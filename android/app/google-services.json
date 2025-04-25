@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "603607348131",
+    "project_id": "soa-starter-d9688",
+    "storage_bucket": "soa-starter-d9688.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:603607348131:android:947d57547b03bbb10b2016",
+        "android_client_info": {
+          "package_name": "com.example.soa_starter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBtG7cx11DZYxGRnQ5H81G03eG2rPbaiOo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
