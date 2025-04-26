@@ -38,6 +38,7 @@ dependencies:
   firebase_auth: ^5.5.2
   firebase_auth_web: ^5.8.13
   google_sign_in: ^6.2.1
+  material_color_utilities: ^0.11.1
 
 
 dev_dependencies:
