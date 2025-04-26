@@ -1,8 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:math'; // Pour Random et fonctions mathématiques
 import 'package:flutter/material.dart';
-// Import pour HSLColor
-import 'package:flutter/painting.dart'; // Contient HSLColor etc.
 
 class LoggedHomepage extends StatefulWidget {
   const LoggedHomepage({Key? key}) : super(key: key);
