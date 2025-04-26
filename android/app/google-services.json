@@ -9,12 +9,12 @@
       "client_info": {
         "mobilesdk_app_id": "1:523869870608:android:c40003ada691cab0bbc895",
         "android_client_info": {
-          "package_name": "org.stanworld.soa_starter"
+          "package_name": "org.stanworld.colors_notes"
         }
       },
       "oauth_client": [
         {
-          "client_id": "523869870608-6seuljfsrtgj638ja6ighrqr301d354u.apps.googleusercontent.com",
+          "client_id": "283517000794-3sl8fhd5ftbb4b7hjdpcv9l6nn46tsjm.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -27,7 +27,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "523869870608-6seuljfsrtgj638ja6ighrqr301d354u.apps.googleusercontent.com",
+              "client_id": "283517000794-3sl8fhd5ftbb4b7hjdpcv9l6nn46tsjm.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
