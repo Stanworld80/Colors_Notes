@@ -3,7 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn(clientId: '283517000794-3sl8fhd5ftbb4b7hjdpcv9l6nn46tsjm.apps.googleusercontent.com');
+  final GoogleSignIn _googleSignIn = GoogleSignIn(clientId: '523869870608-c167do1sb6lfrhcg8tsgughi6gcckcdi.apps.googleusercontent.com');
 
   // Retourne l'utilisateur actuellement connecté
   User? get currentUser => _firebaseAuth.currentUser;

@@ -49,17 +49,17 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyByKR0NTLjEd-4BHaYeh3pDoq1RtSg4WRg',
-    appId: '1:523869870608:web:d2d1a5bd6129e325bbc895',
+    appId: '1:523869870608:web:9a3da9909e4b36afbbc895',
     messagingSenderId: '523869870608',
     projectId: 'colorsnotes-e9142',
     authDomain: 'colorsnotes-e9142.firebaseapp.com',
     storageBucket: 'colorsnotes-e9142.firebasestorage.app',
-    measurementId: 'G-0X0ZKKG9MZ',
+    measurementId: 'G-EDQE6FKNRL',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyB8e2IdFFWKKyLdwQGf-bvxhRKZmWzxdKI',
-    appId: '1:523869870608:android:c40003ada691cab0bbc895',
+    appId: '1:523869870608:android:db8da6bae0f7d968bbc895',
     messagingSenderId: '523869870608',
     projectId: 'colorsnotes-e9142',
     storageBucket: 'colorsnotes-e9142.firebasestorage.app',
