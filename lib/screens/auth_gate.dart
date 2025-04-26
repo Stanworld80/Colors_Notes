@@ -31,7 +31,7 @@ class _AuthGate extends State<AuthGate> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Welcome')),
+      appBar: AppBar(title: const Text('Colors & Notes')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
