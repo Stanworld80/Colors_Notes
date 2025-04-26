@@ -1,4 +1,4 @@
-# soa_starter
+# Colors & Notes
 
 Color your day.
 
