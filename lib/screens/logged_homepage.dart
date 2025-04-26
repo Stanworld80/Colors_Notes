@@ -38,7 +38,7 @@ class LoggedHomepage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
-              'Welcome!',
+              'Welcome to Colors & Notes!',
               style: TextStyle(fontSize: 24),
             ),
             if (user != null) // Afficher l'email de l'utilisateur si disponible
