@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "603607348131",
-    "project_id": "soa-starter-d9688",
-    "storage_bucket": "soa-starter-d9688.firebasestorage.app"
+    "project_number": "523869870608",
+    "project_id": "colorsnotes-e9142",
+    "storage_bucket": "colorsnotes-e9142.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:603607348131:android:947d57547b03bbb10b2016",
+        "mobilesdk_app_id": "1:523869870608:android:c40003ada691cab0bbc895",
         "android_client_info": {
-          "package_name": "com.example.soa_starter"
+          "package_name": "org.stanworld.soa_starter"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBtG7cx11DZYxGRnQ5H81G03eG2rPbaiOo"
+          "current_key": "AIzaSyB8e2IdFFWKKyLdwQGf-bvxhRKZmWzxdKI"
         }
       ],
       "services": {

@@ -3,17 +3,17 @@
     "platforms": {
       "android": {
         "default": {
-          "projectId": "soa-starter-d9688",
-          "appId": "1:603607348131:android:947d57547b03bbb10b2016",
+          "projectId": "colorsnotes-e9142",
+          "appId": "1:523869870608:android:c40003ada691cab0bbc895",
           "fileOutput": "android/app/google-services.json"
         }
       },
       "dart": {
         "lib/firebase_options.dart": {
-          "projectId": "soa-starter-d9688",
+          "projectId": "colorsnotes-e9142",
           "configurations": {
-            "android": "1:603607348131:android:947d57547b03bbb10b2016",
-            "web": "1:603607348131:web:fe69e76947710f930b2016"
+            "android": "1:523869870608:android:c40003ada691cab0bbc895",
+            "web": "1:523869870608:web:d2d1a5bd6129e325bbc895"
           }
         }
       }

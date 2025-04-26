@@ -1,7 +1,7 @@
 {
   "name": "soa_starter",
   "version": "1.0.0",
-  "description": "A new Flutter project.",
+  "description": "Color your days.",
   "main": "index.js",
   "directories": {
     "lib": "lib",
