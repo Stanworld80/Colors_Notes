@@ -7,14 +7,14 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:523869870608:android:c40003ada691cab0bbc895",
+        "mobilesdk_app_id": "1:523869870608:android:db8da6bae0f7d968bbc895",
         "android_client_info": {
-          "package_name": "org.stanworld.colors_notes"
+          "package_name": "org.stanworld.colorsnotes"
         }
       },
       "oauth_client": [
         {
-          "client_id": "283517000794-3sl8fhd5ftbb4b7hjdpcv9l6nn46tsjm.apps.googleusercontent.com",
+          "client_id": "523869870608-f9jnvfkdq74fjhj3davircu7unu1mjnb.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -27,7 +27,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "283517000794-3sl8fhd5ftbb4b7hjdpcv9l6nn46tsjm.apps.googleusercontent.com",
+              "client_id": "523869870608-f9jnvfkdq74fjhj3davircu7unu1mjnb.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
