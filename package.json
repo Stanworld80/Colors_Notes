@@ -1,5 +1,5 @@
 {
-  "name": "soa_starter",
+  "name": "colors_notes",
   "version": "1.0.0",
   "description": "Color your days.",
   "main": "index.js",
@@ -12,13 +12,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Stanworld80/SOA-Starter.git"
+    "url": "git+https://github.com/Stanworld80/colors_notes.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Stanworld80/SOA-Starter/issues"
+    "url": "https://github.com/Stanworld80/colors_notes/issues"
   },
-  "homepage": "https://github.com/Stanworld80/SOA-Starter#readme"
+  "homepage": "https://github.com/Stanworld80/colors_notes#readme"
 }

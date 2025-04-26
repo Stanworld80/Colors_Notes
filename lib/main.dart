@@ -1,9 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:soa_starter/screens/entry_page.dart';
-import 'package:soa_starter/screens/logged_homepage.dart';
-import 'package:soa_starter/screens/register_page.dart';
-import 'package:soa_starter/screens/sign_in_page.dart';
+import 'package:colors_notes/screens/entry_page.dart';
+import 'package:colors_notes/screens/logged_homepage.dart';
+import 'package:colors_notes/screens/register_page.dart';
+import 'package:colors_notes/screens/sign_in_page.dart';
 
 import 'firebase_options.dart';
 

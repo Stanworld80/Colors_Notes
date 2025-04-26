@@ -1,5 +1,6 @@
+import 'package:colors_notes/services/auth_service.dart';
 import 'package:flutter/material.dart';
-import 'package:soa_starter/services/auth_service.dart';
+
 
 class AuthGate extends StatefulWidget {
   const AuthGate({Key? key}) : super(key: key);

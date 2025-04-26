@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:soa_starter/screens/auth_gate.dart';
+import 'auth_gate.dart';
 import 'logged_homepage.dart';
 
 class EntryPage extends StatelessWidget {
