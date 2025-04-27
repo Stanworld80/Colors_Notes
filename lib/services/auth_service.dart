@@ -9,7 +9,7 @@ import '../models/color_data.dart';
 
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn(/*...*/);
+  final GoogleSignIn _googleSignIn = GoogleSignIn(clientId : "523869870608-c167do1sb6lfrhcg8tsgughi6gcckcdi.apps.googleusercontent.com");
   // Ajouter une instance de FirestoreService
   final FirestoreService _firestoreService = FirestoreService();
 

@@ -1,7 +1,6 @@
 import 'package:colors_notes/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
-
 class AuthGate extends StatefulWidget {
   const AuthGate({Key? key}) : super(key: key);
 
@@ -22,9 +21,16 @@ class _AuthGate extends State<AuthGate> {
       // Si l'authentification réussit, on redirige l'utilisateur
       Navigator.pushReplacementNamed(context, '/logged_homepage');
     } catch (e) {
-      setState(() {
-        _errorMessage = 'Google Sign-In failed. Please try again.';
-      });
+      // Vérifier si le widget est toujours monté avant d'appeler setState
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Google Sign-In failed. Please try again.';
+        });
+      } else {
+        print(
+          "AuthGate not mounted, skipping setState for Google Sign-In error.",
+        );
+      }
     }
   }
 
@@ -35,15 +41,16 @@ class _AuthGate extends State<AuthGate> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [ if (_errorMessage != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 15.0),
-              child: Text(
-                _errorMessage!,
-                style: const TextStyle(color: Colors.red),
-                textAlign: TextAlign.center,
+          children: [
+            if (_errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 15.0),
+                child: Text(
+                  _errorMessage!,
+                  style: const TextStyle(color: Colors.red),
+                  textAlign: TextAlign.center,
+                ),
               ),
-            ),
             const Text(
               'Please sign in or register',
               style: TextStyle(fontSize: 20),
@@ -54,7 +61,6 @@ class _AuthGate extends State<AuthGate> {
                 Navigator.pushNamed(context, '/signin');
               },
               child: const Text('Sign In'),
-
             ),
             const SizedBox(height: 20),
             // Bouton de connexion via Google
