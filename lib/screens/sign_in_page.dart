@@ -20,10 +20,7 @@ class _SignInPageState extends State<SignInPage> {
   // Méthode pour se connecter avec l'email et le mot de passe
   Future<void> _signInWithEmail() async {
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
+      await FirebaseAuth.instance.signInWithEmailAndPassword(email: _emailController.text.trim(), password: _passwordController.text.trim());
       // Naviguer vers la page d'accueil après la connexion
       Navigator.pushReplacementNamed(context, '/logged_homepage');
     } on FirebaseAuthException catch (e) {
@@ -56,41 +53,18 @@ class _SignInPageState extends State<SignInPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (_errorMessage != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 15.0),
-                  child: Text(
-                    _errorMessage!,
-                    style: const TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+              if (_errorMessage != null) Padding(padding: const EdgeInsets.only(bottom: 15.0), child: Text(_errorMessage!, style: const TextStyle(color: Colors.red), textAlign: TextAlign.center)),
               // Champ email
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
-                keyboardType: TextInputType.emailAddress,
-              ),
+              TextFormField(controller: _emailController, decoration: const InputDecoration(labelText: 'Email'), keyboardType: TextInputType.emailAddress),
               const SizedBox(height: 20),
               // Champ mot de passe
-              TextFormField(
-                controller: _passwordController,
-                decoration: const InputDecoration(labelText: 'Password'),
-                obscureText: true,
-              ),
+              TextFormField(controller: _passwordController, decoration: const InputDecoration(labelText: 'Password'), obscureText: true),
               const SizedBox(height: 20),
               // Bouton de connexion par email et mot de passe
-              ElevatedButton(
-                onPressed: _signInWithEmail,
-                child: const Text('Sign In with Email'),
-              ),
+              ElevatedButton(onPressed: _signInWithEmail, child: const Text('Sign In with Email')),
               const SizedBox(height: 20),
               // Bouton de connexion via Google
-              ElevatedButton.icon(
-                onPressed: _signInWithGoogle,
-                icon: const Icon(Icons.account_circle),
-                label: const Text('Sign In with Google'),
-              ),
+              ElevatedButton.icon(onPressed: _signInWithGoogle, icon: const Icon(Icons.account_circle), label: const Text('Sign In with Google')),
               const SizedBox(height: 20),
               // Lien vers la page d'inscription
               TextButton(

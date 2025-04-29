@@ -27,9 +27,7 @@ class _AuthGate extends State<AuthGate> {
           _errorMessage = 'Google Sign-In failed. Please try again.';
         });
       } else {
-        print(
-          "AuthGate not mounted, skipping setState for Google Sign-In error.",
-        );
+        print("AuthGate not mounted, skipping setState for Google Sign-In error.");
       }
     }
   }
@@ -42,19 +40,8 @@ class _AuthGate extends State<AuthGate> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (_errorMessage != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 15.0),
-                child: Text(
-                  _errorMessage!,
-                  style: const TextStyle(color: Colors.red),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            const Text(
-              'Please sign in or register',
-              style: TextStyle(fontSize: 20),
-            ),
+            if (_errorMessage != null) Padding(padding: const EdgeInsets.only(bottom: 15.0), child: Text(_errorMessage!, style: const TextStyle(color: Colors.red), textAlign: TextAlign.center)),
+            const Text('Please sign in or register', style: TextStyle(fontSize: 20)),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
@@ -64,11 +51,7 @@ class _AuthGate extends State<AuthGate> {
             ),
             const SizedBox(height: 20),
             // Bouton de connexion via Google
-            ElevatedButton.icon(
-              onPressed: _signInWithGoogle,
-              icon: const Icon(Icons.account_circle),
-              label: const Text('Sign In with Google'),
-            ),
+            ElevatedButton.icon(onPressed: _signInWithGoogle, icon: const Icon(Icons.account_circle), label: const Text('Sign In with Google')),
             const SizedBox(height: 10),
             OutlinedButton(
               onPressed: () {

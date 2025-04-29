@@ -29,10 +29,7 @@ class _RegisterPageState extends State<RegisterPage> {
       }
 
       try {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
-        );
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(email: _emailController.text.trim(), password: _passwordController.text.trim());
         // Si l'enregistrement réussit, Firebase connecte automatiquement l'utilisateur.
         // La EntryPage (ou StreamBuilder) redirigera vers LoggedHomepage.
         Navigator.of(context).pop(); // Ferme la page Register
@@ -91,7 +88,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     if (value == null || value.isEmpty) {
                       return 'Please enter a password';
                     }
-                    if (value.length < 6) { // Exemple: exiger au moins 6 caractères
+                    if (value.length < 6) {
+                      // Exemple: exiger au moins 6 caractères
                       return 'Password must be at least 6 characters long';
                     }
                     return null;
@@ -114,18 +112,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 const SizedBox(height: 20),
                 if (_errorMessage != null) // Afficher l'erreur si elle existe
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 15.0),
-                    child: Text(
-                      _errorMessage!,
-                      style: const TextStyle(color: Colors.red),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ElevatedButton(
-                  onPressed: _register,
-                  child: const Text('Register'),
-                ),
+                  Padding(padding: const EdgeInsets.only(bottom: 15.0), child: Text(_errorMessage!, style: const TextStyle(color: Colors.red), textAlign: TextAlign.center)),
+                ElevatedButton(onPressed: _register, child: const Text('Register')),
                 const SizedBox(height: 10),
                 TextButton(
                   onPressed: () {

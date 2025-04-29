@@ -1,19 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:colors_notes/models/palette.dart';
 
-
 class Agenda {
   final String id; // ID du document Firestore
   final String name;
   final String userId; // ID de l'utilisateur propriétaire
   final Palette embeddedPaletteInstance; // Palette intégrée directement
 
-  Agenda({
-    required this.id,
-    required this.name,
-    required this.userId,
-    required this.embeddedPaletteInstance,
-  });
+  Agenda({required this.id, required this.name, required this.userId, required this.embeddedPaletteInstance});
 
   Map<String, dynamic> toJson() {
     return {

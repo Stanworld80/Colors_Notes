@@ -10,15 +10,7 @@ class Note {
   final Timestamp createdAt; // Utiliser Timestamp de Firestore
   final Timestamp commentUpdatedAt; // Date de dernière modif commentaire
 
-  Note({
-    required this.id,
-    required this.agendaId,
-    required this.userId,
-    required this.colorSnapshot,
-    required this.comment,
-    required this.createdAt,
-    required this.commentUpdatedAt,
-  });
+  Note({required this.id, required this.agendaId, required this.userId, required this.colorSnapshot, required this.comment, required this.createdAt, required this.commentUpdatedAt});
 
   Map<String, dynamic> toJson() {
     return {

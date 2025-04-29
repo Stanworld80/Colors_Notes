@@ -3,27 +3,26 @@ import 'package:colors_notes/models/app_user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'firestore_service.dart'; // Importer FirestoreService
-import '../models/agenda.dart';   // Importer les modèles nécessaires
+import '../models/agenda.dart'; // Importer les modèles nécessaires
 import '../models/palette.dart';
 import '../models/color_data.dart';
 
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn(clientId : "523869870608-c167do1sb6lfrhcg8tsgughi6gcckcdi.apps.googleusercontent.com");
+  final GoogleSignIn _googleSignIn = GoogleSignIn(clientId: "523869870608-c167do1sb6lfrhcg8tsgughi6gcckcdi.apps.googleusercontent.com");
+
   // Ajouter une instance de FirestoreService
   final FirestoreService _firestoreService = FirestoreService();
 
   // Ajouter ce getter :
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
+
   // ... (currentUser, isUserLoggedIn restent inchangés)
 
   // --- Modification de l'inscription Email/Password ---
   Future<User?> signUpWithEmailPassword(String email, String password) async {
     try {
-      UserCredential userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      UserCredential userCredential = await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
       User? user = userCredential.user;
 
       if (user != null) {
@@ -47,12 +46,10 @@ class AuthService {
           // ou la logger plus formellement.
         }
         // ------------------------------------------------
-
       } else {
         print(">>> AUTH SUCCEEDED but user object is null."); // DEBUG (ne devrait pas arriver)
       }
       return user; // Retourne l'utilisateur même si Firestore a échoué pour l'instant
-
     } on FirebaseAuthException catch (e) {
       print(">>> !!! FirebaseAuthException during signUp: ${e.code} - ${e.message}"); // DEBUG
       rethrow;
@@ -71,10 +68,7 @@ class AuthService {
         return null; // L'utilisateur a annulé
       }
       GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      OAuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+      OAuthCredential credential = GoogleAuthProvider.credential(accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
 
       // Utiliser le credential pour se connecter ou s'inscrire à Firebase
       UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
@@ -108,10 +102,7 @@ class AuthService {
   Future<User?> signInWithEmailPassword(String email, String password) async {
     // Pas de changement ici, on ne crée le document/agenda qu'à l'inscription
     try {
-      UserCredential userCredential = await _firebaseAuth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      UserCredential userCredential = await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
       return userCredential.user;
     } on FirebaseAuthException catch (e) {
       print("Error signing in with email and password: $e");
@@ -159,7 +150,6 @@ class AuthService {
         embeddedPaletteInstance: defaultPalette,
       );
 
-
       // 3. Appeler FirestoreService pour créer l'agenda
       // Assurez-vous que votre méthode createAgenda dans FirestoreService
       // gère bien l'ajout et retourne l'ID si besoin.
@@ -173,5 +163,5 @@ class AuthService {
     }
   }
 
-// ... (signOut, isGoogleUserLoggedIn restent inchangés)
+  // ... (signOut, isGoogleUserLoggedIn restent inchangés)
 }

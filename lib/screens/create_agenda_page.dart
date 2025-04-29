@@ -196,36 +196,39 @@ class _CreateAgendaPageState extends State<CreateAgendaPage> {
 
                             final personalModels = snapshot.data ?? [];
                             final genericEntries = predefinedGenericPalettes.entries.toList();
-                            final allSources = [...personalModels, ...genericEntries];
 
                             // Construire UNIQUEMENT les items sélectionnables
                             final List<DropdownMenuItem<String?>> items = [];
 
                             // 1. Placeholder (value: null)
-                            items.add(const DropdownMenuItem<String?>(
-                              value: null,
-                              child: Text("Sélectionnez...", style: TextStyle(color: Colors.grey)),
-                            ));
+                            items.add(const DropdownMenuItem<String?>(value: null, child: Text("Sélectionnez...", style: TextStyle(color: Colors.grey))));
 
                             // 2. Modèles Personnels (value: model.id)
                             if (personalModels.isNotEmpty) {
                               // Optionnel : Ajouter un préfixe au texte pour clarté
-                              items.addAll(personalModels.map((model) => DropdownMenuItem<String?>(
-                                  value: model.id,
-                                  child: Text("Personnel: ${model.name}") // Préfixe optionnel
-                              )));
+                              items.addAll(
+                                personalModels.map(
+                                  (model) => DropdownMenuItem<String?>(
+                                    value: model.id,
+                                    child: Text("Personnel: ${model.name}"), // Préfixe optionnel
+                                  ),
+                                ),
+                              );
                             }
 
                             // 3. Modèles Génériques (value: entry.key)
                             if (genericEntries.isNotEmpty) {
                               // Optionnel : Ajouter un préfixe au texte pour clarté
-                              items.addAll(genericEntries.map((entry) => DropdownMenuItem<String?>(
-                                  value: entry.key,
-                                  child: Text("Générique: ${entry.key}") // Préfixe optionnel
-                              )));
+                              items.addAll(
+                                genericEntries.map(
+                                  (entry) => DropdownMenuItem<String?>(
+                                    value: entry.key,
+                                    child: Text("Générique: ${entry.key}"), // Préfixe optionnel
+                                  ),
+                                ),
+                              );
                             }
                             // --- NE PAS ajouter les Headers/Dividers ici ---
-
 
                             // Le reste de la logique (calcul valueForDropdown, reset post-build, return DropdownButtonFormField)
                             // devrait maintenant fonctionner car la liste 'items' est correcte.
@@ -233,10 +236,13 @@ class _CreateAgendaPageState extends State<CreateAgendaPage> {
                             final Set<String?> validValues = items.map((item) => item.value).toSet();
                             String? valueForDropdown = (_selectedPaletteValue != null && validValues.contains(_selectedPaletteValue)) ? _selectedPaletteValue : null;
 
-                            if (_selectedPaletteValue != null && !validValues.contains(_selectedPaletteValue)){
+                            if (_selectedPaletteValue != null && !validValues.contains(_selectedPaletteValue)) {
                               WidgetsBinding.instance.addPostFrameCallback((_) {
                                 if (mounted && _selectedPaletteValue != null && !items.any((item) => item.value == _selectedPaletteValue)) {
-                                  setState(() { _selectedPaletteValue = null; _selectedPaletteSource = null; });
+                                  setState(() {
+                                    _selectedPaletteValue = null;
+                                    _selectedPaletteSource = null;
+                                  });
                                 }
                               });
                             }
@@ -247,7 +253,6 @@ class _CreateAgendaPageState extends State<CreateAgendaPage> {
                             print("Current _selectedPaletteValue state: $_selectedPaletteValue");
                             print("Final generated (SELECTABLE ONLY) item values: $itemValuesForDebug");
                             print("Value passed to DropdownButtonFormField: $valueForDropdown");
-
 
                             return DropdownButtonFormField<String?>(
                               value: valueForDropdown,
@@ -315,19 +320,35 @@ class _CreateAgendaPageState extends State<CreateAgendaPage> {
                       ],
 
                       // --- Section Agenda Existant ---
-                      // --- SECTION CONDITIONNELLE : AGENDA EXISTANT (CORRIGÉE) ---
+                      // --- SECTION CONDITIONNELLE : AGENDA EXISTANT ---
                       if (_selectedMode == CreationMode.existingAgenda) ...[
                         Text("Choisir un agenda comme modèle :", style: Theme.of(context).textTheme.titleMedium),
                         const SizedBox(height: 8),
                         StreamBuilder<List<Agenda>>(
-                          stream: firestoreService.getUserAgendasStream(userId!),
+                          stream: firestoreService.getUserAgendasStream(userId),
                           builder: (context, snapshot) {
-                            // ... gestion attente/erreur ...
+                            // --- GESTION DE L'ATTENTE ---
                             if (!snapshot.hasData && snapshot.connectionState == ConnectionState.waiting) {
-                              /* ... */
+                              // Afficher un indicateur de chargement centré
+                              return const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                              );
                             }
+                            // --- GESTION DES ERREURS ---
                             if (snapshot.hasError) {
-                              /* ... */
+                              // Afficher un message d'erreur clair
+                              print("Error loading existing agendas: ${snapshot.error}"); // Garder un log pour le debug
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                child: Text(
+                                  "Erreur lors du chargement de vos agendas.\n(${snapshot.error})", // Afficher l'erreur peut aider au debug
+                                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                                  textAlign: TextAlign.center,
+                                ),
+                              );
                             }
                             final existingAgendas = snapshot.data ?? [];
                             if (existingAgendas.isEmpty) {

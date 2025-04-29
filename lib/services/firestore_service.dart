@@ -48,7 +48,6 @@ class FirestoreService {
     return null;
   }
 
-
   // --- Gestion des Agendas ---
 
   /// Crée un nouvel agenda pour un utilisateur donné
@@ -67,12 +66,10 @@ class FirestoreService {
     return _db
         .collection('agendas')
         .where('userId', isEqualTo: userId) // Filtre par utilisateur
-    // Optionnel: trier par nom, date, etc.
-    // .orderBy('name')
+        // Optionnel: trier par nom, date, etc.
+        // .orderBy('name')
         .snapshots() // Retourne un Stream qui se met à jour automatiquement
-        .map((snapshot) => snapshot.docs
-        .map((doc) => Agenda.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>))
-        .toList());
+        .map((snapshot) => snapshot.docs.map((doc) => Agenda.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>)).toList());
   }
 
   /// Met à jour le nom d'un agenda
@@ -82,9 +79,7 @@ class FirestoreService {
 
   /// Met à jour la palette instance d'un agenda
   Future<void> updateAgendaPalette(String agendaId, Palette newPalette) async {
-    await _db.collection('agendas').doc(agendaId).update({
-      'embeddedPaletteInstance': newPalette.toJson()
-    });
+    await _db.collection('agendas').doc(agendaId).update({'embeddedPaletteInstance': newPalette.toJson()});
   }
 
   /// Supprime un agenda (et potentiellement ses notes associées - voir ci-dessous)
@@ -104,7 +99,6 @@ class FirestoreService {
     print("Agenda $agendaId deleted.");
   }
 
-
   // --- Gestion des Notes ---
 
   /// Crée une nouvelle note
@@ -120,9 +114,7 @@ class FirestoreService {
         .where('agendaId', isEqualTo: agendaId)
         .orderBy('createdAt', descending: true) // Tri par défaut (SF-VIEW-02)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-        .map((doc) => Note.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>))
-        .toList());
+        .map((snapshot) => snapshot.docs.map((doc) => Note.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>)).toList());
   }
 
   /// Met à jour le commentaire d'une note
@@ -138,7 +130,6 @@ class FirestoreService {
     await _db.collection('notes').doc(noteId).delete();
   }
 
-
   /// Crée un nouveau modèle de palette
   Future<DocumentReference> createPaletteModel(PaletteModel model) async {
     // Assurez-vous que le userId est correct
@@ -152,9 +143,7 @@ class FirestoreService {
         .where('userId', isEqualTo: userId)
         .orderBy('name') // Trier par nom par exemple
         .snapshots()
-        .map((snapshot) => snapshot.docs
-        .map((doc) => PaletteModel.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>))
-        .toList());
+        .map((snapshot) => snapshot.docs.map((doc) => PaletteModel.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>)).toList());
   }
 
   /// Met à jour un modèle de palette existant (nom et/ou couleurs)
@@ -163,17 +152,13 @@ class FirestoreService {
     if (newColors.length < PaletteModel.minColors || newColors.length > PaletteModel.maxColors) {
       throw Exception("La palette doit contenir entre ${PaletteModel.minColors} et ${PaletteModel.maxColors} couleurs.");
     }
-    await _db.collection('palette_models').doc(modelId).update({
-      'name': newName,
-      'colors': newColors.map((c) => c.toJson()).toList(),
-    });
+    await _db.collection('palette_models').doc(modelId).update({'name': newName, 'colors': newColors.map((c) => c.toJson()).toList()});
   }
 
   /// Renomme un modèle de palette existant
   Future<void> renamePaletteModel(String modelId, String newName) async {
     await _db.collection('palette_models').doc(modelId).update({'name': newName});
   }
-
 
   /// Supprime un modèle de palette
   Future<void> deletePaletteModel(String modelId) async {
@@ -184,7 +169,8 @@ class FirestoreService {
   Future<bool> checkPaletteModelNameExists(String userId, String name, {String? modelIdToExclude}) async {
     print("Checking if palette model name '$name' exists for user $userId (excluding $modelIdToExclude)");
     // Requête pour trouver les modèles avec le même userId ET le même nom
-    var query = _db.collection('palette_models')
+    var query = _db
+        .collection('palette_models')
         .where('userId', isEqualTo: userId)
         .where('name', isEqualTo: name) // Firestore est sensible à la casse par défaut
         .limit(1); // On a juste besoin de savoir s'il y en a au moins un
@@ -213,4 +199,11 @@ class FirestoreService {
     }
   }
 
+  Future<void> updateAgendaPaletteInstance(String agendaId, Palette newPaletteInstance) async {
+    final agendaRef = _db.collection('agendas').doc(agendaId);
+    await agendaRef.update({
+      'embeddedPaletteInstance': newPaletteInstance.toJson(), // Met à jour le champ embarqué
+    });
+    print("Palette instance updated for agenda $agendaId");
+  }
 }

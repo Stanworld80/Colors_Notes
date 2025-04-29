@@ -9,6 +9,7 @@ import '../providers/active_agenda_provider.dart';
 import '../models/agenda.dart';
 import '../models/color_data.dart';
 import '../models/note.dart';
+import 'edit_palette_model_page.dart';
 
 
 class LoggedHomepage extends StatefulWidget {
@@ -181,7 +182,24 @@ class _LoggedHomepageState extends State<LoggedHomepage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_isLoadingAgenda ? 'Chargement...' : activeAgendaNotifier.activeAgendaName),
-        actions: [
+        actions: [ if (!_isLoadingAgenda && currentAgenda != null) // Afficher seulement si agenda chargé
+          IconButton(
+            icon: const Icon(Icons.color_lens), // Ou Icons.color_lens
+            tooltip: 'Modifier la palette de cet agenda',
+            onPressed: () {
+              // Naviguer vers l'éditeur en passant l'agenda actuel
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => EditPaletteModelPage(
+                    // Passer l'agenda pour indiquer l'édition d'instance
+                    // Note: On réutilise EditPaletteModelPage mais on devra l'adapter
+                    existingAgendaInstance: currentAgenda,
+                  ),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Déconnexion',

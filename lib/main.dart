@@ -16,24 +16,17 @@ import 'package:colors_notes/screens/sign_in_page.dart';
 import 'firebase_options.dart';
 import 'package:colors_notes/providers/active_agenda_provider.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // On lance l'application en l'enrobant avec MultiProvider
   runApp(
     MultiProvider(
       providers: [
         // 1. Fournir l'instance de AuthService
-        Provider<AuthService>(
-          create: (_) => AuthService(),
-        ),
+        Provider<AuthService>(create: (_) => AuthService()),
         // 2. Fournir l'instance de FirestoreService
-        Provider<FirestoreService>(
-          create: (_) => FirestoreService(),
-        ),
+        Provider<FirestoreService>(create: (_) => FirestoreService()),
         // 3. Fournir le flux (Stream) de l'état d'authentification Firebase
         //    Ce Stream émettra null si déconnecté, ou l'objet User si connecté.
         StreamProvider<User?>(
@@ -41,10 +34,7 @@ void main() async {
           initialData: null, // Donnée initiale avant que le Stream n'émette
         ),
 
-        ChangeNotifierProvider<ActiveAgendaNotifier>(
-          create: (_) => ActiveAgendaNotifier(),
-        ),
-
+        ChangeNotifierProvider<ActiveAgendaNotifier>(create: (_) => ActiveAgendaNotifier()),
       ],
       child: const MyApp(), // L'application elle-même est l'enfant
     ),
