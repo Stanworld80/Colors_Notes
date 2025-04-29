@@ -4,7 +4,7 @@
 
 Une application web et Android développée avec Flutter et Firebase pour organiser vos notes et pensées quotidiennes en les associant à des couleurs personnalisées regroupées dans des palettes uniques pour chaque agenda.
 
-*(Remplacez la ligne ci-dessus par une description courte et attrayante si vous préférez)*
+
 
 ## ✨ Fonctionnalités (Version MVP 1.0)
 
@@ -75,13 +75,13 @@ Une application web et Android développée avec Flutter et Firebase pour organi
     ```
 
 ## 📂 Structure du Projet (Simplifiée)
-lib/
-├── core/                 # Modèles prédéfinis, constantes...
-├── models/               # Classes de données (Agenda, Note, Palette...)
-├── providers/            # Gestion d'état (ActiveAgendaNotifier...)
-├── screens/              # Widgets représentant les écrans principaux
-├── services/             # Logique métier, accès Firebase (AuthService, FirestoreService)
-└── main.dart             # Point d'entrée de l'application
+* lib/
+* ├── core/                 # Modèles prédéfinis, constantes...
+* ├── models/               # Classes de données (Agenda, Note, Palette...)
+* ├── providers/            # Gestion d'état (ActiveAgendaNotifier...)
+* ├── screens/              # Widgets représentant les écrans principaux
+* ├── services/             # Logique métier, accès Firebase (AuthService, FirestoreService)
+* └── main.dart             # Point d'entrée de l'application
 
 # 🔮 Travaux Futurs / TODO (Post-MVP)
 
