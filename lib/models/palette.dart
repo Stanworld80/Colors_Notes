@@ -1,8 +1,8 @@
-import 'color_data.dart';
+// lib/models/palette.dart
+import 'color_data.dart'; // Assurez-vous d'avoir défini ColorData
 
 class Palette {
-  // Pas forcément d'ID propre si elle est toujours intégrée (embedded) dans l'Agenda
-  final String name; // Nom copié du modèle ou défini
+  final String name; // Nom de la palette (souvent copié du modèle)
   final List<ColorData> colors;
 
   Palette({
@@ -10,14 +10,15 @@ class Palette {
     required this.colors,
   });
 
+  // Méthode pour convertir cette instance en Map (pour Firestore)
   Map<String, dynamic> toJson() {
     return {
       'name': name,
-      // Convertit chaque ColorData en Map
       'colors': colors.map((color) => color.toJson()).toList(),
     };
   }
 
+  // Méthode factory pour créer une instance Palette depuis une Map (depuis Firestore)
   factory Palette.fromJson(Map<String, dynamic> json) {
     var colorsList = json['colors'] as List<dynamic>? ?? [];
     List<ColorData> parsedColors = colorsList
@@ -27,6 +28,17 @@ class Palette {
     return Palette(
       name: json['name'] ?? 'Palette sans nom',
       colors: parsedColors,
+    );
+  }
+
+  // Optionnel: Méthode pour créer une copie (utile pour la modification)
+  Palette copyWith({
+    String? name,
+    List<ColorData>? colors,
+  }) {
+    return Palette(
+      name: name ?? this.name,
+      colors: colors ?? List<ColorData>.from(this.colors.map((c) => ColorData(title: c.title, hexValue: c.hexValue))), // Copie profonde des couleurs
     );
   }
 }

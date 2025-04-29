@@ -13,6 +13,8 @@ class AuthService {
   // Ajouter une instance de FirestoreService
   final FirestoreService _firestoreService = FirestoreService();
 
+  // Ajouter ce getter :
+  Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
   // ... (currentUser, isUserLoggedIn restent inchangés)
 
   // --- Modification de l'inscription Email/Password ---
@@ -117,6 +119,18 @@ class AuthService {
     }
   }
 
+  Future<void> signOut() async {
+    try {
+      // Se déconnecter de Firebase Auth
+      await _firebaseAuth.signOut();
+      // Tenter aussi de se déconnecter de Google Sign In au cas où
+      await _googleSignIn.signOut();
+    } catch (e) {
+      print("Error signing out: $e");
+      // Optionnel: ne pas relancer l'erreur pour ne pas bloquer l'UI
+      // rethrow;
+    }
+  }
 
   // --- Méthode privée pour créer l'agenda par défaut ---
   Future<void> _createDefaultAgendaForUser(String userId) async {

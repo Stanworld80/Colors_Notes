@@ -1,53 +1,75 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Importer User
+import 'package:provider/provider.dart'; // Importer Provider
+
+// Importer vos services
+import 'package:colors_notes/services/auth_service.dart';
+import 'package:colors_notes/services/firestore_service.dart';
+
+// Importer vos écrans
 import 'package:colors_notes/screens/entry_page.dart';
 import 'package:colors_notes/screens/logged_homepage.dart';
 import 'package:colors_notes/screens/register_page.dart';
 import 'package:colors_notes/screens/sign_in_page.dart';
 
 import 'firebase_options.dart';
+import 'package:colors_notes/providers/active_agenda_provider.dart';
 
 
-void main() async  {
-  WidgetsFlutterBinding.ensureInitialized(); // Assurer que les widgets sont initialisés
-  await Firebase.initializeApp( // Initialiser Firebase
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  // On lance l'application en l'enrobant avec MultiProvider
+  runApp(
+    MultiProvider(
+      providers: [
+        // 1. Fournir l'instance de AuthService
+        Provider<AuthService>(
+          create: (_) => AuthService(),
+        ),
+        // 2. Fournir l'instance de FirestoreService
+        Provider<FirestoreService>(
+          create: (_) => FirestoreService(),
+        ),
+        // 3. Fournir le flux (Stream) de l'état d'authentification Firebase
+        //    Ce Stream émettra null si déconnecté, ou l'objet User si connecté.
+        StreamProvider<User?>(
+          create: (context) => context.read<AuthService>().authStateChanges, // Utilise AuthService fourni ci-dessus
+          initialData: null, // Donnée initiale avant que le Stream n'émette
+        ),
+
+        ChangeNotifierProvider<ActiveAgendaNotifier>(
+          create: (_) => ActiveAgendaNotifier(),
+        ),
+
+      ],
+      child: const MyApp(), // L'application elle-même est l'enfant
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Colors & Notes', // Mis à jour le titre
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true, // Optionnel: activer Material 3
       ),
+      // Les routes restent les mêmes pour l'instant
+      // EntryPage sera maintenant capable d'utiliser Provider pour l'état d'auth
+      initialRoute: '/', // Assurez-vous que EntryPage est bien la route initiale
       routes: {
-        '/': (context) => EntryPage(),
-        '/signin': (context) => SignInPage(),
-        '/register': (context) => RegisterPage(),
-        '/logged_homepage': (context) => LoggedHomepage(),
-
+        '/': (context) => const EntryPage(),
+        '/signin': (context) => const SignInPage(),
+        '/register': (context) => const RegisterPage(),
+        '/logged_homepage': (context) => const LoggedHomepage(),
       },
     );
   }

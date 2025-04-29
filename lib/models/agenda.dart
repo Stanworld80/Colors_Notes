@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'palette.dart'; // Importer le modèle Palette
+import 'package:colors_notes/models/palette.dart';
+
 
 class Agenda {
   final String id; // ID du document Firestore
