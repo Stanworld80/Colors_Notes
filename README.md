@@ -5,8 +5,23 @@
 Une application web et Android développée avec Flutter et Firebase pour organiser vos notes et pensées quotidiennes en les associant à des couleurs personnalisées regroupées dans des palettes uniques pour chaque journal.
 
 ## 📜 Licence 
-Author : Stanislas Mathieu Eric Selle < stanworld@gmail.com >
-tout le projet, l'ensemble du code , commentaires et documentations liées sont sous la licence Creative Commons : Attribution-NonCommercial-ShareAlike 4.0 International. 
+Tout le projet, l'ensemble du code , commentaires et documentations liées sont sous la licence Creative Commons : Attribution-NonCommercial-ShareAlike 4.0 International  :
+L'ensemble est distribué sous la licence **Creative Commons Attribution - Pas d’Utilisation Commerciale - Partage dans les Mêmes Conditions 4.0 International (CC BY-NC-SA 4.0)**.
+
+[![Licence CC BY-NC-SA 4.0](https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png)](http://creativecommons.org/licenses/by-nc-sa/4.0/)
+
+**Auteur :** Stanislas Mathieu Eric Selle < stanworld@gmail.com > (2025)
+
+En résumé, vous êtes libre de :
+* **Partager** — copier et redistribuer le matériel sur n'importe quel support ou format
+* **Adapter** — remixer, transformer et créer à partir du matériel
+
+Sous les conditions suivantes :
+* **Attribution (BY)** — Vous devez créditer l'Œuvre, intégrer un lien vers la licence et indiquer si des modifications ont été effectuées. Vous devez indiquer ces informations par tous les moyens raisonnables, sans toutefois suggérer que le Concédant vous soutient ou soutient la façon dont vous avez utilisé son Œuvre.
+* **Pas d’Utilisation Commerciale (NC)** — Vous n'êtes pas autorisé à faire un usage commercial de cette Oeuvre, tout ou partie du matériel la composant.
+* **Partage dans les Mêmes Conditions (SA)** — Dans le cas où vous effectuez un remix, que vous transformez, ou créez à partir du matériel composant l'Oeuvre originale, vous devez diffuser l'Oeuvre modifiée dans les même conditions, c'est-à-dire avec la même licence avec laquelle l'Oeuvre originale a été diffusée.
+
+Voir le fichier [LICENSE](LICENSE) pour le texte légal complet.
 
 [https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode ](CC BY-NC-SA) 
 
