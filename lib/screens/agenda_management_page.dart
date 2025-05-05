@@ -99,7 +99,7 @@ class AgendaManagementPage extends StatelessWidget {
           ), // Fin de Expanded
           // --- Bouton "Gérer mes Modèles de Palettes" ---
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+            padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 90.0), // Augmentation du padding inférieur
             child: ElevatedButton.icon(
               icon: const Icon(Icons.palette_outlined),
               label: const Text('Gérer mes Modèles de Palettes'),
