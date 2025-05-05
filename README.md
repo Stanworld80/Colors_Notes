@@ -23,7 +23,7 @@ Sous les conditions suivantes :
 
 Voir le fichier [LICENSE](LICENSE) pour le texte légal complet.
 
-[https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode ](CC BY-NC-SA) 
+[CC BY-NC-SA](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode) 
 
 https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.txt
 
