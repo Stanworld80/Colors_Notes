@@ -4,6 +4,15 @@
 
 Une application web et Android développée avec Flutter et Firebase pour organiser vos notes et pensées quotidiennes en les associant à des couleurs personnalisées regroupées dans des palettes uniques pour chaque journal.
 
+## 📜 Licence 
+Author : Stanislas Mathieu Eric Selle < stanworld@gmail.com >
+tout le projet, l'ensemble du code , commentaires et documentations liées sont sous la licence Creative Commons : Attribution-NonCommercial-ShareAlike 4.0 International. 
+
+[https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode ](CC BY-NC-SA) 
+
+https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.txt
+
+
 
 
 ## ✨ Fonctionnalités (Version MVP 1.0)
@@ -97,9 +106,5 @@ Une application web et Android développée avec Flutter et Firebase pour organi
 * Gestion du dernier journal utilisé (SF-AGENDA-03).
 * Finaliser la création d'journal depuis un journal existant (copie palette OK, mais UI à peaufiner).
 
-## 📜 Licence
-Pull request will be examined.
-Non-comercial Use only.
 
-*(Optionnel : Indiquez ici la licence de votre projet, ex: MIT)*
 
