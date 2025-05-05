@@ -33,8 +33,8 @@ https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.txt
 ## ✨ Fonctionnalités (Version MVP 1.0)
 
 * **Authentification :** Inscription et connexion par Email/Mot de passe et Google Sign-In.
-* **Gestion d'Journals :**
-    * Création d'journals :
+* **Gestion de Journal :**
+    * Création de journal :
         * Vierge (avec choix de palette de base)
         * Depuis un modèle thématique prédéfini (ex: Sport, Humeur)
         * Depuis un journal existant (copie de structure)
