@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:colors_notes/models/palette.dart';
 
-class Agenda {
+class Journal {
   final String id; // ID du document Firestore
   final String name;
   final String userId; // ID de l'utilisateur propriétaire
   final Palette embeddedPaletteInstance; // Palette intégrée directement
 
-  Agenda({required this.id, required this.name, required this.userId, required this.embeddedPaletteInstance});
+  Journal({required this.id, required this.name, required this.userId, required this.embeddedPaletteInstance});
 
   Map<String, dynamic> toJson() {
     return {
@@ -19,11 +19,11 @@ class Agenda {
     };
   }
 
-  factory Agenda.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+  factory Journal.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     Map<String, dynamic> data = doc.data()!;
-    return Agenda(
+    return Journal(
       id: doc.id,
-      name: data['name'] ?? 'Agenda sans nom',
+      name: data['name'] ?? 'journal sans nom',
       userId: data['userId'] ?? '',
       // Crée l'objet Palette depuis la Map stockée
       embeddedPaletteInstance: Palette.fromJson(data['embeddedPaletteInstance'] as Map<String, dynamic>? ?? {}),

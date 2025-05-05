@@ -14,7 +14,7 @@ import 'package:colors_notes/screens/register_page.dart';
 import 'package:colors_notes/screens/sign_in_page.dart';
 
 import 'firebase_options.dart';
-import 'package:colors_notes/providers/active_agenda_provider.dart';
+import 'package:colors_notes/providers/active_journal_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,7 +34,7 @@ void main() async {
           initialData: null, // Donnée initiale avant que le Stream n'émette
         ),
 
-        ChangeNotifierProvider<ActiveAgendaNotifier>(create: (_) => ActiveAgendaNotifier()),
+        ChangeNotifierProvider<ActiveJournalNotifier>(create: (_) => ActiveJournalNotifier()),
       ],
       child: const MyApp(), // L'application elle-même est l'enfant
     ),

@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
-import '../providers/active_agenda_provider.dart';
+import '../providers/active_journal_provider.dart';
 import '../services/firestore_service.dart';
-import '../models/agenda.dart';
+import '../models/journal.dart';
 import '../models/color_data.dart';
 import '../models/note.dart';
-import '../widgets/dynamic_agenda_app_bar.dart';
+import '../widgets/dynamic_journal_app_bar.dart';
 
 
 class LoggedHomepage extends StatefulWidget {
@@ -20,66 +20,66 @@ class LoggedHomepage extends StatefulWidget {
 }
 
 class _LoggedHomepageState extends State<LoggedHomepage> {
-  bool _isLoadingAgenda = true;
+  bool _isLoadingJournal = true;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (context.read<ActiveAgendaNotifier>().activeAgendaId == null) {
-        _loadInitialAgenda();
+      if (context.read<ActiveJournalNotifier>().activeJournalId == null) {
+        _loadInitialJournal();
       } else {
         if (mounted) {
           setState(() {
-            _isLoadingAgenda = false;
+            _isLoadingJournal = false;
           });
         }
       }
     });
   }
 
-  Future<void> _loadInitialAgenda() async {
+  Future<void> _loadInitialJournal() async {
     if (!mounted) return;
     final firestoreService = context.read<FirestoreService>();
-    final activeAgendaNotifier = context.read<ActiveAgendaNotifier>();
+    final activeJournalNotifier = context.read<ActiveJournalNotifier>();
     final user = context.read<User?>();
 
     if (user != null) {
       try {
-        List<Agenda> userAgendas = await firestoreService.getUserAgendasStream(user.uid).first;
-        Agenda? initialAgenda;
-        if (userAgendas.isNotEmpty) {
-          initialAgenda = userAgendas.first;
+        List<Journal> userJournals = await firestoreService.getUserJournalsStream(user.uid).first;
+        Journal? initialJournal;
+        if (userJournals.isNotEmpty) {
+          initialJournal = userJournals.first;
         }
         if (mounted) {
-          activeAgendaNotifier.setActiveAgenda(initialAgenda);
+          activeJournalNotifier.setActiveJournal(initialJournal);
         }
       } catch (e) {
-        print("Erreur chargement agenda initial: $e");
+        print("Erreur chargement journal initial: $e");
         if (mounted) {
-          activeAgendaNotifier.setActiveAgenda(null);
+          activeJournalNotifier.setActiveJournal(null);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erreur chargement agendas: $e'), backgroundColor: Colors.red),
+            SnackBar(content: Text('Erreur chargement journals: $e'), backgroundColor: Colors.red),
           );
         }
       } finally {
         if (mounted) {
           setState(() {
-            _isLoadingAgenda = false;
+            _isLoadingJournal = false;
           });
         }
       }
     } else {
       if (mounted) {
         setState(() {
-          _isLoadingAgenda = false;
+          _isLoadingJournal = false;
         });
-        activeAgendaNotifier.setActiveAgenda(null);
+        activeJournalNotifier.setActiveJournal(null);
       }
     }
   }
 
-  void _showCreateNoteDialog(BuildContext context, ColorData colorData, String agendaId) {
+  void _showCreateNoteDialog(BuildContext context, ColorData colorData, String journalId) {
     final TextEditingController commentController = TextEditingController();
     Color color;
     try {
@@ -207,7 +207,7 @@ class _LoggedHomepageState extends State<LoggedHomepage> {
                         if (user != null) {
                           final newNote = Note(
                             id: '',
-                            agendaId: agendaId,
+                            journalId: journalId,
                             userId: user.uid,
                             colorSnapshot: colorData,
                             comment: comment,
@@ -253,20 +253,20 @@ class _LoggedHomepageState extends State<LoggedHomepage> {
 
   @override
   Widget build(BuildContext context) {
-    final activeAgendaNotifier = context.watch<ActiveAgendaNotifier>();
-    final Agenda? currentAgenda = activeAgendaNotifier.currentAgenda;
-    final List<ColorData> currentColors = currentAgenda?.embeddedPaletteInstance.colors ?? [];
+    final activeJournalNotifier = context.watch<ActiveJournalNotifier>();
+    final Journal? currentJournal = activeJournalNotifier.currentJournal;
+    final List<ColorData> currentColors = currentJournal?.embeddedPaletteInstance.colors ?? [];
 
     return Scaffold(
-      appBar: const DynamicAgendaAppBar(),
-      body: _isLoadingAgenda
+      appBar: const DynamicJournalAppBar(),
+      body: _isLoadingJournal
           ? const Center(child: CircularProgressIndicator())
-          : (currentAgenda == null
+          : (currentJournal == null
           ? const Center(
           child: Padding(
             padding: EdgeInsets.all(20.0),
             child: Text(
-                "Aucun agenda sélectionné ou trouvé.\n\nAllez dans l'onglet 'Agendas' pour en créer ou en sélectionner un.",
+                "Aucun journal sélectionné ou trouvé.\n\nAllez dans l'onglet 'Journals' pour en créer ou en sélectionner un.",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16, color: Colors.grey)),
           ))
@@ -309,7 +309,7 @@ class _LoggedHomepageState extends State<LoggedHomepage> {
 
                   return InkWell(
                     onTap: () {
-                      _showCreateNoteDialog(context, colorData, currentAgenda.id);
+                      _showCreateNoteDialog(context, colorData, currentJournal.id);
                     },
                     borderRadius: BorderRadius.circular(8.0),
                     child: Container(

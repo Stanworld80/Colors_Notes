@@ -4,20 +4,20 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../models/agenda.dart';
+import '../models/journal.dart';
 import '../models/palette.dart';
 import '../models/palette_model.dart';
 import '../models/color_data.dart';
-import '../providers/active_agenda_provider.dart';
+import '../providers/active_journal_provider.dart';
 import '../services/firestore_service.dart';
 
 class EditPaletteModelPage extends StatefulWidget {
   final PaletteModel? existingPaletteModel; // Pour édition de modèle
-  final Agenda? existingAgendaInstance; // Pour édition d'instance
+  final Journal? existingJournalInstance; // Pour édition d'instance
 
   // Vérifier qu'un seul des deux est fourni (ou aucun pour création modèle)
-  const EditPaletteModelPage({Key? key, this.existingPaletteModel, this.existingAgendaInstance})
-    : assert(existingPaletteModel == null || existingAgendaInstance == null, 'Cannot edit both a model and an instance at the same time.'),
+  const EditPaletteModelPage({Key? key, this.existingPaletteModel, this.existingJournalInstance})
+    : assert(existingPaletteModel == null || existingJournalInstance == null, 'Cannot edit both a model and an instance at the same time.'),
       super(key: key);
 
   @override
@@ -34,7 +34,7 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
 
   bool get _isEditingModel => widget.existingPaletteModel != null;
 
-  bool get _isEditingInstance => widget.existingAgendaInstance != null;
+  bool get _isEditingInstance => widget.existingJournalInstance != null;
 
   @override
   @override
@@ -45,8 +45,8 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
       _currentColors = widget.existingPaletteModel!.colors.map((c) => ColorData(title: c.title, hexValue: c.hexValue)).toList();
     } else if (_isEditingInstance) {
       // Utiliser le nom de la palette de l'instance
-      _nameController = TextEditingController(text: widget.existingAgendaInstance!.embeddedPaletteInstance.name);
-      _currentColors = widget.existingAgendaInstance!.embeddedPaletteInstance.colors.map((c) => ColorData(title: c.title, hexValue: c.hexValue)).toList();
+      _nameController = TextEditingController(text: widget.existingJournalInstance!.embeddedPaletteInstance.name);
+      _currentColors = widget.existingJournalInstance!.embeddedPaletteInstance.colors.map((c) => ColorData(title: c.title, hexValue: c.hexValue)).toList();
     } else {
       // Mode Création de modèle
       _nameController = TextEditingController();
@@ -203,8 +203,8 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
     final messenger = ScaffoldMessenger.of(context);
     final firestoreService = context.read<FirestoreService>();
     final userId = context.read<User?>()?.uid;
-    // Récupérer le notifier pour mettre à jour l'état de l'agenda actif après modif instance
-    final activeAgendaNotifier = context.read<ActiveAgendaNotifier>();
+    // Récupérer le notifier pour mettre à jour l'état de l'journal actif après modif instance
+    final activeJournalNotifier = context.read<ActiveJournalNotifier>();
 
     setState(() {
       _isSaving = true;
@@ -232,25 +232,25 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
     try {
       if (_isEditingInstance) {
         // --- MISE À JOUR DE L'INSTANCE D'AGENDA ---
-        final agendaId = widget.existingAgendaInstance!.id;
+        final journalId = widget.existingJournalInstance!.id;
         // Créer le nouvel objet Palette instance
         // Si le nom de l'instance n'est pas modifiable, réutiliser l'ancien:
-        final String instancePaletteName = widget.existingAgendaInstance!.embeddedPaletteInstance.name;
+        final String instancePaletteName = widget.existingJournalInstance!.embeddedPaletteInstance.name;
         final updatedPaletteInstance = Palette(name: instancePaletteName, colors: colorsToSave);
 
         // Appeler une NOUVELLE méthode du service Firestore
-        await firestoreService.updateAgendaPaletteInstance(agendaId, updatedPaletteInstance);
+        await firestoreService.updateJournalPaletteInstance(journalId, updatedPaletteInstance);
 
-        // Mettre à jour l'état global de l'agenda actif
-        final updatedAgenda = Agenda(
-          id: agendaId,
-          name: widget.existingAgendaInstance!.name, // Le nom de l'agenda ne change pas ici
+        // Mettre à jour l'état global de l'journal actif
+        final updatedJournal = Journal(
+          id: journalId,
+          name: widget.existingJournalInstance!.name, // Le nom de l'journal ne change pas ici
           userId: userId,
           embeddedPaletteInstance: updatedPaletteInstance, // Mettre la palette à jour
         );
-        activeAgendaNotifier.setActiveAgenda(updatedAgenda); // Notifier le changement
+        activeJournalNotifier.setActiveJournal(updatedJournal); // Notifier le changement
 
-        messenger.showSnackBar(const SnackBar(content: Text('Palette de l\'agenda mise à jour.')));
+        messenger.showSnackBar(const SnackBar(content: Text('Palette de l\'journal mise à jour.')));
         // --- FIN MISE À JOUR INSTANCE ---
       } else {
         // --- CRÉATION/MISE À JOUR DE MODÈLE (Logique existante) ---
@@ -284,7 +284,7 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
       appBar: AppBar(
         title: Text(
           _isEditingInstance
-              ? 'Modifier Palette (${widget.existingAgendaInstance!.name})' // Nom de l'agenda
+              ? 'Modifier Palette (${widget.existingJournalInstance!.name})' // Nom de l'journal
               : (_isEditingModel ? 'Modifier Modèle' : 'Nouveau Modèle'),
         ),
         actions: [

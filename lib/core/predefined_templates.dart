@@ -21,19 +21,19 @@ final predefinedGenericPalettes = <String, List<ColorData>>{
   // Ajoutez d'autres modèles génériques ici
 };
 
-// Modèles d'Agendas Thématiques (SF-TEMPLATE-01)
-class PredefinedAgendaTemplate {
+// Modèles d'Journals Thématiques (SF-TEMPLATE-01)
+class PredefinedJournalTemplate {
   final String templateName;
-  final String suggestedAgendaName;
+  final String suggestedJournalName;
   final Palette paletteDefinition;
 
-  PredefinedAgendaTemplate({required this.templateName, required this.suggestedAgendaName, required this.paletteDefinition});
+  PredefinedJournalTemplate({required this.templateName, required this.suggestedJournalName, required this.paletteDefinition});
 }
 
-final predefinedAgendaTemplates = <PredefinedAgendaTemplate>[
-  PredefinedAgendaTemplate(
+final predefinedJournalTemplates = <PredefinedJournalTemplate>[
+  PredefinedJournalTemplate(
     templateName: 'Sport',
-    suggestedAgendaName: 'Mon Suivi Sportif',
+    suggestedJournalName: 'Mon Suivi Sportif',
     paletteDefinition: Palette(
       name: 'Palette Sport',
       colors: [
@@ -45,9 +45,9 @@ final predefinedAgendaTemplates = <PredefinedAgendaTemplate>[
       ],
     ),
   ),
-  PredefinedAgendaTemplate(
+  PredefinedJournalTemplate(
     templateName: 'Humeur',
-    suggestedAgendaName: 'Mon Journal d\'Humeur',
+    suggestedJournalName: 'Mon Journal d\'Humeur',
     paletteDefinition: Palette(
       name: 'Palette Humeur',
       colors: [

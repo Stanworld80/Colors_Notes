@@ -90,7 +90,7 @@ class PaletteModelManagementPage extends StatelessWidget {
       builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Confirmer la suppression'),
-          content: Text('Supprimer le modèle "${model.name}" ?\n(N\'affecte pas les agendas existants).'),
+          content: Text('Supprimer le modèle "${model.name}" ?\n(N\'affecte pas les journals existants).'),
           actions: [
             TextButton(child: const Text('Annuler'), onPressed: () => Navigator.of(dialogContext).pop()),
             TextButton(

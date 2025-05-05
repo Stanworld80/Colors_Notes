@@ -1,38 +1,38 @@
-// lib/screens/agenda_management_page.dart
+// lib/screens/journal_management_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/agenda.dart';
-import '../providers/active_agenda_provider.dart';
+import '../models/journal.dart';
+import '../providers/active_journal_provider.dart';
 import '../services/firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'create_agenda_page.dart';
+import 'create_journal_page.dart';
 import 'palette_model_management_page.dart';
 
-class AgendaManagementPage extends StatelessWidget {
-  const AgendaManagementPage({Key? key}) : super(key: key);
+class JournalManagementPage extends StatelessWidget {
+  const JournalManagementPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final firestoreService = context.read<FirestoreService>();
-    final activeAgendaNotifier = context.watch<ActiveAgendaNotifier>(); // Watch pour l'ID actif
+    final activeJournalNotifier = context.watch<ActiveJournalNotifier>(); // Watch pour l'ID actif
     final userId = context.read<User?>()?.uid; // Lire User depuis Provider
 
     if (userId == null) {
-      return Scaffold(appBar: AppBar(title: const Text('Gérer les Agendas')), body: const Center(child: Text("Utilisateur non connecté.")));
+      return Scaffold(appBar: AppBar(title: const Text('Gérer les journaux')), body: const Center(child: Text("Utilisateur non connecté.")));
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gérer les Agendas'),
-        // Optionnel: Bouton pour créer un nouvel agenda (à implémenter plus tard)
+        title: const Text('Gérer les journaux'),
+        // Optionnel: Bouton pour créer un nouveau journal (à implémenter plus tard)
         // actions: [ IconButton(icon: Icon(Icons.add), onPressed: () {/* SF-AGENDA-01 */})],
       ),
       body: Column(
         children: [
-          // La liste des agendas prend l'espace restant
+          // La liste des journals prend l'espace restant
           Expanded(
-            child: StreamBuilder<List<Agenda>>(
-              stream: firestoreService.getUserAgendasStream(userId),
+            child: StreamBuilder<List<Journal>>(
+              stream: firestoreService.getUserJournalsStream(userId),
               builder: (context, snapshot) {
                 // Gérer les états du Stream
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -43,28 +43,28 @@ class AgendaManagementPage extends StatelessWidget {
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   // Peut arriver brièvement ou si la création par défaut a échoué
-                  return const Center(child: Text('Aucun agenda trouvé.'));
+                  return const Center(child: Text('Aucun journal trouvé.'));
                 }
 
                 // Si on a des données
-                final agendas = snapshot.data!;
+                final journals = snapshot.data!;
 
                 return ListView.builder(
-                  itemCount: agendas.length,
+                  itemCount: journals.length,
                   itemBuilder: (context, index) {
-                    final agenda = agendas[index];
-                    final bool isActive = agenda.id == activeAgendaNotifier.activeAgendaId;
+                    final journal = journals[index];
+                    final bool isActive = journal.id == activeJournalNotifier.activeJournalId;
 
                     return Card(
                       color: isActive ? Theme.of(context).colorScheme.primaryContainer : null,
                       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                       child: ListTile(
                         leading: Icon((isActive ? Icons.arrow_forward_outlined : null), size: 20),
-                        title: Text(agenda.name + (isActive ? ' (ACTIF)' : '')),
-                        // Sélectionner l'agenda actif en tapant dessus
+                        title: Text(journal.name + (isActive ? ' (ACTIF)' : '')),
+                        // Sélectionner l'journal actif en tapant dessus
                         onTap: () {
                           // Lire le notifier SANS écouter pour appeler une méthode
-                          context.read<ActiveAgendaNotifier>().setActiveAgenda(agenda);
+                          context.read<ActiveJournalNotifier>().setActiveJournal(journal);
                           // Optionnel : revenir à l'accueil
                           // Provider.of<NavigationState>(context, listen: false).selectedIndex = 0;
                         },
@@ -76,17 +76,17 @@ class AgendaManagementPage extends StatelessWidget {
                             IconButton(
                               icon: const Icon(Icons.edit_outlined, size: 20),
                               tooltip: 'Renommer',
-                              // Note: La fonction _showRenameAgendaDialog doit être définie
-                              // dans la classe AgendaManagementPage (ou passée en paramètre)
-                              onPressed: () => _showRenameAgendaDialog(context, agenda),
+                              // Note: La fonction _showRenameJournalDialog doit être définie
+                              // dans la classe JournalManagementPage (ou passée en paramètre)
+                              onPressed: () => _showRenameJournalDialog(context, journal),
                             ),
                             // Bouton Supprimer
                             IconButton(
-                              icon: Icon(Icons.delete_outline, size: 20, color: agendas.length > 1 ? Colors.redAccent : Colors.grey),
-                              tooltip: agendas.length > 1 ? 'Supprimer' : 'Impossible de supprimer le dernier agenda',
-                              // Note: La fonction _showDeleteAgendaDialog doit être définie
-                              // dans la classe AgendaManagementPage (ou passée en paramètre)
-                              onPressed: agendas.length > 1 ? () => _showDeleteAgendaDialog(context, agenda, firestoreService) : null, // Désactiver si un seul agenda
+                              icon: Icon(Icons.delete_outline, size: 20, color: journals.length > 1 ? Colors.redAccent : Colors.grey),
+                              tooltip: journals.length > 1 ? 'Supprimer' : 'Impossible de supprimer le dernier journal',
+                              // Note: La fonction _showDeleteJournalDialog doit être définie
+                              // dans la classe JournalManagementPage (ou passée en paramètre)
+                              onPressed: journals.length > 1 ? () => _showDeleteJournalDialog(context, journal, firestoreService) : null, // Désactiver si un seul journal
                             ),
                           ],
                         ),
@@ -114,13 +114,13 @@ class AgendaManagementPage extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         icon: const Icon(Icons.add),
-        label: const Text("Nouvel Agenda"),
-        tooltip: 'Créer un nouvel agenda', // Tooltip ajouté
+        label: const Text("Nouveau Journal"),
+        tooltip: 'Créer un nouveau journal', // Tooltip ajouté
         onPressed: () {
           Navigator.push(
             context,
-            // Naviguer vers la page de création d'agenda
-            MaterialPageRoute(builder: (_) => const CreateAgendaPage()),
+            // Naviguer vers la page de création d'journal
+            MaterialPageRoute(builder: (_) => const CreateJournalPage()),
           );
         },
       ),
@@ -129,13 +129,13 @@ class AgendaManagementPage extends StatelessWidget {
 
   // --- Fonctions pour les Dialogues ---
 
-  void _showRenameAgendaDialog(BuildContext context, Agenda agenda) {
-    final TextEditingController nameController = TextEditingController(text: agenda.name);
+  void _showRenameJournalDialog(BuildContext context, Journal journal) {
+    final TextEditingController nameController = TextEditingController(text: journal.name);
     showDialog(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Renommer l\'agenda'),
+          title: const Text('Renommer l\'journal'),
           content: TextField(controller: nameController, autofocus: true, decoration: const InputDecoration(labelText: 'Nouveau nom')),
           actions: [
             TextButton(child: const Text('Annuler'), onPressed: () => Navigator.of(dialogContext).pop()),
@@ -143,20 +143,20 @@ class AgendaManagementPage extends StatelessWidget {
               child: const Text('Enregistrer'),
               onPressed: () async {
                 final newName = nameController.text.trim();
-                if (newName.isNotEmpty && newName != agenda.name) {
+                if (newName.isNotEmpty && newName != journal.name) {
                   final fs = dialogContext.read<FirestoreService>();
                   try {
-                    await fs.updateAgendaName(agenda.id, newName);
-                    // Mettre à jour aussi le nom dans le notifier si c'est l'agenda actif
-                    final activeNotifier = dialogContext.read<ActiveAgendaNotifier>();
-                    if (activeNotifier.activeAgendaId == agenda.id) {
-                      // Créer un nouvel objet Agenda avec le nom mis à jour pour le notifier
-                      final updatedAgenda = Agenda(id: agenda.id, name: newName, userId: agenda.userId, embeddedPaletteInstance: agenda.embeddedPaletteInstance);
-                      activeNotifier.setActiveAgenda(updatedAgenda);
+                    await fs.updateJournalName(journal.id, newName);
+                    // Mettre à jour aussi le nom dans le notifier si c'est l'journal actif
+                    final activeNotifier = dialogContext.read<ActiveJournalNotifier>();
+                    if (activeNotifier.activeJournalId == journal.id) {
+                      // Créer un nouvel objet Journal avec le nom mis à jour pour le notifier
+                      final updatedJournal = Journal(id: journal.id, name: newName, userId: journal.userId, embeddedPaletteInstance: journal.embeddedPaletteInstance);
+                      activeNotifier.setActiveJournal(updatedJournal);
                     }
                     Navigator.of(dialogContext).pop();
                   } catch (e) {
-                    print("Error renaming agenda: $e");
+                    print("Error renaming journal: $e");
                     Navigator.of(dialogContext).pop();
                     // Afficher une erreur
                     if (context.mounted) {
@@ -174,7 +174,7 @@ class AgendaManagementPage extends StatelessWidget {
     );
   }
 
-  void _showDeleteAgendaDialog(BuildContext context, Agenda agenda, FirestoreService firestoreService) {
+  void _showDeleteJournalDialog(BuildContext context, Journal journal, FirestoreService firestoreService) {
     final TextEditingController deleteController = TextEditingController();
     showDialog(
       context: context,
@@ -184,7 +184,7 @@ class AgendaManagementPage extends StatelessWidget {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Voulez-vous vraiment supprimer l\'agenda "${agenda.name}" ?'),
+              Text('Voulez-vous vraiment supprimer l\'journal "${journal.name}" ?'),
               const Text('Toutes les notes associées seront perdues.', style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 15),
               // Champ pour confirmation renforcée (SF-AGENDA-06a)
@@ -203,19 +203,19 @@ class AgendaManagementPage extends StatelessWidget {
                       value.text.trim().toLowerCase() == 'delete'
                           ? () async {
                             try {
-                              // Réinitialiser l'agenda actif si c'est celui qu'on supprime
-                              final activeNotifier = dialogContext.read<ActiveAgendaNotifier>();
-                              if (activeNotifier.activeAgendaId == agenda.id) {
-                                activeNotifier.setActiveAgenda(null); // Ou choisir un autre agenda ?
+                              // Réinitialiser l'journal actif si c'est celui qu'on supprime
+                              final activeNotifier = dialogContext.read<ActiveJournalNotifier>();
+                              if (activeNotifier.activeJournalId == journal.id) {
+                                activeNotifier.setActiveJournal(null); // Ou choisir un autre journal ?
                               }
 
-                              await firestoreService.deleteAgenda(agenda.id); // Doit supprimer les notes !
+                              await firestoreService.deleteJournal(journal.id); // Doit supprimer les notes !
                               Navigator.of(dialogContext).pop();
                               if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Agenda supprimé.'), duration: Duration(seconds: 2)));
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Journal supprimé.'), duration: Duration(seconds: 2)));
                               }
                             } catch (e) {
-                              print("Error deleting agenda: $e");
+                              print("Error deleting journal: $e");
                               Navigator.of(dialogContext).pop();
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red));

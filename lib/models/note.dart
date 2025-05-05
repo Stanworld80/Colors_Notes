@@ -4,7 +4,7 @@ import 'color_data.dart'; // Importer ColorData
 
 class Note {
   final String id; // ID du document Firestore
-  final String agendaId;
+  final String journalId;
   final String userId; // Pourrait être utile pour les règles de sécurité
   final ColorData colorSnapshot; // Copie de la couleur au moment T
   final String comment;
@@ -13,7 +13,7 @@ class Note {
 
   Note({
     required this.id,
-    required this.agendaId,
+    required this.journalId,
     required this.userId,
     required this.colorSnapshot,
     required this.comment,
@@ -23,7 +23,7 @@ class Note {
 
   Map<String, dynamic> toJson() {
     return {
-      'agendaId': agendaId,
+      'journalId': journalId,
       'userId': userId,
       'colorSnapshot': colorSnapshot.toJson(), // Convertit ColorData en Map
       'comment': comment,
@@ -39,7 +39,7 @@ class Note {
 
     return Note(
       id: doc.id,
-      agendaId: data['agendaId'] ?? '',
+      journalId: data['journalId'] ?? '',
       userId: data['userId'] ?? '',
       // Crée ColorData depuis la Map stockée
       colorSnapshot: ColorData.fromJson(data['colorSnapshot'] as Map<String, dynamic>? ?? {}),

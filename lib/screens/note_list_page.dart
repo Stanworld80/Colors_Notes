@@ -5,10 +5,10 @@ import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
 
-import '../providers/active_agenda_provider.dart';
+import '../providers/active_journal_provider.dart';
 import '../services/firestore_service.dart';
 import '../models/note.dart';
-import '../widgets/dynamic_agenda_app_bar.dart';
+import '../widgets/dynamic_journal_app_bar.dart';
 
 enum SortOrder { descending, ascending }
 
@@ -193,12 +193,12 @@ class _NoteListPageState extends State<NoteListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final activeAgendaNotifier = context.watch<ActiveAgendaNotifier>();
-    final String? agendaId = activeAgendaNotifier.activeAgendaId;
+    final activeJournalNotifier = context.watch<ActiveJournalNotifier>();
+    final String? journalId = activeJournalNotifier.activeJournalId;
     final firestoreService = context.read<FirestoreService>();
 
     return Scaffold(
-      appBar: const DynamicAgendaAppBar(),
+      appBar: const DynamicJournalAppBar(),
       body: Column(
         children: [
           Padding(
@@ -233,10 +233,10 @@ class _NoteListPageState extends State<NoteListPage> {
           const Divider(height: 1, thickness: 1),
           Expanded(
             child:
-                agendaId == null
-                    ? const Center(child: Text('Sélectionnez un agenda pour voir les notes.'))
+                journalId == null
+                    ? const Center(child: Text('Sélectionnez un journal pour voir les notes.'))
                     : StreamBuilder<List<Note>>(
-                      stream: firestoreService.getAgendaNotesStream(agendaId, descending: _currentSortOrder == SortOrder.descending),
+                      stream: firestoreService.getJournalNotesStream(journalId, descending: _currentSortOrder == SortOrder.descending),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return const Center(child: CircularProgressIndicator());
@@ -245,7 +245,7 @@ class _NoteListPageState extends State<NoteListPage> {
                           return Center(child: Text('Erreur chargement des notes: ${snapshot.error}'));
                         }
                         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                          return const Center(child: Text('Aucune note dans cet agenda.'));
+                          return const Center(child: Text('Aucune note dans cet journal.'));
                         }
 
                         final notes = snapshot.data!;

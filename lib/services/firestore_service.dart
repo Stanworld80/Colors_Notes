@@ -2,7 +2,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/app_user.dart';
-import '../models/agenda.dart';
+import '../models/journal.dart';
 import '../models/note.dart';
 import '../models/palette.dart';
 import '../models/palette_model.dart';
@@ -33,47 +33,47 @@ class FirestoreService {
     return null;
   }
 
-  // --- Agenda Management (No changes) ---
-  Future<DocumentReference> createAgenda(String userId, Agenda agendaData) async {
-    if (agendaData.userId != userId) {
-      throw Exception("Mismatch between provided userId and agendaData.userId");
+  // --- Journal Management (No changes) ---
+  Future<DocumentReference> createJournal(String userId, Journal journalData) async {
+    if (journalData.userId != userId) {
+      throw Exception("Mismatch between provided userId and journalData.userId");
     }
-    return await _db.collection('agendas').add(agendaData.toJson());
+    return await _db.collection('journals').add(journalData.toJson());
   }
 
-  Stream<List<Agenda>> getUserAgendasStream(String userId) {
+  Stream<List<Journal>> getUserJournalsStream(String userId) {
     return _db
-        .collection('agendas')
+        .collection('journals')
         .where('userId', isEqualTo: userId)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => Agenda.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>)).toList());
+        .map((snapshot) => snapshot.docs.map((doc) => Journal.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>)).toList());
   }
 
-  Future<void> updateAgendaName(String agendaId, String newName) async {
-    await _db.collection('agendas').doc(agendaId).update({'name': newName});
+  Future<void> updateJournalName(String journalId, String newName) async {
+    await _db.collection('journals').doc(journalId).update({'name': newName});
   }
 
-  Future<void> updateAgendaPalette(String agendaId, Palette newPalette) async {
-    await _db.collection('agendas').doc(agendaId).update({'embeddedPaletteInstance': newPalette.toJson()});
+  Future<void> updateJournalPalette(String journalId, Palette newPalette) async {
+    await _db.collection('journals').doc(journalId).update({'embeddedPaletteInstance': newPalette.toJson()});
   }
 
-  Future<void> deleteAgenda(String agendaId) async {
-    print("Deleting notes for agenda $agendaId...");
+  Future<void> deleteJournal(String journalId) async {
+    print("Deleting notes for journal $journalId...");
     final WriteBatch batch = _db.batch();
-    final notesSnapshot = await _db.collection('notes').where('agendaId', isEqualTo: agendaId).get();
+    final notesSnapshot = await _db.collection('notes').where('journalId', isEqualTo: journalId).get();
     for (final doc in notesSnapshot.docs) {
       batch.delete(doc.reference);
     }
     await batch.commit();
     print("${notesSnapshot.size} notes deleted.");
-    await _db.collection('agendas').doc(agendaId).delete();
-    print("Agenda $agendaId deleted.");
+    await _db.collection('journals').doc(journalId).delete();
+    print("Journal $journalId deleted.");
   }
 
-  Future<void> updateAgendaPaletteInstance(String agendaId, Palette newPaletteInstance) async {
-    final agendaRef = _db.collection('agendas').doc(agendaId);
-    await agendaRef.update({'embeddedPaletteInstance': newPaletteInstance.toJson()});
-    print("Palette instance updated for agenda $agendaId");
+  Future<void> updateJournalPaletteInstance(String journalId, Palette newPaletteInstance) async {
+    final journalRef = _db.collection('journals').doc(journalId);
+    await journalRef.update({'embeddedPaletteInstance': newPaletteInstance.toJson()});
+    print("Palette instance updated for journal $journalId");
   }
 
   // --- Note Management (MODIFIED) ---
@@ -81,13 +81,13 @@ class FirestoreService {
     return await _db.collection('notes').add(noteData.toJson());
   }
 
-  /// Récupère le flux (Stream) des notes pour un agenda spécifique,
+  /// Récupère le flux (Stream) des notes pour un journal spécifique,
   /// avec option de tri par eventTimestamp.
-  Stream<List<Note>> getAgendaNotesStream(String agendaId, {bool descending = true}) {
+  Stream<List<Note>> getJournalNotesStream(String journalId, {bool descending = true}) {
     // Ajout du paramètre descending
     return _db
         .collection('notes')
-        .where('agendaId', isEqualTo: agendaId)
+        .where('journalId', isEqualTo: journalId)
         // Utiliser le paramètre pour contrôler l'ordre de tri
         .orderBy('eventTimestamp', descending: descending) // MODIFIÉ
         .snapshots()

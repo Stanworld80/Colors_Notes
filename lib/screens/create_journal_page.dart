@@ -3,30 +3,30 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/palette_model.dart';
-import '../models/agenda.dart';
+import '../models/journal.dart';
 import '../models/palette.dart';
 import '../models/color_data.dart';
 import '../services/firestore_service.dart';
 import '../core/predefined_templates.dart';
 
-enum CreationMode { blank, predefinedTemplate, existingAgenda }
+enum CreationMode { blank, predefinedTemplate, existingJournal }
 
-class CreateAgendaPage extends StatefulWidget {
-  const CreateAgendaPage({Key? key}) : super(key: key);
+class CreateJournalPage extends StatefulWidget {
+  const CreateJournalPage({Key? key}) : super(key: key);
 
   @override
-  _CreateAgendaPageState createState() => _CreateAgendaPageState();
+  _CreateJournalPageState createState() => _CreateJournalPageState();
 }
 
-class _CreateAgendaPageState extends State<CreateAgendaPage> {
+class _CreateJournalPageState extends State<CreateJournalPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   bool _isSaving = false;
 
   CreationMode _selectedMode = CreationMode.blank;
-  PredefinedAgendaTemplate? _selectedPredefinedTemplate;
-  Agenda? _selectedExistingAgendaTemplate;
-  String? _selectedExistingAgendaId;
+  PredefinedJournalTemplate? _selectedPredefinedTemplate;
+  Journal? _selectedExistingJournalTemplate;
+  String? _selectedExistingJournalId;
   Object? _selectedPaletteSource;
   String? _selectedPaletteValue;
 
@@ -44,13 +44,13 @@ class _CreateAgendaPageState extends State<CreateAgendaPage> {
         _selectedPaletteSource = null;
         _selectedPaletteValue = null;
         _selectedPredefinedTemplate = null;
-        _selectedExistingAgendaTemplate = null;
+        _selectedExistingJournalTemplate = null;
         _nameController.text = '';
       });
     }
   }
 
-  Future<void> _saveAgenda() async {
+  Future<void> _saveJournal() async {
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final firestoreService = context.read<FirestoreService>();
@@ -65,9 +65,9 @@ class _CreateAgendaPageState extends State<CreateAgendaPage> {
     } else if (_selectedMode == CreationMode.predefinedTemplate && _selectedPredefinedTemplate == null) {
       selectionValid = false;
       messenger.showSnackBar(const SnackBar(content: Text('Choisissez un modèle thématique.'), backgroundColor: Colors.orange));
-    } else if (_selectedMode == CreationMode.existingAgenda && _selectedExistingAgendaTemplate == null) {
+    } else if (_selectedMode == CreationMode.existingJournal && _selectedExistingJournalTemplate == null) {
       selectionValid = false;
-      messenger.showSnackBar(const SnackBar(content: Text('Choisissez un agenda source.'), backgroundColor: Colors.orange));
+      messenger.showSnackBar(const SnackBar(content: Text('Choisissez un journal source.'), backgroundColor: Colors.orange));
     }
 
     if (!selectionValid) return;
@@ -86,7 +86,7 @@ class _CreateAgendaPageState extends State<CreateAgendaPage> {
       return;
     }
 
-    final String agendaName = _nameController.text.trim();
+    final String journalName = _nameController.text.trim();
     Palette paletteInstance;
 
     try {
@@ -105,21 +105,21 @@ class _CreateAgendaPageState extends State<CreateAgendaPage> {
           name: _selectedPredefinedTemplate!.paletteDefinition.name,
           colors: _selectedPredefinedTemplate!.paletteDefinition.colors.map((c) => ColorData(title: c.title, hexValue: c.hexValue)).toList(),
         );
-      } else if (_selectedMode == CreationMode.existingAgenda) {
+      } else if (_selectedMode == CreationMode.existingJournal) {
         paletteInstance = Palette(
-          name: _selectedExistingAgendaTemplate!.embeddedPaletteInstance.name,
-          colors: _selectedExistingAgendaTemplate!.embeddedPaletteInstance.colors.map((c) => ColorData(title: c.title, hexValue: c.hexValue)).toList(),
+          name: _selectedExistingJournalTemplate!.embeddedPaletteInstance.name,
+          colors: _selectedExistingJournalTemplate!.embeddedPaletteInstance.colors.map((c) => ColorData(title: c.title, hexValue: c.hexValue)).toList(),
         );
       } else {
         throw Exception("Mode de création non supporté.");
       }
 
-      final newAgenda = Agenda(id: '', name: agendaName, userId: userId, embeddedPaletteInstance: paletteInstance);
-      await firestoreService.createAgenda(userId, newAgenda);
-      messenger.showSnackBar(const SnackBar(content: Text('Agenda créé avec succès !')));
+      final newJournal = Journal(id: '', name: journalName, userId: userId, embeddedPaletteInstance: paletteInstance);
+      await firestoreService.createJournal(userId, newJournal);
+      messenger.showSnackBar(const SnackBar(content: Text('Journal créé avec succès !')));
       navigator.pop();
     } catch (e) {
-      print("Error creating agenda: $e");
+      print("Error creating journal: $e");
       messenger.showSnackBar(SnackBar(content: Text('Erreur création: $e'), backgroundColor: Colors.red));
     } finally {
       if (mounted) {
@@ -137,12 +137,12 @@ class _CreateAgendaPageState extends State<CreateAgendaPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Nouvel Agenda'),
+        title: const Text('Nouveau journal'),
         actions: [
           IconButton(
             icon: _isSaving ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Icon(Icons.save),
             tooltip: 'Enregistrer',
-            onPressed: _isSaving ? null : _saveAgenda,
+            onPressed: _isSaving ? null : _saveJournal,
           ),
         ],
       ),
@@ -157,7 +157,7 @@ class _CreateAgendaPageState extends State<CreateAgendaPage> {
                     children: [
                       Text("Méthode de création :", style: Theme.of(context).textTheme.titleMedium),
                       RadioListTile<CreationMode>(
-                        title: const Text('Agenda Vierge'),
+                        title: const Text('Journal Vierge'),
                         subtitle: const Text('Choisir nom et palette de base.'),
                         value: CreationMode.blank,
                         groupValue: _selectedMode,
@@ -171,9 +171,9 @@ class _CreateAgendaPageState extends State<CreateAgendaPage> {
                         onChanged: _updateMode,
                       ),
                       RadioListTile<CreationMode>(
-                        title: const Text('Agenda Existant'),
-                        subtitle: const Text('Copier structure d\'un agenda.'),
-                        value: CreationMode.existingAgenda,
+                        title: const Text('Journal Existant'),
+                        subtitle: const Text('Copier structure d\'un journal.'),
+                        value: CreationMode.existingJournal,
                         groupValue: _selectedMode,
                         onChanged: _updateMode,
                       ),
@@ -181,7 +181,7 @@ class _CreateAgendaPageState extends State<CreateAgendaPage> {
 
                       TextFormField(
                         controller: _nameController,
-                        decoration: const InputDecoration(labelText: 'Nom du nouvel agenda', border: OutlineInputBorder()),
+                        decoration: const InputDecoration(labelText: 'Nom du nouvel journal', border: OutlineInputBorder()),
                         validator: (value) => (value == null || value.trim().isEmpty) ? 'Entrez un nom.' : null,
                       ),
                       const SizedBox(height: 24),
@@ -302,16 +302,16 @@ class _CreateAgendaPageState extends State<CreateAgendaPage> {
                       if (_selectedMode == CreationMode.predefinedTemplate) ...[
                         Text("Modèle thématique :", style: Theme.of(context).textTheme.titleMedium),
                         const SizedBox(height: 8),
-                        DropdownButtonFormField<PredefinedAgendaTemplate?>(
+                        DropdownButtonFormField<PredefinedJournalTemplate?>(
                           value: _selectedPredefinedTemplate,
                           items: [
-                            const DropdownMenuItem<PredefinedAgendaTemplate?>(value: null, child: Text("Sélectionnez...", style: TextStyle(color: Colors.grey))),
-                            ...predefinedAgendaTemplates.map((template) => DropdownMenuItem(value: template, child: Text(template.templateName))).toList(),
+                            const DropdownMenuItem<PredefinedJournalTemplate?>(value: null, child: Text("Sélectionnez...", style: TextStyle(color: Colors.grey))),
+                            ...predefinedJournalTemplates.map((template) => DropdownMenuItem(value: template, child: Text(template.templateName))).toList(),
                           ],
                           onChanged: (template) {
                             setState(() {
                               _selectedPredefinedTemplate = template;
-                              _nameController.text = template?.suggestedAgendaName ?? '';
+                              _nameController.text = template?.suggestedJournalName ?? '';
                             });
                           },
                           decoration: const InputDecoration(labelText: 'Modèle thématique', border: OutlineInputBorder()),
@@ -320,13 +320,13 @@ class _CreateAgendaPageState extends State<CreateAgendaPage> {
                         ),
                       ],
 
-                      // --- Section Agenda Existant ---
+                      // --- Section Journal Existant ---
                       // --- SECTION CONDITIONNELLE : AGENDA EXISTANT ---
-                      if (_selectedMode == CreationMode.existingAgenda) ...[
-                        Text("Choisir un agenda comme modèle :", style: Theme.of(context).textTheme.titleMedium),
+                      if (_selectedMode == CreationMode.existingJournal) ...[
+                        Text("Choisir un journal comme modèle :", style: Theme.of(context).textTheme.titleMedium),
                         const SizedBox(height: 8),
-                        StreamBuilder<List<Agenda>>(
-                          stream: firestoreService.getUserAgendasStream(userId),
+                        StreamBuilder<List<Journal>>(
+                          stream: firestoreService.getUserJournalsStream(userId),
                           builder: (context, snapshot) {
                             // --- GESTION DE L'ATTENTE ---
                             if (!snapshot.hasData && snapshot.connectionState == ConnectionState.waiting) {
@@ -336,47 +336,47 @@ class _CreateAgendaPageState extends State<CreateAgendaPage> {
                             // --- GESTION DES ERREURS ---
                             if (snapshot.hasError) {
                               // Afficher un message d'erreur clair
-                              print("Error loading existing agendas: ${snapshot.error}"); // Garder un log pour le debug
+                              print("Error loading existing journals: ${snapshot.error}"); // Garder un log pour le debug
                               return Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                                 child: Text(
-                                  "Erreur lors du chargement de vos agendas.\n(${snapshot.error})", // Afficher l'erreur peut aider au debug
+                                  "Erreur lors du chargement de vos journals.\n(${snapshot.error})", // Afficher l'erreur peut aider au debug
                                   style: TextStyle(color: Theme.of(context).colorScheme.error),
                                   textAlign: TextAlign.center,
                                 ),
                               );
                             }
-                            final existingAgendas = snapshot.data ?? [];
-                            if (existingAgendas.isEmpty) {
-                              // Vérifier s'il y a au moins 1 agenda à copier
-                              return const Text("Aucun agenda disponible pour servir de modèle.", style: TextStyle(fontStyle: FontStyle.italic));
+                            final existingJournals = snapshot.data ?? [];
+                            if (existingJournals.isEmpty) {
+                              // Vérifier s'il y a au moins 1 journal à copier
+                              return const Text("Aucun journal disponible pour servir de modèle.", style: TextStyle(fontStyle: FontStyle.italic));
                             }
 
-                            // Construire les items avec agenda.id comme valeur
+                            // Construire les items avec journal.id comme valeur
                             final List<DropdownMenuItem<String?>> items = [
-                              const DropdownMenuItem<String?>(value: null, child: Text("Sélectionnez l'agenda source...", style: TextStyle(color: Colors.grey))),
-                              ...existingAgendas
+                              const DropdownMenuItem<String?>(value: null, child: Text("Sélectionnez l'journal source...", style: TextStyle(color: Colors.grey))),
+                              ...existingJournals
                                   .map(
-                                    (agenda) => DropdownMenuItem<String?>(
+                                    (journal) => DropdownMenuItem<String?>(
                                       // Type String?
-                                      value: agenda.id, // <<< Utiliser agenda.id comme valeur
-                                      child: Text(agenda.name),
+                                      value: journal.id, // <<< Utiliser journal.id comme valeur
+                                      child: Text(journal.name),
                                     ),
                                   )
                                   .toList(),
                             ];
 
                             // Vérifier si la valeur sélectionnée existe
-                            bool valueExists = items.any((item) => item.value == _selectedExistingAgendaId);
-                            String? valueForDropdown = valueExists ? _selectedExistingAgendaId : null;
+                            bool valueExists = items.any((item) => item.value == _selectedExistingJournalId);
+                            String? valueForDropdown = valueExists ? _selectedExistingJournalId : null;
 
                             // Logique de reset post-build (optionnelle mais sûre)
-                            if (_selectedExistingAgendaId != null && !valueExists) {
+                            if (_selectedExistingJournalId != null && !valueExists) {
                               WidgetsBinding.instance.addPostFrameCallback((_) {
-                                if (mounted && _selectedExistingAgendaId != null && !items.any((item) => item.value == _selectedExistingAgendaId)) {
+                                if (mounted && _selectedExistingJournalId != null && !items.any((item) => item.value == _selectedExistingJournalId)) {
                                   setState(() {
-                                    _selectedExistingAgendaId = null;
-                                    _selectedExistingAgendaTemplate = null;
+                                    _selectedExistingJournalId = null;
+                                    _selectedExistingJournalTemplate = null;
                                   });
                                 }
                               });
@@ -388,47 +388,47 @@ class _CreateAgendaPageState extends State<CreateAgendaPage> {
                               // Utiliser l'ID stocké
                               items: items,
                               onChanged: (String? newValue) {
-                                // Reçoit l'ID (String?) de l'agenda
-                                // 'existingAgendas' doit être accessible depuis le scope du builder parent
-                                final List<Agenda> localExistingAgendas = existingAgendas; // Recréer ici par sécurité si besoin
+                                // Reçoit l'ID (String?) de l'journal
+                                // 'existingJournals' doit être accessible depuis le scope du builder parent
+                                final List<Journal> localExistingJournals = existingJournals; // Recréer ici par sécurité si besoin
 
                                 setState(() {
-                                  _selectedExistingAgendaId = newValue; // Met à jour l'ID stocké
-                                  _selectedExistingAgendaTemplate = null; // Réinitialise l'objet trouvé
+                                  _selectedExistingJournalId = newValue; // Met à jour l'ID stocké
+                                  _selectedExistingJournalTemplate = null; // Réinitialise l'objet trouvé
 
                                   if (newValue != null) {
                                     try {
-                                      // Essayer de trouver l'objet Agenda correspondant à l'ID
-                                      _selectedExistingAgendaTemplate = localExistingAgendas.firstWhere(
-                                        (agenda) => agenda.id == newValue,
+                                      // Essayer de trouver l'objet Journal correspondant à l'ID
+                                      _selectedExistingJournalTemplate = localExistingJournals.firstWhere(
+                                        (journal) => journal.id == newValue,
                                         // Pas de orElse: ici !
                                       );
                                     } on StateError catch (_) {
-                                      // Gérer le cas où l'agenda n'est pas trouvé
-                                      print(">>> INFO: Selected agenda ID '$newValue' not found (StateError caught).");
-                                      _selectedExistingAgendaTemplate = null;
+                                      // Gérer le cas où l'journal n'est pas trouvé
+                                      print(">>> INFO: Selected journal ID '$newValue' not found (StateError caught).");
+                                      _selectedExistingJournalTemplate = null;
                                     } catch (e) {
                                       // Gérer toute autre erreur
-                                      print(">>> ERROR during existing agenda lookup: $e");
-                                      _selectedExistingAgendaTemplate = null;
+                                      print(">>> ERROR during existing journal lookup: $e");
+                                      _selectedExistingJournalTemplate = null;
                                     }
                                   }
 
                                   // Pré-remplir le nom
-                                  _nameController.text = _selectedExistingAgendaTemplate != null ? 'Copie de ${_selectedExistingAgendaTemplate!.name}' : '';
+                                  _nameController.text = _selectedExistingJournalTemplate != null ? 'Copie de ${_selectedExistingJournalTemplate!.name}' : '';
 
-                                  print("--- ExistingAgenda Dropdown onChanged ---");
-                                  print("newValue (agendaId) received: $newValue");
-                                  print("Selected ExistingAgenda object set to: ${_selectedExistingAgendaTemplate?.name}");
+                                  print("--- ExistingJournal Dropdown onChanged ---");
+                                  print("newValue (journalId) received: $newValue");
+                                  print("Selected ExistingJournal object set to: ${_selectedExistingJournalTemplate?.name}");
                                 });
                               },
-                              decoration: const InputDecoration(labelText: 'Agenda source à copier', border: OutlineInputBorder()),
-                              validator: (value) => value == null ? 'Choisissez un agenda source.' : null,
+                              decoration: const InputDecoration(labelText: 'Journal source à copier', border: OutlineInputBorder()),
+                              validator: (value) => value == null ? 'Choisissez un journal source.' : null,
                               isExpanded: true,
                             );
                           },
                         ),
-                      ], // Fin Section Agenda Existant
+                      ], // Fin Section Journal Existant
                       const SizedBox(height: 20),
                     ],
                   ),

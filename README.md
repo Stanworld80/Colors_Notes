@@ -2,34 +2,34 @@
 
 "Color your day."
 
-Une application web et Android développée avec Flutter et Firebase pour organiser vos notes et pensées quotidiennes en les associant à des couleurs personnalisées regroupées dans des palettes uniques pour chaque agenda.
+Une application web et Android développée avec Flutter et Firebase pour organiser vos notes et pensées quotidiennes en les associant à des couleurs personnalisées regroupées dans des palettes uniques pour chaque journal.
 
 
 
 ## ✨ Fonctionnalités (Version MVP 1.0)
 
 * **Authentification :** Inscription et connexion par Email/Mot de passe et Google Sign-In.
-* **Gestion d'Agendas :**
-    * Création d'agendas :
+* **Gestion d'Journals :**
+    * Création d'journals :
         * Vierge (avec choix de palette de base)
         * Depuis un modèle thématique prédéfini (ex: Sport, Humeur)
-        * Depuis un agenda existant (copie de structure)
-    * Sélection de l'agenda actif.
-    * Renommage des agendas.
-    * Suppression des agendas (avec confirmation et suppression des notes associées).
+        * Depuis un journal existant (copie de structure)
+    * Sélection de l'journal actif.
+    * Renommage des journals.
+    * Suppression des journals (avec confirmation et suppression des notes associées).
 * **Gestion des Palettes :**
-    * Chaque agenda possède sa propre **instance** de palette indépendante.
+    * Chaque journal possède sa propre **instance** de palette indépendante.
     * Gestion complète des **modèles** de palettes personnelles réutilisables (Créer, Voir, Modifier, Renommer, Supprimer).
     * Éditeur de couleurs avec sélecteur visuel et gestion des titres (pré-remplissage avec Hex).
     * Validation des contraintes (nombre de couleurs, unicité titres/valeurs).
-    * Modification des couleurs de l'**instance** de palette d'un agenda actif.
+    * Modification des couleurs de l'**instance** de palette d'un journal actif.
 * **Gestion des Notes :**
-    * Création rapide de notes en cliquant sur une couleur de la palette de l'agenda actif.
+    * Création rapide de notes en cliquant sur une couleur de la palette de l'journal actif.
     * Ajout de commentaires (limités en caractères).
-    * Affichage de la liste des notes par agenda (triées par date).
+    * Affichage de la liste des notes par journal (triées par date).
     * Modification des commentaires des notes.
     * Suppression des notes (avec confirmation).
-* **Navigation :** Barre de navigation simple pour basculer entre Accueil, Liste des Notes, Gestion des Agendas. Accès à la gestion des modèles de palettes depuis la gestion des agendas.
+* **Navigation :** Barre de navigation simple pour basculer entre Accueil, Liste des Notes, Gestion des Journals. Accès à la gestion des modèles de palettes depuis la gestion des journals.
 
 ## 🚀 Technologies Utilisées
 
@@ -77,8 +77,8 @@ Une application web et Android développée avec Flutter et Firebase pour organi
 ## 📂 Structure du Projet (Simplifiée)
 * lib/
 * ├── core/                 # Modèles prédéfinis, constantes...
-* ├── models/               # Classes de données (Agenda, Note, Palette...)
-* ├── providers/            # Gestion d'état (ActiveAgendaNotifier...)
+* ├── models/               # Classes de données (Journal, Note, Palette...)
+* ├── providers/            # Gestion d'état (ActiveJournalNotifier...)
 * ├── screens/              # Widgets représentant les écrans principaux
 * ├── services/             # Logique métier, accès Firebase (AuthService, FirestoreService)
 * └── main.dart             # Point d'entrée de l'application
@@ -89,13 +89,13 @@ Une application web et Android développée avec Flutter et Firebase pour organi
 
 * Interface d'administration détaillée (SF-ADMIN-\*).
 * Option de suppression de couleur utilisée avec suppression/modification des notes liées.
-* Optimisation du stockage/gestion des instances de palettes pour un grand nombre d'agendas.
+* Optimisation du stockage/gestion des instances de palettes pour un grand nombre d'journals.
 * Amélioration de l'UI/UX générale.
 * Options de tri/filtrage/recherche avancées pour les notes.
 * Fonctionnalités de partage (si pertinent).
 * Affichage Grid/Liste pour les notes (SF-VIEW-02).
-* Gestion du dernier agenda utilisé (SF-AGENDA-03).
-* Finaliser la création d'agenda depuis un agenda existant (copie palette OK, mais UI à peaufiner).
+* Gestion du dernier journal utilisé (SF-AGENDA-03).
+* Finaliser la création d'journal depuis un journal existant (copie palette OK, mais UI à peaufiner).
 
 ## 📜 Licence
 Pull request will be examined.

@@ -3,7 +3,7 @@ import 'package:colors_notes/models/app_user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'firestore_service.dart'; // Importer FirestoreService
-import '../models/agenda.dart'; // Importer les modèles nécessaires
+import '../models/journal.dart'; // Importer les modèles nécessaires
 import '../models/palette.dart';
 import '../models/color_data.dart';
 
@@ -34,11 +34,11 @@ class AuthService {
           await _firestoreService.createUserDocument(user);
           print(">>> DONE createUserDocument."); // DEBUG
 
-          print(">>> Calling _createDefaultAgendaForUser..."); // DEBUG
-          await _createDefaultAgendaForUser(user.uid);
-          print(">>> DONE _createDefaultAgendaForUser."); // DEBUG
+          print(">>> Calling _createDefaultJournalForUser..."); // DEBUG
+          await _createDefaultJournalForUser(user.uid);
+          print(">>> DONE _createDefaultJournalForUser."); // DEBUG
 
-          print("Firestore user document and default agenda potentially created for new user ${user.uid}");
+          print("Firestore user document and default journal potentially created for new user ${user.uid}");
         } catch (e) {
           // Attraper et afficher les erreurs spécifiques à Firestore
           print(">>> !!! ERROR during Firestore document creation: $e"); // DEBUG
@@ -83,11 +83,11 @@ class AuthService {
           // Si le document n'existe pas, c'est une "nouvelle" inscription Firestore
           print("First time Firestore setup for Google user ${user.uid}");
           await _firestoreService.createUserDocument(user);
-          await _createDefaultAgendaForUser(user.uid);
-          print("Firestore user document and default agenda created for Google user ${user.uid}");
+          await _createDefaultJournalForUser(user.uid);
+          print("Firestore user document and default journal created for Google user ${user.uid}");
         } else {
           print("Google user ${user.uid} already exists in Firestore.");
-          // Optionnel : vérifier si l'agenda par défaut existe, au cas où le processus
+          // Optionnel : vérifier si l'journal par défaut existe, au cas où le processus
           // aurait échoué la première fois (moins prioritaire pour le MVP)
         }
       }
@@ -98,9 +98,9 @@ class AuthService {
     }
   }
 
-  // --- Connexion Email/Password (Pas besoin de créer l'agenda ici) ---
+  // --- Connexion Email/Password (Pas besoin de créer l'journal ici) ---
   Future<User?> signInWithEmailPassword(String email, String password) async {
-    // Pas de changement ici, on ne crée le document/agenda qu'à l'inscription
+    // Pas de changement ici, on ne crée le document/journal qu'à l'inscription
     try {
       UserCredential userCredential = await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
       return userCredential.user;
@@ -123,9 +123,9 @@ class AuthService {
     }
   }
 
-  // --- Méthode privée pour créer l'agenda par défaut ---
-  Future<void> _createDefaultAgendaForUser(String userId) async {
-    print(">>> ENTERED _createDefaultAgendaForUser for $userId"); // DEBUG
+  // --- Méthode privée pour créer l'journal par défaut ---
+  Future<void> _createDefaultJournalForUser(String userId) async {
+    print(">>> ENTERED _createDefaultJournalForUser for $userId"); // DEBUG
     try {
       // 1. Définir la palette par défaut
       Palette defaultPalette = Palette(
@@ -138,27 +138,27 @@ class AuthService {
         ],
       );
 
-      // 2. Créer l'objet Agenda
-      // Note: L'ID de l'agenda sera généré par Firestore lors de l'appel à .add()
+      // 2. Créer l'objet Journal
+      // Note: L'ID de l'journal sera généré par Firestore lors de l'appel à .add()
       // Nous créons un objet "modèle" sans ID ici.
-      // Ajustez la classe Agenda et FirestoreService.createAgenda si nécessaire.
-      // Supposons que createAgenda prend un objet Agenda sans ID et le userId séparément
-      Agenda defaultAgenda = Agenda(
+      // Ajustez la classe Journal et FirestoreService.createJournal si nécessaire.
+      // Supposons que createJournal prend un objet Journal sans ID et le userId séparément
+      Journal defaultJournal = Journal(
         id: '', // Laissé vide, Firestore générera l'ID
-        name: "Agenda par défaut",
+        name: "Journal par défaut",
         userId: userId,
         embeddedPaletteInstance: defaultPalette,
       );
 
-      // 3. Appeler FirestoreService pour créer l'agenda
-      // Assurez-vous que votre méthode createAgenda dans FirestoreService
+      // 3. Appeler FirestoreService pour créer l'journal
+      // Assurez-vous que votre méthode createJournal dans FirestoreService
       // gère bien l'ajout et retourne l'ID si besoin.
-      print(">>> Attempting to add default agenda to Firestore for $userId"); // DEBUG
-      await _firestoreService.createAgenda(userId, defaultAgenda);
-      print(">>> Default agenda potentially added to Firestore for $userId"); // DEBUG
+      print(">>> Attempting to add default journal to Firestore for $userId"); // DEBUG
+      await _firestoreService.createJournal(userId, defaultJournal);
+      print(">>> Default journal potentially added to Firestore for $userId"); // DEBUG
     } catch (e) {
-      print("Error creating default agenda for user $userId: $e");
-      print(">>> !!! ERROR in _createDefaultAgendaForUser for $userId: $e"); // DEBUG
+      print("Error creating default journal for user $userId: $e");
+      print(">>> !!! ERROR in _createDefaultJournalForUser for $userId: $e"); // DEBUG
       // Gérer l'erreur (peut-être logger ou afficher un message)
     }
   }
