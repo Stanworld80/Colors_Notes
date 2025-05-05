@@ -32,9 +32,7 @@ class DynamicAgendaAppBar extends StatelessWidget implements PreferredSizeWidget
       print("Error signing out from AppBar: $e");
       // Utiliser le context original passé pour le ScaffoldMessenger
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error signing out: $e')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error signing out: $e')));
       }
     }
   }
@@ -49,75 +47,61 @@ class DynamicAgendaAppBar extends StatelessWidget implements PreferredSizeWidget
 
     return AppBar(
       // --- Titre dynamique avec sélection d'agenda ---
-      title: (userId == null) // Si pas connecté, titre simple
-          ? const Text('Colors & Notes')
-          : StreamBuilder<List<Agenda>>(
-        // Écoute les agendas de l'utilisateur
-        stream: firestoreService.getUserAgendasStream(userId),
-        builder: (context, snapshot) {
-          // --- Gestion des états du Stream ---
-          if (snapshot.connectionState == ConnectionState.waiting && currentAgenda == null) {
-            return const Text('Chargement...');
-          }
-          if (snapshot.hasError) {
-            print("Erreur Stream Agendas AppBar (Widget): ${snapshot.error}");
-            return Text(currentAgenda?.name ?? 'Erreur Agendas');
-          }
-          // Si pas de données ou liste vide, afficher nom courant ou indication
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Text(currentAgenda?.name ?? 'Aucun Agenda');
-          }
+      title:
+          (userId == null) // Si pas connecté, titre simple
+              ? const Text('Colors & Notes')
+              : StreamBuilder<List<Agenda>>(
+                // Écoute les agendas de l'utilisateur
+                stream: firestoreService.getUserAgendasStream(userId),
+                builder: (context, snapshot) {
+                  // --- Gestion des états du Stream ---
+                  if (snapshot.connectionState == ConnectionState.waiting && currentAgenda == null) {
+                    return const Text('Chargement...');
+                  }
+                  if (snapshot.hasError) {
+                    print("Erreur Stream Agendas AppBar (Widget): ${snapshot.error}");
+                    return Text(currentAgenda?.name ?? 'Erreur Agendas');
+                  }
+                  // Si pas de données ou liste vide, afficher nom courant ou indication
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Text(currentAgenda?.name ?? 'Aucun Agenda');
+                  }
 
-          // --- Stream OK ---
-          final agendas = snapshot.data!;
-          final currentAgendaName = currentAgenda?.name ?? 'Sélectionner Agenda';
+                  // --- Stream OK ---
+                  final agendas = snapshot.data!;
+                  final currentAgendaName = currentAgenda?.name ?? 'Sélectionner Agenda';
 
-          // --- PopupMenuButton pour la sélection ---
-          return PopupMenuButton<String>(
-            tooltip: "Changer l'agenda actif",
-            onSelected: (String selectedAgendaId) {
-              // Logique de sélection (identique aux versions précédentes)
-              try {
-                final selectedAgenda = agendas.firstWhere((a) => a.id == selectedAgendaId);
-                context.read<ActiveAgendaNotifier>().setActiveAgenda(selectedAgenda);
-              } catch (e) {
-                print("Erreur sélection agenda (AppBar Widget): $selectedAgendaId non trouvé.");
-                // Utiliser le context du builder pour le ScaffoldMessenger
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Erreur sélection agenda.'), backgroundColor: Colors.red),
-                );
-              }
-            },
-            itemBuilder: (BuildContext context) {
-              // Construction des items (identique aux versions précédentes)
-              return agendas.map((Agenda agenda) {
-                return PopupMenuItem<String>(
-                  value: agenda.id,
-                  child: Text(
-                    agenda.name,
-                    style: TextStyle(
-                      fontWeight: agenda.id == currentAgenda?.id ? FontWeight.bold : FontWeight.normal,
+                  // --- PopupMenuButton pour la sélection ---
+                  return PopupMenuButton<String>(
+                    tooltip: "Changer l'agenda actif",
+                    onSelected: (String selectedAgendaId) {
+                      // Logique de sélection (identique aux versions précédentes)
+                      try {
+                        final selectedAgenda = agendas.firstWhere((a) => a.id == selectedAgendaId);
+                        context.read<ActiveAgendaNotifier>().setActiveAgenda(selectedAgenda);
+                      } catch (e) {
+                        print("Erreur sélection agenda (AppBar Widget): $selectedAgendaId non trouvé.");
+                        // Utiliser le context du builder pour le ScaffoldMessenger
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erreur sélection agenda.'), backgroundColor: Colors.red));
+                      }
+                    },
+                    itemBuilder: (BuildContext context) {
+                      // Construction des items (identique aux versions précédentes)
+                      return agendas.map((Agenda agenda) {
+                        return PopupMenuItem<String>(
+                          value: agenda.id,
+                          child: Text(agenda.name, style: TextStyle(fontWeight: agenda.id == currentAgenda?.id ? FontWeight.bold : FontWeight.normal)),
+                        );
+                      }).toList();
+                    },
+                    // Widget cliquable (identique aux versions précédentes)
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [Flexible(child: Text(currentAgendaName, overflow: TextOverflow.ellipsis)), const Icon(Icons.arrow_drop_down, color: Colors.white)],
                     ),
-                  ),
-                );
-              }).toList();
-            },
-            // Widget cliquable (identique aux versions précédentes)
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  child: Text(
-                    currentAgendaName,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const Icon(Icons.arrow_drop_down, color: Colors.white),
-              ],
-            ),
-          );
-        },
-      ),
+                  );
+                },
+              ),
       // --- Actions de l'AppBar ---
       actions: [
         // Bouton Modifier Palette (si agenda actif)
@@ -129,11 +113,7 @@ class DynamicAgendaAppBar extends StatelessWidget implements PreferredSizeWidget
               // Naviguer vers la page d'édition
               Navigator.push(
                 context, // Utiliser le context du build
-                MaterialPageRoute(
-                  builder: (_) => EditPaletteModelPage(
-                    existingAgendaInstance: currentAgenda,
-                  ),
-                ),
+                MaterialPageRoute(builder: (_) => EditPaletteModelPage(existingAgendaInstance: currentAgenda)),
               );
             },
           ),
@@ -141,7 +121,6 @@ class DynamicAgendaAppBar extends StatelessWidget implements PreferredSizeWidget
         IconButton(
           icon: const Icon(Icons.logout),
           tooltip: 'Déconnexion',
-          // Appelle la méthode helper _signOut DANS ce widget
           onPressed: () => _signOut(context),
         ),
       ],
