@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
 
@@ -9,6 +8,7 @@ import '../providers/active_journal_provider.dart';
 import '../services/firestore_service.dart';
 import '../models/note.dart';
 import '../widgets/dynamic_journal_app_bar.dart';
+
 
 enum SortOrder { descending, ascending }
 
@@ -36,7 +36,10 @@ class _NoteListPageState extends State<NoteListPage> {
 
     showDialog(
       context: context,
+
+      barrierDismissible: false,
       builder: (BuildContext dialogContext) {
+
         return StatefulBuilder(
           builder: (stfContext, stfSetState) {
             Future<void> _selectDate() async {
@@ -112,13 +115,29 @@ class _NoteListPageState extends State<NoteListPage> {
                   ],
                 ),
               ),
+              // *** MODIFIED ACTIONS ***
               actions: <Widget>[
+                // Delete Button (on the left)
+                TextButton(
+                  style: TextButton.styleFrom(foregroundColor: Colors.red),
+                  child: const Text('Supprimer'),
+                  onPressed: () {
+                    // 1. Close the current edit dialog
+                    Navigator.of(dialogContext).pop();
+                    // 2. Show the delete confirmation dialog (using the original page context)
+                    _showDeleteConfirmDialog(context, note);
+                  },
+                ),
+                // Spacer to push other buttons to the right
+                const Spacer(),
+                // Cancel Button
                 TextButton(
                   child: const Text('Annuler'),
                   onPressed: () {
                     Navigator.of(dialogContext).pop();
                   },
                 ),
+                // Save Button
                 ElevatedButton(
                   child: const Text('Enregistrer'),
                   onPressed: () async {
@@ -152,6 +171,7 @@ class _NoteListPageState extends State<NoteListPage> {
     );
   }
 
+  // _showDeleteConfirmDialog remains unchanged
   void _showDeleteConfirmDialog(BuildContext context, Note note) {
     final firestoreService = context.read<FirestoreService>();
     showDialog(
@@ -193,11 +213,14 @@ class _NoteListPageState extends State<NoteListPage> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: Rename ActiveJournalNotifier to ActiveJournalNotifier if refactored
     final activeJournalNotifier = context.watch<ActiveJournalNotifier>();
+    // TODO: Rename journalId to journalId if refactored
     final String? journalId = activeJournalNotifier.activeJournalId;
     final firestoreService = context.read<FirestoreService>();
 
     return Scaffold(
+      // TODO: Rename DynamicJournalAppBar to DynamicJournalAppBar if refactored
       appBar: const DynamicJournalAppBar(),
       body: Column(
         children: [
@@ -207,7 +230,7 @@ class _NoteListPageState extends State<NoteListPage> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton.icon(
-                  icon: Icon(_groupByColor ? Icons.list : Icons.list_alt_outlined),
+                  icon: Icon(_groupByColor ? Icons.list_outlined : Icons.list_alt_outlined),
                   label: Text(_groupByColor ? 'Dégrouper' : 'Grouper par couleur'),
                   onPressed: () {
                     setState(() {
@@ -234,8 +257,9 @@ class _NoteListPageState extends State<NoteListPage> {
           Expanded(
             child:
                 journalId == null
-                    ? const Center(child: Text('Sélectionnez un journal pour voir les notes.'))
+                    ? const Center(child: Text('Sélectionnez un journal pour voir les notes.')) // Updated text
                     : StreamBuilder<List<Note>>(
+                      // TODO: Rename getJournalNotesStream to getJournalNotesStream if refactored
                       stream: firestoreService.getJournalNotesStream(journalId, descending: _currentSortOrder == SortOrder.descending),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -245,7 +269,7 @@ class _NoteListPageState extends State<NoteListPage> {
                           return Center(child: Text('Erreur chargement des notes: ${snapshot.error}'));
                         }
                         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                          return const Center(child: Text('Aucune note dans cet journal.'));
+                          return const Center(child: Text('Aucune note dans ce journal.')); // Updated text
                         }
 
                         final notes = snapshot.data!;
