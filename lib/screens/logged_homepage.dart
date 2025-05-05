@@ -238,7 +238,6 @@ class _LoggedHomepageState extends State<LoggedHomepage> {
     // --- Lire les services (pas besoin de watch, ils ne changent pas) ---
     // context.read récupère une instance sans s'abonner aux changements
     final firestoreService = context.read<FirestoreService>();
-    final authService = context.read<AuthService>(); // Pour le bouton logout
 
     return Scaffold(
       appBar: AppBar(

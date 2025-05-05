@@ -155,7 +155,6 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
   }
 
   Future<bool> _validatePalette() async {
-    final String name = _nameController.text.trim();
     final userId = context.read<User?>()?.uid;
     final fs = context.read<FirestoreService>();
     final messenger = ScaffoldMessenger.of(context); // Capture context sensitive widget
@@ -177,7 +176,7 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
       bool needsNameCheck = !_isEditingModel || (widget.existingPaletteModel?.name != name);
       if (needsNameCheck) {
         bool nameExists = await fs.checkPaletteModelNameExists(
-          userId!, // userId ne sera pas null ici
+          userId,
           name,
           modelIdToExclude: _isEditingModel ? widget.existingPaletteModel!.id : null,
         );
