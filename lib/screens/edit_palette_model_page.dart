@@ -331,7 +331,7 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
                             return ListTile(
                               leading: Container(width: 24, height: 24, color: color, margin: const EdgeInsets.symmetric(vertical: 8)),
                               title: Text(colorData.title),
-                              subtitle: Text(colorData.hexValue.toUpperCase()),
+                              //subtitle: Text(colorData.hexValue.toUpperCase()),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [

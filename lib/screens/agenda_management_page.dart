@@ -56,10 +56,11 @@ class AgendaManagementPage extends StatelessWidget {
                     final bool isActive = agenda.id == activeAgendaNotifier.activeAgendaId;
 
                     return Card(
-                      color: isActive ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3) : null,
+                      color: isActive ? Theme.of(context).colorScheme.primaryContainer : null,
                       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                       child: ListTile(
-                        title: Text(agenda.name + (isActive ? ' (Actif)' : '')),
+                        leading: Icon((isActive ? Icons.arrow_forward_outlined : null), size: 20),
+                        title: Text(agenda.name + (isActive ? ' (ACTIF)' : '')),
                         // Sélectionner l'agenda actif en tapant dessus
                         onTap: () {
                           // Lire le notifier SANS écouter pour appeler une méthode
