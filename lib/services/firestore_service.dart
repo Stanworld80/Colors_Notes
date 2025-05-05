@@ -1,10 +1,9 @@
 // lib/services/firestore_service.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Pour User si besoin
-// Importer vos modèles créés à l'étape 2
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/app_user.dart';
 import '../models/agenda.dart';
-import '../models/note.dart'; // Modèle Note mis à jour
+import '../models/note.dart';
 import '../models/palette.dart';
 import '../models/palette_model.dart';
 import '../models/color_data.dart';
@@ -12,7 +11,7 @@ import '../models/color_data.dart';
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // --- Gestion des Utilisateurs (inchangé) ---
+  // --- User Management (No changes) ---
   Future<void> createUserDocument(User user) async {
     final userRef = _db.collection('users').doc(user.uid);
     final docSnapshot = await userRef.get();
@@ -34,7 +33,7 @@ class FirestoreService {
     return null;
   }
 
-  // --- Gestion des Agendas (inchangé) ---
+  // --- Agenda Management (No changes) ---
   Future<DocumentReference> createAgenda(String userId, Agenda agendaData) async {
     if (agendaData.userId != userId) {
       throw Exception("Mismatch between provided userId and agendaData.userId");
@@ -77,54 +76,44 @@ class FirestoreService {
     print("Palette instance updated for agenda $agendaId");
   }
 
-  // --- Gestion des Notes (MODIFIÉ) ---
-
-  /// Crée une nouvelle note. `noteData` doit contenir le `eventTimestamp` souhaité.
+  // --- Note Management (MODIFIED) ---
   Future<DocumentReference> createNote(Note noteData) async {
-    // La méthode toJson() inclut maintenant eventTimestamp
     return await _db.collection('notes').add(noteData.toJson());
   }
 
-  /// Récupère le flux (Stream) des notes pour un agenda spécifique, trié par eventTimestamp.
-  Stream<List<Note>> getAgendaNotesStream(String agendaId) {
+  /// Récupère le flux (Stream) des notes pour un agenda spécifique,
+  /// avec option de tri par eventTimestamp.
+  Stream<List<Note>> getAgendaNotesStream(String agendaId, {bool descending = true}) {
+    // Ajout du paramètre descending
     return _db
         .collection('notes')
         .where('agendaId', isEqualTo: agendaId)
-        // Trier par la date de l'événement modifiable
-        .orderBy('eventTimestamp', descending: true) // MODIFIÉ: tri par eventTimestamp
+        // Utiliser le paramètre pour contrôler l'ordre de tri
+        .orderBy('eventTimestamp', descending: descending) // MODIFIÉ
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) => Note.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>)).toList());
   }
 
-  /// Met à jour le commentaire ET/OU la date/heure de l'événement d'une note.
   Future<void> updateNoteDetails(String noteId, {String? newComment, Timestamp? newEventTimestamp}) async {
-    // Crée une map pour contenir uniquement les champs à mettre à jour
     Map<String, dynamic> dataToUpdate = {};
     if (newComment != null) {
       dataToUpdate['comment'] = newComment;
     }
     if (newEventTimestamp != null) {
-      dataToUpdate['eventTimestamp'] = newEventTimestamp; // Met à jour la date de l'événement
+      dataToUpdate['eventTimestamp'] = newEventTimestamp;
     }
-
-    // Ne rien faire si aucun champ n'est fourni pour la mise à jour
     if (dataToUpdate.isEmpty) {
       print("updateNoteDetails called with no changes for note $noteId.");
       return;
     }
-
-    // Ajouter la date de modification technique (peut être utile pour l'audit)
-    // dataToUpdate['lastModifiedAt'] = Timestamp.now(); // Champ optionnel
-
     await _db.collection('notes').doc(noteId).update(dataToUpdate);
   }
 
-  /// Supprime une note (inchangé)
   Future<void> deleteNote(String noteId) async {
     await _db.collection('notes').doc(noteId).delete();
   }
 
-  // --- Gestion des Modèles de Palette (inchangé) ---
+  // --- Palette Model Management (No changes) ---
   Future<DocumentReference> createPaletteModel(PaletteModel model) async {
     return await _db.collection('palette_models').add(model.toJson());
   }

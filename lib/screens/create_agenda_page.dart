@@ -77,10 +77,11 @@ class _CreateAgendaPageState extends State<CreateAgendaPage> {
     });
 
     if (userId == null) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _isSaving = false;
         });
+      }
       messenger.showSnackBar(const SnackBar(content: Text('Erreur: Utilisateur non trouvé.'), backgroundColor: Colors.red));
       return;
     }
@@ -330,12 +331,7 @@ class _CreateAgendaPageState extends State<CreateAgendaPage> {
                             // --- GESTION DE L'ATTENTE ---
                             if (!snapshot.hasData && snapshot.connectionState == ConnectionState.waiting) {
                               // Afficher un indicateur de chargement centré
-                              return const Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: CircularProgressIndicator(strokeWidth: 2),
-                                  )
-                              );
+                              return const Center(child: Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator(strokeWidth: 2)));
                             }
                             // --- GESTION DES ERREURS ---
                             if (snapshot.hasError) {
