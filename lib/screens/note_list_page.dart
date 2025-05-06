@@ -1,22 +1,22 @@
+// lib/screens/note_list_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-// collection package is no longer needed for groupBy visual grouping
-// import 'package:collection/collection.dart';
 
-import '../providers/active_journal_provider.dart'; // Should be active_journal_provider
+import '../providers/active_journal_provider.dart';
 import '../services/firestore_service.dart';
 import '../models/note.dart';
-import '../models/journal.dart'; // Should be journal
-import '../widgets/dynamic_journal_app_bar.dart'; // Should be dynamic_journal_app_bar
+import '../models/journal.dart';
+import '../models/color_data.dart';
+import '../models/palette.dart';
+import '../widgets/dynamic_journal_app_bar.dart';
 import 'edit_palette_model_page.dart';
 
-// TODO: Rename SortOrder if needed
 enum SortOrder { descending, ascending }
 
-// TODO: Rename NoteListPage if desired
 class NoteListPage extends StatefulWidget {
   const NoteListPage({Key? key}) : super(key: key);
 
@@ -26,18 +26,25 @@ class NoteListPage extends StatefulWidget {
 
 class _NoteListPageState extends State<NoteListPage> {
   SortOrder _currentSortOrder = SortOrder.descending;
-  bool _groupByColor = false; // Now only controls sorting logic
-  bool _isGridView = false; // State for view mode
+  bool _groupByColor = false;
+  bool _isGridView = false;
 
-  // _showEditNoteDialog remains unchanged
-  void _showEditNoteDialog(BuildContext context, Note note) {
+  void _showEditNoteDialog(BuildContext context, Note note, Palette? currentPalette) {
     final TextEditingController commentController = TextEditingController(text: note.comment);
-    Color color;
-    try {
-      color = Color(int.parse(note.colorSnapshot.hexValue.replaceFirst('#', 'FF'), radix: 16));
-    } catch (e) {
-      color = Colors.grey;
+    ColorData? currentColorData;
+    if (currentPalette != null) {
+      try {
+        currentColorData = currentPalette.colors.firstWhere(
+              (c) => c.paletteElementId == note.paletteElementId,
+        );
+      } catch (e) {
+        print("Note orpheline (ID) détectée dans _showEditNoteDialog: ID '${note.paletteElementId}' non trouvé.");
+        currentColorData = null;
+      }
     }
+    Color displayColor = currentColorData != null ? _safeParseColor(currentColorData.hexValue) : Colors.grey;
+    String displayTitle = currentColorData?.title ?? "ID: ${note.paletteElementId}";
+
     final firestoreService = context.read<FirestoreService>();
     DateTime selectedDateTime = note.eventTimestamp.toDate();
 
@@ -48,33 +55,29 @@ class _NoteListPageState extends State<NoteListPage> {
         return StatefulBuilder(
             builder: (stfContext, stfSetState) {
               Future<void> _selectDate() async {
-                final DateTime? pickedDate = await showDatePicker(
-                  context: stfContext,
-                  initialDate: selectedDateTime,
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime(2101),
-                );
+                final DateTime? pickedDate = await showDatePicker(context: stfContext, initialDate: selectedDateTime, firstDate: DateTime(2000), lastDate: DateTime(2101));
                 if (pickedDate != null) {
                   final newDateTime = DateTime(pickedDate.year, pickedDate.month, pickedDate.day, selectedDateTime.hour, selectedDateTime.minute);
                   stfSetState(() { selectedDateTime = newDateTime; });
                 }
               }
               Future<void> _selectTime() async {
-                final TimeOfDay? pickedTime = await showTimePicker(
-                  context: stfContext,
-                  initialTime: TimeOfDay.fromDateTime(selectedDateTime),
-                );
+                final TimeOfDay? pickedTime = await showTimePicker(context: stfContext, initialTime: TimeOfDay.fromDateTime(selectedDateTime));
                 if (pickedTime != null) {
                   final newDateTime = DateTime(selectedDateTime.year, selectedDateTime.month, selectedDateTime.day, pickedTime.hour, pickedTime.minute);
                   stfSetState(() { selectedDateTime = newDateTime; });
                 }
               }
+
               return AlertDialog(
                 title: Row(
                   children: [
-                    Container(width: 20, height: 20, color: color),
+                    Container(width: 20, height: 20, color: displayColor),
                     const SizedBox(width: 10),
-                    Expanded(child: Text('Modifier la note (${note.colorSnapshot.title})', overflow: TextOverflow.ellipsis)),
+                    Expanded(child: Text(
+                        'Modifier: ${currentColorData != null ? displayTitle : "(ID Non Trouvé)"}',
+                        overflow: TextOverflow.ellipsis)
+                    ),
                   ],
                 ),
                 content: SingleChildScrollView(
@@ -82,14 +85,7 @@ class _NoteListPageState extends State<NoteListPage> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TextField(
-                        controller: commentController,
-                        autofocus: true,
-                        maxLength: 256,
-                        decoration: const InputDecoration(hintText: 'Modifiez votre commentaire...', labelText: 'Commentaire'),
-                        maxLines: 3,
-                        textInputAction: TextInputAction.newline,
-                      ),
+                      TextField(controller: commentController, autofocus: true, maxLength: 256, decoration: const InputDecoration(hintText: 'Modifiez votre commentaire...', labelText: 'Commentaire'), maxLines: 3, textInputAction: TextInputAction.newline,),
                       const SizedBox(height: 20),
                       Text("Date et Heure de l'événement:", style: Theme.of(stfContext).textTheme.labelMedium),
                       const SizedBox(height: 8),
@@ -114,16 +110,10 @@ class _NoteListPageState extends State<NoteListPage> {
                   TextButton(
                     style: TextButton.styleFrom(foregroundColor: Colors.red),
                     child: const Text('Supprimer'),
-                    onPressed: () {
-                      Navigator.of(dialogContext).pop();
-                      _showDeleteConfirmDialog(context, note);
-                    },
+                    onPressed: () { Navigator.of(dialogContext).pop(); _showDeleteConfirmDialog(context, note); },
                   ),
                   const Spacer(),
-                  TextButton(
-                    child: const Text('Annuler'),
-                    onPressed: () { Navigator.of(dialogContext).pop(); },
-                  ),
+                  TextButton(child: const Text('Annuler'), onPressed: () { Navigator.of(dialogContext).pop(); },),
                   ElevatedButton(
                     child: const Text('Enregistrer'),
                     onPressed: () async {
@@ -131,6 +121,7 @@ class _NoteListPageState extends State<NoteListPage> {
                       final updatedTimestamp = Timestamp.fromDate(selectedDateTime);
                       bool commentChanged = updatedComment.isNotEmpty && updatedComment != note.comment;
                       bool timestampChanged = updatedTimestamp.seconds != note.eventTimestamp.seconds || updatedTimestamp.nanoseconds != note.eventTimestamp.nanoseconds;
+
                       if (commentChanged || timestampChanged) {
                         try {
                           await firestoreService.updateNoteDetails(
@@ -139,14 +130,10 @@ class _NoteListPageState extends State<NoteListPage> {
                             newEventTimestamp: timestampChanged ? updatedTimestamp : null,
                           );
                           Navigator.of(dialogContext).pop();
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Note modifiée.'), duration: Duration(seconds: 2)));
-                          }
+                          if (context.mounted) { ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Note modifiée.'), duration: Duration(seconds: 2))); }
                         } catch (e) {
                           Navigator.of(dialogContext).pop();
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red));
-                          }
+                          if (context.mounted) { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red)); }
                         }
                       } else {
                         Navigator.of(dialogContext).pop();
@@ -161,7 +148,6 @@ class _NoteListPageState extends State<NoteListPage> {
     );
   }
 
-  // _showDeleteConfirmDialog remains unchanged
   void _showDeleteConfirmDialog(BuildContext context, Note note) {
     final firestoreService = context.read<FirestoreService>();
     showDialog(
@@ -171,10 +157,7 @@ class _NoteListPageState extends State<NoteListPage> {
           title: const Text('Confirmer la suppression'),
           content: const Text('Êtes-vous sûr de vouloir supprimer cette note définitivement ?'),
           actions: <Widget>[
-            TextButton(
-              child: const Text('Annuler'),
-              onPressed: () { Navigator.of(dialogContext).pop(); },
-            ),
+            TextButton(child: const Text('Annuler'), onPressed: () { Navigator.of(dialogContext).pop(); },),
             TextButton(
               style: TextButton.styleFrom(foregroundColor: Colors.red),
               child: const Text('Supprimer'),
@@ -182,14 +165,10 @@ class _NoteListPageState extends State<NoteListPage> {
                 try {
                   await firestoreService.deleteNote(note.id);
                   Navigator.of(dialogContext).pop();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Note supprimée.'), duration: Duration(seconds: 2)));
-                  }
+                  if (context.mounted) { ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Note supprimée.'), duration: Duration(seconds: 2))); }
                 } catch (e) {
                   Navigator.of(dialogContext).pop();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red));
-                  }
+                  if (context.mounted) { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red)); }
                 }
               },
             ),
@@ -199,23 +178,34 @@ class _NoteListPageState extends State<NoteListPage> {
     );
   }
 
-  // --- Helper method to build a single grid item ---
-  Widget _buildNoteGridItem(BuildContext context, Note note) {
-    Color color;
+  Color _safeParseColor(String hexString) {
     try {
-      color = Color(int.parse(note.colorSnapshot.hexValue.replaceFirst('#', 'FF'), radix: 16));
+      final buffer = StringBuffer();
+      if (hexString.length == 6 || hexString.length == 7) buffer.write('FF');
+      buffer.write(hexString.replaceFirst('#', ''));
+      return Color(int.parse(buffer.toString(), radix: 16));
     } catch (e) {
-      color = Colors.grey;
+      return Colors.grey;
     }
+  }
+
+  Widget _buildNoteGridItem(BuildContext context, Note note, Palette? currentPalette) {
+    ColorData? currentColorData;
+    if (currentPalette != null) {
+      try { currentColorData = currentPalette.colors.firstWhere((c) => c.paletteElementId == note.paletteElementId); }
+      catch (e) { currentColorData = null; }
+    }
+    Color displayColor = currentColorData != null ? _safeParseColor(currentColorData.hexValue) : Colors.grey;
+    bool isOrphan = currentColorData == null;
+
     final formattedDate = DateFormat('dd/MM HH:mm').format(note.eventTimestamp.toDate());
-    final textColor = ThemeData.estimateBrightnessForColor(color) == Brightness.dark
-        ? Colors.white : Colors.black;
+    final textColor = ThemeData.estimateBrightnessForColor(displayColor) == Brightness.dark ? Colors.white : Colors.black;
 
     return InkWell(
-      onTap: () => _showEditNoteDialog(context, note),
+      onTap: () => _showEditNoteDialog(context, note, currentPalette),
       borderRadius: BorderRadius.circular(8.0),
       child: Card(
-        color: color,
+        color: displayColor,
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
         child: Padding(
@@ -224,18 +214,9 @@ class _NoteListPageState extends State<NoteListPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Text(
-                  note.comment,
-                  style: TextStyle(color: textColor, fontSize: 12),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 4,
-                ),
-              ),
-              Text(
-                formattedDate,
-                style: TextStyle(color: textColor.withOpacity(0.8), fontSize: 10),
-              ),
+              if (isOrphan) Tooltip(message: "ID Couleur: ${note.paletteElementId}", child: Icon(Icons.error_outline, size: 12, color: textColor.withOpacity(0.7))),
+              Expanded(child: Text(note.comment, style: TextStyle(color: textColor, fontSize: 12), overflow: TextOverflow.ellipsis, maxLines: isOrphan ? 3 : 4)),
+              Text(formattedDate, style: TextStyle(color: textColor.withOpacity(0.8), fontSize: 10)),
             ],
           ),
         ),
@@ -243,161 +224,124 @@ class _NoteListPageState extends State<NoteListPage> {
     );
   }
 
-  // --- Helper method to build a single list item ---
-  Widget _buildNoteListItem(BuildContext context, Note note) {
-    Color color;
-    try {
-      color = Color(int.parse(note.colorSnapshot.hexValue.replaceFirst('#', 'FF'), radix: 16));
-    } catch (e) {
-      color = Colors.grey;
+  Widget _buildNoteListItem(BuildContext context, Note note, Palette? currentPalette) {
+    ColorData? currentColorData;
+    if (currentPalette != null) {
+      try { currentColorData = currentPalette.colors.firstWhere((c) => c.paletteElementId == note.paletteElementId); }
+      catch (e) { currentColorData = null; }
     }
+    Color displayColor = currentColorData != null ? _safeParseColor(currentColorData.hexValue) : Colors.grey;
+    String displayTitle = currentColorData?.title ?? "ID: ${note.paletteElementId}";
+    bool isOrphan = currentColorData == null;
+
     final formattedDate = DateFormat('dd/MM/yyyy HH:mm').format(note.eventTimestamp.toDate());
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       child: ListTile(
-        leading: Container(width: 24, height: 24, color: color),
+        leading: Container(width: 24, height: 24, color: displayColor),
         title: Text(note.comment),
-        subtitle: Text('Couleur: ${note.colorSnapshot.title} - $formattedDate'),
+        subtitle: Text(
+          '${isOrphan ? "(ID Non Trouvé) " : ""}Titre: $displayTitle - $formattedDate',
+          style: TextStyle(color: isOrphan ? Colors.red.shade800 : null),
+        ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(icon: const Icon(Icons.edit, size: 20), tooltip: 'Modifier la note', onPressed: () { _showEditNoteDialog(context, note); }),
+            IconButton(icon: const Icon(Icons.edit, size: 20), tooltip: 'Modifier la note', onPressed: () { _showEditNoteDialog(context, note, currentPalette); }),
             IconButton(icon: const Icon(Icons.delete_outline, size: 20, color: Colors.redAccent), tooltip: 'Supprimer la note', onPressed: () { _showDeleteConfirmDialog(context, note); }),
           ],
         ),
+        onTap: () => _showEditNoteDialog(context, note, currentPalette),
       ),
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
-    // TODO: Rename ActiveJournalNotifier to ActiveJournalNotifier if refactored
     final activeJournalNotifier = context.watch<ActiveJournalNotifier>();
-    // TODO: Rename journalId to journalId if refactored
-    final String? journalId = activeJournalNotifier.activeJournalId;
+    final Journal? currentJournal = activeJournalNotifier.currentJournal;
+    final String? journalId = currentJournal?.id;
+    final Palette? currentPalette = currentJournal?.embeddedPaletteInstance;
     final firestoreService = context.read<FirestoreService>();
 
+    String getCurrentTitleForNote(Note note) {
+      if (currentPalette != null) {
+        try { return currentPalette.colors.firstWhere((c) => c.paletteElementId == note.paletteElementId).title; }
+        catch (e) { /* non trouvé */ }
+      }
+      return "zzz_ID Non Trouvé";
+    }
+
     return Scaffold(
-      // TODO: Rename DynamicJournalAppBar to DynamicJournalAppBar if refactored
       appBar: const DynamicJournalAppBar(),
       body: Column(
         children: [
-          // --- Options Bar ---
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                // Group Button (now only affects sorting)
                 TextButton.icon(
-                  // Use different icons to indicate sorting mode maybe?
-                  icon: Icon(_groupByColor ? Icons.sort_by_alpha : Icons.color_lens_outlined),
-                  label: Text(_groupByColor ? 'Trier par couleur' : 'Trier par date'),
-                  onPressed: () {
-                    setState(() {
-                      _groupByColor = !_groupByColor;
-                      // *** REMOVED: _isGridView = false; ***
-                    });
-                  },
-                  style: TextButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    textStyle: Theme.of(context).textTheme.labelSmall,
-                  ),
+                  icon: Icon(_groupByColor ? Icons.sort_by_alpha : Icons.calendar_today_outlined),
+                  label: Text(_groupByColor ? 'Trier par couleur (titre)' : 'Trier par date'),
+                  onPressed: () { setState(() { _groupByColor = !_groupByColor; }); },
+                  style: TextButton.styleFrom(visualDensity: VisualDensity.compact, textStyle: Theme.of(context).textTheme.labelSmall),
                 ),
                 const SizedBox(width: 8),
-                // View Mode Button (List/Grid) - *** NOW ALWAYS ENABLED ***
                 IconButton(
                   icon: Icon(_isGridView ? Icons.view_list : Icons.view_module),
                   tooltip: _isGridView ? 'Affichage Liste' : 'Affichage Grille',
-                  onPressed: () { // Always enabled
-                    setState(() { _isGridView = !_isGridView; });
-                  },
+                  onPressed: () { setState(() { _isGridView = !_isGridView; }); },
                   visualDensity: VisualDensity.compact,
-                  // color: _groupByColor ? Colors.grey : null, // *** REMOVED color change ***
                 ),
                 const SizedBox(width: 8),
-                // Sort Button (Asc/Desc for secondary sort)
                 IconButton(
                   icon: Icon(_currentSortOrder == SortOrder.descending ? Icons.arrow_downward : Icons.arrow_upward),
                   tooltip: _currentSortOrder == SortOrder.descending ? 'Ordre décroissant' : 'Ordre croissant',
-                  onPressed: () {
-                    setState(() {
-                      _currentSortOrder = _currentSortOrder == SortOrder.descending ? SortOrder.ascending : SortOrder.descending;
-                    });
-                  },
+                  onPressed: () { setState(() { _currentSortOrder = _currentSortOrder == SortOrder.descending ? SortOrder.ascending : SortOrder.descending; }); },
                   visualDensity: VisualDensity.compact,
                 ),
               ],
             ),
           ),
           const Divider(height: 1, thickness: 1),
-          // --- Notes Area ---
           Expanded(
             child: journalId == null
-                ? const Center(child: Text('Sélectionnez un journal pour voir les notes.')) // Updated text
+                ? const Center(child: Text('Sélectionnez un journal pour voir les notes.'))
                 : StreamBuilder<List<Note>>(
-              // Stream still fetches sorted by date initially
-              // TODO: Rename getJournalNotesStream to getJournalNotesStream if refactored
               stream: firestoreService.getJournalNotesStream(journalId, descending: _currentSortOrder == SortOrder.descending),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(child: Text('Erreur chargement des notes: ${snapshot.error}'));
-                }
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('Aucune note dans ce journal.')); // Updated text
-                }
+                if (snapshot.connectionState == ConnectionState.waiting) { return const Center(child: CircularProgressIndicator()); }
+                if (snapshot.hasError) { return Center(child: Text('Erreur chargement des notes: ${snapshot.error}')); }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) { return const Center(child: Text('Aucune note dans ce journal.')); }
 
                 List<Note> notes = snapshot.data!;
 
-                // --- Apply client-side sorting IF grouping by color is active ---
                 if (_groupByColor) {
-                  // Create a mutable copy before sorting
                   notes = List<Note>.from(notes);
                   notes.sort((a, b) {
-                    // 1. Primary sort: Color Title (case-insensitive)
-                    int colorCompare = a.colorSnapshot.title.toLowerCase().compareTo(b.colorSnapshot.title.toLowerCase());
-                    if (colorCompare != 0) {
-                      return colorCompare;
-                    }
-                    // 2. Secondary sort: Event Timestamp (respecting _currentSortOrder)
-                    if (_currentSortOrder == SortOrder.descending) {
-                      return b.eventTimestamp.compareTo(a.eventTimestamp); // Descending
-                    } else {
-                      return a.eventTimestamp.compareTo(b.eventTimestamp); // Ascending
-                    }
+                    String titleA = getCurrentTitleForNote(a);
+                    String titleB = getCurrentTitleForNote(b);
+                    int titleCompare = titleA.toLowerCase().compareTo(titleB.toLowerCase());
+                    if (titleCompare != 0) return titleCompare;
+                    return (_currentSortOrder == SortOrder.descending)
+                        ? b.eventTimestamp.compareTo(a.eventTimestamp)
+                        : a.eventTimestamp.compareTo(b.eventTimestamp);
                   });
                 }
-                // If not _groupByColor, 'notes' is already sorted by timestamp from the stream
 
-                // --- Render based on _isGridView ---
-                // *** REMOVED the ExpansionTile logic ***
                 if (_isGridView) {
-                  // Render GridView using the (potentially re-sorted) notes list
                   return GridView.builder(
                     padding: const EdgeInsets.all(8.0),
-                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 130.0,
-                      childAspectRatio: 0.9,
-                      crossAxisSpacing: 8.0,
-                      mainAxisSpacing: 8.0,
-                    ),
+                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 130.0, childAspectRatio: 0.9, crossAxisSpacing: 8.0, mainAxisSpacing: 8.0),
                     itemCount: notes.length,
-                    itemBuilder: (context, index) {
-                      return _buildNoteGridItem(context, notes[index]);
-                    },
+                    itemBuilder: (context, index) => _buildNoteGridItem(context, notes[index], currentPalette),
                   );
                 } else {
-                  // Render ListView using the (potentially re-sorted) notes list
                   return ListView.builder(
                     itemCount: notes.length,
-                    itemBuilder: (context, index) {
-                      return _buildNoteListItem(context, notes[index]);
-                    },
+                    itemBuilder: (context, index) => _buildNoteListItem(context, notes[index], currentPalette),
                   );
                 }
               },

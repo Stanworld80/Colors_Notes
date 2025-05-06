@@ -1,4 +1,5 @@
 // lib/services/firestore_service.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/app_user.dart';
@@ -11,7 +12,6 @@ import '../models/color_data.dart';
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // --- User Management (No changes) ---
   Future<void> createUserDocument(User user) async {
     final userRef = _db.collection('users').doc(user.uid);
     final docSnapshot = await userRef.get();
@@ -33,12 +33,19 @@ class FirestoreService {
     return null;
   }
 
-  // --- Journal Management (No changes) ---
   Future<DocumentReference> createJournal(String userId, Journal journalData) async {
     if (journalData.userId != userId) {
       throw Exception("Mismatch between provided userId and journalData.userId");
     }
-    return await _db.collection('journals').add(journalData.toJson());
+    final paletteWithIds = Palette(
+        name: journalData.embeddedPaletteInstance.name,
+        colors: journalData.embeddedPaletteInstance.colors.map((c) =>
+            ColorData(id: c.paletteElementId, title: c.title, hexValue: c.hexValue)
+        ).toList()
+    );
+    final journalJson = journalData.toJson();
+    journalJson['embeddedPaletteInstance'] = paletteWithIds.toJson();
+    return await _db.collection('journals').add(journalJson);
   }
 
   Stream<List<Journal>> getUserJournalsStream(String userId) {
@@ -53,8 +60,10 @@ class FirestoreService {
     await _db.collection('journals').doc(journalId).update({'name': newName});
   }
 
-  Future<void> updateJournalPalette(String journalId, Palette newPalette) async {
-    await _db.collection('journals').doc(journalId).update({'embeddedPaletteInstance': newPalette.toJson()});
+  Future<void> updateJournalPaletteInstance(String journalId, Palette newPaletteInstance) async {
+    final journalRef = _db.collection('journals').doc(journalId);
+    await journalRef.update({'embeddedPaletteInstance': newPaletteInstance.toJson()});
+    print("Palette instance updated for journal $journalId.");
   }
 
   Future<void> deleteJournal(String journalId) async {
@@ -70,26 +79,15 @@ class FirestoreService {
     print("Journal $journalId deleted.");
   }
 
-  Future<void> updateJournalPaletteInstance(String journalId, Palette newPaletteInstance) async {
-    final journalRef = _db.collection('journals').doc(journalId);
-    await journalRef.update({'embeddedPaletteInstance': newPaletteInstance.toJson()});
-    print("Palette instance updated for journal $journalId");
-  }
-
-  // --- Note Management (MODIFIED) ---
   Future<DocumentReference> createNote(Note noteData) async {
     return await _db.collection('notes').add(noteData.toJson());
   }
 
-  /// Récupère le flux (Stream) des notes pour un journal spécifique,
-  /// avec option de tri par eventTimestamp.
   Stream<List<Note>> getJournalNotesStream(String journalId, {bool descending = true}) {
-    // Ajout du paramètre descending
     return _db
         .collection('notes')
         .where('journalId', isEqualTo: journalId)
-        // Utiliser le paramètre pour contrôler l'ordre de tri
-        .orderBy('eventTimestamp', descending: descending) // MODIFIÉ
+        .orderBy('eventTimestamp', descending: descending)
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) => Note.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>)).toList());
   }
@@ -113,7 +111,24 @@ class FirestoreService {
     await _db.collection('notes').doc(noteId).delete();
   }
 
-  // --- Palette Model Management (No changes) ---
+  Future<bool> isPaletteElementUsedInNotes(String journalId, String paletteElementId) async {
+    print("Checking if paletteElementId '${paletteElementId}' is used in journal $journalId");
+    try {
+      final querySnapshot = await _db
+          .collection('notes')
+          .where('journalId', isEqualTo: journalId)
+          .where('paletteElementId', isEqualTo: paletteElementId)
+          .limit(1)
+          .get();
+      final isUsed = querySnapshot.docs.isNotEmpty;
+      print("paletteElementId '${paletteElementId}' used in journal $journalId: $isUsed");
+      return isUsed;
+    } catch (e) {
+      print("Error checking palette element usage: $e");
+      return true;
+    }
+  }
+
   Future<DocumentReference> createPaletteModel(PaletteModel model) async {
     return await _db.collection('palette_models').add(model.toJson());
   }
@@ -128,10 +143,11 @@ class FirestoreService {
   }
 
   Future<void> updatePaletteModel(String modelId, String newName, List<ColorData> newColors) async {
+    final colorsJson = newColors.map((c) => {'title': c.title, 'hexValue': c.hexValue}).toList();
     if (newColors.length < PaletteModel.minColors || newColors.length > PaletteModel.maxColors) {
       throw Exception("La palette doit contenir entre ${PaletteModel.minColors} et ${PaletteModel.maxColors} couleurs.");
     }
-    await _db.collection('palette_models').doc(modelId).update({'name': newName, 'colors': newColors.map((c) => c.toJson()).toList()});
+    await _db.collection('palette_models').doc(modelId).update({'name': newName, 'colors': colorsJson});
   }
 
   Future<void> renamePaletteModel(String modelId, String newName) async {
@@ -148,14 +164,11 @@ class FirestoreService {
     try {
       final snapshot = await query.get();
       if (snapshot.docs.isEmpty) {
-        print("Name '$name' does not exist.");
         return false;
       } else {
         if (modelIdToExclude != null && snapshot.docs.first.id == modelIdToExclude) {
-          print("Name '$name' exists, but it's the model being edited ($modelIdToExclude). Allowed.");
           return false;
         } else {
-          print("Name '$name' already exists for a different model.");
           return true;
         }
       }
