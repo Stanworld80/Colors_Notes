@@ -18,8 +18,14 @@ const _uuid = Uuid();
 class EntryPage extends StatefulWidget {
   final String journalId;
   final Note? noteToEdit;
+  final String? initialPaletteElementId;
 
-  EntryPage({Key? key, required this.journalId, this.noteToEdit}) : super(key: key);
+  EntryPage({
+    Key? key,
+    required this.journalId,
+    this.noteToEdit,
+    this.initialPaletteElementId,
+  }) : super(key: key);
 
   @override
   _EntryPageState createState() => _EntryPageState();
@@ -42,10 +48,13 @@ class _EntryPageState extends State<EntryPage> {
     super.initState();
     _userId = Provider.of<AuthService>(context, listen: false).currentUser?.uid;
     _contentController = TextEditingController(text: widget.noteToEdit?.content);
-    _selectedPaletteElementId = widget.noteToEdit?.paletteElementId;
+
     if (widget.noteToEdit != null) {
+      _selectedPaletteElementId = widget.noteToEdit!.paletteElementId;
       _selectedEventDate = widget.noteToEdit!.eventTimestamp.toDate();
       _selectedEventTime = TimeOfDay.fromDateTime(_selectedEventDate);
+    } else {
+      _selectedPaletteElementId = widget.initialPaletteElementId;
     }
     _loadJournalDetails();
   }
@@ -67,7 +76,7 @@ class _EntryPageState extends State<EntryPage> {
         }
       }
 
-      if (widget.noteToEdit == null && _currentJournalDetails != null && _currentJournalDetails!.palette.colors.isNotEmpty) {
+      if (widget.noteToEdit == null && _selectedPaletteElementId == null && _currentJournalDetails != null && _currentJournalDetails!.palette.colors.isNotEmpty) {
         final defaultColor = _currentJournalDetails!.palette.colors.firstWhere((c) => c.isDefault, orElse: () => _currentJournalDetails!.palette.colors.first);
         _selectedPaletteElementId = defaultColor.paletteElementId;
       }
@@ -101,9 +110,11 @@ class _EntryPageState extends State<EntryPage> {
       lastDate: DateTime(DateTime.now().year + 5),
       locale: const Locale('fr', 'FR'),
     );
+    // Vérification cruciale : est-ce que l'utilisateur a choisi une date ET est-ce qu'elle est différente ?
     if (picked != null && picked != _selectedEventDate) {
+      // Vérifier si le widget est toujours monté avant d'appeler setState
       if (mounted) {
-        setState(() {
+        setState(() { // L'appel à setState est essentiel pour rafraîchir l'UI
           _selectedEventDate = picked;
         });
       }
@@ -121,6 +132,7 @@ class _EntryPageState extends State<EntryPage> {
         );
       },
     );
+
     if (picked != null && picked != _selectedEventTime) {
       if (mounted) {
         setState(() {
@@ -197,7 +209,7 @@ class _EntryPageState extends State<EntryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final DateFormat dateFormat = DateFormat('EEEE dd MMMM yyyy', 'fr_FR');
+    final DateFormat dateFormat = DateFormat('EEEE dd MMMM yyyy', 'fr_FR'); // Format long pour le bouton
 
     return Scaffold(
       appBar: AppBar(
@@ -237,8 +249,8 @@ class _EntryPageState extends State<EntryPage> {
               TextFormField(
                 controller: _contentController,
                 decoration: InputDecoration(
-                  labelText: 'Contenu de la note',
-                  hintText: 'Décrivez votre humeur, événement, pensée...',
+                  labelText: 'Contenu de la note...',
+                  hintText: 'Décrivez votre note...',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                 ),
                 maxLines: 5,
@@ -250,14 +262,12 @@ class _EntryPageState extends State<EntryPage> {
                 },
               ),
               SizedBox(height: 20),
-              Text("Date et Heure de l'événement:", style: Theme.of(context).textTheme.titleMedium),
-              SizedBox(height: 8),
               Row(
                 children: [
                   Expanded(
                     child: TextButton.icon(
                       icon: Icon(Icons.calendar_today_outlined),
-                      label: Text(dateFormat.format(_selectedEventDate)),
+                      label: Text(dateFormat.format(_selectedEventDate)), // Affichage de la date sélectionnée
                       onPressed: () => _selectEventDate(context),
                     ),
                   ),
@@ -265,58 +275,12 @@ class _EntryPageState extends State<EntryPage> {
                   Expanded(
                     child: TextButton.icon(
                       icon: Icon(Icons.access_time_outlined),
-                      label: Text(_selectedEventTime.format(context)),
+                      label: Text(_selectedEventTime.format(context)), // Affichage de l'heure sélectionnée
                       onPressed: () => _selectEventTime(context),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 20),
-              Text("Couleur / Humeur:", style: Theme.of(context).textTheme.titleMedium),
-              SizedBox(height: 8),
-              if (_currentJournalDetails!.palette.colors.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text("Palette vide. Modifiez le journal pour ajouter des couleurs.", textAlign: TextAlign.center),
-                )
-              else
-                Wrap(
-                  spacing: 8.0,
-                  runSpacing: 8.0,
-                  children: _currentJournalDetails!.palette.colors.map((ColorData colorData) {
-                    final bool isSelected = colorData.paletteElementId == _selectedPaletteElementId;
-                    return ChoiceChip(
-                      label: Text(colorData.title),
-                      selected: isSelected,
-                      onSelected: (bool selected) {
-                        if (mounted) {
-                          setState(() {
-                            if (selected) {
-                              _selectedPaletteElementId = colorData.paletteElementId;
-                            }
-                          });
-                        }
-                      },
-                      avatar: CircleAvatar(backgroundColor: colorData.color, radius: 12),
-                      selectedColor: colorData.color.withAlpha(100),
-                      pressElevation: 2.0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          side: BorderSide(
-                            color: isSelected ? colorData.color : Colors.grey.shade400,
-                            width: isSelected ? 2.5 : 1,
-                          )
-                      ),
-                      labelStyle: TextStyle(
-                        color: isSelected
-                            ? (colorData.color.computeLuminance() > 0.5 ? Colors.black : Colors.white)
-                            : null,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      ),
-                      backgroundColor: Colors.grey.shade100,
-                    );
-                  }).toList(),
-                ),
               SizedBox(height: 30),
               ElevatedButton.icon(
                 icon: Icon(_isSaving ? Icons.hourglass_empty_outlined : Icons.save_outlined),

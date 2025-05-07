@@ -122,11 +122,7 @@ class _NoteListPageState extends State<NoteListPage> {
                     'Aucune note dans ce journal.',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Appuyez sur le bouton "+" pour en ajouter une.',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
+
                 ],
               ),
             );

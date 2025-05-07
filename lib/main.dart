@@ -5,16 +5,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
-import 'package:intl/date_symbol_data_local.dart'; // Pour le formatage des dates en français
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:flutter_localizations/flutter_localizations.dart'; // Import pour les localisations
 
 import 'firebase_options.dart';
 import 'services/auth_service.dart';
 import 'services/firestore_service.dart';
 import 'providers/active_journal_provider.dart';
 import 'screens/auth_gate.dart';
-import 'screens/sign_in_page.dart'; // Importer pour les routes
-import 'screens/register_page.dart'; // Importer pour les routes
-import 'screens/main_screen.dart'; // Importer pour les routes (si nécessaire)
+import 'screens/sign_in_page.dart';
+import 'screens/register_page.dart';
+import 'screens/main_screen.dart';
 
 final _logger = Logger(
   printer: PrettyPrinter(
@@ -27,7 +28,8 @@ final _logger = Logger(
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting('fr_FR', null); // Initialisation pour le français
+  // Initialiser le formatage pour le français AVANT runApp
+  await initializeDateFormatting('fr_FR', null);
 
   try {
     await Firebase.initializeApp(
@@ -63,7 +65,6 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  // Retiré const car MyApp n'est pas const à cause de MaterialApp et des routes
   MyApp({Key? key}) : super(key: key);
 
   @override
@@ -71,22 +72,31 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Colors & Notes',
       theme: ThemeData(
-        primarySwatch: Colors.teal, // Changé pour un autre thème
+        primarySwatch: Colors.teal,
         visualDensity: VisualDensity.adaptivePlatformDensity,
         colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal).copyWith(
-          secondary: Colors.amberAccent, // Couleur d'accentuation
+          secondary: Colors.amberAccent,
         ),
-        // Vous pouvez ajouter d'autres configurations de thème ici
       ),
-      home: AuthGate(), // AuthGate gère la redirection initiale
+      // --- Configuration des Localisations ---
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate, // Pour les widgets style iOS si utilisés
+      ],
+      supportedLocales: [
+        const Locale('fr', 'FR'), // Français
+        const Locale('en', 'US'), // Anglais (langue par défaut/fallback)
+        // Ajoutez d'autres langues si nécessaire
+      ],
+      locale: const Locale('fr', 'FR'), // Optionnel: Forcer la locale française par défaut
+
+      home: AuthGate(),
       routes: {
-        // Définir les routes nommées utilisées dans l'application
         '/signin': (context) => SignInPage(),
         '/register': (context) => RegisterPage(),
-        '/main': (context) => MainScreen(), // Si vous naviguez vers MainScreen par nom
-        // Ajoutez d'autres routes ici si nécessaire
+        '/main': (context) => MainScreen(),
       },
-
     );
   }
 }
