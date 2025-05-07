@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import 'package:logger/logger.dart';
+
+import '../services/auth_service.dart';
+
+final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0, printTime: true));
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({Key? key}) : super(key: key);
+  RegisterPage({Key? key}) : super(key: key);
 
   @override
   _RegisterPageState createState() => _RegisterPageState();
@@ -10,47 +15,52 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _displayNameController = TextEditingController();
+  bool _isLoading = false;
 
-  String? _errorMessage; // Pour afficher les erreurs
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _displayNameController.dispose();
+    super.dispose();
+  }
 
-  Future<void> _register() async {
+  Future<void> _signUp() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
-        _errorMessage = null; // Réinitialise l'erreur
+        _isLoading = true;
       });
-      if (_passwordController.text != _confirmPasswordController.text) {
-        setState(() {
-          _errorMessage = 'Passwords do not match.';
-        });
-        return; // Arrête le processus si les mots de passe ne correspondent pas
-      }
 
       try {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(email: _emailController.text.trim(), password: _passwordController.text.trim());
-        // Si l'enregistrement réussit, Firebase connecte automatiquement l'utilisateur.
-        // La EntryPage (ou StreamBuilder) redirigera vers LoggedHomepage.
-        Navigator.of(context).pop(); // Ferme la page Register
-      } on FirebaseAuthException catch (e) {
-        // Gérer les erreurs d'enregistrement
-        setState(() {
-          if (e.code == 'weak-password') {
-            _errorMessage = 'The password provided is too weak.';
-          } else if (e.code == 'email-already-in-use') {
-            _errorMessage = 'The account already exists for that email.';
-          } else {
-            _errorMessage = 'Registration failed: ${e.message}';
-          }
-        });
-        print("Registration Error: ${e.code}"); // Debug
+        final authService = Provider.of<AuthService>(context, listen: false);
+
+        await authService.signUpWithEmailAndPassword(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
+          _displayNameController.text.trim(),
+        );
+
+        if (mounted) {
+          _loggerPage.i('Inscription réussie pour ${_emailController.text.trim()}');
+          // AuthGate gère la navigation
+        }
+
       } catch (e) {
-        // Autres erreurs possibles
-        setState(() {
-          _errorMessage = 'An unexpected error occurred.';
-        });
-        print("Unexpected Registration Error: $e"); // Debug
+        if (mounted) {
+          _loggerPage.e('Erreur lors de l\'inscription sur RegisterPage: ${e.toString()}');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }
@@ -58,69 +68,69 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Register')),
+      appBar: AppBar(title: Text('Créer un compte')),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(20.0),
           child: Form(
             key: _formKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+              children: <Widget>[
+                Text("Rejoignez Colors & Notes", style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Theme.of(context).primaryColor)),
+                SizedBox(height: 30),
+                TextFormField(
+                  controller: _displayNameController,
+                  decoration: InputDecoration(labelText: 'Nom d\'affichage', border: OutlineInputBorder()),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer votre nom d\'affichage.';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16),
                 TextFormField(
                   controller: _emailController,
-                  decoration: const InputDecoration(labelText: 'Email'),
+                  decoration: InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
+                    if (value == null || value.isEmpty || !value.contains('@')) {
+                      return 'Veuillez entrer une adresse e-mail valide.';
                     }
-                    // Vous pouvez ajouter une validation d'email plus poussée
                     return null;
                   },
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
-                  decoration: const InputDecoration(labelText: 'Password'),
+                  decoration: InputDecoration(labelText: 'Mot de passe', border: OutlineInputBorder()),
                   obscureText: true,
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a password';
-                    }
-                    if (value.length < 6) {
-                      // Exemple: exiger au moins 6 caractères
-                      return 'Password must be at least 6 characters long';
+                    if (value == null || value.isEmpty || value.length < 6) {
+                      return 'Le mot de passe doit contenir au moins 6 caractères.';
                     }
                     return null;
                   },
                 ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: _confirmPasswordController,
-                  decoration: const InputDecoration(labelText: 'Confirm Password'),
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please confirm your password';
-                    }
-                    if (value != _passwordController.text) {
-                      return 'Passwords do not match';
-                    }
-                    return null;
-                  },
+                SizedBox(height: 24),
+                _isLoading
+                    ? CircularProgressIndicator()
+                    : ElevatedButton(
+                  onPressed: _signUp,
+                  child: Text('S\'inscrire'),
+                  style: ElevatedButton.styleFrom(minimumSize: Size(double.infinity, 50)),
                 ),
-                const SizedBox(height: 20),
-                if (_errorMessage != null) // Afficher l'erreur si elle existe
-                  Padding(padding: const EdgeInsets.only(bottom: 15.0), child: Text(_errorMessage!, style: const TextStyle(color: Colors.red), textAlign: TextAlign.center)),
-                ElevatedButton(onPressed: _register, child: const Text('Register')),
-                const SizedBox(height: 10),
+                SizedBox(height: 20),
                 TextButton(
                   onPressed: () {
-                    // Naviguer vers la page de connexion
-                    Navigator.pushReplacementNamed(context, '/signin'); // Utiliser pushReplacement
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    } else {
+                      Navigator.pushReplacementNamed(context, '/signin');
+                    }
                   },
-                  child: const Text("Already have an account? Sign In here."),
+                  child: Text('Déjà un compte ? Se connecter'),
                 ),
               ],
             ),
@@ -128,13 +138,5 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
   }
 }

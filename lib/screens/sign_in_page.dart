@@ -1,79 +1,146 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:colors_notes/services/auth_service.dart';
+import 'package:provider/provider.dart';
+import 'package:logger/logger.dart';
+
+import '../services/auth_service.dart';
+
+final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0, printTime: true));
 
 class SignInPage extends StatefulWidget {
-  const SignInPage({Key? key}) : super(key: key);
+  SignInPage({Key? key}) : super(key: key);
 
   @override
   _SignInPageState createState() => _SignInPageState();
 }
 
 class _SignInPageState extends State<SignInPage> {
+  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  String? _errorMessage;
+  bool _isLoading = false;
+  bool _isLoadingGoogle = false;
 
-  // Instance de notre AuthService (avec GoogleSignIn)
-  final AuthService _authService = AuthService();
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
-  // Méthode pour se connecter avec l'email et le mot de passe
   Future<void> _signInWithEmail() async {
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(email: _emailController.text.trim(), password: _passwordController.text.trim());
-      // Naviguer vers la page d'accueil après la connexion
-      Navigator.pushReplacementNamed(context, '/logged_homepage');
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        _errorMessage = e.message; // Gérer l'erreur
-      });
+    if (_formKey.currentState!.validate()) {
+      setState(() { _isLoading = true; });
+      try {
+        final authService = Provider.of<AuthService>(context, listen: false);
+        await authService.signInWithEmailAndPassword(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
+        );
+        _loggerPage.i("Tentative de connexion réussie pour ${_emailController.text.trim()}");
+        // AuthGate gère la navigation
+      } catch (e) {
+        _loggerPage.e("Erreur connexion email: ${e.toString()}");
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() { _isLoading = false; });
+        }
+      }
     }
   }
 
-  // Méthode pour se connecter avec Google
   Future<void> _signInWithGoogle() async {
+    setState(() { _isLoadingGoogle = true; });
     try {
-      await _authService.signInWithGoogle();
-      // Si l'authentification réussit, on redirige l'utilisateur
-      Navigator.pushReplacementNamed(context, '/logged_homepage');
+      final authService = Provider.of<AuthService>(context, listen: false);
+      await authService.signInWithGoogle();
+      _loggerPage.i("Tentative de connexion Google réussie.");
+      // AuthGate gère la navigation
     } catch (e) {
-      setState(() {
-        _errorMessage = 'Google Sign-In failed. Please try again.';
-      });
+      _loggerPage.e("Erreur connexion Google: ${e.toString()}");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() { _isLoadingGoogle = false; });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign In')),
+      appBar: AppBar(title: Text('Se connecter')),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (_errorMessage != null) Padding(padding: const EdgeInsets.only(bottom: 15.0), child: Text(_errorMessage!, style: const TextStyle(color: Colors.red), textAlign: TextAlign.center)),
-              // Champ email
-              TextFormField(controller: _emailController, decoration: const InputDecoration(labelText: 'Email'), keyboardType: TextInputType.emailAddress),
-              const SizedBox(height: 20),
-              // Champ mot de passe
-              TextFormField(controller: _passwordController, decoration: const InputDecoration(labelText: 'Password'), obscureText: true),
-              const SizedBox(height: 20),
-              // Bouton de connexion par email et mot de passe
-              ElevatedButton(onPressed: _signInWithEmail, child: const Text('Sign In with Email')),
-              const SizedBox(height: 20),
-              // Bouton de connexion via Google
-              ElevatedButton.icon(onPressed: _signInWithGoogle, icon: const Icon(Icons.account_circle), label: const Text('Sign In with Google')),
-              const SizedBox(height: 20),
-              // Lien vers la page d'inscription
-              TextButton(
-                onPressed: () {
-                  Navigator.pushReplacementNamed(context, '/register');
-                },
-                child: const Text("Don't have an account? Register here."),
-              ),
-            ],
+          padding: EdgeInsets.all(20.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text("Colors & Notes", style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Theme.of(context).primaryColor)),
+                SizedBox(height: 30),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.isEmpty || !value.contains('@')) {
+                      return 'Veuillez entrer une adresse e-mail valide.';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16),
+                TextFormField(
+                  controller: _passwordController,
+                  decoration: InputDecoration(labelText: 'Mot de passe', border: OutlineInputBorder()),
+                  obscureText: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer votre mot de passe.';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 24),
+                _isLoading
+                    ? CircularProgressIndicator()
+                    : ElevatedButton(
+                  onPressed: _signInWithEmail,
+                  child: Text('Se connecter par Email'),
+                  style: ElevatedButton.styleFrom(minimumSize: Size(double.infinity, 50)),
+                ),
+                SizedBox(height: 12),
+                _isLoadingGoogle
+                    ? CircularProgressIndicator()
+                    : ElevatedButton.icon(
+                  icon: Icon(Icons.login), // Icône originale
+                  label: Text('Se connecter avec Google'),
+                  onPressed: _signInWithGoogle,
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      minimumSize: Size(double.infinity, 50)
+                  ),
+                ),
+                SizedBox(height: 20),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/register');
+                  },
+                  child: Text('Pas encore de compte ? S\'inscrire'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

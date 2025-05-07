@@ -1,118 +1,261 @@
-// lib/services/firestore_service.dart
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' show User;
+import 'package:logger/logger.dart';
+import 'package:uuid/uuid.dart';
+
 import '../models/app_user.dart';
 import '../models/journal.dart';
-import '../models/note.dart';
 import '../models/palette.dart';
 import '../models/palette_model.dart';
 import '../models/color_data.dart';
+import '../models/note.dart';
+import '../core/predefined_templates.dart';
+
+final _logger = Logger(
+  printer: PrettyPrinter(
+    methodCount: 1, errorMethodCount: 8, lineLength: 120,
+    colors: true, printEmojis: true, printTime: true,
+  ),
+);
+const Uuid _uuid = Uuid();
 
 class FirestoreService {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final FirebaseFirestore _db;
 
-  Future<void> createUserDocument(User user) async {
-    final userRef = _db.collection('users').doc(user.uid);
-    final docSnapshot = await userRef.get();
-    if (!docSnapshot.exists) {
-      AppUser newUser = AppUser(id: user.uid, email: user.email ?? 'no-email@example.com', role: 'Utilisateur');
-      await userRef.set(newUser.toJson());
-      print("User document created for ${user.uid}");
-    } else {
-      print("User document already exists for ${user.uid}");
+  FirestoreService(this._db);
+
+  Future<void> initializeNewUserData(User firebaseUser, {String? displayName, String? email}) async {
+    try {
+      _logger.i('Initialisation des données pour le nouvel utilisateur: ${firebaseUser.uid}');
+
+      AppUser newUser = AppUser(
+        id: firebaseUser.uid,
+        email: firebaseUser.email ?? email,
+        displayName: firebaseUser.displayName ?? displayName ?? 'Nouvel Utilisateur',
+        registrationDate: Timestamp.now(),
+      );
+      await _db.collection('users').doc(newUser.id).set(newUser.toMap());
+      _logger.i('Document utilisateur créé pour ${newUser.id}');
+
+      if (predefinedPalettes.isEmpty) {
+        _logger.w('Aucune palette prédéfinie disponible pour créer le journal par défaut.');
+        Palette fallbackPalette = Palette(
+            id: _uuid.v4(),
+            name: "Palette de Base",
+            colors: [ColorData(title: "Défaut", hexCode: "808080", paletteElementId: _uuid.v4(), isDefault: true)],
+            userId: firebaseUser.uid,
+            isPredefined: false
+        );
+        Journal defaultJournal = Journal(
+          id: _uuid.v4(),
+          userId: firebaseUser.uid,
+          name: 'Mon Premier Journal',
+          palette: fallbackPalette,
+          createdAt: Timestamp.now(),
+          lastUpdatedAt: Timestamp.now(),
+        );
+        await _db.collection('journals').doc(defaultJournal.id).set(defaultJournal.toMap());
+        _logger.i('Journal par défaut créé avec palette de secours pour ${firebaseUser.uid} avec ID ${defaultJournal.id}');
+        return;
+      }
+
+      PaletteModel defaultPaletteTemplate = predefinedPalettes[0];
+
+      List<ColorData> instanceColors = defaultPaletteTemplate.colors.map((colorTemplate) {
+        return ColorData(
+          title: colorTemplate.title,
+          hexCode: colorTemplate.hexCode,
+          isDefault: colorTemplate.isDefault,
+          paletteElementId: _uuid.v4(),
+        );
+      }).toList();
+
+      Palette paletteForJournal = Palette(
+        id: _uuid.v4(),
+        name: defaultPaletteTemplate.name,
+        colors: instanceColors,
+        isPredefined: false,
+        userId: firebaseUser.uid,
+      );
+
+      Journal defaultJournal = Journal(
+        id: _uuid.v4(),
+        userId: firebaseUser.uid,
+        name: 'Mon Premier Journal',
+        palette: paletteForJournal,
+        createdAt: Timestamp.now(),
+        lastUpdatedAt: Timestamp.now(),
+      );
+      await _db.collection('journals').doc(defaultJournal.id).set(defaultJournal.toMap());
+      _logger.i('Journal par défaut créé pour ${firebaseUser.uid} avec ID ${defaultJournal.id}');
+
+    } catch (e, stackTrace) {
+      _logger.e('Erreur initialisation données utilisateur', error: e, stackTrace: stackTrace);
+      throw Exception('Échec initialisation données utilisateur: ${e.toString()}');
     }
   }
 
-  Future<AppUser?> getAppUser(String userId) async {
-    final docRef = _db.collection('users').doc(userId);
-    final snapshot = await docRef.get();
-    if (snapshot.exists) {
-      return AppUser.fromFirestore(snapshot);
+  Future<AppUser?> getUser(String uid) async {
+    try {
+      DocumentSnapshot doc = await _db.collection('users').doc(uid).get();
+      if (doc.exists) {
+        return AppUser.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+      }
+      return null;
+    } catch (e, stackTrace) {
+      _logger.e('Erreur get User $uid', error: e, stackTrace: stackTrace);
+      throw Exception('Impossible de récupérer les infos utilisateur.');
     }
-    return null;
   }
 
-  Future<DocumentReference> createJournal(String userId, Journal journalData) async {
-    if (journalData.userId != userId) {
-      throw Exception("Mismatch between provided userId and journalData.userId");
+  Stream<List<Journal>> getJournalsStream(String userId) {
+    try {
+      return _db
+          .collection('journals')
+          .where('userId', isEqualTo: userId)
+          .orderBy('createdAt', descending: true)
+          .snapshots()
+          .map((snapshot) => snapshot.docs
+          .map((doc) => Journal.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+          .toList())
+          .handleError((error, stackTrace) {
+        _logger.e('Erreur stream journaux pour $userId', error: error, stackTrace: stackTrace);
+        throw error;
+      });
+    } catch (e, stackTrace) {
+      _logger.e('Erreur config stream journaux pour $userId', error: e, stackTrace: stackTrace);
+      return Stream.error(Exception('Impossible de charger les journaux.'));
     }
-    final paletteWithIds = Palette(
-        name: journalData.embeddedPaletteInstance.name,
-        colors: journalData.embeddedPaletteInstance.colors.map((c) =>
-            ColorData(id: c.paletteElementId, title: c.title, hexValue: c.hexValue)
-        ).toList()
-    );
-    final journalJson = journalData.toJson();
-    journalJson['embeddedPaletteInstance'] = paletteWithIds.toJson();
-    return await _db.collection('journals').add(journalJson);
   }
 
-  Stream<List<Journal>> getUserJournalsStream(String userId) {
-    return _db
-        .collection('journals')
-        .where('userId', isEqualTo: userId)
-        .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => Journal.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>)).toList());
+  Stream<DocumentSnapshot> getJournalStream(String journalId) {
+    try {
+      return _db.collection('journals').doc(journalId).snapshots()
+          .handleError((error, stackTrace) {
+        _logger.e('Erreur stream journal $journalId', error: error, stackTrace: stackTrace);
+        throw error;
+      });
+    } catch (e, stackTrace) {
+      _logger.e('Erreur config stream pour journal $journalId', error: e, stackTrace: stackTrace);
+      return Stream.error(Exception('Impossible de charger le journal.'));
+    }
+  }
+
+  Future<void> createJournal(Journal journal) async {
+    try {
+      await _db.collection('journals').doc(journal.id).set(journal.toMap());
+      _logger.i('Journal créé: ${journal.id} pour ${journal.userId}');
+    } catch (e, stackTrace) {
+      _logger.e('Erreur création journal ${journal.id}', error: e, stackTrace: stackTrace);
+      throw Exception('Impossible de créer le journal.');
+    }
+  }
+
+  Future<void> updateJournal(Journal journal) async {
+    try {
+      journal.lastUpdatedAt = Timestamp.now();
+      await _db.collection('journals').doc(journal.id).update(journal.toMap());
+      _logger.i('Journal mis à jour: ${journal.id}');
+    } catch (e, stackTrace) {
+      _logger.e('Erreur màj journal ${journal.id}', error: e, stackTrace: stackTrace);
+      throw Exception('Impossible de mettre à jour le journal.');
+    }
   }
 
   Future<void> updateJournalName(String journalId, String newName) async {
-    await _db.collection('journals').doc(journalId).update({'name': newName});
+    try {
+      await _db.collection('journals').doc(journalId).update({
+        'name': newName,
+        'lastUpdatedAt': Timestamp.now(),
+      });
+      _logger.i('Nom du journal $journalId mis à jour vers "$newName"');
+    } catch (e, stackTrace) {
+      _logger.e('Erreur màj nom journal $journalId', error: e, stackTrace: stackTrace);
+      throw Exception('Impossible de mettre à jour le nom du journal.');
+    }
   }
 
   Future<void> updateJournalPaletteInstance(String journalId, Palette newPaletteInstance) async {
-    final journalRef = _db.collection('journals').doc(journalId);
-    await journalRef.update({'embeddedPaletteInstance': newPaletteInstance.toJson()});
-    print("Palette instance updated for journal $journalId.");
+    try {
+      await _db.collection('journals').doc(journalId).update({
+        'palette': newPaletteInstance.toMap(),
+        'lastUpdatedAt': Timestamp.now(),
+      });
+      _logger.i('Palette du journal $journalId mise à jour.');
+    } catch (e, stackTrace) {
+      _logger.e('Erreur màj palette journal $journalId', error: e, stackTrace: stackTrace);
+      throw Exception('Impossible de mettre à jour la palette du journal.');
+    }
   }
 
-  Future<void> deleteJournal(String journalId) async {
-    print("Deleting notes for journal $journalId...");
-    final WriteBatch batch = _db.batch();
-    final notesSnapshot = await _db.collection('notes').where('journalId', isEqualTo: journalId).get();
-    for (final doc in notesSnapshot.docs) {
-      batch.delete(doc.reference);
+  Future<void> deleteJournal(String journalId, String userId) async {
+    try {
+      WriteBatch batch = _db.batch();
+      QuerySnapshot notesSnapshot = await _db.collection('notes')
+          .where('journalId', isEqualTo: journalId)
+          .get();
+      for (DocumentSnapshot noteDoc in notesSnapshot.docs) {
+        batch.delete(noteDoc.reference);
+      }
+      _logger.i('${notesSnapshot.docs.length} notes marquées pour suppression pour le journal $journalId.');
+      batch.delete(_db.collection('journals').doc(journalId));
+      await batch.commit();
+      _logger.i('Journal $journalId et ses notes associées supprimés.');
+    } catch (e, stackTrace) {
+      _logger.e('Erreur suppression journal $journalId', error: e, stackTrace: stackTrace);
+      throw Exception('Impossible de supprimer le journal et ses notes.');
     }
-    await batch.commit();
-    print("${notesSnapshot.size} notes deleted.");
-    await _db.collection('journals').doc(journalId).delete();
-    print("Journal $journalId deleted.");
   }
 
-  Future<DocumentReference> createNote(Note noteData) async {
-    return await _db.collection('notes').add(noteData.toJson());
+  Stream<List<Note>> getJournalNotesStream(String journalId, {String? sortBy, bool descending = false}) {
+    try {
+      Query query = _db.collection('notes').where('journalId', isEqualTo: journalId);
+      query = query.orderBy(sortBy ?? 'eventTimestamp', descending: descending);
+
+      return query.snapshots().map((snapshot) {
+        return snapshot.docs.map((doc) => Note.fromMap(doc.data() as Map<String, dynamic>, doc.id)).toList();
+      }).handleError((error, stackTrace) {
+        _logger.e('Erreur stream notes journal $journalId', error: error, stackTrace: stackTrace);
+        throw error;
+      });
+    } catch (e, stackTrace) {
+      _logger.e('Erreur config stream notes $journalId', error: e, stackTrace: stackTrace);
+      return Stream.error(Exception('Impossible de charger les notes.'));
+    }
   }
 
-  Stream<List<Note>> getJournalNotesStream(String journalId, {bool descending = true}) {
-    return _db
-        .collection('notes')
-        .where('journalId', isEqualTo: journalId)
-        .orderBy('eventTimestamp', descending: descending)
-        .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => Note.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>)).toList());
+  Future<void> createNote(Note note) async {
+    try {
+      await _db.collection('notes').doc(note.id).set(note.toMap());
+      _logger.i('Note créée: ${note.id} dans journal ${note.journalId}');
+    } catch (e, stackTrace) {
+      _logger.e('Erreur création note ${note.id}', error: e, stackTrace: stackTrace);
+      throw Exception('Impossible de créer la note.');
+    }
   }
 
-  Future<void> updateNoteDetails(String noteId, {String? newComment, Timestamp? newEventTimestamp}) async {
-    Map<String, dynamic> dataToUpdate = {};
-    if (newComment != null) {
-      dataToUpdate['comment'] = newComment;
+  Future<void> updateNote(Note note) async {
+    try {
+      note.lastUpdatedAt = Timestamp.now();
+      await _db.collection('notes').doc(note.id).update(note.toMap());
+      _logger.i('Note màj: ${note.id}');
+    } catch (e, stackTrace) {
+      _logger.e('Erreur màj note ${note.id}', error: e, stackTrace: stackTrace);
+      throw Exception('Impossible de mettre à jour la note.');
     }
-    if (newEventTimestamp != null) {
-      dataToUpdate['eventTimestamp'] = newEventTimestamp;
-    }
-    if (dataToUpdate.isEmpty) {
-      print("updateNoteDetails called with no changes for note $noteId.");
-      return;
-    }
-    await _db.collection('notes').doc(noteId).update(dataToUpdate);
   }
 
   Future<void> deleteNote(String noteId) async {
-    await _db.collection('notes').doc(noteId).delete();
+    try {
+      await _db.collection('notes').doc(noteId).delete();
+      _logger.i('Note supprimée: $noteId');
+    } catch (e, stackTrace) {
+      _logger.e('Erreur suppression note $noteId', error: e, stackTrace: stackTrace);
+      throw Exception('Impossible de supprimer la note.');
+    }
   }
 
   Future<bool> isPaletteElementUsedInNotes(String journalId, String paletteElementId) async {
-    print("Checking if paletteElementId '${paletteElementId}' is used in journal $journalId");
     try {
       final querySnapshot = await _db
           .collection('notes')
@@ -120,61 +263,96 @@ class FirestoreService {
           .where('paletteElementId', isEqualTo: paletteElementId)
           .limit(1)
           .get();
-      final isUsed = querySnapshot.docs.isNotEmpty;
-      print("paletteElementId '${paletteElementId}' used in journal $journalId: $isUsed");
-      return isUsed;
-    } catch (e) {
-      print("Error checking palette element usage: $e");
-      return true;
+      return querySnapshot.docs.isNotEmpty;
+    } catch (e, stackTrace) {
+      _logger.e('Erreur vérif utilisation paletteElementId $paletteElementId journal $journalId', error: e, stackTrace: stackTrace);
+      throw Exception('Impossible de vérifier l\'utilisation de la couleur.');
     }
-  }
-
-  Future<DocumentReference> createPaletteModel(PaletteModel model) async {
-    return await _db.collection('palette_models').add(model.toJson());
   }
 
   Stream<List<PaletteModel>> getUserPaletteModelsStream(String userId) {
-    return _db
-        .collection('palette_models')
-        .where('userId', isEqualTo: userId)
-        .orderBy('name')
-        .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => PaletteModel.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>)).toList());
-  }
-
-  Future<void> updatePaletteModel(String modelId, String newName, List<ColorData> newColors) async {
-    final colorsJson = newColors.map((c) => {'title': c.title, 'hexValue': c.hexValue}).toList();
-    if (newColors.length < PaletteModel.minColors || newColors.length > PaletteModel.maxColors) {
-      throw Exception("La palette doit contenir entre ${PaletteModel.minColors} et ${PaletteModel.maxColors} couleurs.");
-    }
-    await _db.collection('palette_models').doc(modelId).update({'name': newName, 'colors': colorsJson});
-  }
-
-  Future<void> renamePaletteModel(String modelId, String newName) async {
-    await _db.collection('palette_models').doc(modelId).update({'name': newName});
-  }
-
-  Future<void> deletePaletteModel(String modelId) async {
-    await _db.collection('palette_models').doc(modelId).delete();
-  }
-
-  Future<bool> checkPaletteModelNameExists(String userId, String name, {String? modelIdToExclude}) async {
-    print("Checking if palette model name '$name' exists for user $userId (excluding $modelIdToExclude)");
-    var query = _db.collection('palette_models').where('userId', isEqualTo: userId).where('name', isEqualTo: name).limit(1);
     try {
+      return _db
+          .collection('paletteModels')
+          .where('userId', isEqualTo: userId)
+          .snapshots()
+          .map((snapshot) => snapshot.docs
+          .map((doc) => PaletteModel.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+          .toList())
+          .handleError((error, stackTrace) {
+        _logger.e('Erreur stream modèles palette pour $userId', error: error, stackTrace: stackTrace);
+        throw error;
+      });
+    } catch (e, stackTrace) {
+      _logger.e('Erreur config stream modèles palette pour $userId', error: e, stackTrace: stackTrace);
+      return Stream.error(Exception('Impossible de charger les modèles de palette.'));
+    }
+  }
+
+  Stream<List<PaletteModel>> getPredefinedPaletteModelsStream() {
+    try {
+      return _db
+          .collection('paletteModels')
+          .where('isPredefined', isEqualTo: true)
+          .snapshots()
+          .map((snapshot) => snapshot.docs
+          .map((doc) => PaletteModel.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+          .toList())
+          .handleError((error, stackTrace) {
+        _logger.e('Erreur stream modèles palette prédéfinis', error: error, stackTrace: stackTrace);
+        throw error;
+      });
+    } catch (e, stackTrace) {
+      _logger.e('Erreur config stream modèles palette prédéfinis', error: e, stackTrace: stackTrace);
+      return Stream.error(Exception('Impossible de charger les modèles de palette prédéfinis.'));
+    }
+  }
+
+  Future<void> createPaletteModel(PaletteModel paletteModel) async {
+    try {
+      await _db.collection('paletteModels').doc(paletteModel.id).set(paletteModel.toMap());
+      _logger.i('Modèle de palette créé: ${paletteModel.id} par ${paletteModel.userId}');
+    } catch (e, stackTrace) {
+      _logger.e('Erreur création modèle palette ${paletteModel.id}', error: e, stackTrace: stackTrace);
+      throw Exception('Impossible de créer le modèle de palette.');
+    }
+  }
+
+  Future<void> updatePaletteModel(PaletteModel paletteModel) async {
+    try {
+      await _db.collection('paletteModels').doc(paletteModel.id).update(paletteModel.toMap());
+      _logger.i('Modèle de palette màj: ${paletteModel.id}');
+    } catch (e, stackTrace) {
+      _logger.e('Erreur màj modèle palette ${paletteModel.id}', error: e, stackTrace: stackTrace);
+      throw Exception('Impossible de mettre à jour le modèle de palette.');
+    }
+  }
+
+  Future<void> deletePaletteModel(String paletteModelId) async {
+    try {
+      await _db.collection('paletteModels').doc(paletteModelId).delete();
+      _logger.i('Modèle de palette supprimé: $paletteModelId');
+    } catch (e, stackTrace) {
+      _logger.e('Erreur suppression modèle palette $paletteModelId', error: e, stackTrace: stackTrace);
+      throw Exception('Impossible de supprimer le modèle de palette.');
+    }
+  }
+
+  Future<bool> checkPaletteModelNameExists(String name, String userId, {String? excludeId}) async {
+    try {
+      Query query = _db
+          .collection('paletteModels')
+          .where('userId', isEqualTo: userId)
+          .where('name', isEqualTo: name);
+
       final snapshot = await query.get();
-      if (snapshot.docs.isEmpty) {
-        return false;
-      } else {
-        if (modelIdToExclude != null && snapshot.docs.first.id == modelIdToExclude) {
-          return false;
-        } else {
-          return true;
-        }
+      if (excludeId != null) {
+        return snapshot.docs.any((doc) => doc.id != excludeId);
       }
-    } catch (e) {
-      print("Error checking palette model name existence: $e");
-      return false;
+      return snapshot.docs.isNotEmpty;
+    } catch (e, stackTrace) {
+      _logger.e('Erreur vérif nom modèle palette "$name"', error: e, stackTrace: stackTrace);
+      throw Exception('Erreur lors de la vérification du nom du modèle de palette.');
     }
   }
 }

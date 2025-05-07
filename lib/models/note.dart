@@ -1,52 +1,73 @@
-// lib/models/note.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uuid/uuid.dart';
+
+const Uuid _uuid = Uuid();
 
 class Note {
   final String id;
   final String journalId;
   final String userId;
-  final String comment;
-  final Timestamp createdAt;
-  final Timestamp eventTimestamp;
+  String content;
   final String paletteElementId;
+  final Timestamp eventTimestamp;
+  final Timestamp createdAt;
+  Timestamp lastUpdatedAt;
 
   Note({
-    required this.id,
+    String? id,
     required this.journalId,
     required this.userId,
-    required this.comment,
-    required this.createdAt,
-    required this.eventTimestamp,
+    required this.content,
     required this.paletteElementId,
-  });
+    required this.eventTimestamp,
+    required this.createdAt,
+    required this.lastUpdatedAt,
+  }) : id = id ?? _uuid.v4();
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'journalId': journalId,
       'userId': userId,
-      'comment': comment,
-      'createdAt': createdAt,
-      'eventTimestamp': eventTimestamp,
+      'content': content,
       'paletteElementId': paletteElementId,
+      'eventTimestamp': eventTimestamp,
+      'createdAt': createdAt,
+      'lastUpdatedAt': lastUpdatedAt,
     };
   }
 
-  factory Note.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-    Map<String, dynamic> data = doc.data()!;
-    Timestamp eventTs = data['eventTimestamp'] ?? data['commentUpdatedAt'] ?? data['createdAt'] ?? Timestamp.now();
-    final String elementId = data['paletteElementId'] as String? ?? 'ID_INCONNU';
-    if (elementId == 'ID_INCONNU') {
-      print("Note Warning: 'paletteElementId' was missing or null for note ${doc.id}. Defaulting to 'ID_INCONNU'.");
-    }
-
+  factory Note.fromMap(Map<String, dynamic> map, String documentId) {
     return Note(
-      id: doc.id,
-      journalId: data['journalId'] ?? '',
-      userId: data['userId'] ?? '',
-      comment: data['comment'] ?? '',
-      createdAt: data['createdAt'] ?? Timestamp.now(),
-      eventTimestamp: eventTs,
-      paletteElementId: elementId,
+      id: documentId,
+      journalId: map['journalId'] as String? ?? '',
+      userId: map['userId'] as String? ?? '',
+      content: map['content'] as String? ?? '',
+      paletteElementId: map['paletteElementId'] as String? ?? '',
+      eventTimestamp: map['eventTimestamp'] as Timestamp? ?? Timestamp.now(),
+      createdAt: map['createdAt'] as Timestamp? ?? Timestamp.now(),
+      lastUpdatedAt: map['lastUpdatedAt'] as Timestamp? ?? Timestamp.now(),
+    );
+  }
+
+  Note copyWith({
+    String? id,
+    String? journalId,
+    String? userId,
+    String? content,
+    String? paletteElementId,
+    Timestamp? eventTimestamp,
+    Timestamp? createdAt,
+    Timestamp? lastUpdatedAt,
+  }) {
+    return Note(
+      id: id ?? this.id,
+      journalId: journalId ?? this.journalId,
+      userId: userId ?? this.userId,
+      content: content ?? this.content,
+      paletteElementId: paletteElementId ?? this.paletteElementId,
+      eventTimestamp: eventTimestamp ?? this.eventTimestamp,
+      createdAt: createdAt ?? this.createdAt,
+      lastUpdatedAt: lastUpdatedAt ?? this.lastUpdatedAt,
     );
   }
 }

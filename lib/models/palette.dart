@@ -1,30 +1,71 @@
-// lib/models/palette.dart
-import 'color_data.dart'; // Assurez-vous d'avoir défini ColorData
+import 'package:uuid/uuid.dart';
+import 'color_data.dart';
+
+const Uuid _uuid = Uuid();
 
 class Palette {
-  final String name; // Nom de la palette (souvent copié du modèle)
-  final List<ColorData> colors;
+  final String id;
+  String name;
+  List<ColorData> colors;
+  bool isPredefined;
+  String? userId;
 
-  Palette({required this.name, required this.colors});
+  Palette({
+    String? id,
+    required this.name,
+    required this.colors,
+    this.isPredefined = false,
+    this.userId,
+  }) : id = id ?? _uuid.v4();
 
-  // Méthode pour convertir cette instance en Map (pour Firestore)
-  Map<String, dynamic> toJson() {
-    return {'name': name, 'colors': colors.map((color) => color.toJson()).toList()};
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'colors': colors.map((color) => color.toMap()).toList(),
+      'isPredefined': isPredefined,
+      if (userId != null) 'userId': userId,
+    };
   }
 
-  // Méthode factory pour créer une instance Palette depuis une Map (depuis Firestore)
-  factory Palette.fromJson(Map<String, dynamic> json) {
-    var colorsList = json['colors'] as List<dynamic>? ?? [];
-    List<ColorData> parsedColors = colorsList.map((colorJson) => ColorData.fromJson(colorJson as Map<String, dynamic>)).toList();
-
-    return Palette(name: json['name'] ?? 'Palette sans nom', colors: parsedColors);
-  }
-
-  // Optionnel: Méthode pour créer une copie (utile pour la modification)
-  Palette copyWith({String? name, List<ColorData>? colors}) {
+  factory Palette.fromMap(Map<String, dynamic> map, String documentId) {
     return Palette(
+      id: documentId,
+      name: map['name'] as String? ?? 'Palette sans nom',
+      colors: (map['colors'] as List<dynamic>? ?? [])
+          .map((colorMap) => ColorData.fromMap(colorMap as Map<String, dynamic>))
+          .toList(),
+      isPredefined: map['isPredefined'] as bool? ?? false,
+      userId: map['userId'] as String?,
+    );
+  }
+
+  factory Palette.fromEmbeddedMap(Map<String, dynamic> map) {
+    return Palette(
+      id: map['id'] as String? ?? _uuid.v4(),
+      name: map['name'] as String? ?? 'Palette sans nom',
+      colors: (map['colors'] as List<dynamic>? ?? [])
+          .map((colorMap) => ColorData.fromMap(colorMap as Map<String, dynamic>))
+          .toList(),
+      isPredefined: map['isPredefined'] as bool? ?? false,
+      userId: map['userId'] as String?,
+    );
+  }
+
+
+  Palette copyWith({
+    String? id,
+    String? name,
+    List<ColorData>? colors,
+    bool? isPredefined,
+    String? userId,
+    bool clearUserId = false,
+  }) {
+    return Palette(
+      id: id ?? this.id,
       name: name ?? this.name,
-      colors: colors ?? List<ColorData>.from(this.colors.map((c) => ColorData(title: c.title, hexValue: c.hexValue))), // Copie profonde des couleurs
+      colors: colors ?? this.colors.map((c) => c.copyWith()).toList(),
+      isPredefined: isPredefined ?? this.isPredefined,
+      userId: clearUserId ? null : (userId ?? this.userId),
     );
   }
 }

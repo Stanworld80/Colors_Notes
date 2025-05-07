@@ -1,32 +1,64 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:colors_notes/models/palette.dart';
+import 'package:uuid/uuid.dart';
+import 'palette.dart';
+
+const Uuid _uuid = Uuid();
 
 class Journal {
-  final String id; // ID du document Firestore
-  final String name;
-  final String userId; // ID de l'utilisateur propriétaire
-  final Palette embeddedPaletteInstance; // Palette intégrée directement
+  final String id;
+  final String userId;
+  String name;
+  Palette palette;
+  final Timestamp createdAt;
+  Timestamp lastUpdatedAt;
 
-  Journal({required this.id, required this.name, required this.userId, required this.embeddedPaletteInstance});
+  Journal({
+    String? id,
+    required this.userId,
+    required this.name,
+    required this.palette,
+    required this.createdAt,
+    required this.lastUpdatedAt,
+  }) : id = id ?? _uuid.v4();
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
-      'name': name,
       'userId': userId,
-      // Convertit l'objet Palette en Map
-      'embeddedPaletteInstance': embeddedPaletteInstance.toJson(),
-      // Ne pas inclure l'ID ici, c'est l'ID du document
+      'name': name,
+      'palette': palette.toMap(),
+      'createdAt': createdAt,
+      'lastUpdatedAt': lastUpdatedAt,
     };
   }
 
-  factory Journal.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-    Map<String, dynamic> data = doc.data()!;
+  factory Journal.fromMap(Map<String, dynamic> map, String documentId) {
     return Journal(
-      id: doc.id,
-      name: data['name'] ?? 'journal sans nom',
-      userId: data['userId'] ?? '',
-      // Crée l'objet Palette depuis la Map stockée
-      embeddedPaletteInstance: Palette.fromJson(data['embeddedPaletteInstance'] as Map<String, dynamic>? ?? {}),
+      id: documentId,
+      userId: map['userId'] as String? ?? '',
+      name: map['name'] as String? ?? 'Journal sans nom',
+      palette: map['palette'] != null
+          ? Palette.fromEmbeddedMap(map['palette'] as Map<String, dynamic>)
+          : Palette(id: _uuid.v4(), name: "Palette par défaut", colors: [], userId: map['userId'] as String?),
+      createdAt: map['createdAt'] as Timestamp? ?? Timestamp.now(),
+      lastUpdatedAt: map['lastUpdatedAt'] as Timestamp? ?? Timestamp.now(),
+    );
+  }
+
+  Journal copyWith({
+    String? id,
+    String? userId,
+    String? name,
+    Palette? palette,
+    Timestamp? createdAt,
+    Timestamp? lastUpdatedAt,
+  }) {
+    return Journal(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      name: name ?? this.name,
+      palette: palette ?? this.palette.copyWith(),
+      createdAt: createdAt ?? this.createdAt,
+      lastUpdatedAt: lastUpdatedAt ?? this.lastUpdatedAt,
     );
   }
 }

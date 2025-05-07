@@ -1,33 +1,32 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AppUser {
-  final String id; // Correspond à l'UID de Firebase Auth
-  final String email;
-  final String role; // 'Utilisateur' ou 'Administrateur'
+  final String id;
+  final String? email;
+  final String? displayName;
+  final Timestamp registrationDate;
 
   AppUser({
     required this.id,
-    required this.email,
-    this.role = 'Utilisateur', // Rôle par défaut
+    this.email,
+    this.displayName,
+    required this.registrationDate,
   });
 
-  // Méthode pour convertir un AppUser en Map pour Firestore
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'email': email,
-      'role': role,
-      // L'ID n'est généralement pas stocké DANS le document lui-même
-      // mais utilisé comme ID du document.
+      'displayName': displayName,
+      'registrationDate': registrationDate,
     };
   }
 
-  // Méthode factory pour créer un AppUser depuis un DocumentSnapshot Firestore
-  factory AppUser.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-    Map<String, dynamic> data = doc.data()!;
+  factory AppUser.fromMap(Map<String, dynamic> map, String documentId) {
     return AppUser(
-      id: doc.id, // Récupère l'ID du document
-      email: data['email'] ?? '',
-      role: data['role'] ?? 'Utilisateur',
+      id: documentId,
+      email: map['email'] as String?,
+      displayName: map['displayName'] as String?,
+      registrationDate: map['registrationDate'] as Timestamp? ?? Timestamp.now(),
     );
   }
 }

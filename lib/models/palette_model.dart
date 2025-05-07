@@ -1,27 +1,57 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uuid/uuid.dart';
 import 'color_data.dart';
 
+const Uuid _uuid = Uuid();
+
 class PaletteModel {
-  final String id; // ID du document Firestore
-  final String userId;
-  final String name;
-  final List<ColorData> colors;
+  final String id;
+  String name;
+  List<ColorData> colors;
+  String? userId;
+  bool isPredefined;
 
-  PaletteModel({required this.id, required this.userId, required this.name, required this.colors});
+  PaletteModel({
+    String? id,
+    required this.name,
+    required this.colors,
+    this.userId,
+    this.isPredefined = false,
+  }) : id = id ?? _uuid.v4();
 
-  // Limites de taille (SF-PALETTE-04)
-  static const int minColors = 3;
-  static const int maxColors = 48;
-
-  Map<String, dynamic> toJson() {
-    return {'userId': userId, 'name': name, 'colors': colors.map((c) => c.toJson()).toList()};
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'colors': colors.map((color) => color.toMap()).toList(),
+      'userId': userId,
+      'isPredefined': isPredefined,
+    };
   }
 
-  factory PaletteModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-    Map<String, dynamic> data = doc.data()!;
-    var colorsList = data['colors'] as List<dynamic>? ?? [];
-    List<ColorData> parsedColors = colorsList.map((json) => ColorData.fromJson(json as Map<String, dynamic>)).toList();
+  factory PaletteModel.fromMap(Map<String, dynamic> map, String documentId) {
+    return PaletteModel(
+      id: documentId,
+      name: map['name'] as String? ?? 'Modèle sans nom',
+      colors: (map['colors'] as List<dynamic>? ?? [])
+          .map((colorMap) => ColorData.fromMap(colorMap as Map<String, dynamic>))
+          .toList(),
+      userId: map['userId'] as String?,
+      isPredefined: map['isPredefined'] as bool? ?? false,
+    );
+  }
 
-    return PaletteModel(id: doc.id, userId: data['userId'] ?? '', name: data['name'] ?? 'Modèle sans nom', colors: parsedColors);
+  PaletteModel copyWith({
+    String? id,
+    String? name,
+    List<ColorData>? colors,
+    String? userId,
+    bool? isPredefined,
+  }) {
+    return PaletteModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      colors: colors ?? this.colors.map((c) => c.copyWith()).toList(),
+      userId: userId ?? this.userId,
+      isPredefined: isPredefined ?? this.isPredefined,
+    );
   }
 }

@@ -1,170 +1,171 @@
-// lib/screens/journal_management_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/journal.dart';
-import '../providers/active_journal_provider.dart';
+import 'package:logger/logger.dart';
+import 'package:uuid/uuid.dart';
+import 'package:intl/intl.dart'; // Pour le formatage de date
+
+import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import '../providers/active_journal_provider.dart';
+import '../models/journal.dart';
 import 'create_journal_page.dart';
-import 'palette_model_management_page.dart';
+
+final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0, printTime: true));
+const _uuid = Uuid();
 
 class JournalManagementPage extends StatelessWidget {
-  const JournalManagementPage({Key? key}) : super(key: key);
+  JournalManagementPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final firestoreService = context.read<FirestoreService>();
-    final activeJournalNotifier = context.watch<ActiveJournalNotifier>(); // Watch pour l'ID actif
-    final userId = context.read<User?>()?.uid; // Lire User depuis Provider
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final firestoreService = Provider.of<FirestoreService>(context, listen: false);
+    final activeJournalNotifier = Provider.of<ActiveJournalNotifier>(context);
+    final String? currentUserId = authService.currentUser?.uid;
 
-    if (userId == null) {
-      return Scaffold(appBar: AppBar(title: const Text('Gérer les journaux')), body: const Center(child: Text("Utilisateur non connecté.")));
+    if (currentUserId == null) {
+      _loggerPage.w("JournalManagementPage: currentUserId est null.");
+      return Scaffold(
+          appBar: AppBar(title: Text('Gérer les Journaux')),
+          body: Center(child: Text("Utilisateur non connecté.")));
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gérer les journaux'),
-        // Optionnel: Bouton pour créer un nouveau journal (à implémenter plus tard)
-        // actions: [ IconButton(icon: Icon(Icons.add), onPressed: () {/* SF-AGENDA-01 */})],
-      ),
-      body: Column(
-        children: [
-          // La liste des journals prend l'espace restant
-          Expanded(
-            child: StreamBuilder<List<Journal>>(
-              stream: firestoreService.getUserJournalsStream(userId),
-              builder: (context, snapshot) {
-                // Gérer les états du Stream
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(child: Text('Erreur: ${snapshot.error}'));
-                }
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  // Peut arriver brièvement ou si la création par défaut a échoué
-                  return const Center(child: Text('Aucun journal trouvé.'));
-                }
-
-                // Si on a des données
-                final journals = snapshot.data!;
-
-                return ListView.builder(
-                  itemCount: journals.length,
-                  itemBuilder: (context, index) {
-                    final journal = journals[index];
-                    final bool isActive = journal.id == activeJournalNotifier.activeJournalId;
-
-                    return Card(
-                      color: isActive ? Theme.of(context).colorScheme.primaryContainer : null,
-                      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                      child: ListTile(
-                        leading: Icon((isActive ? Icons.arrow_forward_outlined : null), size: 20),
-                        title: Text(journal.name + (isActive ? ' (ACTIF)' : '')),
-                        // Sélectionner l'journal actif en tapant dessus
-                        onTap: () {
-                          // Lire le notifier SANS écouter pour appeler une méthode
-                          context.read<ActiveJournalNotifier>().setActiveJournal(journal);
-                          // Optionnel : revenir à l'accueil
-                          // Provider.of<NavigationState>(context, listen: false).selectedIndex = 0;
-                        },
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          // Important pour la taille de la Row
-                          children: [
-                            // Bouton Renommer
-                            IconButton(
-                              icon: const Icon(Icons.edit_outlined, size: 20),
-                              tooltip: 'Renommer',
-                              // Note: La fonction _showRenameJournalDialog doit être définie
-                              // dans la classe JournalManagementPage (ou passée en paramètre)
-                              onPressed: () => _showRenameJournalDialog(context, journal),
-                            ),
-                            // Bouton Supprimer
-                            IconButton(
-                              icon: Icon(Icons.delete_outline, size: 20, color: journals.length > 1 ? Colors.redAccent : Colors.grey),
-                              tooltip: journals.length > 1 ? 'Supprimer' : 'Impossible de supprimer le dernier journal',
-                              // Note: La fonction _showDeleteJournalDialog doit être définie
-                              // dans la classe JournalManagementPage (ou passée en paramètre)
-                              onPressed: journals.length > 1 ? () => _showDeleteJournalDialog(context, journal, firestoreService) : null, // Désactiver si un seul journal
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ), // Fin de Expanded
-          // --- Bouton "Gérer mes Modèles de Palettes" ---
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 90.0), // Augmentation du padding inférieur
-            child: ElevatedButton.icon(
-              icon: const Icon(Icons.palette_outlined),
-              label: const Text('Gérer mes Modèles de Palettes'),
-              style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 40)),
-              onPressed: () {
-                // Naviguer vers l'écran de gestion des palettes modèles
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const PaletteModelManagementPage()));
-              },
-            ),
+        title: Text('Gérer les Journaux'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add_circle_outline),
+            tooltip: "Créer un nouveau journal",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CreateJournalPage()),
+              );
+            },
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        icon: const Icon(Icons.add),
-        label: const Text("Nouveau Journal"),
-        tooltip: 'Créer un nouveau journal', // Tooltip ajouté
-        onPressed: () {
-          Navigator.push(
-            context,
-            // Naviguer vers la page de création d'journal
-            MaterialPageRoute(builder: (_) => const CreateJournalPage()),
+      body: StreamBuilder<List<Journal>>(
+        stream: firestoreService.getJournalsStream(currentUserId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            _loggerPage.e("Erreur chargement journaux: ${snapshot.error}");
+            return Center(child: Text('Erreur de chargement des journaux.'));
+          }
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.menu_book_outlined, size: 60, color: Theme.of(context).colorScheme.secondary),
+                        SizedBox(height: 16),
+                        Text('Aucun journal trouvé.', style: Theme.of(context).textTheme.headlineSmall),
+                        SizedBox(height: 8),
+                        Text('Créez votre premier journal en utilisant le bouton "+" en haut.', textAlign: TextAlign.center),
+                      ]
+                  ),
+                )
+            );
+          }
+
+          final journals = snapshot.data!;
+          final DateFormat dateFormat = DateFormat('dd MMM yyyy, HH:mm', 'fr_FR');
+
+          return ListView.builder(
+            itemCount: journals.length,
+            itemBuilder: (context, index) {
+              final journal = journals[index];
+              final bool isActive = journal.id == activeJournalNotifier.activeJournalId;
+
+              return Card(
+                margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                color: isActive ? Theme.of(context).colorScheme.primary.withOpacity(0.1) : null,
+                child: ListTile(
+                  leading: Icon(isActive ? Icons.book : Icons.book_outlined, color: Theme.of(context).colorScheme.primary),
+                  title: Text(journal.name, style: TextStyle(fontWeight: isActive ? FontWeight.bold : FontWeight.normal)),
+                  subtitle: Text('Créé le: ${dateFormat.format(journal.createdAt.toDate().toLocal())}'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.edit_outlined),
+                        tooltip: "Modifier le nom",
+                        onPressed: () => _editJournalNameDialog(context, journal, firestoreService),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.delete_forever_outlined, color: Colors.redAccent),
+                        tooltip: "Supprimer le journal",
+                        onPressed: () => _deleteJournalDialog(context, journal, firestoreService, activeJournalNotifier, currentUserId),
+                      ),
+                    ],
+                  ),
+                  selected: isActive,
+                  onTap: () {
+                    if (!isActive) {
+                      activeJournalNotifier.setActiveJournal(journal.id, currentUserId);
+                      _loggerPage.i("Journal actif changé vers: ${journal.name}");
+                      // Optionnel: revenir à la page précédente si on est venu de là pour choisir
+                      // if (Navigator.canPop(context)) {
+                      //   Navigator.pop(context);
+                      // }
+                    }
+                  },
+                ),
+              );
+            },
           );
         },
       ),
     );
   }
 
-  // --- Fonctions pour les Dialogues ---
-
-  void _showRenameJournalDialog(BuildContext context, Journal journal) {
+  Future<void> _editJournalNameDialog(BuildContext context, Journal journal, FirestoreService firestoreService) async {
     final TextEditingController nameController = TextEditingController(text: journal.name);
-    showDialog(
+    return showDialog<void>(
       context: context,
-      builder: (dialogContext) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Renommer l\'journal'),
-          content: TextField(controller: nameController, autofocus: true, decoration: const InputDecoration(labelText: 'Nouveau nom')),
-          actions: [
-            TextButton(child: const Text('Annuler'), onPressed: () => Navigator.of(dialogContext).pop()),
-            ElevatedButton(
-              child: const Text('Enregistrer'),
+          title: Text('Modifier le nom du journal'),
+          content: TextField(
+            controller: nameController,
+            decoration: InputDecoration(hintText: "Nouveau nom du journal"),
+            autofocus: true,
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Annuler'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Sauvegarder'),
               onPressed: () async {
                 final newName = nameController.text.trim();
+                Navigator.of(dialogContext).pop(); // Fermer avant l'opération async
                 if (newName.isNotEmpty && newName != journal.name) {
-                  final fs = dialogContext.read<FirestoreService>();
                   try {
-                    await fs.updateJournalName(journal.id, newName);
-                    // Mettre à jour aussi le nom dans le notifier si c'est l'journal actif
-                    final activeNotifier = dialogContext.read<ActiveJournalNotifier>();
-                    if (activeNotifier.activeJournalId == journal.id) {
-                      // Créer un nouvel objet Journal avec le nom mis à jour pour le notifier
-                      final updatedJournal = Journal(id: journal.id, name: newName, userId: journal.userId, embeddedPaletteInstance: journal.embeddedPaletteInstance);
-                      activeNotifier.setActiveJournal(updatedJournal);
-                    }
-                    Navigator.of(dialogContext).pop();
-                  } catch (e) {
-                    print("Error renaming journal: $e");
-                    Navigator.of(dialogContext).pop();
-                    // Afficher une erreur
+                    await firestoreService.updateJournalName(journal.id, newName);
+                    _loggerPage.i("Nom du journal ${journal.id} mis à jour vers '$newName'");
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Nom du journal mis à jour.')),
+                      );
+                    }
+                  } catch (e) {
+                    _loggerPage.e("Erreur màj nom journal: $e");
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Erreur: ${e.toString()}')),
+                      );
                     }
                   }
-                } else {
-                  Navigator.of(dialogContext).pop();
                 }
               },
             ),
@@ -174,57 +175,59 @@ class JournalManagementPage extends StatelessWidget {
     );
   }
 
-  void _showDeleteJournalDialog(BuildContext context, Journal journal, FirestoreService firestoreService) {
-    final TextEditingController deleteController = TextEditingController();
-    showDialog(
+  Future<void> _deleteJournalDialog(BuildContext context, Journal journalToDelete, FirestoreService firestoreService, ActiveJournalNotifier activeJournalNotifier, String currentUserId) async {
+    return showDialog<void>(
       context: context,
-      builder: (dialogContext) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Confirmer la suppression'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Voulez-vous vraiment supprimer l\'journal "${journal.name}" ?'),
-              const Text('Toutes les notes associées seront perdues.', style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 15),
-              // Champ pour confirmation renforcée (SF-AGENDA-06a)
-              TextField(controller: deleteController, autofocus: true, decoration: const InputDecoration(labelText: 'Tapez "delete" pour confirmer', hintText: 'delete')),
-            ],
-          ),
-          actions: [
-            TextButton(child: const Text('Annuler'), onPressed: () => Navigator.of(dialogContext).pop()),
-            ValueListenableBuilder<TextEditingValue>(
-              // Pour activer/désactiver le bouton
-              valueListenable: deleteController,
-              builder: (context, value, child) {
-                return TextButton(
-                  style: TextButton.styleFrom(foregroundColor: Colors.red),
-                  onPressed:
-                      value.text.trim().toLowerCase() == 'delete'
-                          ? () async {
-                            try {
-                              // Réinitialiser l'journal actif si c'est celui qu'on supprime
-                              final activeNotifier = dialogContext.read<ActiveJournalNotifier>();
-                              if (activeNotifier.activeJournalId == journal.id) {
-                                activeNotifier.setActiveJournal(null); // Ou choisir un autre journal ?
-                              }
+          title: Text('Supprimer le journal ?'),
+          content: Text('"${journalToDelete.name}" et toutes ses notes seront supprimés définitivement. Cette action est irréversible.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Annuler'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: Text('Supprimer'),
+              onPressed: () async {
+                Navigator.of(dialogContext).pop();
+                bool wasActive = activeJournalNotifier.activeJournalId == journalToDelete.id;
 
-                              await firestoreService.deleteJournal(journal.id); // Doit supprimer les notes !
-                              Navigator.of(dialogContext).pop();
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Journal supprimé.'), duration: Duration(seconds: 2)));
-                              }
-                            } catch (e) {
-                              print("Error deleting journal: $e");
-                              Navigator.of(dialogContext).pop();
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red));
-                              }
-                            }
-                          }
-                          : null, // Désactiver si 'delete' n'est pas tapé
-                  child: const Text('Supprimer'),
-                );
+                try {
+                  await firestoreService.deleteJournal(journalToDelete.id, currentUserId);
+                  _loggerPage.i("Journal ${journalToDelete.id} supprimé.");
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Journal "${journalToDelete.name}" supprimé.')),
+                    );
+                  }
+
+                  if (wasActive) {
+                    _loggerPage.i("Rechargement du journal initial après suppression du journal actif.");
+                    // Déclenche _loadInitialJournalForUser dans le notifier pour sélectionner un nouveau journal ou vider l'état
+                    final journals = await firestoreService.getJournalsStream(currentUserId).first;
+                    if (context.mounted) { // Vérifier à nouveau après l'await
+                      if (journals.isNotEmpty) {
+                        await activeJournalNotifier.setActiveJournal(journals.first.id, currentUserId);
+                      } else {
+                        activeJournalNotifier.clearActiveJournalState();
+                        // Forcer la notification si clearActiveJournalState ne le fait pas
+                        Provider.of<ActiveJournalNotifier>(context, listen: false).notifyListeners();
+                      }
+                    }
+                  }
+
+                } catch (e) {
+                  _loggerPage.e("Erreur suppression journal: $e");
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Erreur de suppression: ${e.toString()}')),
+                    );
+                  }
+                }
               },
             ),
           ],

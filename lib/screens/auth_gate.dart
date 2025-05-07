@@ -1,67 +1,38 @@
-import 'package:colors_notes/services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-class AuthGate extends StatefulWidget {
-  const AuthGate({Key? key}) : super(key: key);
+import '../services/auth_service.dart';
+import 'main_screen.dart';
+import 'sign_in_page.dart';
 
-  @override
-  _AuthGate createState() => _AuthGate();
-}
-
-class _AuthGate extends State<AuthGate> {
-  String? _errorMessage;
-
-  // Instance de notre AuthService (avec GoogleSignIn)
-  final AuthService _authService = AuthService();
-
-  // Méthode pour se connecter avec Google
-  Future<void> _signInWithGoogle() async {
-    try {
-      await _authService.signInWithGoogle();
-      // Si l'authentification réussit, on redirige l'utilisateur
-      Navigator.pushReplacementNamed(context, '/logged_homepage');
-    } catch (e) {
-      // Vérifier si le widget est toujours monté avant d'appeler setState
-      if (mounted) {
-        setState(() {
-          _errorMessage = 'Google Sign-In failed. Please try again.';
-        });
-      } else {
-        print("AuthGate not mounted, skipping setState for Google Sign-In error.");
-      }
-    }
-  }
+class AuthGate extends StatelessWidget {
+  AuthGate({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Colors & Notes')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (_errorMessage != null) Padding(padding: const EdgeInsets.only(bottom: 15.0), child: Text(_errorMessage!, style: const TextStyle(color: Colors.red), textAlign: TextAlign.center)),
-            const Text('Please sign in or register', style: TextStyle(fontSize: 20)),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/signin');
-              },
-              child: const Text('Sign In'),
-            ),
-            const SizedBox(height: 20),
-            // Bouton de connexion via Google
-            ElevatedButton.icon(onPressed: _signInWithGoogle, icon: const Icon(Icons.account_circle), label: const Text('Sign In with Google')),
-            const SizedBox(height: 10),
-            OutlinedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/register');
-              },
-              child: const Text('Register'),
-            ),
-          ],
-        ),
-      ),
+    final authService = Provider.of<AuthService>(context, listen: false);
+
+    return StreamBuilder<User?>(
+      stream: authService.userStream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(child: Text('Erreur: ${snapshot.error}')),
+          );
+        }
+
+        if (snapshot.hasData) {
+          return MainScreen();
+        } else {
+          return SignInPage();
+        }
+      },
     );
   }
 }

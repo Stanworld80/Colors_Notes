@@ -1,167 +1,153 @@
-// lib/services/auth_service.dart
-import 'package:colors_notes/models/app_user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'firestore_service.dart'; // Importer FirestoreService
-import '../models/journal.dart'; // Importer les modèles nécessaires
-import '../models/palette.dart';
-import '../models/color_data.dart';
+import 'package:logger/logger.dart';
+import 'firestore_service.dart';
+
+final _logger = Logger(
+  printer: PrettyPrinter(
+    methodCount: 1, errorMethodCount: 8, lineLength: 120,
+    colors: true, printEmojis: true, printTime: true,
+  ),
+);
 
 class AuthService {
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn(clientId: "523869870608-c167do1sb6lfrhcg8tsgughi6gcckcdi.apps.googleusercontent.com");
+  final FirebaseAuth _firebaseAuth;
+  final GoogleSignIn _googleSignIn;
+  final FirestoreService _firestoreService;
 
-  // Ajouter une instance de FirestoreService
-  final FirestoreService _firestoreService = FirestoreService();
+  AuthService(this._firebaseAuth, this._googleSignIn, this._firestoreService);
 
-  // Ajouter ce getter :
-  Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
+  Stream<User?> get userStream => _firebaseAuth.authStateChanges();
+  User? get currentUser => _firebaseAuth.currentUser;
 
-  // ... (currentUser, isUserLoggedIn restent inchangés)
-
-  // --- Modification de l'inscription Email/Password ---
-  Future<User?> signUpWithEmailPassword(String email, String password) async {
+  Future<User?> signUpWithEmailAndPassword(String email, String password, String displayName) async {
     try {
-      UserCredential userCredential = await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
+      UserCredential userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
       User? user = userCredential.user;
-
       if (user != null) {
-        print(">>> AUTH SUCCEEDED for ${user.uid}. Attempting Firestore writes..."); // DEBUG
-
-        // --- Bloc try-catch pour l'écriture Firestore ---
-        try {
-          print(">>> Calling createUserDocument..."); // DEBUG
-          await _firestoreService.createUserDocument(user);
-          print(">>> DONE createUserDocument."); // DEBUG
-
-          print(">>> Calling _createDefaultJournalForUser..."); // DEBUG
-          await _createDefaultJournalForUser(user.uid);
-          print(">>> DONE _createDefaultJournalForUser."); // DEBUG
-
-          print("Firestore user document and default journal potentially created for new user ${user.uid}");
-        } catch (e) {
-          // Attraper et afficher les erreurs spécifiques à Firestore
-          print(">>> !!! ERROR during Firestore document creation: $e"); // DEBUG
-          // Optionnel: vous pourriez vouloir propager cette erreur
-          // ou la logger plus formellement.
-        }
-        // ------------------------------------------------
-      } else {
-        print(">>> AUTH SUCCEEDED but user object is null."); // DEBUG (ne devrait pas arriver)
+        await user.updateDisplayName(displayName);
+        await _firestoreService.initializeNewUserData(user, displayName: displayName, email: email);
+        _logger.i('Utilisateur inscrit et données initialisées: ${user.uid}');
+        return user;
       }
-      return user; // Retourne l'utilisateur même si Firestore a échoué pour l'instant
-    } on FirebaseAuthException catch (e) {
-      print(">>> !!! FirebaseAuthException during signUp: ${e.code} - ${e.message}"); // DEBUG
-      rethrow;
-    } catch (e) {
-      print(">>> !!! UNEXPECTED ERROR during signUp: $e"); // DEBUG - Autre erreur ?
-      rethrow;
+      _logger.w('Inscription: UserCredential.user est null après la création.');
+      return null;
+    } on FirebaseAuthException catch (e, stackTrace) {
+      _logger.e('FirebaseAuthException lors de l\'inscription', error: e, stackTrace: stackTrace);
+      throw _handleAuthException(e);
+    } catch (e, stackTrace) {
+      _logger.e('Erreur générique lors de l\'inscription', error: e, stackTrace: stackTrace);
+      throw 'Une erreur inconnue est survenue lors de l\'inscription. Veuillez réessayer.';
     }
   }
 
-  // --- Modification de la connexion Google ---
+  Future<User?> signInWithEmailAndPassword(String email, String password) async {
+    try {
+      UserCredential userCredential = await _firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      _logger.i('Utilisateur connecté avec email: ${userCredential.user?.uid}');
+      return userCredential.user;
+    } on FirebaseAuthException catch (e, stackTrace) {
+      _logger.e('FirebaseAuthException lors de la connexion', error: e, stackTrace: stackTrace);
+      throw _handleAuthException(e);
+    } catch (e, stackTrace) {
+      _logger.e('Erreur générique lors de la connexion', error: e, stackTrace: stackTrace);
+      throw 'Une erreur inconnue est survenue lors de la connexion. Veuillez réessayer.';
+    }
+  }
+
   Future<User?> signInWithGoogle() async {
     try {
-      // ... (processus Google Sign In jusqu'à obtenir le credential)
-      GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
-        return null; // L'utilisateur a annulé
+        _logger.i('Connexion Google annulée par l\'utilisateur.');
+        return null;
       }
-      GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      OAuthCredential credential = GoogleAuthProvider.credential(accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
 
-      // Utiliser le credential pour se connecter ou s'inscrire à Firebase
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
       UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
       User? user = userCredential.user;
 
       if (user != null) {
-        // <<< NOUVEAU: Vérifier si c'est la première connexion/inscription via Google >>>
-        // On vérifie si le document Firestore existe DEJA
-        AppUser? existingAppUser = await _firestoreService.getAppUser(user.uid);
-
-        if (existingAppUser == null) {
-          // Si le document n'existe pas, c'est une "nouvelle" inscription Firestore
-          print("First time Firestore setup for Google user ${user.uid}");
-          await _firestoreService.createUserDocument(user);
-          await _createDefaultJournalForUser(user.uid);
-          print("Firestore user document and default journal created for Google user ${user.uid}");
+        bool isNewUser = userCredential.additionalUserInfo?.isNewUser ?? false;
+        if (isNewUser) {
+          _logger.i('Nouvel utilisateur Google détecté: ${user.uid}. Initialisation des données.');
+          await _firestoreService.initializeNewUserData(user, displayName: user.displayName, email: user.email);
         } else {
-          print("Google user ${user.uid} already exists in Firestore.");
-          // Optionnel : vérifier si l'journal par défaut existe, au cas où le processus
-          // aurait échoué la première fois (moins prioritaire pour le MVP)
+          _logger.i('Utilisateur Google existant connecté: ${user.uid}');
         }
+        return user;
       }
-      return user;
-    } catch (e) {
-      print("Error signing in with Google: $e");
-      rethrow;
-    }
-  }
-
-  // --- Connexion Email/Password (Pas besoin de créer l'journal ici) ---
-  Future<User?> signInWithEmailPassword(String email, String password) async {
-    // Pas de changement ici, on ne crée le document/journal qu'à l'inscription
-    try {
-      UserCredential userCredential = await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
-      return userCredential.user;
-    } on FirebaseAuthException catch (e) {
-      print("Error signing in with email and password: $e");
-      rethrow;
+      _logger.w('Connexion Google: UserCredential.user est null après la connexion.');
+      return null;
+    } on FirebaseAuthException catch (e, stackTrace) {
+      _logger.e('FirebaseAuthException lors de la connexion Google', error: e, stackTrace: stackTrace);
+      throw _handleAuthException(e);
+    } catch (e, stackTrace) {
+      _logger.e('Erreur générique lors de la connexion Google', error: e, stackTrace: stackTrace);
+      throw 'Une erreur est survenue lors de la connexion avec Google. Veuillez réessayer.';
     }
   }
 
   Future<void> signOut() async {
     try {
-      // Se déconnecter de Firebase Auth
+      if (await _googleSignIn.isSignedIn()) {
+        await _googleSignIn.signOut();
+        _logger.i('Google Sign-In déconnecté.');
+      }
       await _firebaseAuth.signOut();
-      // Tenter aussi de se déconnecter de Google Sign In au cas où
-      await _googleSignIn.signOut();
-    } catch (e) {
-      print("Error signing out: $e");
-      // Optionnel: ne pas relancer l'erreur pour ne pas bloquer l'UI
-      // rethrow;
+      _logger.i('Utilisateur Firebase déconnecté.');
+    } catch (e, stackTrace) {
+      _logger.e('Erreur lors de la déconnexion', error: e, stackTrace: stackTrace);
+      throw 'Une erreur est survenue lors de la déconnexion.';
     }
   }
 
-  // --- Méthode privée pour créer l'journal par défaut ---
-  Future<void> _createDefaultJournalForUser(String userId) async {
-    print(">>> ENTERED _createDefaultJournalForUser for $userId"); // DEBUG
-    try {
-      // 1. Définir la palette par défaut
-      Palette defaultPalette = Palette(
-        name: "Palette par défaut", // Ou un nom plus générique
-        colors: [
-          ColorData(title: "Important", hexValue: "#FF0000"), // Rouge
-          ColorData(title: "Travail", hexValue: "#0000FF"), // Bleu
-          ColorData(title: "Personnel", hexValue: "#00FF00"), // Vert
-          ColorData(title: "Idée", hexValue: "#FFFF00"), // Jaune
-        ],
-      );
-
-      // 2. Créer l'objet Journal
-      // Note: L'ID de l'journal sera généré par Firestore lors de l'appel à .add()
-      // Nous créons un objet "modèle" sans ID ici.
-      // Ajustez la classe Journal et FirestoreService.createJournal si nécessaire.
-      // Supposons que createJournal prend un objet Journal sans ID et le userId séparément
-      Journal defaultJournal = Journal(
-        id: '', // Laissé vide, Firestore générera l'ID
-        name: "Journal par défaut",
-        userId: userId,
-        embeddedPaletteInstance: defaultPalette,
-      );
-
-      // 3. Appeler FirestoreService pour créer l'journal
-      // Assurez-vous que votre méthode createJournal dans FirestoreService
-      // gère bien l'ajout et retourne l'ID si besoin.
-      print(">>> Attempting to add default journal to Firestore for $userId"); // DEBUG
-      await _firestoreService.createJournal(userId, defaultJournal);
-      print(">>> Default journal potentially added to Firestore for $userId"); // DEBUG
-    } catch (e) {
-      print("Error creating default journal for user $userId: $e");
-      print(">>> !!! ERROR in _createDefaultJournalForUser for $userId: $e"); // DEBUG
-      // Gérer l'erreur (peut-être logger ou afficher un message)
+  String _handleAuthException(FirebaseAuthException e) {
+    _logger.w("Auth Exception Code: ${e.code}, Message: ${e.message}");
+    String message = "Une erreur d'authentification est survenue. (${e.code})";
+    switch (e.code) {
+      case 'weak-password':
+        message = 'Le mot de passe fourni est trop faible.';
+        break;
+      case 'email-already-in-use':
+        message = 'Un compte existe déjà pour cette adresse e-mail.';
+        break;
+      case 'invalid-email':
+        message = 'L\'adresse e-mail n\'est pas valide.';
+        break;
+      case 'user-not-found':
+      case 'INVALID_LOGIN_CREDENTIALS':
+        message = 'Aucun utilisateur trouvé ou mot de passe incorrect.';
+        break;
+      case 'wrong-password':
+        message = 'Mot de passe incorrect.';
+        break;
+      case 'user-disabled':
+        message = 'Ce compte utilisateur a été désactivé.';
+        break;
+      case 'too-many-requests':
+        message = 'Trop de tentatives. Veuillez réessayer plus tard.';
+        break;
+      case 'operation-not-allowed':
+        message = 'L\'authentification par e-mail et mot de passe n\'est pas activée.';
+        break;
+      case 'network-request-failed':
+        message = 'Erreur de réseau. Vérifiez votre connexion internet.';
+        break;
+      default:
+        message = e.message ?? message;
     }
+    return message;
   }
-
-  // ... (signOut, isGoogleUserLoggedIn restent inchangés)
 }

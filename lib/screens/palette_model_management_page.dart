@@ -1,130 +1,188 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:logger/logger.dart';
 
-import '../models/palette_model.dart';
+import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
+import '../models/palette_model.dart';
+import '../core/predefined_templates.dart';
 import 'edit_palette_model_page.dart';
 
+final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0));
+
 class PaletteModelManagementPage extends StatelessWidget {
-  const PaletteModelManagementPage({Key? key}) : super(key: key);
+  PaletteModelManagementPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final firestoreService = context.read<FirestoreService>();
-    final userId = context.watch<User?>()?.uid;
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final firestoreService = Provider.of<FirestoreService>(context, listen: false);
+    final String? currentUserId = authService.currentUser?.uid;
+
+    if (currentUserId == null) {
+      _loggerPage.w("PaletteModelManagementPage: currentUserId est null.");
+      return Scaffold(
+        appBar: AppBar(title: Text('Gérer les Modèles de Palette')),
+        body: Center(child: Text("Utilisateur non connecté.")),
+      );
+    }
+
+    final List<PaletteModel> staticPredefinedPalettes = predefinedPalettes;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Mes Modèles de Palettes')),
-      body:
-          userId == null
-              ? const Center(child: Text("Veuillez vous connecter."))
-              : StreamBuilder<List<PaletteModel>>(
-                stream: firestoreService.getUserPaletteModelsStream(userId),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    print("Error loading palette models: ${snapshot.error}");
-                    return Center(child: Text('Erreur: ${snapshot.error}'));
-                  }
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(
-                      child: Padding(padding: EdgeInsets.all(16.0), child: Text('Aucun modèle de palette créé.\nCliquez sur "+" pour en ajouter un.', textAlign: TextAlign.center)),
-                    );
-                  }
+      appBar: AppBar(
+        title: Text('Modèles de Palette'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add_circle_outline),
+            tooltip: "Créer un nouveau modèle personnel",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditPaletteModelPage(),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+      body: StreamBuilder<List<PaletteModel>>(
+        stream: firestoreService.getUserPaletteModelsStream(currentUserId),
+        builder: (context, userModelsSnapshot) {
+          if (userModelsSnapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (userModelsSnapshot.hasError) {
+            _loggerPage.e("Erreur chargement modèles utilisateur: ${userModelsSnapshot.error}");
+            return Center(child: Text('Erreur de chargement des modèles personnels.'));
+          }
 
-                  final models = snapshot.data!;
+          final List<PaletteModel> userModels = userModelsSnapshot.data ?? [];
+          final List<PaletteModel> allModels = [...staticPredefinedPalettes, ...userModels];
 
-                  return ListView.builder(
-                    itemCount: models.length,
-                    itemBuilder: (context, index) {
-                      final model = models[index];
-                      return Card(
-                        margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                        child: ListTile(
-                          leading: Wrap(
-                            spacing: 2,
-                            runSpacing: 2,
-                            children: model.colors.take(4).map((c) => Container(width: 12, height: 12, color: _safeParseColor(c.hexValue), margin: const EdgeInsets.all(1))).toList(),
-                          ),
-                          title: Text(model.name),
-                          subtitle: Text("${model.colors.length} couleurs"),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit_outlined, size: 20),
-                                tooltip: 'Modifier',
-                                onPressed: () {
-                                  Navigator.push(context, MaterialPageRoute(builder: (_) => EditPaletteModelPage(existingPaletteModel: model))); // Mode édition
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline, size: 20, color: Colors.redAccent),
-                                tooltip: 'Supprimer',
-                                onPressed: () => _showDeletePaletteModelConfirmDialog(context, model, firestoreService),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
+          if (allModels.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.palette_outlined, size: 60, color: Theme.of(context).colorScheme.secondary),
+                    SizedBox(height: 16),
+                    Text(
+                      'Aucun modèle de palette disponible.',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Créez votre premier modèle personnel en appuyant sur le bouton "+" en haut.',
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        tooltip: "Nouvelle Palette Modèle",
-        onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const EditPaletteModelPage()));
+            );
+          }
+
+          return ListView.builder(
+            itemCount: allModels.length,
+            itemBuilder: (context, index) {
+              final model = allModels[index];
+              final bool isEditable = !model.isPredefined;
+
+              return Card(
+                margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                child: ListTile(
+                  title: Text(model.name),
+                  subtitle: Text("${model.colors.length} couleurs ${model.isPredefined ? '(Prédéfini)' : '(Personnel)'}"),
+                  leading: Icon(Icons.style_outlined, color: model.colors.isNotEmpty ? model.colors.first.color : Theme.of(context).colorScheme.primary),
+                  trailing: isEditable ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.edit_outlined),
+                        tooltip: "Modifier le modèle",
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditPaletteModelPage(paletteModelToEdit: model),
+                            ),
+                          );
+                        },
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.delete_forever_outlined, color: Colors.redAccent),
+                        tooltip: "Supprimer le modèle",
+                        onPressed: () => _confirmDeleteModel(context, firestoreService, model),
+                      ),
+                    ],
+                  ) : null,
+                  onTap: isEditable ? () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditPaletteModelPage(paletteModelToEdit: model),
+                      ),
+                    );
+                  } : null,
+                ),
+              );
+            },
+          );
         },
       ),
     );
   }
 
-  void _showDeletePaletteModelConfirmDialog(BuildContext context, PaletteModel model, FirestoreService firestoreService) {
-    showDialog(
+  Future<void> _confirmDeleteModel(BuildContext context, FirestoreService firestoreService, PaletteModel modelToDelete) async {
+    if (modelToDelete.isPredefined) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Les modèles prédéfinis ne peuvent pas être supprimés.')),
+      );
+      return;
+    }
+
+    final bool? confirm = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Confirmer la suppression'),
-          content: Text('Supprimer le modèle "${model.name}" ?\n(N\'affecte pas les journals existants).'),
-          actions: [
-            TextButton(child: const Text('Annuler'), onPressed: () => Navigator.of(dialogContext).pop()),
+          title: Text('Supprimer le Modèle ?'),
+          content: Text('Voulez-vous vraiment supprimer le modèle de palette "${modelToDelete.name}" ? Cette action est irréversible.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Annuler'),
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+            ),
             TextButton(
               style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('Supprimer'),
-              onPressed: () async {
-                try {
-                  // Utiliser dialogContext pour lire le service
-                  final fs = dialogContext.read<FirestoreService>();
-                  await fs.deletePaletteModel(model.id);
-                  Navigator.of(dialogContext).pop();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Modèle supprimé.'), duration: Duration(seconds: 2)));
-                  }
-                } catch (e) {
-                  print("Error deleting palette model: $e");
-                  Navigator.of(dialogContext).pop();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red));
-                  }
-                }
-              },
+              child: Text('Supprimer'),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
             ),
           ],
         );
       },
     );
-  }
 
-  Color _safeParseColor(String hexString) {
-    try {
-      return Color(int.parse(hexString.replaceFirst('#', 'FF'), radix: 16));
-    } catch (e) {
-      return Colors.grey; // Couleur par défaut en cas d'erreur
+    if (confirm == true) {
+      try {
+        await firestoreService.deletePaletteModel(modelToDelete.id);
+        _loggerPage.i("Modèle ${modelToDelete.name} supprimé.");
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Modèle "${modelToDelete.name}" supprimé.')),
+          );
+        }
+      } catch (e) {
+        _loggerPage.e("Erreur suppression modèle: $e");
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Erreur de suppression: ${e.toString()}')),
+          );
+        }
+      }
     }
   }
 }

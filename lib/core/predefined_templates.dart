@@ -1,64 +1,57 @@
-// lib/core/predefined_templates.dart
+import '../models/palette_model.dart';
 import '../models/color_data.dart';
-import '../models/palette.dart'; // Utiliser Palette pour la structure
 
-// Modèles de Palettes Génériques (SF-TEMPLATE-02)
-final predefinedGenericPalettes = <String, List<ColorData>>{
-  'Palette simple 4 couleurs': [
-    ColorData(title: 'Tomato', hexValue: '#FF6347'), // Tomato
-    ColorData(title: 'SteelBlue', hexValue: '#4682B4'), // SteelBlue
-    ColorData(title: 'LimeGreen', hexValue: '#32CD32'), // LimeGreen
-    ColorData(title: 'Gold', hexValue: '#FFD700'), // Gold
-  ],
-  'Palette neutre (6 couleurs)': [
-    ColorData(title: 'Gris 1', hexValue: '#D3D3D3'),
-    ColorData(title: 'Gris 2', hexValue: '#A9A9A9'),
-    ColorData(title: 'Gris 3', hexValue: '#808080'),
-    ColorData(title: 'Beige 1', hexValue: '#F5F5DC'),
-    ColorData(title: 'Beige 2', hexValue: '#FFE4C4'),
-    ColorData(title: 'Blanc Cassé', hexValue: '#FAF0E6'),
-  ],
-  // Ajoutez d'autres modèles génériques ici
-};
-
-// Modèles d'Journals Thématiques (SF-TEMPLATE-01)
-class PredefinedJournalTemplate {
-  final String templateName;
-  final String suggestedJournalName;
-  final Palette paletteDefinition;
-
-  PredefinedJournalTemplate({required this.templateName, required this.suggestedJournalName, required this.paletteDefinition});
-}
-
-final predefinedJournalTemplates = <PredefinedJournalTemplate>[
-  PredefinedJournalTemplate(
-    templateName: 'Sport',
-    suggestedJournalName: 'Mon Suivi Sportif',
-    paletteDefinition: Palette(
-      name: 'Palette Sport',
-      colors: [
-        ColorData(title: 'Endurance', hexValue: '#4682B4'),
-        ColorData(title: 'Force', hexValue: '#B22222'),
-        ColorData(title: 'Repos', hexValue: '#90EE90'),
-        ColorData(title: 'Compétition', hexValue: '#FFD700'),
-        ColorData(title: 'Motivation', hexValue: '#FF4500'),
-      ],
-    ),
+final List<PaletteModel> predefinedPalettes = [
+  PaletteModel(
+    id: 'template_default_pastel',
+    name: 'Doux Pastel',
+    isPredefined: true,
+    colors: [
+      ColorData(title: 'Rose Pâle', hexCode: 'FFD1DC', isDefault: true),
+      ColorData(title: 'Bleu Ciel', hexCode: 'ADD8E6'),
+      ColorData(title: 'Vert Menthe', hexCode: '98FB98'),
+      ColorData(title: 'Lavande', hexCode: 'E6E6FA'),
+      ColorData(title: 'Pêche Claire', hexCode: 'FFDAB9'),
+      ColorData(title: 'Jaune Doux', hexCode: 'FFFFE0'),
+    ],
   ),
-  PredefinedJournalTemplate(
-    templateName: 'Humeur',
-    suggestedJournalName: 'Mon Journal d\'Humeur',
-    paletteDefinition: Palette(
-      name: 'Palette Humeur',
-      colors: [
-        ColorData(title: 'Joyeux', hexValue: '#FFFF00'),
-        ColorData(title: 'Calme', hexValue: '#ADD8E6'),
-        ColorData(title: 'Triste', hexValue: '#696969'),
-        ColorData(title: 'En colère', hexValue: '#DC143C'),
-        ColorData(title: 'Énergique', hexValue: '#FFA500'),
-        ColorData(title: 'Stressé', hexValue: '#8B0000'),
-      ],
-    ),
+  PaletteModel(
+    id: 'template_vibrant_energy',
+    name: 'Énergie Vibrante',
+    isPredefined: true,
+    colors: [
+      ColorData(title: 'Rouge Vif', hexCode: 'FF0000', isDefault: true),
+      ColorData(title: 'Orange Intense', hexCode: 'FFA500'),
+      ColorData(title: 'Jaune Éclatant', hexCode: 'FFFF00'),
+      ColorData(title: 'Vert Lime', hexCode: '32CD32'),
+      ColorData(title: 'Bleu Électrique', hexCode: '0000FF'),
+      ColorData(title: 'Magenta', hexCode: 'FF00FF'),
+    ],
   ),
-  // Ajoutez d'autres modèles thématiques ici
+  PaletteModel(
+    id: 'template_forest_calm',
+    name: 'Calme Forestier',
+    isPredefined: true,
+    colors: [
+      ColorData(title: 'Vert Forêt', hexCode: '228B22', isDefault: true),
+      ColorData(title: 'Brun Terreux', hexCode: 'A0522D'),
+      ColorData(title: 'Beige Sable', hexCode: 'F5F5DC'),
+      ColorData(title: 'Gris Pierre', hexCode: '808080'),
+      ColorData(title: 'Bleu Profond', hexCode: '000080'),
+      ColorData(title: 'Vert Olive', hexCode: '808000'),
+    ],
+  ),
+  PaletteModel(
+    id: 'template_ocean_breeze',
+    name: 'Brise Océanique',
+    isPredefined: true,
+    colors: [
+      ColorData(title: 'Turquoise', hexCode: '40E0D0', isDefault: true),
+      ColorData(title: 'Bleu Mer', hexCode: '1E90FF'),
+      ColorData(title: 'Blanc Écume', hexCode: 'F0FFFF'),
+      ColorData(title: 'Corail Doux', hexCode: 'FF7F50'),
+      ColorData(title: 'Sable Doré', hexCode: 'F4A460'),
+      ColorData(title: 'Gris Dauphin', hexCode: 'A9A9A9'),
+    ],
+  ),
 ];

@@ -1,41 +1,61 @@
-// lib/models/color_data.dart
+import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
+const Uuid _uuid = Uuid();
+
 class ColorData {
-  final String paletteElementId;
+  String paletteElementId;
   String title;
-  String hexValue;
+  String hexCode;
+  bool isDefault;
 
   ColorData({
-    String? id,
+    String? paletteElementId,
     required this.title,
-    required this.hexValue,
-  }) : paletteElementId = id ?? const Uuid().v4();
+    required this.hexCode,
+    this.isDefault = false,
+  }) : paletteElementId = paletteElementId ?? _uuid.v4();
 
-  Map<String, dynamic> toJson() {
+  Color get color {
+    final buffer = StringBuffer();
+    if (hexCode.length == 6 || hexCode.length == 7) buffer.write('ff');
+    buffer.write(hexCode.replaceFirst('#', ''));
+    try {
+      return Color(int.parse(buffer.toString(), radix: 16));
+    } catch (e) {
+      return Colors.grey;
+    }
+  }
+
+  Map<String, dynamic> toMap() {
     return {
       'paletteElementId': paletteElementId,
       'title': title,
-      'hexValue': hexValue,
+      'hexCode': hexCode,
+      'isDefault': isDefault,
     };
   }
 
-  factory ColorData.fromJson(Map<String, dynamic> json) {
+  factory ColorData.fromMap(Map<String, dynamic> map) {
     return ColorData(
-      id: json['paletteElementId'] as String? ?? const Uuid().v4(),
-      title: json['title'] ?? 'Sans titre',
-      hexValue: json['hexValue'] ?? '#FFFFFF',
+      paletteElementId: map['paletteElementId'] as String? ?? _uuid.v4(),
+      title: map['title'] as String? ?? 'Sans titre',
+      hexCode: map['hexCode'] as String? ?? '808080',
+      isDefault: map['isDefault'] as bool? ?? false,
     );
   }
 
   ColorData copyWith({
+    String? paletteElementId,
     String? title,
-    String? hexValue,
+    String? hexCode,
+    bool? isDefault,
   }) {
     return ColorData(
-      id: paletteElementId,
+      paletteElementId: paletteElementId ?? this.paletteElementId,
       title: title ?? this.title,
-      hexValue: hexValue ?? this.hexValue,
+      hexCode: hexCode ?? this.hexCode,
+      isDefault: isDefault ?? this.isDefault,
     );
   }
 }
