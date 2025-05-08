@@ -1,3 +1,4 @@
+// lib/widgets/dynamic_journal_app_bar.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
@@ -8,7 +9,7 @@ import '../services/firestore_service.dart';
 import '../models/journal.dart';
 import '../screens/journal_management_page.dart';
 import '../screens/palette_model_management_page.dart';
-import '../screens/edit_palette_model_page.dart'; // Import pour éditer la palette du journal
+import '../screens/unified_palette_editor_page.dart';
 
 final _loggerAppBar = Logger(printer: PrettyPrinter(methodCount: 0));
 
@@ -23,7 +24,7 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
     final firestoreService = Provider.of<FirestoreService>(context, listen: false);
     final activeJournalNotifier = Provider.of<ActiveJournalNotifier>(context);
     final String? currentUserId = authService.currentUser?.uid;
-    final Journal? activeJournal = activeJournalNotifier.activeJournal; // Obtenir le journal actif
+    final Journal? activeJournal = activeJournalNotifier.activeJournal;
 
     String displayTitle = defaultTitleText;
     if (activeJournalNotifier.isLoading) {
@@ -42,53 +43,56 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
           : StreamBuilder<List<Journal>>(
         stream: firestoreService.getJournalsStream(currentUserId),
         builder: (context, snapshot) {
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          // Si pas de journaux, afficher juste le titre non cliquable
+          if (!snapshot.hasData || snapshot.data == null || snapshot.data!.isEmpty) {
             return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Icons.book_outlined, size: 20),
                 SizedBox(width: 8),
-                Text(displayTitle),
+                Text(displayTitle, style: TextStyle(fontSize: 18)),
               ],
             );
           }
 
           final journals = snapshot.data!;
+          // PopupMenuButton pour la sélection du journal
           return PopupMenuButton<String>(
             tooltip: "Changer de journal",
             onSelected: (String journalId) {
-              if (journalId == 'manage_journals') {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => JournalManagementPage()));
-              } else if (journalId == 'manage_palette_models') {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => PaletteModelManagementPage()));
-              } else {
+              // La sélection ici ne concerne QUE le changement de journal
+              if (journalId.isNotEmpty) { // Vérifier qu'on n'a pas cliqué sur une option de gestion par erreur
                 activeJournalNotifier.setActiveJournal(journalId, currentUserId);
                 _loggerAppBar.i("Journal actif changé via Titre AppBar: $journalId");
               }
             },
             itemBuilder: (BuildContext context) {
-              List<PopupMenuItem<String>> items = journals.map((Journal journal) {
+              // Construire la liste des journaux SEULEMENT
+              List<PopupMenuItem<String>> journalItems = journals.map((Journal journal) {
                 return PopupMenuItem<String>(
                   value: journal.id,
                   child: Text(
                     journal.name,
                     style: TextStyle(
                       fontWeight: activeJournalNotifier.activeJournalId == journal.id
-                          ? FontWeight.bold
+                          ? FontWeight.bold // Met en gras le journal actif
                           : FontWeight.normal,
+                      color: activeJournalNotifier.activeJournalId == journal.id
+                          ? Theme.of(context).colorScheme.primary // Optionnel: Couleur différente si actif
+                          : null,
                     ),
                   ),
                 );
               }).toList();
-
-              return items;
+              // Retourner UNIQUEMENT les items des journaux
+              return journalItems;
             },
-            child: Row(
+            child: Row( // Le widget sur lequel on clique pour ouvrir le menu
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Icons.book_outlined, size: 20),
                 SizedBox(width: 8),
-                Text(displayTitle),
+                Flexible(child: Text(displayTitle, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 18))),
                 Icon(Icons.arrow_drop_down, size: 24),
               ],
             ),
@@ -98,49 +102,72 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
       centerTitle: true,
       actions: <Widget>[
         // --- Bouton pour éditer la palette du journal ACTIF ---
-        if (activeJournal != null) // Afficher seulement si un journal est actif
+        if (activeJournal != null)
           IconButton(
-            icon: Icon(Icons.palette_outlined), // Icône Palette
+            icon: Icon(Icons.palette_outlined),
             tooltip: "Modifier la palette de '${activeJournal.name}'",
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => EditPaletteModelPage(
-                    // Passer le journal actif pour éditer sa palette
+                  builder: (context) => UnifiedPaletteEditorPage(
                     journalToUpdatePaletteFor: activeJournal,
                   ),
                 ),
               );
             },
           ),
-        // --- Fin Bouton Palette ---
 
-        // Menu d'actions simplifié (peut contenir gestion modèles, etc.)
+        // --- Menu d'options "more_vert" ---
         if (currentUserId != null)
           PopupMenuButton<String>(
             icon: Icon(Icons.more_vert_outlined),
             tooltip: "Options",
-            onSelected: (value) {
-              if (value == 'manage_palette_models') {
+            onSelected: (value) { // Gérer la sélection des options ici
+              if (value == 'manage_journals') {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => JournalManagementPage()));
+              } else if (value == 'manage_palette_models') {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => PaletteModelManagementPage()));
+              } else if (value == 'sign_out') {
+                authService.signOut().then((_) {
+                  _loggerAppBar.i("Déconnexion demandée.");
+                }).catchError((e) {
+                  _loggerAppBar.e("Erreur déconnexion: $e");
+                  if(context.mounted){
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Erreur lors de la déconnexion: $e"))
+                    );
+                  }
+                });
               }
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              // Ajouter l'option pour gérer les journaux ici
+              const PopupMenuItem<String>(
+                value: 'manage_journals',
+                child: ListTile(
+                  leading: Icon(Icons.settings_outlined),
+                  title: Text('Gérer les journaux'),
+                ),
+              ),
+              // Ajouter l'option pour gérer les modèles ici
               const PopupMenuItem<String>(
                 value: 'manage_palette_models',
-                child: Text('Gérer les modèles'),
+                child: ListTile(
+                  leading: Icon(Icons.collections_bookmark_outlined),
+                  title: Text('Gérer les modèles'),
+                ),
+              ),
+              const PopupMenuDivider(), // Séparateur
+              const PopupMenuItem<String>(
+                value: 'sign_out',
+                child: ListTile(
+                  leading: Icon(Icons.logout_outlined),
+                  title: Text('Déconnexion'),
+                ),
               ),
             ],
           ),
-        IconButton(
-          icon: Icon(Icons.logout_outlined),
-          tooltip: "Déconnexion",
-          onPressed: () async {
-            await authService.signOut();
-            _loggerAppBar.i("Déconnexion demandée.");
-          },
-        ),
       ],
     );
   }

@@ -1,3 +1,4 @@
+// lib/screens/journal_management_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
@@ -9,6 +10,7 @@ import '../services/firestore_service.dart';
 import '../providers/active_journal_provider.dart';
 import '../models/journal.dart';
 import 'create_journal_page.dart';
+import 'unified_palette_editor_page.dart'; // Importer la page d'édition de palette unifiée
 
 final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0, printTime: true));
 const _uuid = Uuid();
@@ -93,6 +95,21 @@ class JournalManagementPage extends StatelessWidget {
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      // Nouvelle icône pour éditer la palette
+                      IconButton(
+                        icon: Icon(Icons.palette_outlined),
+                        tooltip: "Modifier la palette de '${journal.name}'",
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => UnifiedPaletteEditorPage(
+                                journalToUpdatePaletteFor: journal,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                       IconButton(
                         icon: Icon(Icons.edit_outlined),
                         tooltip: "Modifier le nom",
@@ -110,10 +127,6 @@ class JournalManagementPage extends StatelessWidget {
                     if (!isActive) {
                       activeJournalNotifier.setActiveJournal(journal.id, currentUserId);
                       _loggerPage.i("Journal actif changé vers: ${journal.name}");
-                      // Optionnel: revenir à la page précédente si on est venu de là pour choisir
-                      // if (Navigator.canPop(context)) {
-                      //   Navigator.pop(context);
-                      // }
                     }
                   },
                 ),
@@ -148,7 +161,7 @@ class JournalManagementPage extends StatelessWidget {
               child: Text('Sauvegarder'),
               onPressed: () async {
                 final newName = nameController.text.trim();
-                Navigator.of(dialogContext).pop(); // Fermer avant l'opération async
+                Navigator.of(dialogContext).pop();
                 if (newName.isNotEmpty && newName != journal.name) {
                   try {
                     await firestoreService.updateJournalName(journal.id, newName);
@@ -207,14 +220,12 @@ class JournalManagementPage extends StatelessWidget {
 
                   if (wasActive) {
                     _loggerPage.i("Rechargement du journal initial après suppression du journal actif.");
-                    // Déclenche _loadInitialJournalForUser dans le notifier pour sélectionner un nouveau journal ou vider l'état
                     final journals = await firestoreService.getJournalsStream(currentUserId).first;
-                    if (context.mounted) { // Vérifier à nouveau après l'await
+                    if (context.mounted) {
                       if (journals.isNotEmpty) {
                         await activeJournalNotifier.setActiveJournal(journals.first.id, currentUserId);
                       } else {
                         activeJournalNotifier.clearActiveJournalState();
-                        // Forcer la notification si clearActiveJournalState ne le fait pas
                         Provider.of<ActiveJournalNotifier>(context, listen: false).notifyListeners();
                       }
                     }

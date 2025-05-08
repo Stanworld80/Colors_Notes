@@ -172,5 +172,95 @@ List<PaletteModel> predefinedPalettes = [
       ColorData(paletteElementId: _generateColorId(), title: 'Lilas Clair', hexCode: '#E6E6FA'),
     ],
   ),
+
+  // NOUVEAU: Dégradés Arc-en-ciel (48 couleurs)
+  PaletteModel(
+    id: 'rainbow_gradients_48',
+    name: 'Dégradés Arc-en-ciel (48)',
+    isPredefined: true,
+    colors: [
+      // Rouge (6 nuances)
+      ColorData(paletteElementId: _generateColorId(), title: 'Rouge Pâle', hexCode: '#FFEBEE'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Rouge Clair', hexCode: '#FFCDD2'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Rouge', hexCode: '#EF9A9A'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Rouge Moyen', hexCode: '#E57373'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Rouge Foncé', hexCode: '#EF5350'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Rouge Profond', hexCode: '#F44336'),
+      // Orange (6 nuances)
+      ColorData(paletteElementId: _generateColorId(), title: 'Orange Pâle', hexCode: '#FFF3E0'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Orange Clair', hexCode: '#FFE0B2'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Orange', hexCode: '#FFCC80'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Orange Moyen', hexCode: '#FFB74D'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Orange Foncé', hexCode: '#FFA726'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Orange Profond', hexCode: '#FF9800'),
+      // Jaune (6 nuances)
+      ColorData(paletteElementId: _generateColorId(), title: 'Jaune Pâle', hexCode: '#FFFDE7'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Jaune Clair', hexCode: '#FFF9C4'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Jaune', hexCode: '#FFF59D'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Jaune Moyen', hexCode: '#FFF176'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Jaune Foncé', hexCode: '#FFEE58'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Jaune Profond', hexCode: '#FFEB3B'),
+      // Vert Lime (6 nuances)
+      ColorData(paletteElementId: _generateColorId(), title: 'Vert Lime Pâle', hexCode: '#F9FBE7'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Vert Lime Clair', hexCode: '#F0F4C3'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Vert Lime', hexCode: '#E6EE9C'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Vert Lime Moyen', hexCode: '#DCE775'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Vert Lime Foncé', hexCode: '#D4E157'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Vert Lime Profond', hexCode: '#CDDC39'),
+      // Vert (6 nuances)
+      ColorData(paletteElementId: _generateColorId(), title: 'Vert Pâle', hexCode: '#E8F5E9'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Vert Clair', hexCode: '#C8E6C9'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Vert', hexCode: '#A5D6A7'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Vert Moyen', hexCode: '#81C784'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Vert Foncé', hexCode: '#66BB6A'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Vert Profond', hexCode: '#4CAF50'),
+      // Cyan (6 nuances)
+      ColorData(paletteElementId: _generateColorId(), title: 'Cyan Pâle', hexCode: '#E0F7FA'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Cyan Clair', hexCode: '#B2EBF2'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Cyan', hexCode: '#80DEEA'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Cyan Moyen', hexCode: '#4DD0E1'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Cyan Foncé', hexCode: '#26C6DA'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Cyan Profond', hexCode: '#00BCD4'),
+      // Bleu (6 nuances)
+      ColorData(paletteElementId: _generateColorId(), title: 'Bleu Pâle', hexCode: '#E3F2FD'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Bleu Clair', hexCode: '#BBDEFB'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Bleu', hexCode: '#90CAF9'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Bleu Moyen', hexCode: '#64B5F6'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Bleu Foncé', hexCode: '#42A5F5'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Bleu Profond', hexCode: '#2196F3'),
+      // Violet (6 nuances)
+      ColorData(paletteElementId: _generateColorId(), title: 'Violet Pâle', hexCode: '#F3E5F5'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Violet Clair', hexCode: '#E1BEE7'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Violet', hexCode: '#CE93D8'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Violet Moyen', hexCode: '#BA68C8'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Violet Foncé', hexCode: '#AB47BC'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Violet Profond', hexCode: '#9C27B0'),
+    ],
+  ),
+
+  // NOUVEAU: Contraste Intense (16 couleurs)
+  PaletteModel(
+    id: 'high_contrast_16',
+    name: 'Contraste Intense (16)',
+    isPredefined: true,
+    colors: [
+      ColorData(paletteElementId: _generateColorId(), title: 'Rouge Vif', hexCode: '#FF0000'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Bleu Roi', hexCode: '#0000CD'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Vert Émeraude', hexCode: '#009B77'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Jaune Citron', hexCode: '#FFFACD'), // LemonChiffon
+      ColorData(paletteElementId: _generateColorId(), title: 'Orange Brûlé', hexCode: '#CC5500'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Violet Améthyste', hexCode: '#9966CC'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Rose Foncé', hexCode: '#FF1493'), // DeepPink
+      ColorData(paletteElementId: _generateColorId(), title: 'Turquoise Foncé', hexCode: '#00CED1'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Or Pur', hexCode: '#FFD700'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Marron Chocolat', hexCode: '#7B3F00'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Noir Profond', hexCode: '#000000'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Blanc Neige', hexCode: '#FFFFFF'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Vert Lime Vif', hexCode: '#32CD32'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Magenta Éclatant', hexCode: '#FF00FF'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Gris Ardoise', hexCode: '#708090'),
+      ColorData(paletteElementId: _generateColorId(), title: 'Bleu Ciel Clair', hexCode: '#87CEEB'),
+    ],
+  ),
   // Ajoutez d'autres modèles prédéfinis ici si nécessaire
 ];
