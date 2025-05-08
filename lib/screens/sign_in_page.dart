@@ -116,7 +116,7 @@ class _SignInPageState extends State<SignInPage> {
                     ? CircularProgressIndicator()
                     : ElevatedButton(
                   onPressed: _signInWithEmail,
-                  child: Text('Se connecter par Email'),
+                  child: Text('Se connecter'),
                   style: ElevatedButton.styleFrom(minimumSize: Size(double.infinity, 50)),
                 ),
                 SizedBox(height: 12),

@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:uuid/uuid.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart'; // Pas directement utilisé ici pour les PaletteModels
 
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
@@ -16,12 +16,12 @@ import '../providers/active_journal_provider.dart';
 final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 1, printTime: true));
 const _uuid = Uuid();
 
-const int MIN_COLORS_IN_PALETTE = 1;
-const int MAX_COLORS_IN_PALETTE = 10;
+const int MIN_COLORS_IN_PALETTE = 1; // Conforme à SF-PALETTE-04 (minimum 3, mais pour l'édition on peut être plus souple temporairement)
+const int MAX_COLORS_IN_PALETTE = 48; // Conforme à SF-PALETTE-04
 
 class EditPaletteModelPage extends StatefulWidget {
   final PaletteModel? paletteModelToEdit;
-  final Journal? journalToUpdatePaletteFor;
+  final Journal? journalToUpdatePaletteFor; // Pour éditer la palette d'un journal spécifique
 
   EditPaletteModelPage({Key? key, this.paletteModelToEdit, this.journalToUpdatePaletteFor}) : super(key: key);
 
@@ -31,9 +31,9 @@ class EditPaletteModelPage extends StatefulWidget {
 
 class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _modelNameController;
+  late TextEditingController _paletteNameController;
   late List<ColorData> _currentColors;
-  bool _isEditingModel = false;
+  bool _isEditingPaletteModel = true; // Par défaut, on édite un modèle
   bool _isLoading = false;
   String? _userId;
 
@@ -42,59 +42,163 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
     super.initState();
     _userId = Provider.of<AuthService>(context, listen: false).currentUser?.uid;
 
-    if (widget.paletteModelToEdit != null) {
-      _isEditingModel = true;
-      _modelNameController = TextEditingController(text: widget.paletteModelToEdit!.name);
-      _currentColors = widget.paletteModelToEdit!.colors.map((c) => c.copyWith()).toList();
-    } else if (widget.journalToUpdatePaletteFor != null) {
-      _isEditingModel = false;
-      _modelNameController = TextEditingController(text: widget.journalToUpdatePaletteFor!.palette.name);
+    if (widget.journalToUpdatePaletteFor != null) {
+      // Mode: Édition de la palette d'un journal existant
+      _isEditingPaletteModel = false;
+      _paletteNameController = TextEditingController(text: widget.journalToUpdatePaletteFor!.palette.name);
       _currentColors = widget.journalToUpdatePaletteFor!.palette.colors.map((c) => c.copyWith()).toList();
+    } else if (widget.paletteModelToEdit != null) {
+      // Mode: Édition d'un modèle de palette existant
+      _isEditingPaletteModel = true;
+      _paletteNameController = TextEditingController(text: widget.paletteModelToEdit!.name);
+      _currentColors = widget.paletteModelToEdit!.colors.map((c) => c.copyWith()).toList();
     } else {
-      _isEditingModel = true;
-      _modelNameController = TextEditingController();
+      // Mode: Création d'un nouveau modèle de palette
+      _isEditingPaletteModel = true;
+      _paletteNameController = TextEditingController();
       _currentColors = [
-        ColorData(title: 'Couleur 1', hexCode: 'FF0000', paletteElementId: _uuid.v4()),
+        // ColorData(title: 'Rouge', hexCode: 'FF0000', paletteElementId: _uuid.v4()), // Exemple initial
       ];
     }
   }
 
   @override
   void dispose() {
-    _modelNameController.dispose();
+    _paletteNameController.dispose();
     super.dispose();
   }
 
-  void _addColor() {
-    if (_currentColors.length >= MAX_COLORS_IN_PALETTE) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Vous avez atteint le nombre maximum de $MAX_COLORS_IN_PALETTE couleurs.'))
-      );
-      return;
-    }
-    setState(() {
-      _currentColors.add(ColorData(
-        title: 'Nouvelle Couleur ${_currentColors.length + 1}',
-        hexCode: '808080',
-        paletteElementId: _uuid.v4(),
-      ));
-    });
+  void _showEditColorDialog({ColorData? existingColorData}) {
+    final bool isAdding = existingColorData == null;
+    Color pickerColor = isAdding ? Color(0xFF808080) : existingColorData!.color; // Gris par défaut pour ajout
+    String initialTitle = isAdding ? '' : existingColorData!.title; // Laisser vide si ajout
+
+    final TextEditingController titleController = TextEditingController(text: initialTitle);
+    final GlobalKey<FormState> dialogFormKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text(isAdding ? 'Ajouter une couleur' : 'Modifier la couleur'),
+          content: SingleChildScrollView(
+            child: Form(
+              key: dialogFormKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    controller: titleController,
+                    decoration: InputDecoration(labelText: 'Nom de la couleur'),
+                    autofocus: true,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Le titre ne peut pas être vide.';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 20),
+                  ColorPicker(
+                    pickerColor: pickerColor,
+                    onColorChanged: (color) {
+                      pickerColor = color;
+                    },
+                    colorPickerWidth: 300.0,
+                    pickerAreaHeightPercent: 0.7,
+                    enableAlpha: false,
+                    displayThumbColor: true,
+                    paletteType: PaletteType.hsvWithValue,
+                    pickerAreaBorderRadius: const BorderRadius.all(Radius.circular(2.0)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: Text('Annuler'),
+              onPressed: () => Navigator.of(dialogContext).pop(),
+            ),
+            TextButton(
+              child: Text(isAdding ? 'Ajouter' : 'Sauvegarder'),
+              onPressed: () {
+                if (!dialogFormKey.currentState!.validate()) {
+                  return;
+                }
+
+                final String newTitle = titleController.text.trim();
+                final String newHexCode = pickerColor.value.toRadixString(16).substring(2).toUpperCase();
+
+                bool titleExists = _currentColors.any((c) =>
+                c.title.toLowerCase() == newTitle.toLowerCase() &&
+                    (isAdding || c.paletteElementId != existingColorData!.paletteElementId));
+                if (titleExists) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Ce titre de couleur existe déjà dans cette palette.'), backgroundColor: Colors.red),
+                  );
+                  return;
+                }
+
+                bool colorExists = _currentColors.any((c) =>
+                c.hexCode.toUpperCase() == newHexCode.toUpperCase() &&
+                    (isAdding || c.paletteElementId != existingColorData!.paletteElementId));
+                if (colorExists) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Cette couleur existe déjà dans cette palette.'), backgroundColor: Colors.red),
+                  );
+                  return;
+                }
+
+                setState(() {
+                  if (isAdding) {
+                    _currentColors.add(ColorData(
+                      title: newTitle,
+                      hexCode: newHexCode,
+                      paletteElementId: _uuid.v4(),
+                    ));
+                  } else {
+                    final index = _currentColors.indexWhere((c) => c.paletteElementId == existingColorData!.paletteElementId);
+                    if (index != -1) {
+                      _currentColors[index] = _currentColors[index].copyWith(
+                        title: newTitle,
+                        hexCode: newHexCode,
+                      );
+                    }
+                  }
+                });
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
+
   void _removeColor(String paletteElementIdToRemove) async {
-    if (_currentColors.length <= MIN_COLORS_IN_PALETTE) {
+    if (_currentColors.length <= MIN_COLORS_IN_PALETTE && _isEditingPaletteModel) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Une palette doit contenir au moins $MIN_COLORS_IN_PALETTE couleur(s).'))
+          SnackBar(content: Text('Un modèle de palette doit contenir au moins $MIN_COLORS_IN_PALETTE couleur(s).'))
       );
       return;
     }
+    if (_currentColors.length <= 0 && !_isEditingPaletteModel) {
+      // Pas de restriction si c'est une instance et qu'on veut la vider
+    }
 
-    if (_userId == null) return;
+
+    if (_userId == null) {
+      _loggerPage.w("UserID est null, suppression de couleur annulée.");
+      return;
+    }
     final firestoreService = Provider.of<FirestoreService>(context, listen: false);
     bool isUsed = false;
 
-    if (!_isEditingModel && widget.journalToUpdatePaletteFor != null) {
+    if (!_isEditingPaletteModel && widget.journalToUpdatePaletteFor != null) {
       try {
+        setState(() { _isLoading = true; });
         isUsed = await firestoreService.isPaletteElementUsedInNotes(
             widget.journalToUpdatePaletteFor!.id,
             paletteElementIdToRemove
@@ -103,17 +207,21 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
         _loggerPage.e("Erreur vérification utilisation couleur: $e");
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Erreur vérification utilisation couleur: ${e.toString()}'))
+              SnackBar(content: Text('Erreur vérification utilisation couleur: ${e.toString()}'), backgroundColor: Colors.red)
           );
         }
         return;
+      } finally {
+        if (mounted) {
+          setState(() { _isLoading = false; });
+        }
       }
     }
 
     if (isUsed) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Cette couleur est utilisée dans des notes et ne peut être supprimée.'))
+            SnackBar(content: Text('Cette couleur est utilisée dans des notes et ne peut être supprimée de ce journal.'), backgroundColor: Colors.orange)
         );
       }
       return;
@@ -124,79 +232,30 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
     });
   }
 
-  void _editColor(ColorData colorToEdit) {
-    Color pickerColor = colorToEdit.color;
-    TextEditingController titleController = TextEditingController(text: colorToEdit.title);
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Modifier la couleur'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: InputDecoration(labelText: 'Nom de la couleur'),
-                autofocus: true,
-              ),
-              SizedBox(height: 20),
-              ColorPicker(
-                pickerColor: pickerColor,
-                onColorChanged: (color) => pickerColor = color,
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            child: Text('Annuler'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          TextButton(
-            child: Text('Sauvegarder'),
-            onPressed: () {
-              setState(() {
-                final index = _currentColors.indexWhere((c) => c.paletteElementId == colorToEdit.paletteElementId);
-                if (index != -1) {
-                  _currentColors[index] = _currentColors[index].copyWith(
-                    title: titleController.text.trim(),
-                    hexCode: pickerColor.value.toRadixString(16).substring(2).toUpperCase(),
-                  );
-                }
-              });
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      ),
-    );
-  }
 
   Future<void> _savePalette() async {
     if (_userId == null) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Utilisateur non identifié.")));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Utilisateur non identifié."), backgroundColor: Colors.red));
       return;
     }
     if (!_formKey.currentState!.validate()) return;
 
     if (_currentColors.length < MIN_COLORS_IN_PALETTE || _currentColors.length > MAX_COLORS_IN_PALETTE) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("La palette doit contenir entre $MIN_COLORS_IN_PALETTE et $MAX_COLORS_IN_PALETTE couleurs.")));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("La palette doit contenir entre $MIN_COLORS_IN_PALETTE et $MAX_COLORS_IN_PALETTE couleurs."), backgroundColor: Colors.orange));
       return;
     }
 
     setState(() { _isLoading = true; });
     final firestoreService = Provider.of<FirestoreService>(context, listen: false);
     final activeJournalNotifier = Provider.of<ActiveJournalNotifier>(context, listen: false);
-    final String paletteName = _modelNameController.text.trim();
+    final String paletteName = _paletteNameController.text.trim();
 
     try {
-      if (_isEditingModel) {
+      if (_isEditingPaletteModel) {
         if (widget.paletteModelToEdit == null) {
           bool nameExists = await firestoreService.checkPaletteModelNameExists(paletteName, _userId!);
           if (nameExists) {
-            if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Un modèle de palette avec ce nom existe déjà.")));
+            if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Un modèle de palette avec ce nom existe déjà."), backgroundColor: Colors.orange));
             setState(() { _isLoading = false; });
             return;
           }
@@ -211,7 +270,7 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
         } else {
           bool nameExists = await firestoreService.checkPaletteModelNameExists(paletteName, _userId!, excludeId: widget.paletteModelToEdit!.id);
           if (nameExists) {
-            if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Un autre modèle de palette avec ce nom existe déjà.")));
+            if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Un autre modèle de palette avec ce nom existe déjà."), backgroundColor: Colors.orange));
             setState(() { _isLoading = false; });
             return;
           }
@@ -222,16 +281,13 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
           await firestoreService.updatePaletteModel(updatedModel);
           _loggerPage.i("Modèle de palette mis à jour: ${updatedModel.name}");
         }
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Modèle de palette sauvegardé.")));
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Modèle de palette sauvegardé."), backgroundColor: Colors.green));
 
       } else if (widget.journalToUpdatePaletteFor != null) {
         final Journal currentJournal = widget.journalToUpdatePaletteFor!;
-        final Palette updatedPaletteInstance = Palette(
-          id: currentJournal.palette.id,
+        final Palette updatedPaletteInstance = currentJournal.palette.copyWith(
           name: paletteName,
           colors: _currentColors,
-          isPredefined: false,
-          userId: currentJournal.userId,
         );
 
         await firestoreService.updateJournalPaletteInstance(currentJournal.id, updatedPaletteInstance);
@@ -240,13 +296,13 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
         if (activeJournalNotifier.activeJournalId == currentJournal.id && _userId != null) {
           await activeJournalNotifier.setActiveJournal(currentJournal.id, _userId!);
         }
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Palette du journal sauvegardée.")));
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Palette du journal sauvegardée."), backgroundColor: Colors.green));
       }
       if (mounted) Navigator.of(context).pop();
 
     } catch (e) {
       _loggerPage.e("Erreur sauvegarde palette: $e");
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erreur: ${e.toString()}")));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erreur: ${e.toString()}"), backgroundColor: Colors.red));
     } finally {
       if (mounted) setState(() { _isLoading = false; });
     }
@@ -254,15 +310,19 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
 
   @override
   Widget build(BuildContext context) {
-    String pageTitle = _isEditingModel
+    String pageTitle = _isEditingPaletteModel
         ? (widget.paletteModelToEdit == null ? 'Créer un modèle de palette' : 'Modifier le modèle')
         : (widget.journalToUpdatePaletteFor != null ? 'Modifier la palette de "${widget.journalToUpdatePaletteFor!.name}"' : 'Modifier la palette');
 
     return Scaffold(
-      appBar: AppBar(title: Text(pageTitle)),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
+      appBar: AppBar(
+        title: Text(pageTitle),
+        actions: [
+          if (_isLoading) Padding(padding: EdgeInsets.all(16.0), child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.0,))
+          else IconButton(icon: Icon(Icons.save_alt_outlined), onPressed: _savePalette, tooltip: "Sauvegarder")
+        ],
+      ),
+      body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
@@ -270,10 +330,10 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
-                controller: _modelNameController,
-                decoration: InputDecoration(labelText: _isEditingModel ? 'Nom du modèle' : 'Nom de la palette'),
+                controller: _paletteNameController,
+                decoration: InputDecoration(labelText: _isEditingPaletteModel ? 'Nom du modèle de palette' : 'Nom de la palette du journal'),
                 validator: (value) {
-                  if (value == null || value.isEmpty) return 'Veuillez entrer un nom.';
+                  if (value == null || value.trim().isEmpty) return 'Veuillez entrer un nom.';
                   if (value.length > 50) return 'Le nom ne doit pas dépasser 50 caractères.';
                   return null;
                 },
@@ -286,7 +346,8 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
                   TextButton.icon(
                     icon: Icon(Icons.add_circle_outline),
                     label: Text('Ajouter'),
-                    onPressed: _currentColors.length < MAX_COLORS_IN_PALETTE ? _addColor : null,
+                    onPressed: _currentColors.length < MAX_COLORS_IN_PALETTE ? () => _showEditColorDialog() : null,
+                    style: _currentColors.length >= MAX_COLORS_IN_PALETTE ? TextButton.styleFrom(foregroundColor: Colors.grey) : null,
                   ),
                 ],
               ),
@@ -315,14 +376,14 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
                           children: [
                             IconButton(
                               icon: Icon(Icons.edit_outlined, color: Theme.of(context).colorScheme.primary),
-                              onPressed: () => _editColor(colorData),
+                              onPressed: () => _showEditColorDialog(existingColorData: colorData),
                               tooltip: "Modifier la couleur",
                             ),
                             IconButton(
                               icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
-                              onPressed: _currentColors.length > MIN_COLORS_IN_PALETTE
-                                  ? () => _removeColor(colorData.paletteElementId)
-                                  : null,
+                              onPressed: (_isEditingPaletteModel && _currentColors.length <= MIN_COLORS_IN_PALETTE)
+                                  ? null
+                                  : () => _removeColor(colorData.paletteElementId),
                               tooltip: "Supprimer la couleur",
                             ),
                           ],
@@ -341,13 +402,6 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
                   },
                 ),
               SizedBox(height: 12),
-              SizedBox(height: 30),
-              ElevatedButton.icon(
-                icon: Icon(Icons.save_alt_outlined),
-                onPressed: _savePalette,
-                label: Text('Sauvegarder la palette'),
-                style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 12)),
-              ),
             ],
           ),
         ),

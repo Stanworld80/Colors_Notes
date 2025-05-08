@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
+import 'package:collection/collection.dart'; // Importer pour firstWhereOrNull
 
 import '../services/firestore_service.dart';
 import '../models/note.dart';
@@ -22,8 +23,8 @@ class NoteListPage extends StatefulWidget {
 }
 
 class _NoteListPageState extends State<NoteListPage> {
-  String _sortBy = 'eventTimestamp';
-  bool _sortDescending = true;
+  String _sortBy = 'eventTimestamp'; // Champ de tri par défaut
+  bool _sortDescending = true; // Ordre de tri par défaut
   bool _isGridView = false;
 
   ColorData? _getColorDataById(Journal? journal, String paletteElementId) {
@@ -71,8 +72,22 @@ class _NoteListPageState extends State<NoteListPage> {
               },
             ),
             ListTile(
+              leading: Icon(_sortBy == 'paletteOrder' ? (_sortDescending ? Icons.sort_by_alpha : Icons.sort_by_alpha) : Icons.palette_outlined), // Icône à adapter
+              title: Text('Trier par Couleur de la palette'),
+              onTap: () {
+                if (mounted) {
+                  setState(() {
+                    if (_sortBy == 'paletteOrder') _sortDescending = !_sortDescending;
+                    else _sortDescending = false; // Par défaut, ordre de la palette
+                    _sortBy = 'paletteOrder';
+                  });
+                }
+                Navigator.pop(builderContext);
+              },
+            ),
+            ListTile(
               leading: Icon(_sortBy == 'content' ? (_sortDescending ? Icons.arrow_downward : Icons.arrow_upward) : Icons.sort_by_alpha_outlined),
-              title: Text('Trier par Contenu'),
+              title: Text('Trier par Contenu (A-Z / Z-A)'),
               onTap: () {
                 if (mounted) {
                   setState(() {
@@ -136,19 +151,12 @@ class _NoteListPageState extends State<NoteListPage> {
     final Color cardColor = colorData?.color ?? Colors.grey.shade100;
     final Color textColor = cardColor.computeLuminance() > 0.5 ? Colors.black87 : Colors.white;
     final Color subtleTextColor = cardColor.computeLuminance() > 0.5 ? Colors.black54 : Colors.white70;
-    final Color iconColor = cardColor.computeLuminance() > 0.5 ? Colors.black54 : Colors.white;
-
 
     return Card(
       elevation: 3.0,
-      color: cardColor, // Couleur de fond de la carte
+      color: cardColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
-        // Optionnel: retirer la bordure si la couleur de fond est suffisante
-        // side: BorderSide(
-        //   color: colorData?.color ?? Colors.grey.shade300,
-        //   width: 1.5,
-        // ),
       ),
       child: InkWell(
         onTap: () {
@@ -171,7 +179,6 @@ class _NoteListPageState extends State<NoteListPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Optionnel: Remplacer le CircleAvatar par le titre de la couleur si désiré
                   Text(
                     colorData?.title ?? "Couleur",
                     style: TextStyle(fontSize: 11, color: subtleTextColor, fontWeight: FontWeight.bold),
@@ -196,7 +203,6 @@ class _NoteListPageState extends State<NoteListPage> {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              // Spacer(), // Peut-être plus nécessaire si Expanded est utilisé pour le contenu
               Text(
                 dateFormat.format(note.eventTimestamp.toDate().toLocal()),
                 style: TextStyle(fontSize: 10, color: subtleTextColor),
@@ -213,14 +219,24 @@ class _NoteListPageState extends State<NoteListPage> {
   Widget build(BuildContext context) {
     final firestoreService = Provider.of<FirestoreService>(context, listen: false);
     final activeJournalNotifier = Provider.of<ActiveJournalNotifier>(context);
-
     final Journal? journalForPalette = activeJournalNotifier.activeJournalId == widget.journalId
         ? activeJournalNotifier.activeJournal
         : null;
 
+    // Déterminer le champ de tri pour Firestore.
+    // Pour 'paletteOrder', nous trions côté client, donc Firestore peut utiliser un tri par défaut.
+    String firestoreSortField = _sortBy;
+    bool firestoreSortDescending = _sortDescending;
+
+    if (_sortBy == 'paletteOrder') {
+      firestoreSortField = 'eventTimestamp'; // Ou 'createdAt', comme tri de base avant le tri client
+      firestoreSortDescending = true; // Ou false, selon ce qui est le plus logique comme base
+    }
+
+
     return Scaffold(
       body: StreamBuilder<List<Note>>(
-        stream: firestoreService.getJournalNotesStream(widget.journalId, sortBy: _sortBy, descending: _sortDescending),
+        stream: firestoreService.getJournalNotesStream(widget.journalId, sortBy: firestoreSortField, descending: firestoreSortDescending),
         builder: (context, snapshot) {
           if (activeJournalNotifier.isLoading && journalForPalette == null && activeJournalNotifier.activeJournalId == widget.journalId) {
             return Center(child: CircularProgressIndicator());
@@ -248,10 +264,26 @@ class _NoteListPageState extends State<NoteListPage> {
             );
           }
 
-          final notes = snapshot.data!;
+          List<Note> notes = snapshot.data!;
+
+          // Tri côté client pour 'paletteOrder'
+          if (_sortBy == 'paletteOrder' && journalForPalette != null) {
+            final paletteOrderMap = {
+              for (var i = 0; i < journalForPalette.palette.colors.length; i++)
+                journalForPalette.palette.colors[i].paletteElementId: i
+            };
+
+            notes.sort((a, b) {
+              final indexA = paletteOrderMap[a.paletteElementId] ?? double.maxFinite.toInt();
+              final indexB = paletteOrderMap[b.paletteElementId] ?? double.maxFinite.toInt();
+              int comparison = indexA.compareTo(indexB);
+              return _sortDescending ? -comparison : comparison;
+            });
+          }
+
 
           if (journalForPalette == null && activeJournalNotifier.activeJournalId != widget.journalId && !activeJournalNotifier.isLoading) {
-            _loggerPage.w("Détails du journal (pour la palette) non disponibles pour ${widget.journalId}.");
+            _loggerPage.w("Détails du journal (pour la palette) non disponibles pour ${widget.journalId}. Le tri par couleur peut ne pas fonctionner.");
           }
 
           final screenWidth = MediaQuery.of(context).size.width;
@@ -311,31 +343,24 @@ class _NoteListPageState extends State<NoteListPage> {
                   itemBuilder: (context, index) {
                     final note = notes[index];
                     final colorData = _getColorDataById(journalForPalette, note.paletteElementId);
-                    final DateFormat dateFormat = DateFormat('EEEE dd MMMM Künstler, HH:mm', 'fr_FR');
+                    final DateFormat dateFormat = DateFormat('EEEE dd MMMM HH:mm', 'fr_FR'); // Corrigé 'Künstler' en HH
 
                     final Color cardColor = colorData?.color ?? Theme.of(context).cardColor;
                     final Color textColor = cardColor.computeLuminance() > 0.5 ? Colors.black87 : Colors.white;
                     final Color subtleTextColor = cardColor.computeLuminance() > 0.5 ? Colors.black54 : Colors.white70;
-                    final Color iconColor = cardColor.computeLuminance() > 0.5 ? Colors.black54 : Colors.white;
-
 
                     return Card(
                       elevation: 2.0,
-                      color: cardColor, // Couleur de fond de la carte
+                      color: cardColor,
                       margin: EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),
-                        // Optionnel: retirer la bordure si la couleur de fond est suffisante
-                        // side: BorderSide(
-                        //   color: colorData?.color ?? Colors.grey.shade300,
-                        //   width: 1.5,
-                        // ),
                       ),
                       child: ListTile(
                         contentPadding: EdgeInsets.all(12.0),
                         leading: colorData != null
                             ? CircleAvatar(
-                          backgroundColor: Colors.transparent, // Rendre transparent si le fond de la carte est la couleur
+                          backgroundColor: Colors.transparent,
                           child: Text(
                             colorData.title.isNotEmpty ? colorData.title[0].toUpperCase() : '?',
                             style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
