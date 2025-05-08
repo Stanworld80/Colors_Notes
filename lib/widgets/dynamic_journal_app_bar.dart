@@ -80,7 +80,7 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
                   ),
                 );
               }).toList();
-              items.add(const PopupMenuItem<String>(value: 'manage_journals', child: Text('Gérer les journaux...')));
+
               return items;
             },
             child: Row(

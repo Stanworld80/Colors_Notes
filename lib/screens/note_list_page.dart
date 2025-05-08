@@ -317,7 +317,6 @@ class _NoteListPageState extends State<NoteListPage> {
                         runSpacing: 0,
                         children: [
                           _buildSortButton('eventTimestamp', Icons.event_note_outlined, "Trier par date d'événement"),
-                          _buildSortButton('createdAt', Icons.history_outlined, "Trier par date de création"),
                           _buildSortButton('paletteOrder', Icons.palette_outlined, "Trier par couleur de palette"),
                           _buildSortButton('content', Icons.sort_by_alpha_outlined, "Trier par contenu"),
                         ],
