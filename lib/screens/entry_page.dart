@@ -255,7 +255,7 @@ class _EntryPageState extends State<EntryPage> {
                 ),
                 maxLines: 5,
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
+                  if (value == null ) {
                     return 'Veuillez entrer le contenu de la note.';
                   }
                   return null;
