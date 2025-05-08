@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
-import 'package:collection/collection.dart'; // Importer pour firstWhereOrNull
+// import 'package:collection/collection.dart';
 
 import '../services/firestore_service.dart';
 import '../models/note.dart';
@@ -23,8 +23,8 @@ class NoteListPage extends StatefulWidget {
 }
 
 class _NoteListPageState extends State<NoteListPage> {
-  String _sortBy = 'eventTimestamp'; // Champ de tri par défaut
-  bool _sortDescending = true; // Ordre de tri par défaut
+  String _sortBy = 'eventTimestamp';
+  bool _sortDescending = true;
   bool _isGridView = false;
 
   ColorData? _getColorDataById(Journal? journal, String paletteElementId) {
@@ -37,73 +37,46 @@ class _NoteListPageState extends State<NoteListPage> {
     }
   }
 
-  void _showSortOptions(BuildContext scaffoldContext) {
-    showModalBottomSheet(
-      context: context,
-      builder: (builderContext) {
-        return Wrap(
-          children: <Widget>[
-            ListTile(
-              leading: Icon(_sortBy == 'eventTimestamp' ? (_sortDescending ? Icons.arrow_downward : Icons.arrow_upward) : Icons.date_range_outlined),
-              title: Text('Trier par Date de l\'événement'),
-              onTap: () {
-                if (mounted) {
-                  setState(() {
-                    if (_sortBy == 'eventTimestamp') _sortDescending = !_sortDescending;
-                    else _sortDescending = true;
-                    _sortBy = 'eventTimestamp';
-                  });
-                }
-                Navigator.pop(builderContext);
-              },
+  Widget _buildSortButton(String sortType, IconData mainIcon, String tooltip) {
+    bool isActive = _sortBy == sortType;
+    const double directionIconSize = 16.0;
+
+    return IconButton(
+      icon: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(mainIcon),
+          if (isActive)
+            Padding(
+              padding: const EdgeInsets.only(left: 4.0),
+              child: Icon(
+                _sortDescending ? Icons.arrow_drop_down : Icons.arrow_drop_up,
+                size: directionIconSize,
+              ),
             ),
-            ListTile(
-              leading: Icon(_sortBy == 'createdAt' ? (_sortDescending ? Icons.arrow_downward : Icons.arrow_upward) : Icons.schedule_outlined),
-              title: Text('Trier par Date de création'),
-              onTap: () {
-                if (mounted) {
-                  setState(() {
-                    if (_sortBy == 'createdAt') _sortDescending = !_sortDescending;
-                    else _sortDescending = true;
-                    _sortBy = 'createdAt';
-                  });
-                }
-                Navigator.pop(builderContext);
-              },
-            ),
-            ListTile(
-              leading: Icon(_sortBy == 'paletteOrder' ? (_sortDescending ? Icons.sort_by_alpha : Icons.sort_by_alpha) : Icons.palette_outlined), // Icône à adapter
-              title: Text('Trier par Couleur de la palette'),
-              onTap: () {
-                if (mounted) {
-                  setState(() {
-                    if (_sortBy == 'paletteOrder') _sortDescending = !_sortDescending;
-                    else _sortDescending = false; // Par défaut, ordre de la palette
-                    _sortBy = 'paletteOrder';
-                  });
-                }
-                Navigator.pop(builderContext);
-              },
-            ),
-            ListTile(
-              leading: Icon(_sortBy == 'content' ? (_sortDescending ? Icons.arrow_downward : Icons.arrow_upward) : Icons.sort_by_alpha_outlined),
-              title: Text('Trier par Contenu (A-Z / Z-A)'),
-              onTap: () {
-                if (mounted) {
-                  setState(() {
-                    if (_sortBy == 'content') _sortDescending = !_sortDescending;
-                    else _sortDescending = false;
-                    _sortBy = 'content';
-                  });
-                }
-                Navigator.pop(builderContext);
-              },
-            ),
-          ],
-        );
+        ],
+      ),
+      tooltip: tooltip + (isActive ? (_sortDescending ? " (Décroissant)" : " (Croissant)") : ""),
+      color: isActive ? Theme.of(context).colorScheme.primary : Theme.of(context).iconTheme.color,
+      onPressed: () {
+        if (mounted) {
+          setState(() {
+            if (isActive) {
+              _sortDescending = !_sortDescending;
+            } else {
+              _sortBy = sortType;
+              if (sortType == 'eventTimestamp' || sortType == 'createdAt') {
+                _sortDescending = true;
+              } else {
+                _sortDescending = false;
+              }
+            }
+          });
+        }
       },
     );
   }
+
 
   Future<void> _confirmDeleteNote(BuildContext context, FirestoreService firestoreService, String noteId) async {
     final bool? confirm = await showDialog<bool>(
@@ -147,16 +120,32 @@ class _NoteListPageState extends State<NoteListPage> {
   }
 
   Widget _buildNoteGridItem(BuildContext context, Note note, ColorData? colorData, FirestoreService firestoreService, Journal? journal) {
-    final DateFormat dateFormat = DateFormat('dd/MM/yy HH:mm', 'fr_FR');
+    final DateFormat dateFormat = DateFormat('dd/MM/yy', 'fr_FR'); // Format plus court pour la date
     final Color cardColor = colorData?.color ?? Colors.grey.shade100;
     final Color textColor = cardColor.computeLuminance() > 0.5 ? Colors.black87 : Colors.white;
     final Color subtleTextColor = cardColor.computeLuminance() > 0.5 ? Colors.black54 : Colors.white70;
 
+    // Ajuster la taille de la police pour les petites cartes
+    double titleFontSize = 10.0;
+    double contentFontSize = 11.0;
+    double dateFontSize = 9.0;
+    int maxLinesForContent = 2;
+
+    // Si la carte est très petite (par exemple, 9 par ligne), réduire davantage
+    final screenWidth = MediaQuery.of(context).size.width;
+    if (screenWidth / 9 < 80) { // Estimation approximative de la largeur de la carte
+      titleFontSize = 8.0;
+      contentFontSize = 9.0;
+      dateFontSize = 7.0;
+      maxLinesForContent = 1;
+    }
+
+
     return Card(
-      elevation: 3.0,
+      elevation: 2.0, // Réduire l'élévation pour un look plus plat si beaucoup d'éléments
       color: cardColor,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(8.0), // Rayon plus petit pour les petites cartes
       ),
       child: InkWell(
         onTap: () {
@@ -170,42 +159,46 @@ class _NoteListPageState extends State<NoteListPage> {
             ),
           );
         },
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(8.0),
         child: Padding(
-          padding: const EdgeInsets.all(10.0),
+          padding: const EdgeInsets.all(6.0), // Padding réduit
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    colorData?.title ?? "Couleur",
-                    style: TextStyle(fontSize: 11, color: subtleTextColor, fontWeight: FontWeight.bold),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  Expanded(
+                    child: Text(
+                      colorData?.title ?? "Couleur",
+                      style: TextStyle(fontSize: titleFontSize, color: subtleTextColor, fontWeight: FontWeight.bold),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
+                  // Optionnel: Rendre le bouton de suppression plus petit ou conditionnel
+                  // if (screenWidth / 9 > 60) // Afficher seulement si la carte n'est pas trop petite
                   IconButton(
-                    icon: Icon(Icons.delete_outline, color: textColor.withOpacity(0.7), size: 20),
+                    icon: Icon(Icons.delete_outline, color: textColor.withOpacity(0.7), size: 16), // Taille d'icône réduite
                     padding: EdgeInsets.zero,
-                    constraints: BoxConstraints(),
+                    constraints: BoxConstraints(minWidth: 24, minHeight: 24), // Contraintes plus petites
                     tooltip: "Supprimer la note",
                     onPressed: () => _confirmDeleteNote(context, firestoreService, note.id),
                   )
                 ],
               ),
-              SizedBox(height: 6),
+              SizedBox(height: 4), // Espace réduit
               Expanded(
                 child: Text(
                   note.content,
-                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: textColor),
-                  maxLines: (journal?.palette.colors.length ?? 0) > 5 ? 3 : 4,
+                  style: TextStyle(fontWeight: FontWeight.normal, fontSize: contentFontSize, color: textColor), // Police moins grasse
+                  maxLines: maxLinesForContent,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               Text(
                 dateFormat.format(note.eventTimestamp.toDate().toLocal()),
-                style: TextStyle(fontSize: 10, color: subtleTextColor),
+                style: TextStyle(fontSize: dateFontSize, color: subtleTextColor),
               ),
             ],
           ),
@@ -223,14 +216,12 @@ class _NoteListPageState extends State<NoteListPage> {
         ? activeJournalNotifier.activeJournal
         : null;
 
-    // Déterminer le champ de tri pour Firestore.
-    // Pour 'paletteOrder', nous trions côté client, donc Firestore peut utiliser un tri par défaut.
     String firestoreSortField = _sortBy;
     bool firestoreSortDescending = _sortDescending;
 
-    if (_sortBy == 'paletteOrder') {
-      firestoreSortField = 'eventTimestamp'; // Ou 'createdAt', comme tri de base avant le tri client
-      firestoreSortDescending = true; // Ou false, selon ce qui est le plus logique comme base
+    if (_sortBy == 'paletteOrder' || _sortBy == 'content') {
+      firestoreSortField = 'eventTimestamp';
+      firestoreSortDescending = true;
     }
 
 
@@ -264,39 +255,47 @@ class _NoteListPageState extends State<NoteListPage> {
             );
           }
 
-          List<Note> notes = snapshot.data!;
+          List<Note> notes = List.from(snapshot.data!);
 
-          // Tri côté client pour 'paletteOrder'
           if (_sortBy == 'paletteOrder' && journalForPalette != null) {
             final paletteOrderMap = {
               for (var i = 0; i < journalForPalette.palette.colors.length; i++)
                 journalForPalette.palette.colors[i].paletteElementId: i
             };
-
             notes.sort((a, b) {
               final indexA = paletteOrderMap[a.paletteElementId] ?? double.maxFinite.toInt();
               final indexB = paletteOrderMap[b.paletteElementId] ?? double.maxFinite.toInt();
               int comparison = indexA.compareTo(indexB);
               return _sortDescending ? -comparison : comparison;
             });
+          } else if (_sortBy == 'content') {
+            notes.sort((a, b) {
+              int comparison = a.content.toLowerCase().compareTo(b.content.toLowerCase());
+              return _sortDescending ? -comparison : comparison;
+            });
           }
 
 
           if (journalForPalette == null && activeJournalNotifier.activeJournalId != widget.journalId && !activeJournalNotifier.isLoading) {
-            _loggerPage.w("Détails du journal (pour la palette) non disponibles pour ${widget.journalId}. Le tri par couleur peut ne pas fonctionner.");
+            _loggerPage.w("Détails du journal (pour la palette) non disponibles pour ${widget.journalId}. Le tri par couleur peut ne pas fonctionner correctement.");
           }
 
           final screenWidth = MediaQuery.of(context).size.width;
-          int gridCrossAxisCount = 2;
-          if (screenWidth > 600) gridCrossAxisCount = 3;
-          if (screenWidth > 900) gridCrossAxisCount = 4;
-          if (screenWidth > 1200) gridCrossAxisCount = 5;
+          // Logique pour gridCrossAxisCount pour atteindre jusqu'à 9 éléments
+          int gridCrossAxisCount;
+          if (screenWidth < 400) gridCrossAxisCount = 3;
+          else if (screenWidth < 600) gridCrossAxisCount = 4;
+          else if (screenWidth < 800) gridCrossAxisCount = 5;
+          else if (screenWidth < 1000) gridCrossAxisCount = 6;
+          else if (screenWidth < 1200) gridCrossAxisCount = 7;
+          else if (screenWidth < 1400) gridCrossAxisCount = 8;
+          else gridCrossAxisCount = 9;
 
 
           return Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -311,11 +310,18 @@ class _NoteListPageState extends State<NoteListPage> {
                         }
                       },
                     ),
-                    SizedBox(width: 8),
-                    TextButton.icon(
-                      icon: Icon(Icons.sort_outlined),
-                      label: Text("Trier"),
-                      onPressed: () => _showSortOptions(context),
+                    Expanded(
+                      child: Wrap(
+                        alignment: WrapAlignment.end,
+                        spacing: 0,
+                        runSpacing: 0,
+                        children: [
+                          _buildSortButton('eventTimestamp', Icons.event_note_outlined, "Trier par date d'événement"),
+                          _buildSortButton('createdAt', Icons.history_outlined, "Trier par date de création"),
+                          _buildSortButton('paletteOrder', Icons.palette_outlined, "Trier par couleur de palette"),
+                          _buildSortButton('content', Icons.sort_by_alpha_outlined, "Trier par contenu"),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -323,12 +329,12 @@ class _NoteListPageState extends State<NoteListPage> {
               Expanded(
                 child: _isGridView
                     ? GridView.builder(
-                  padding: EdgeInsets.all(12.0),
+                  padding: EdgeInsets.all(8.0), // Padding réduit pour la grille
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: gridCrossAxisCount,
-                    crossAxisSpacing: 10.0,
-                    mainAxisSpacing: 10.0,
-                    childAspectRatio: (journalForPalette?.palette.colors.length ?? 0) > 5 ? 3/2.8 : 3/2.2,
+                    crossAxisSpacing: 4.0, // Espacement réduit
+                    mainAxisSpacing: 4.0,  // Espacement réduit
+                    childAspectRatio: 1.1, // Rendre les cartes plus carrées ou légèrement plus hautes que larges
                   ),
                   itemCount: notes.length,
                   itemBuilder: (context, index) {
@@ -343,7 +349,7 @@ class _NoteListPageState extends State<NoteListPage> {
                   itemBuilder: (context, index) {
                     final note = notes[index];
                     final colorData = _getColorDataById(journalForPalette, note.paletteElementId);
-                    final DateFormat dateFormat = DateFormat('EEEE dd MMMM HH:mm', 'fr_FR'); // Corrigé 'Künstler' en HH
+                    final DateFormat dateFormat = DateFormat('EEEE dd MMMM HH:mm', 'fr_FR');
 
                     final Color cardColor = colorData?.color ?? Theme.of(context).cardColor;
                     final Color textColor = cardColor.computeLuminance() > 0.5 ? Colors.black87 : Colors.white;
