@@ -10,6 +10,8 @@ import '../models/journal.dart';
 import '../screens/journal_management_page.dart';
 import '../screens/palette_model_management_page.dart';
 import '../screens/unified_palette_editor_page.dart';
+import '../screens/about_page.dart';
+import '../screens/license_page.dart';
 
 final _loggerAppBar = Logger(printer: PrettyPrinter(methodCount: 0));
 
@@ -43,7 +45,6 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
           : StreamBuilder<List<Journal>>(
         stream: firestoreService.getJournalsStream(currentUserId),
         builder: (context, snapshot) {
-          // Si pas de journaux, afficher juste le titre non cliquable
           if (!snapshot.hasData || snapshot.data == null || snapshot.data!.isEmpty) {
             return Row(
               mainAxisSize: MainAxisSize.min,
@@ -56,18 +57,15 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
           }
 
           final journals = snapshot.data!;
-          // PopupMenuButton pour la sélection du journal
           return PopupMenuButton<String>(
             tooltip: "Changer de journal",
             onSelected: (String journalId) {
-              // La sélection ici ne concerne QUE le changement de journal
-              if (journalId.isNotEmpty) { // Vérifier qu'on n'a pas cliqué sur une option de gestion par erreur
+              if (journalId.isNotEmpty) {
                 activeJournalNotifier.setActiveJournal(journalId, currentUserId);
                 _loggerAppBar.i("Journal actif changé via Titre AppBar: $journalId");
               }
             },
             itemBuilder: (BuildContext context) {
-              // Construire la liste des journaux SEULEMENT
               List<PopupMenuItem<String>> journalItems = journals.map((Journal journal) {
                 return PopupMenuItem<String>(
                   value: journal.id,
@@ -75,19 +73,18 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
                     journal.name,
                     style: TextStyle(
                       fontWeight: activeJournalNotifier.activeJournalId == journal.id
-                          ? FontWeight.bold // Met en gras le journal actif
+                          ? FontWeight.bold
                           : FontWeight.normal,
                       color: activeJournalNotifier.activeJournalId == journal.id
-                          ? Theme.of(context).colorScheme.primary // Optionnel: Couleur différente si actif
+                          ? Theme.of(context).colorScheme.primary
                           : null,
                     ),
                   ),
                 );
               }).toList();
-              // Retourner UNIQUEMENT les items des journaux
               return journalItems;
             },
-            child: Row( // Le widget sur lequel on clique pour ouvrir le menu
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Icons.book_outlined, size: 20),
@@ -101,7 +98,6 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
       ),
       centerTitle: true,
       actions: <Widget>[
-        // --- Bouton pour éditer la palette du journal ACTIF ---
         if (activeJournal != null)
           IconButton(
             icon: Icon(Icons.palette_outlined),
@@ -118,16 +114,19 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
             },
           ),
 
-        // --- Menu d'options "more_vert" ---
         if (currentUserId != null)
           PopupMenuButton<String>(
             icon: Icon(Icons.more_vert_outlined),
             tooltip: "Options",
-            onSelected: (value) { // Gérer la sélection des options ici
+            onSelected: (value) {
               if (value == 'manage_journals') {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => JournalManagementPage()));
               } else if (value == 'manage_palette_models') {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => PaletteModelManagementPage()));
+              } else if (value == 'about') {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => AboutPage()));
+              } else if (value == 'license') {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => ColorsNotesLicensePage()));
               } else if (value == 'sign_out') {
                 authService.signOut().then((_) {
                   _loggerAppBar.i("Déconnexion demandée.");
@@ -142,7 +141,7 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
               }
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              // Ajouter l'option pour gérer les journaux ici
+              // Options de gestion
               const PopupMenuItem<String>(
                 value: 'manage_journals',
                 child: ListTile(
@@ -150,7 +149,6 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
                   title: Text('Gérer les journaux'),
                 ),
               ),
-              // Ajouter l'option pour gérer les modèles ici
               const PopupMenuItem<String>(
                 value: 'manage_palette_models',
                 child: ListTile(
@@ -159,6 +157,23 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
                 ),
               ),
               const PopupMenuDivider(), // Séparateur
+              // Nouvelles options
+              const PopupMenuItem<String>(
+                value: 'about',
+                child: ListTile(
+                  leading: Icon(Icons.info_outline),
+                  title: Text('À Propos'),
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'license',
+                child: ListTile(
+                  leading: Icon(Icons.description_outlined),
+                  title: Text('Licence'),
+                ),
+              ),
+              const PopupMenuDivider(), // Séparateur
+              // Déconnexion
               const PopupMenuItem<String>(
                 value: 'sign_out',
                 child: ListTile(

@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
 
 import '../services/auth_service.dart';
+import 'about_page.dart';
+import 'license_page.dart';
 
 final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0, printTime: true));
 
@@ -131,6 +133,55 @@ class _RegisterPageState extends State<RegisterPage> {
                     }
                   },
                   child: Text('Déjà un compte ? Se connecter'),
+                ),
+                SizedBox(height: 30), // Espace avant les liens discrets
+                // --- Liens discrets ajoutés ici ---
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => AboutPage()));
+                      },
+                      child: Text(
+                        'À Propos',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600], // Couleur discrète
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        minimumSize: Size(0, 0), // Taille minimale pour réduire le padding autour
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Réduit la zone de clic
+                      ),
+                    ),
+                    SizedBox(width: 10), // Espace entre les liens
+                    Text(
+                      '|', // Séparateur
+                      style: TextStyle(fontSize: 12, color: Colors.grey[400]),
+                    ),
+                    SizedBox(width: 10), // Espace entre les liens
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => ColorsNotesLicensePage()));
+                      },
+                      child: Text(
+                        'Licence',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600], // Couleur discrète
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        minimumSize: Size(0, 0), // Taille minimale
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Réduit la zone de clic
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
