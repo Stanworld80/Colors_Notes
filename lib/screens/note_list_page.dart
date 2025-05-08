@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:logger/logger.dart';
 import 'package:intl/intl.dart';
+import 'package:logger/logger.dart';
 
 import '../services/firestore_service.dart';
 import '../models/note.dart';
@@ -10,7 +10,7 @@ import '../models/color_data.dart';
 import '../providers/active_journal_provider.dart';
 import 'entry_page.dart';
 
-final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0));
+final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0, printTime: false));
 
 class NoteListPage extends StatefulWidget {
   final String journalId;
@@ -24,12 +24,14 @@ class NoteListPage extends StatefulWidget {
 class _NoteListPageState extends State<NoteListPage> {
   String _sortBy = 'eventTimestamp';
   bool _sortDescending = true;
+  bool _isGridView = false;
 
   ColorData? _getColorDataById(Journal? journal, String paletteElementId) {
     if (journal == null) return null;
     try {
       return journal.palette.colors.firstWhere((c) => c.paletteElementId == paletteElementId);
     } catch (e) {
+      _loggerPage.w("ColorData non trouvé pour paletteElementId: $paletteElementId dans le journal ${journal.name}");
       return null;
     }
   }
@@ -88,6 +90,125 @@ class _NoteListPageState extends State<NoteListPage> {
     );
   }
 
+  Future<void> _confirmDeleteNote(BuildContext context, FirestoreService firestoreService, String noteId) async {
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text('Confirmer la suppression'),
+          content: Text('Voulez-vous vraiment supprimer cette note ?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Annuler'),
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: Text('Supprimer'),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm == true) {
+      try {
+        await firestoreService.deleteNote(noteId);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Note supprimée avec succès.')),
+          );
+        }
+      } catch (e) {
+        _loggerPage.e("Erreur suppression note: $e");
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Erreur lors de la suppression: ${e.toString()}')),
+          );
+        }
+      }
+    }
+  }
+
+  Widget _buildNoteGridItem(BuildContext context, Note note, ColorData? colorData, FirestoreService firestoreService, Journal? journal) {
+    final DateFormat dateFormat = DateFormat('dd/MM/yy HH:mm', 'fr_FR');
+    final Color cardColor = colorData?.color ?? Colors.grey.shade100;
+    final Color textColor = cardColor.computeLuminance() > 0.5 ? Colors.black87 : Colors.white;
+    final Color subtleTextColor = cardColor.computeLuminance() > 0.5 ? Colors.black54 : Colors.white70;
+    final Color iconColor = cardColor.computeLuminance() > 0.5 ? Colors.black54 : Colors.white;
+
+
+    return Card(
+      elevation: 3.0,
+      color: cardColor, // Couleur de fond de la carte
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+        // Optionnel: retirer la bordure si la couleur de fond est suffisante
+        // side: BorderSide(
+        //   color: colorData?.color ?? Colors.grey.shade300,
+        //   width: 1.5,
+        // ),
+      ),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => EntryPage(
+                journalId: widget.journalId,
+                noteToEdit: note,
+              ),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(12.0),
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Optionnel: Remplacer le CircleAvatar par le titre de la couleur si désiré
+                  Text(
+                    colorData?.title ?? "Couleur",
+                    style: TextStyle(fontSize: 11, color: subtleTextColor, fontWeight: FontWeight.bold),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete_outline, color: textColor.withOpacity(0.7), size: 20),
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(),
+                    tooltip: "Supprimer la note",
+                    onPressed: () => _confirmDeleteNote(context, firestoreService, note.id),
+                  )
+                ],
+              ),
+              SizedBox(height: 6),
+              Expanded(
+                child: Text(
+                  note.content,
+                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: textColor),
+                  maxLines: (journal?.palette.colors.length ?? 0) > 5 ? 3 : 4,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              // Spacer(), // Peut-être plus nécessaire si Expanded est utilisé pour le contenu
+              Text(
+                dateFormat.format(note.eventTimestamp.toDate().toLocal()),
+                style: TextStyle(fontSize: 10, color: subtleTextColor),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final firestoreService = Provider.of<FirestoreService>(context, listen: false);
@@ -122,7 +243,6 @@ class _NoteListPageState extends State<NoteListPage> {
                     'Aucune note dans ce journal.',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
-
                 ],
               ),
             );
@@ -131,8 +251,15 @@ class _NoteListPageState extends State<NoteListPage> {
           final notes = snapshot.data!;
 
           if (journalForPalette == null && activeJournalNotifier.activeJournalId != widget.journalId && !activeJournalNotifier.isLoading) {
-            _loggerPage.w("Détails du journal (pour la palette) non disponibles pour ${widget.journalId}. Les couleurs des notes pourraient ne pas s'afficher.");
+            _loggerPage.w("Détails du journal (pour la palette) non disponibles pour ${widget.journalId}.");
           }
+
+          final screenWidth = MediaQuery.of(context).size.width;
+          int gridCrossAxisCount = 2;
+          if (screenWidth > 600) gridCrossAxisCount = 3;
+          if (screenWidth > 900) gridCrossAxisCount = 4;
+          if (screenWidth > 1200) gridCrossAxisCount = 5;
+
 
           return Column(
             children: [
@@ -141,6 +268,18 @@ class _NoteListPageState extends State<NoteListPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    IconButton(
+                      icon: Icon(_isGridView ? Icons.view_list_outlined : Icons.grid_view_outlined),
+                      tooltip: _isGridView ? "Afficher en liste" : "Afficher en grille",
+                      onPressed: () {
+                        if (mounted) {
+                          setState(() {
+                            _isGridView = !_isGridView;
+                          });
+                        }
+                      },
+                    ),
+                    SizedBox(width: 8),
                     TextButton.icon(
                       icon: Icon(Icons.sort_outlined),
                       label: Text("Trier"),
@@ -150,38 +289,62 @@ class _NoteListPageState extends State<NoteListPage> {
                 ),
               ),
               Expanded(
-                child: ListView.builder(
+                child: _isGridView
+                    ? GridView.builder(
+                  padding: EdgeInsets.all(12.0),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: gridCrossAxisCount,
+                    crossAxisSpacing: 10.0,
+                    mainAxisSpacing: 10.0,
+                    childAspectRatio: (journalForPalette?.palette.colors.length ?? 0) > 5 ? 3/2.8 : 3/2.2,
+                  ),
+                  itemCount: notes.length,
+                  itemBuilder: (context, index) {
+                    final note = notes[index];
+                    final colorData = _getColorDataById(journalForPalette, note.paletteElementId);
+                    return _buildNoteGridItem(context, note, colorData, firestoreService, journalForPalette);
+                  },
+                )
+                    : ListView.builder(
                   padding: EdgeInsets.all(8.0),
                   itemCount: notes.length,
                   itemBuilder: (context, index) {
                     final note = notes[index];
                     final colorData = _getColorDataById(journalForPalette, note.paletteElementId);
-                    final DateFormat dateFormat = DateFormat('EEEE dd MMMM<x_bin_534>, HH:mm', 'fr_FR');
+                    final DateFormat dateFormat = DateFormat('EEEE dd MMMM Künstler, HH:mm', 'fr_FR');
+
+                    final Color cardColor = colorData?.color ?? Theme.of(context).cardColor;
+                    final Color textColor = cardColor.computeLuminance() > 0.5 ? Colors.black87 : Colors.white;
+                    final Color subtleTextColor = cardColor.computeLuminance() > 0.5 ? Colors.black54 : Colors.white70;
+                    final Color iconColor = cardColor.computeLuminance() > 0.5 ? Colors.black54 : Colors.white;
+
 
                     return Card(
                       elevation: 2.0,
+                      color: cardColor, // Couleur de fond de la carte
                       margin: EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),
-                        side: BorderSide(
-                          color: colorData?.color ?? Colors.grey.shade300,
-                          width: 1.5,
-                        ),
+                        // Optionnel: retirer la bordure si la couleur de fond est suffisante
+                        // side: BorderSide(
+                        //   color: colorData?.color ?? Colors.grey.shade300,
+                        //   width: 1.5,
+                        // ),
                       ),
                       child: ListTile(
                         contentPadding: EdgeInsets.all(12.0),
                         leading: colorData != null
                             ? CircleAvatar(
-                          backgroundColor: colorData.color,
+                          backgroundColor: Colors.transparent, // Rendre transparent si le fond de la carte est la couleur
                           child: Text(
                             colorData.title.isNotEmpty ? colorData.title[0].toUpperCase() : '?',
-                            style: TextStyle(color: colorData.color.computeLuminance() > 0.5 ? Colors.black : Colors.white),
+                            style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
                           ),
                         )
                             : CircleAvatar(backgroundColor: Colors.grey, child: Icon(Icons.palette_outlined, color: Colors.white)),
                         title: Text(
                           note.content,
-                          style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+                          style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: textColor),
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -190,20 +353,20 @@ class _NoteListPageState extends State<NoteListPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (colorData != null) Text("Humeur: ${colorData.title}", style: TextStyle(fontSize: 12)),
+                              if (colorData != null) Text("Humeur: ${colorData.title}", style: TextStyle(fontSize: 12, color: subtleTextColor)),
                               Text(
                                 'Date: ${dateFormat.format(note.eventTimestamp.toDate().toLocal())}',
-                                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                                style: TextStyle(fontSize: 12, color: subtleTextColor),
                               ),
                               Text(
                                 'Créé le: ${DateFormat('dd/MM/yy HH:mm', 'fr_FR').format(note.createdAt.toDate().toLocal())}',
-                                style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
+                                style: TextStyle(fontSize: 10, color: subtleTextColor.withOpacity(0.8)),
                               ),
                             ],
                           ),
                         ),
                         trailing: IconButton(
-                          icon: Icon(Icons.delete_forever_outlined, color: Colors.redAccent),
+                          icon: Icon(Icons.delete_forever_outlined, color: textColor.withOpacity(0.7)),
                           onPressed: () => _confirmDeleteNote(context, firestoreService, note.id),
                         ),
                         onTap: () {
@@ -227,47 +390,5 @@ class _NoteListPageState extends State<NoteListPage> {
         },
       ),
     );
-  }
-
-  Future<void> _confirmDeleteNote(BuildContext context, FirestoreService firestoreService, String noteId) async {
-    final bool? confirm = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: Text('Confirmer la suppression'),
-          content: Text('Voulez-vous vraiment supprimer cette note ?'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Annuler'),
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-            ),
-            TextButton(
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: Text('Supprimer'),
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (confirm == true) {
-      try {
-        await firestoreService.deleteNote(noteId);
-        _loggerPage.i("Note $noteId supprimée.");
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Note supprimée avec succès.')),
-          );
-        }
-      } catch (e) {
-        _loggerPage.e("Erreur suppression note: $e");
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erreur lors de la suppression: ${e.toString()}')),
-          );
-        }
-      }
-    }
   }
 }
