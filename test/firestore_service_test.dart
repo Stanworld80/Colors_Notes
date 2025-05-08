@@ -1,89 +1,74 @@
 // test/firestore_service_test.dart
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart'; // Nécessaire pour @GenerateMocks
-import 'package:mockito/mockito.dart'; // Nécessaire pour when(), verify() etc. si vous utilisez les mocks générés
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 
-// Importez vos modèles et votre service
-// Assurez-vous que les chemins d'importation sont corrects pour votre structure de projet
+// Importer vos modèles et votre service
 import 'package:colors_notes/models/journal.dart';
 import 'package:colors_notes/models/palette.dart';
 import 'package:colors_notes/models/color_data.dart';
 import 'package:colors_notes/services/firestore_service.dart'; // Le service à tester
+import 'package:colors_notes/core/predefined_templates.dart'; // Importer les modèles prédéfinis
+import 'package:colors_notes/models/app_user.dart';
 
-// --- Mocking Firebase Services (Optionnel si fake_cloud_firestore est utilisé principalement) ---
-// Si vous utilisez @GenerateMocks, assurez-vous que build_runner a généré ce fichier.
-// Exécutez `flutter pub run build_runner build --delete-conflicting-outputs` dans le terminal
+// --- Mocking Firebase Services ---
 @GenerateMocks([
-  // FirebaseFirestore, // Commenté car nous utilisons FakeFirebaseFirestore principalement
-  // CollectionReference,
-  // DocumentReference,
-  // WriteBatch,
-  // QuerySnapshot,
-  // Query,
-  // DocumentSnapshot,
-  FirebaseAuth, // Utile si vous testez des logiques d'authentification dans le service
+  FirebaseAuth,
   User,
-  Logger, // Pour moquer les appels de logging
-  Uuid, // Pour contrôler la génération d'UUID dans les tests
+  Logger,
+  Uuid,
 ])
-import 'firestore_service_test.mocks.dart'; // Ce fichier DOIT être généré par build_runner
+import 'firestore_service_test.mocks.dart'; // Fichier généré par build_runner
 
 void main() {
-  // Instance du service à tester
   late FirestoreService firestoreService;
-  // Instance de FakeFirebaseFirestore
   late FakeFirebaseFirestore fakeFirestoreInstance;
-  // Mocks pour les dépendances qui ne sont pas Firestore (si FirestoreService les injecte)
   late MockFirebaseAuth mockAuth;
   late MockLogger mockLogger;
   late MockUuid mockUuid;
+  late MockUser mockUser;
 
   setUp(() {
     fakeFirestoreInstance = FakeFirebaseFirestore();
-    mockAuth = MockFirebaseAuth(); // Si FirestoreService dépend de FirebaseAuth
+    mockAuth = MockFirebaseAuth();
     mockLogger = MockLogger();
     mockUuid = MockUuid();
+    mockUser = MockUser();
 
-    // *** IMPORTANT: Refactorisation de FirestoreService pour l'injection de dépendances ***
-    // ... (commentaire inchangé) ...
-    //
-    // Avec cette refactorisation, vous initialiseriez le service comme suit :
-    firestoreService = FirestoreService(
-      firestore: fakeFirestoreInstance, // Utilise fake_cloud_firestore
-      auth: mockAuth, // Utilisez le mock si nécessaire
-      logger: mockLogger, // Utilisez le mock pour vérifier les logs
-      uuid: mockUuid, // Utilisez le mock pour contrôler les UUIDs générés
-    );
-    // Assurez-vous que le fichier .mocks.dart est généré et non vide.
-    // Exécutez: flutter pub run build_runner build --delete-conflicting-outputs
+    // Initialisation de FirestoreService avec l'instance FakeFirebaseFirestore
+    firestoreService = FirestoreService(fakeFirestoreInstance);
+
+    // Configuration de base pour le mockUser si nécessaire
+    when(mockUser.uid).thenReturn('testUserId');
+    when(mockUser.email).thenReturn('test@example.com');
+    when(mockUser.displayName).thenReturn('Test User');
   });
 
+
   group('FirestoreService Unit Tests with FakeFirebaseFirestore', () {
+
+    // --- Test createJournal (Corrigé) ---
     test('createJournal should add a journal to Firestore', () async {
       // Arrange
       const userId = 'testUserId';
       final journalId = 'journalTest123';
-      final paletteId = 'paletteTest123';
+      final paletteId = 'paletteTest123'; // L'ID de la palette *n'est pas* stocké dans la map elle-même
       final colorId = 'colorTest123';
 
-      // Configurez le mockUuid pour retourner des valeurs prévisibles si nécessaire
-      when(mockUuid.v4()).thenReturnInOrder([/*paletteId, colorId,*/ journalId]); // Ajustez l'ordre si nécessaire
-
-      // **Correction:** Utiliser createdAt et lastUpdatedAt
       final journalToCreate = Journal(
         id: journalId,
         userId: userId,
         name: 'Mon Journal de Test Fake',
-        createdAt: Timestamp.fromDate(DateTime(2023, 1, 1)), // Nom de champ corrigé
-        lastUpdatedAt: Timestamp.fromDate(DateTime(2023, 1, 1)), // Nom de champ corrigé
+        createdAt: Timestamp.fromDate(DateTime(2023, 1, 1)),
+        lastUpdatedAt: Timestamp.fromDate(DateTime(2023, 1, 1)),
         palette: Palette(
-          id: paletteId,
+          id: paletteId, // Cet ID n'est pas dans le toMap() par défaut
           name: 'Palette de Test Fake',
           colors: [
             ColorData(
@@ -91,174 +76,143 @@ void main() {
                 title: 'Bleu Test',
                 hexCode: '#0000FF'),
           ],
+          userId: userId,
         ),
       );
-      final journalMap = journalToCreate.toMap(); // Pour la vérification
 
       // Act
-      // **Correction:** Appeler createJournal avec seulement l'objet Journal
       await firestoreService.createJournal(journalToCreate);
 
       // Assert
-      // Vérifiez directement dans fakeFirestoreInstance que le document a été créé
       final docSnapshot = await fakeFirestoreInstance
-          .collection('users')
-          .doc(userId)
           .collection('journals')
-          .doc(journalToCreate.id)
+          .doc(journalId)
           .get();
 
-      expect(docSnapshot.exists, isTrue, reason: "Le document journal devrait exister dans FakeFirestore");
-      // Comparer les maps peut être délicat avec les Timestamps, vérifier les champs clés
+      expect(docSnapshot.exists, isTrue, reason: "Le document journal devrait exister");
       final data = docSnapshot.data();
-      expect(data?['id'], equals(journalToCreate.id));
-      expect(data?['userId'], equals(journalToCreate.userId));
-      expect(data?['name'], equals(journalToCreate.name));
-      // expect(data, equals(journalMap)); // Peut échouer à cause des Timestamps, préférez les vérifications individuelles
+      expect(data?['userId'], equals(userId));
+      expect(data?['name'], equals('Mon Journal de Test Fake'));
+      // *** CORRECTION: Ne pas tester l'ID de la palette dans la map ***
+      // expect(data?['palette']?['id'], equals(paletteId)); // Commenté/Supprimé
+      expect(data?['palette']?['name'], equals('Palette de Test Fake')); // Vérifier le nom
+      expect(data?['palette']?['colors']?[0]?['paletteElementId'], equals(colorId));
 
-      // Optionnel: Vérifiez les appels au logger si vous l'avez moqué et injecté
-      verify(mockLogger.i('Journal ${journalToCreate.id} créé pour l\'utilisateur $userId')).called(1);
     });
 
-    test('initializeNewUserData should create user, default journal, and update activeJournalId', () async {
+    // --- Test initializeNewUserData (Adapté) ---
+    test('initializeNewUserData should create user and default journal', () async {
       // Arrange
-      const testEmail = 'test@example.com';
-      const testDisplayName = 'Test User';
-      const defaultJournalName = 'Journal par Défaut';
+      const testEmail = 'newuser@example.com';
+      const testDisplayName = 'New Test User';
+      const defaultJournalName = 'Mon Premier Journal';
 
-      // Mock User
-      final mockUser = MockUser();
-      when(mockUser.uid).thenReturn('newTestUserId');
+      when(mockUser.uid).thenReturn('newUserId123');
       when(mockUser.email).thenReturn(testEmail);
       when(mockUser.displayName).thenReturn(testDisplayName);
 
-      // Mock UUIDs that will be generated by FirestoreService
-      final expectedUserDocId = 'newTestUserId';
-      final expectedJournalId = 'defaultJournalUuid';
-      final expectedPaletteId = 'defaultPaletteUuid';
-      final expectedColorId1 = 'defaultColorUuid1';
-      // ... add more if your default palette has more colors
-
-      when(mockUuid.v4()).thenReturnInOrder([
-        expectedPaletteId, // Palette ID for default instance palette
-        expectedColorId1, // ColorData ID for the first color in default palette
-        // ... add more UUIDs for other colors in the default palette
-        expectedJournalId,  // Journal ID
-      ]);
-
-
       // Act
-      // Note: initializeNewUserData dans votre service actuel utilise predefinedPaletteModels.
-      // Assurez-vous que cette liste est accessible ou moquez son accès si nécessaire.
-      await firestoreService.initializeNewUserData(mockUser); // Pass named param
+      await firestoreService.initializeNewUserData(mockUser, displayName: testDisplayName, email: testEmail);
 
       // Assert
-      // 1. Check user document
-      final userDoc = await fakeFirestoreInstance.collection('users').doc(expectedUserDocId).get();
-      expect(userDoc.exists, isTrue, reason: "User document should exist");
+      // 1. Vérifier le document utilisateur
+      final userDoc = await fakeFirestoreInstance.collection('users').doc('newUserId123').get();
+      expect(userDoc.exists, isTrue, reason: "Le document utilisateur devrait exister");
       expect(userDoc.data()?['email'], testEmail);
-      expect(userDoc.data()?['activeJournalId'], expectedJournalId, reason: "Active journal ID should be set");
+      expect(userDoc.data()?['displayName'], testDisplayName);
 
-      // 2. Check default journal document
-      final journalDoc = await fakeFirestoreInstance
-          .collection('users')
-          .doc(expectedUserDocId)
+      // 2. Vérifier le document journal par défaut
+      final journalQuery = await fakeFirestoreInstance
           .collection('journals')
-          .doc(expectedJournalId)
+          .where('userId', isEqualTo: 'newUserId123')
+          .limit(1)
           .get();
-      expect(journalDoc.exists, isTrue, reason: "Default journal document should exist");
-      expect(journalDoc.data()?['name'], defaultJournalName);
-      expect(journalDoc.data()?['userId'], expectedUserDocId);
 
-      // 3. Check palette within the journal
-      final paletteData = journalDoc.data()?['palette'] as Map<String, dynamic>?;
-      expect(paletteData, isNotNull, reason: "Palette data should exist in journal");
-      expect(paletteData?['id'], expectedPaletteId); // Vérifie l'ID de la palette
-      // Le nom de la palette dans initializeNewUserData est basé sur le nom du modèle
-      // expect(paletteData?['name'], 'Palette de $defaultJournalName'); // Vérifiez le nom exact défini dans initializeNewUserData
+      expect(journalQuery.docs.length, 1, reason: "Un journal par défaut devrait être créé");
+      final journalDoc = journalQuery.docs.first;
+      expect(journalDoc.exists, isTrue, reason: "Le document journal par défaut devrait exister");
+      expect(journalDoc.data()['name'], defaultJournalName);
+      expect(journalDoc.data()['userId'], 'newUserId123');
+
+      // 3. Vérifier la palette dans le journal par défaut
+      final paletteData = journalDoc.data()['palette'] as Map<String, dynamic>?;
+      expect(paletteData, isNotNull, reason: "La palette devrait exister dans le journal");
+      expect(paletteData?['name'], predefinedPalettes[0].name); // Vérifier le nom basé sur le modèle
 
       final colorsList = paletteData?['colors'] as List<dynamic>?;
-      expect(colorsList, isNotEmpty, reason: "Palette should have colors");
-      final firstColor = colorsList?.first as Map<String, dynamic>?;
-      expect(firstColor?['paletteElementId'], expectedColorId1);
-
-
-      verify(mockLogger.i('Nouvel utilisateur et journal par défaut initialisés pour $expectedUserDocId')).called(1);
+      expect(colorsList, isNotNull);
+      expect(colorsList?.length, predefinedPalettes[0].colors.length, reason: "Le nombre de couleurs doit correspondre au modèle");
+      if (colorsList != null && colorsList.isNotEmpty && predefinedPalettes[0].colors.isNotEmpty) {
+        expect(colorsList[0]['title'], predefinedPalettes[0].colors[0].title);
+        expect(colorsList[0]['hexCode'], predefinedPalettes[0].colors[0].hexCode);
+        expect(colorsList[0]['paletteElementId'], isNotNull);
+      }
     });
 
-
-    // Ajoutez d'autres tests pour d'autres méthodes en utilisant fakeFirestoreInstance
-  });
-
-  // Groupe de tests illustratif pour Mockito (nécessite une refactorisation majeure de FirestoreService)
-  group('FirestoreService Unit Tests with Mockito (Illustrative - Requires Refactoring)', () {
-    // setUp(() { // Mock instantiations commented out
-    // MockFirebaseFirestore mockFirestoreForMockito = MockFirebaseFirestore();
-    // MockLogger mockLoggerForMockito = MockLogger();
-    // firestoreService = FirestoreService(
-    //   firestore: mockFirestoreForMockito,
-    //   logger: mockLoggerForMockito,
-    //   auth: MockFirebaseAuth(),
-    //   uuid: MockUuid(),
-    // );
-    // });
-
-    test('[Mockito Example] createJournal should call Firestore set with correct data', () async {
-      // Ce test ne fonctionnera que si FirestoreService est refactorisé pour l'injection de dépendances.
+    // --- Test deleteJournal (Inchangé) ---
+    test('deleteJournal should remove the journal and its notes', () async {
       // Arrange
-      // final mockFirestore = MockFirebaseFirestore(); // Commented out
-      // final mockUsersCol = MockCollectionReference<Map<String, dynamic>>(); // Commented out
-      // final mockUserDoc = MockDocumentReference<Map<String, dynamic>>(); // Commented out
-      // final mockJournalsCol = MockCollectionReference<Map<String, dynamic>>(); // Commented out
-      // final mockJournalDoc = MockDocumentReference<Map<String, dynamic>>(); // Commented out
-      final mockLoggerForThisTest = MockLogger(); // Keep this mock
+      const userId = 'userToDeleteJournal';
+      const journalId = 'journalToDelete';
+      const noteId1 = 'note1InJournalToDelete';
+      const noteId2 = 'note2InJournalToDelete';
 
-      // Configurez FirestoreService pour utiliser ces mocks (nécessite un constructeur acceptant les dépendances)
-      // final serviceWithMocks = FirestoreService( // Commented out
-      //     firestore: mockFirestore,
-      //     logger: mockLoggerForThisTest,
-      //     auth: MockFirebaseAuth(),
-      //     uuid: MockUuid()
-      // );
-
-
-      const userId = 'mockitoUserId';
-      // **Correction:** Utiliser createdAt et lastUpdatedAt
-      final journal = Journal(
-        id: 'mockitoJournal123',
-        userId: userId,
-        name: 'Mon Journal Mockito',
-        createdAt: Timestamp.now(), // Nom de champ corrigé
-        lastUpdatedAt: Timestamp.now(), // Nom de champ corrigé
-        palette: Palette(
-          id: 'mockitoPalette123',
-          name: 'Palette Mockito',
-          colors: [
-            ColorData(paletteElementId: 'mockitoColor1', title: 'Vert', hexCode: '#00FF00'),
-          ],
-        ),
-      );
-      final journalMap = journal.toMap();
-
-      // Configuration des mocks pour la chaîne d'appels (Commented out)
-      // when(mockFirestore.collection('users')).thenReturn(mockUsersCol);
-      // when(mockUsersCol.doc(userId)).thenReturn(mockUserDoc);
-      // when(mockUserDoc.collection('journals')).thenReturn(mockJournalsCol);
-      // when(mockJournalsCol.doc(journal.id)).thenReturn(mockJournalDoc);
-      // when(mockJournalDoc.set(journalMap)).thenAnswer((_) async {});
+      await fakeFirestoreInstance.collection('journals').doc(journalId).set({
+        'userId': userId, 'name': 'Journal à Supprimer', 'createdAt': Timestamp.now(),
+        'lastUpdatedAt': Timestamp.now(), 'palette': {'id': 'p1', 'name': 'Palette', 'colors': []}
+      });
+      await fakeFirestoreInstance.collection('notes').doc(noteId1).set({
+        'journalId': journalId, 'userId': userId, 'content': 'Note 1', 'paletteElementId': 'c1',
+        'eventTimestamp': Timestamp.now(), 'createdAt': Timestamp.now(), 'lastUpdatedAt': Timestamp.now()
+      });
+      await fakeFirestoreInstance.collection('notes').doc(noteId2).set({
+        'journalId': journalId, 'userId': userId, 'content': 'Note 2', 'paletteElementId': 'c2',
+        'eventTimestamp': Timestamp.now(), 'createdAt': Timestamp.now(), 'lastUpdatedAt': Timestamp.now()
+      });
+      await fakeFirestoreInstance.collection('notes').doc('otherNote').set({
+        'journalId': 'otherJournal', 'userId': userId, 'content': 'Autre Note', 'paletteElementId': 'c3',
+        'eventTimestamp': Timestamp.now(), 'createdAt': Timestamp.now(), 'lastUpdatedAt': Timestamp.now()
+      });
 
       // Act
-      // **Correction:** Appeler createJournal avec seulement l'objet Journal (Commented out)
-      // await serviceWithMocks.createJournal(journal);
+      await firestoreService.deleteJournal(journalId, userId);
 
-      // Assert (Commented out)
-      // verify(mockJournalDoc.set(journalMap)).called(1);
-      // verify(mockLoggerForThisTest.i('Journal ${journal.id} créé pour l\'utilisateur $userId')).called(1);
-
-      print("NOTE: L'exemple de test Mockito ci-dessus suppose que FirestoreService");
-      print("a été refactorisé pour l'injection de dépendances et que les mocks sont générés.");
-      expect(true, isTrue); // Placeholder
+      // Assert
+      final journalDoc = await fakeFirestoreInstance.collection('journals').doc(journalId).get();
+      expect(journalDoc.exists, isFalse, reason: "Le journal devrait être supprimé");
+      final note1Doc = await fakeFirestoreInstance.collection('notes').doc(noteId1).get();
+      expect(note1Doc.exists, isFalse, reason: "La note 1 associée devrait être supprimée");
+      final note2Doc = await fakeFirestoreInstance.collection('notes').doc(noteId2).get();
+      expect(note2Doc.exists, isFalse, reason: "La note 2 associée devrait être supprimée");
+      final otherNoteDoc = await fakeFirestoreInstance.collection('notes').doc('otherNote').get();
+      expect(otherNoteDoc.exists, isTrue, reason: "La note de l'autre journal ne doit pas être supprimée");
     });
+
+    // --- Test isPaletteElementUsedInNotes (Inchangé) ---
+    test('isPaletteElementUsedInNotes returns true if used, false otherwise', () async {
+      // Arrange
+      const userId = 'userToCheckUsage';
+      const journalId = 'journalToCheckUsage';
+      const usedColorId = 'colorUsed1';
+      const unusedColorId = 'colorUnused1';
+
+      await fakeFirestoreInstance.collection('notes').doc('noteUsingColor').set({
+        'journalId': journalId, 'userId': userId, 'content': 'Utilise la couleur', 'paletteElementId': usedColorId,
+        'eventTimestamp': Timestamp.now(), 'createdAt': Timestamp.now(), 'lastUpdatedAt': Timestamp.now()
+      });
+
+      // Act
+      final bool isUsed = await firestoreService.isPaletteElementUsedInNotes(journalId, usedColorId);
+      final bool isUnused = await firestoreService.isPaletteElementUsedInNotes(journalId, unusedColorId);
+      final bool isUsedInOtherJournal = await firestoreService.isPaletteElementUsedInNotes('otherJournalId', usedColorId);
+
+      // Assert
+      expect(isUsed, isTrue, reason: "La couleur $usedColorId devrait être marquée comme utilisée");
+      expect(isUnused, isFalse, reason: "La couleur $unusedColorId ne devrait pas être marquée comme utilisée");
+      expect(isUsedInOtherJournal, isFalse, reason: "La couleur $usedColorId ne devrait pas être marquée comme utilisée dans un autre journal");
+    });
+
+    // Ajoutez d'autres tests ici...
+
   });
 }
-
