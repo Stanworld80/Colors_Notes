@@ -8,18 +8,17 @@ import '../models/color_data.dart';
 final _logger = Logger(printer: PrettyPrinter(methodCount: 1, printTime: false));
 const _uuid = Uuid();
 
-
-int MIN_COLORS_IN_PALETTE_PREVIEW = 3; // Plus flexible pour la pré-création
-int MAX_COLORS_IN_PALETTE_PREVIEW = 48;
+const int MIN_COLORS_IN_PALETTE_EDITOR = 1;
+const int MAX_COLORS_IN_PALETTE_EDITOR = 48;
 
 class InlinePaletteEditorWidget extends StatefulWidget {
-
-
   final String initialPaletteName;
   final List<ColorData> initialColors;
   final Function(String newName) onPaletteNameChanged;
   final Function(List<ColorData> newColors) onColorsChanged;
-  // final String? userId; // Pourrait être utile pour des validations futures spécifiques à l'utilisateur
+  final bool isEditingJournalPalette;
+  final Future<bool> Function(String paletteElementId)? canDeleteColorCallback;
+  final Future<void> Function()? onPaletteNeedsSave; // Nouveau callback pour la sauvegarde automatique
 
   const InlinePaletteEditorWidget({
     Key? key,
@@ -27,7 +26,9 @@ class InlinePaletteEditorWidget extends StatefulWidget {
     required this.initialColors,
     required this.onPaletteNameChanged,
     required this.onColorsChanged,
-    // this.userId,
+    this.isEditingJournalPalette = false,
+    this.canDeleteColorCallback,
+    this.onPaletteNeedsSave, // Ajout du callback
   }) : super(key: key);
 
   @override
@@ -37,51 +38,50 @@ class InlinePaletteEditorWidget extends StatefulWidget {
 class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
   late TextEditingController _paletteNameController;
   late List<ColorData> _editableColors;
-  bool _isGridView = true; // Default to grid view
+  bool _isGridView = true;
 
   @override
   void initState() {
     super.initState();
     _paletteNameController = TextEditingController(text: widget.initialPaletteName);
-    // Créer une copie profonde pour l'édition locale afin de ne pas muter la liste parente directement
-    // sauf via le callback onColorsChanged. Les IDs sont déjà uniques grâce à la page CreateJournalPage.
     _editableColors = widget.initialColors.map((c) => c.copyWith()).toList();
 
     _paletteNameController.addListener(() {
       widget.onPaletteNameChanged(_paletteNameController.text);
+      widget.onPaletteNeedsSave?.call(); // Déclenche la sauvegarde après changement de nom
     });
   }
 
   @override
   void didUpdateWidget(covariant InlinePaletteEditorWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Si le nom initial change de l'extérieur, mettre à jour le contrôleur
     if (widget.initialPaletteName != oldWidget.initialPaletteName &&
         widget.initialPaletteName != _paletteNameController.text) {
       _paletteNameController.text = widget.initialPaletteName;
+      // Pas besoin de widget.onPaletteNeedsSave?.call() ici car le listener s'en charge déjà
     }
-    // Si la liste de couleurs initiale change radicalement de l'extérieur (ex: changement de source de palette)
-    // il faut reconstruire _editableColors. Pour cela, il est préférable de donner une Key au widget parent
-    // pour forcer la reconstruction complète de cet éditeur si la source change.
-    // Cependant, pour des mises à jour moins drastiques, on peut comparer.
-    // Ici, on suppose que la Key gère les changements majeurs de source.
-    // Si seulement le contenu des couleurs change mais pas la référence de la liste :
-    if (!listEquals(_editableColors, widget.initialColors)) {
+    if (!_listEquals(widget.initialColors, oldWidget.initialColors)) {
       _editableColors = widget.initialColors.map((c) => c.copyWith()).toList();
     }
   }
 
-  bool listEquals<T>(List<T>? a, List<T>? b) {
-    if (a == null) return b == null;
-    if (b == null || a.length != b.length) return false;
+  bool _listEquals<T>(List<T> a, List<T> b) {
+    if (a.length != b.length) return false;
     for (int i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) { // This might need deep equality for ColorData if not handled by copyWith/Equatable
+      if (a[i] is ColorData && b[i] is ColorData) {
+        final colorA = a[i] as ColorData;
+        final colorB = b[i] as ColorData;
+        if (colorA.paletteElementId != colorB.paletteElementId ||
+            colorA.title != colorB.title ||
+            colorA.hexCode != colorB.hexCode) {
+          return false;
+        }
+      } else if (a[i] != b[i]) {
         return false;
       }
     }
     return true;
   }
-
 
   void _showEditColorDialog({ColorData? existingColorData, int? existingColorIndex}) {
     final bool isAdding = existingColorData == null;
@@ -101,10 +101,11 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
               key: dialogFormKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   TextFormField(
                     controller: titleController,
-                    decoration: InputDecoration(labelText: 'Nom de la couleur'),
+                    decoration: const InputDecoration(labelText: 'Nom de la couleur'),
                     autofocus: true,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
@@ -114,12 +115,12 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                       if (_editableColors.any((c) =>
                       c.title.toLowerCase() == newTitleLower &&
                           (isAdding || c.paletteElementId != existingColorData!.paletteElementId))) {
-                        return 'Ce titre de couleur existe déjà.';
+                        return 'Ce titre de couleur existe déjà dans cette palette.';
                       }
                       return null;
                     },
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   ColorPicker(
                     pickerColor: pickerColor,
                     onColorChanged: (color) => pickerColor = color,
@@ -130,16 +131,53 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                     paletteType: PaletteType.hsvWithValue,
                     pickerAreaBorderRadius: const BorderRadius.all(Radius.circular(2.0)),
                   ),
+                  if (!isAdding && existingColorData != null && existingColorIndex != null) ...[
+                    const SizedBox(height: 20),
+                    const Divider(),
+                    TextButton.icon(
+                      icon: Icon(Icons.delete_outline, color: Colors.red.shade700),
+                      label: Text(
+                        'Supprimer cette couleur',
+                        style: TextStyle(color: Colors.red.shade700),
+                      ),
+                      onPressed: () async {
+                        Navigator.of(dialogContext).pop();
+                        final bool? confirmDelete = await showDialog<bool>(
+                          context: context,
+                          builder: (BuildContext confirmCtx) {
+                            return AlertDialog(
+                              title: const Text('Confirmer la suppression'),
+                              content: Text('Voulez-vous vraiment supprimer la couleur "${existingColorData.title}" ?'),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: const Text('Annuler'),
+                                  onPressed: () => Navigator.of(confirmCtx).pop(false),
+                                ),
+                                TextButton(
+                                  child: Text('Supprimer', style: TextStyle(color: Colors.red.shade700)),
+                                  onPressed: () => Navigator.of(confirmCtx).pop(true),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+
+                        if (confirmDelete == true) {
+                          await _removeColor(existingColorIndex); // Changé pour être async
+                        }
+                      },
+                    ),
+                  ]
                 ],
               ),
             ),
           ),
           actions: [
             TextButton(
-              child: Text('Annuler'),
+              child: const Text('Annuler'),
               onPressed: () => Navigator.of(dialogContext).pop(),
             ),
-            TextButton(
+            FilledButton(
               child: Text(isAdding ? 'Ajouter' : 'Sauvegarder'),
               onPressed: () {
                 if (!dialogFormKey.currentState!.validate()) return;
@@ -151,7 +189,7 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                 c.hexCode.toUpperCase() == newHexCode.toUpperCase() &&
                     (isAdding || c.paletteElementId != existingColorData!.paletteElementId))) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Cette couleur existe déjà.'), backgroundColor: Colors.red),
+                    SnackBar(content: Text('Cette couleur (valeur hexadécimale) existe déjà dans cette palette.'), backgroundColor: Colors.orange),
                   );
                   return;
                 }
@@ -169,7 +207,8 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                       hexCode: newHexCode,
                     );
                   }
-                  widget.onColorsChanged(List.from(_editableColors)); // Notifier le parent
+                  widget.onColorsChanged(List.from(_editableColors));
+                  widget.onPaletteNeedsSave?.call(); // Déclenche la sauvegarde
                 });
                 Navigator.of(dialogContext).pop();
               },
@@ -180,16 +219,34 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
     );
   }
 
-  void _removeColor(int index) {
-    if (_editableColors.length <= MIN_COLORS_IN_PALETTE_PREVIEW) {
+  Future<void> _removeColor(int indexToRemove) async { // Changé pour retourner Future<void>
+    if (_editableColors.length <= MIN_COLORS_IN_PALETTE_EDITOR && !widget.isEditingJournalPalette) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('La palette doit contenir au moins ${MIN_COLORS_IN_PALETTE_PREVIEW + 1} couleur(s) pour en supprimer une.')),
+        SnackBar(content: Text('Un modèle de palette doit contenir au moins $MIN_COLORS_IN_PALETTE_EDITOR couleur(s). Impossible de supprimer.')),
       );
       return;
     }
+
+    if (widget.isEditingJournalPalette && widget.canDeleteColorCallback != null) {
+      final colorToDelete = _editableColors[indexToRemove];
+      final bool canDelete = await widget.canDeleteColorCallback!(colorToDelete.paletteElementId);
+      if (!canDelete) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Cette couleur est utilisée dans des notes et ne peut pas être supprimée de ce journal.'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+    }
+
     setState(() {
-      _editableColors.removeAt(index);
-      widget.onColorsChanged(List.from(_editableColors)); // Notifier le parent
+      _editableColors.removeAt(indexToRemove);
+      widget.onColorsChanged(List.from(_editableColors));
+      widget.onPaletteNeedsSave?.call(); // Déclenche la sauvegarde
     });
   }
 
@@ -200,14 +257,16 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
       }
       final ColorData item = _editableColors.removeAt(oldIndex);
       _editableColors.insert(newIndex, item);
-      widget.onColorsChanged(List.from(_editableColors)); // Notifier le parent
+      widget.onColorsChanged(List.from(_editableColors));
+      widget.onPaletteNeedsSave?.call(); // Déclenche la sauvegarde
     });
   }
 
   @override
   void dispose() {
-    _paletteNameController.removeListener(() {
-      widget.onPaletteNameChanged(_paletteNameController.text);
+    _paletteNameController.removeListener(() { // Assurez-vous que le listener est bien retiré
+      // widget.onPaletteNameChanged(_paletteNameController.text); // Déjà géré par le setter
+      // widget.onPaletteNeedsSave?.call(); // Déjà géré par le setter
     });
     _paletteNameController.dispose();
     super.dispose();
@@ -220,9 +279,10 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
       children: [
         TextFormField(
           controller: _paletteNameController,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             labelText: 'Nom de la palette en préparation',
-            hintText: 'Ex: Ma superbe palette',
+            hintText: 'Ex: Ma palette de travail',
+            border: OutlineInputBorder(),
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
@@ -231,8 +291,9 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
             if (value.length > 50) return 'Le nom ne doit pas dépasser 50 caractères.';
             return null;
           },
+          // Le listener dans initState s'occupe déjà d'appeler onPaletteNameChanged et onPaletteNeedsSave
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -245,21 +306,21 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                   onPressed: () => setState(() => _isGridView = !_isGridView),
                 ),
                 IconButton(
-                  icon: Icon(Icons.add_circle_outline),
-                  tooltip: 'Ajouter une couleur',
-                  onPressed: _editableColors.length < MAX_COLORS_IN_PALETTE_PREVIEW
+                  icon: const Icon(Icons.add_circle_outline),
+                  tooltip: 'Ajouter une nouvelle couleur',
+                  onPressed: _editableColors.length < MAX_COLORS_IN_PALETTE_EDITOR
                       ? () => _showEditColorDialog()
-                      : null, // Désactiver si max atteint
+                      : null,
                 ),
               ],
             ),
           ],
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         if (_editableColors.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: Center(child: Text("Aucune couleur. Cliquez sur '+' pour ajouter.", textAlign: TextAlign.center)),
+            child: Center(child: Text("Aucune couleur dans cette palette. Cliquez sur '+' pour commencer.", textAlign: TextAlign.center)),
           )
         else if (_isGridView)
           _buildGridView()
@@ -283,13 +344,13 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
 
     return GridView.builder(
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.symmetric(vertical: 5),
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(vertical: 5),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: gridCrossAxisCount,
         crossAxisSpacing: 8.0,
         mainAxisSpacing: 8.0,
-        childAspectRatio: 1.0, // Carrés
+        childAspectRatio: 1.0,
       ),
       itemCount: _editableColors.length,
       itemBuilder: (context, index) {
@@ -299,35 +360,21 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
           key: ValueKey(colorData.paletteElementId),
           color: colorData.color,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-          elevation: 3.0,
+          elevation: 2.0,
           child: InkWell(
             onTap: () => _showEditColorDialog(existingColorData: colorData, existingColorIndex: index),
             borderRadius: BorderRadius.circular(10.0),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: Text(
-                    colorData.title,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: fontSize, color: textColor, fontWeight: FontWeight.w500),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
-                  ),
+            child: Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Center(
+                child: Text(
+                  colorData.title,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: fontSize, color: textColor, fontWeight: FontWeight.w500),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
                 ),
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: IconButton(
-                    icon: Icon(Icons.remove_circle_outline, color: textColor.withOpacity(0.7), size: 18),
-                    padding: EdgeInsets.zero,
-                    constraints: BoxConstraints(),
-                    tooltip: "Supprimer '${colorData.title}'",
-                    onPressed: () => _removeColor(index),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         );
@@ -338,32 +385,18 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
   Widget _buildListView() {
     return ReorderableListView.builder(
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: _editableColors.length,
       itemBuilder: (context, index) {
         final colorData = _editableColors[index];
         return Card(
           key: ValueKey(colorData.paletteElementId),
-          margin: EdgeInsets.symmetric(vertical: 4),
+          margin: const EdgeInsets.symmetric(vertical: 4),
           child: ListTile(
             leading: CircleAvatar(backgroundColor: colorData.color, radius: 20),
             title: Text(colorData.title),
             subtitle: Text(colorData.hexCode.toUpperCase()),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.edit_outlined, color: Theme.of(context).colorScheme.primary),
-                  onPressed: () => _showEditColorDialog(existingColorData: colorData, existingColorIndex: index),
-                  tooltip: "Modifier la couleur",
-                ),
-                IconButton(
-                  icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
-                  onPressed: () => _removeColor(index),
-                  tooltip: "Supprimer la couleur",
-                ),
-              ],
-            ),
+            onTap: () => _showEditColorDialog(existingColorData: colorData, existingColorIndex: index),
           ),
         );
       },
