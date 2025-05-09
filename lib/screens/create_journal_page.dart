@@ -302,9 +302,11 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              SizedBox(height: 20),
+              Text('Nom du journal :', style: Theme.of(context).textTheme.titleMedium),
               TextFormField(
                 controller: _journalNameController,
-                decoration: InputDecoration(labelText: 'Nom du nouveau journal'),
+                decoration: InputDecoration(labelText: 'Choississez ici le nom du nouveau journal...'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Veuillez entrer un nom pour le journal.';
@@ -315,7 +317,19 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
                   return null;
                 },
               ),
+
               SizedBox(height: 20),
+              Row(
+                  children: <Widget>[
+                    const Expanded(
+                      child: Divider(
+                        thickness: 3, // Épaisseur de la ligne
+                        color: Colors.black26, // Couleur de la ligne
+                      ),
+                    ),
+                  ],
+                ),
+              const SizedBox(height: 20),
               Text('Source de la palette :', style: Theme.of(context).textTheme.titleMedium),
               RadioListTile<JournalCreationMode>(
                 title: Text('À partir d\'un modèle de palette'),

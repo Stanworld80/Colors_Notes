@@ -8,7 +8,7 @@ import '../models/color_data.dart';
 final _logger = Logger(printer: PrettyPrinter(methodCount: 1, printTime: false));
 const _uuid = Uuid();
 
-const int MIN_COLORS_IN_PALETTE_EDITOR = 1;
+const int MIN_COLORS_IN_PALETTE_EDITOR = 3;
 const int MAX_COLORS_IN_PALETTE_EDITOR = 48;
 
 class InlinePaletteEditorWidget extends StatefulWidget {
