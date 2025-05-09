@@ -1,22 +1,17 @@
+// lib/screens/logged_homepage.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart'; // Pas utilisé directement
-// import 'package:uuid/uuid.dart'; // Pas utilisé directement
-// import 'package:intl/intl.dart'; // Pas utilisé directement
 
 import '../providers/active_journal_provider.dart';
 import '../services/auth_service.dart';
-// import '../services/firestore_service.dart'; // Pas utilisé directement
 import '../models/journal.dart';
-// import '../models/note.dart'; // Pas utilisé directement
-import '../models/color_data.dart';
-// import 'note_list_page.dart'; // Pas utilisé directement
+// import '../models/color_data.dart'; // Pas directement utilisé pour la logique de navigation ici
 import 'entry_page.dart';
 import 'create_journal_page.dart';
+// import 'journal_management_page.dart'; // Option alternative de navigation
 
 final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0, printTime: false));
-// const _uuid = Uuid(); // Pas utilisé
 
 class LoggedHomepage extends StatelessWidget {
   LoggedHomepage({Key? key}) : super(key: key);
@@ -24,7 +19,7 @@ class LoggedHomepage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context, listen: false);
-    final activeJournalNotifier = Provider.of<ActiveJournalNotifier>(context);
+    final activeJournalNotifier = Provider.of<ActiveJournalNotifier>(context); // listen: true par défaut
 
     final user = authService.currentUser;
     final Journal? activeJournal = activeJournalNotifier.activeJournal;
@@ -56,38 +51,46 @@ class LoggedHomepage extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                 ),
-              if (activeJournalNotifier.isLoading)
-                Expanded(child: Center(child: CircularProgressIndicator()))
-              else if (activeJournal != null && currentUserId != null) ...[
 
+              // Affiche un indicateur de chargement si le journal actif est en cours de chargement.
+              if (activeJournalNotifier.isLoading && activeJournal == null) // Modifié pour être plus précis
+                const Expanded(child: Center(child: CircularProgressIndicator()))
+              // Si un journal est actif et que l'utilisateur est identifié
+              else if (activeJournal != null && currentUserId != null) ...[
                 Expanded(
                   child: activeJournal.palette.colors.isEmpty
-                      ? Center(child: Text("La palette de ce journal est vide.\nModifiez le journal pour ajouter des couleurs.", textAlign: TextAlign.center,))
-                      : LayoutBuilder( // Utiliser LayoutBuilder pour obtenir la largeur disponible
+                      ? Center(
+                      child: Padding( // Ajout de Padding pour un meilleur espacement
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Text(
+                          "La palette de ce journal est vide.\nModifiez le journal pour ajouter des couleurs, ou choisissez un autre journal.",
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      )
+                  )
+                      : LayoutBuilder(
                       builder: (context, constraints) {
                         final screenWidth = constraints.maxWidth;
-                        // Logique similaire à NoteListPage pour déterminer le nombre de colonnes
                         int gridCrossAxisCount;
-                        if (screenWidth < 400) gridCrossAxisCount = 4; // Commencer un peu plus dense
+                        if (screenWidth < 400) gridCrossAxisCount = 4;
                         else if (screenWidth < 600) gridCrossAxisCount = 5;
                         else if (screenWidth < 800) gridCrossAxisCount = 6;
                         else if (screenWidth < 1000) gridCrossAxisCount = 7;
                         else if (screenWidth < 1200) gridCrossAxisCount = 8;
-                        else gridCrossAxisCount = 9; // Jusqu'à 9 comme demandé
+                        else gridCrossAxisCount = 9;
 
-                        // Ajuster la taille de la police en fonction de la densité
                         double fontSize = 12.0;
                         if (gridCrossAxisCount > 6) fontSize = 10.0;
                         if (gridCrossAxisCount > 7) fontSize = 9.0;
 
-
                         return GridView.builder(
-                          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
                           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: gridCrossAxisCount, // Nombre de colonnes dynamique
-                            crossAxisSpacing: 6.0, // Espacement réduit
-                            mainAxisSpacing: 6.0,  // Espacement réduit
-                            childAspectRatio: 1.1, // Ratio similaire à NoteListPage (ajuster si besoin)
+                            crossAxisCount: gridCrossAxisCount,
+                            crossAxisSpacing: 6.0,
+                            mainAxisSpacing: 6.0,
+                            childAspectRatio: 1.1,
                           ),
                           itemCount: activeJournal.palette.colors.length,
                           itemBuilder: (context, index) {
@@ -110,18 +113,18 @@ class LoggedHomepage extends StatelessWidget {
                                 backgroundColor: colorData.color,
                                 foregroundColor: textColor,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.0), // Rayon plus petit
+                                  borderRadius: BorderRadius.circular(8.0),
                                 ),
-                                padding: EdgeInsets.all(4), // Padding réduit
-                                elevation: 2.0, // Élévation réduite
+                                padding: const EdgeInsets.all(4),
+                                elevation: 2.0,
                               ),
                               child: Center(
                                 child: Text(
                                   colorData.title,
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: fontSize), // Taille de police ajustée
-                                  overflow: TextOverflow.ellipsis, // Gérer le dépassement
-                                  maxLines: 2, // Permettre 2 lignes si nécessaire
+                                  style: TextStyle(fontSize: fontSize),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 2,
                                 ),
                               ),
                             );
@@ -130,13 +133,14 @@ class LoggedHomepage extends StatelessWidget {
                       }
                   ),
                 ),
+                // Si une erreur s'est produite lors du chargement du journal actif
               ] else if (activeJournalNotifier.errorMessage != null) ... [
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.error_outline, color: Colors.red, size: 50),
-                      SizedBox(height: 10),
+                      const Icon(Icons.error_outline, color: Colors.red, size: 50),
+                      const SizedBox(height: 10),
                       Text(
                         "Erreur de chargement du journal:",
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.red),
@@ -144,53 +148,63 @@ class LoggedHomepage extends StatelessWidget {
                       ),
                       Text(
                         activeJournalNotifier.errorMessage!,
-                        style: TextStyle(color: Colors.redAccent),
+                        style: const TextStyle(color: Colors.redAccent),
                         textAlign: TextAlign.center,
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () {
+                          // Correction: Naviguer directement vers CreateJournalPage
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => CreateJournalPage()),
                           );
                         },
-                        child: Text('Créer un nouveau journal'),
+                        child: const Text('Créer un nouveau journal'),
                       ),
                     ],
                   ),
                 )
+                // Si aucun journal n'est actif et qu'il n'y a pas d'erreur
               ] else ...[
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.menu_book_outlined, size: 50, color: Theme.of(context).colorScheme.primary),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       Text(
                         'Aucun journal actif.',
                         style: Theme.of(context).textTheme.titleLarge,
                         textAlign: TextAlign.center,
                       ),
-                      SizedBox(height: 5),
+                      const SizedBox(height: 5),
                       Text(
                         'Sélectionnez un journal existant ou créez-en un nouveau pour commencer.',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () {
-                          // Naviguer vers la page de gestion pour choisir ou créer
-                          Navigator.pushNamed(context, '/main').then((_) {
-                            // Naviguer vers l'onglet de gestion des journaux (si MainScreen gère cela)
-                            // Ou directement vers CreateJournalPage si c'est plus simple
-                            // Exemple simple:
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => CreateJournalPage()));
-                          });
+                          // Correction: Naviguer directement vers CreateJournalPage
+                          // ou vers JournalManagementPage si vous préférez que l'utilisateur
+                          // voie d'abord la liste de ses journaux.
+                          // Pour une action directe de création :
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => CreateJournalPage()),
+                          );
+                          // Alternative: Naviguer vers la page de gestion des journaux
+                          // Cela nécessiterait que MainScreen puisse changer d'onglet programmatiquement
+                          // ou que vous ayez une route directe vers JournalManagementPage.
+                          // Exemple si vous voulez aller à la page de gestion (suppose une route '/journal-management'):
+                          // Navigator.pushNamed(context, '/journal-management');
+                          // Ou si JournalManagementPage est un onglet de MainScreen, il faudrait une méthode
+                          // pour changer l'onglet actif de MainScreen.
                         },
-                        child: Text('Choisir ou créer un journal'), // Texte modifié
-                        style: ElevatedButton.styleFrom(minimumSize: Size(200, 45)),
+                        style: ElevatedButton.styleFrom(minimumSize: const Size(200, 45)),
+                        child: const Text('Choisir ou créer un journal'),
                       ),
                     ],
                   ),
