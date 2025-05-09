@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
-import 'package:uuid/uuid.dart';
+//import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart'; // Pour le formatage de date
 
 import '../services/auth_service.dart';
@@ -13,7 +13,7 @@ import 'create_journal_page.dart';
 import 'unified_palette_editor_page.dart'; // Importer la page d'édition de palette unifiée
 
 final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0, printTime: true));
-const _uuid = Uuid();
+//const _uuid = Uuid();
 
 class JournalManagementPage extends StatelessWidget {
   JournalManagementPage({Key? key}) : super(key: key);

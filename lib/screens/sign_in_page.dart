@@ -82,16 +82,6 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
-    // URL du logo Google officiel (SVG converti en PNG pour Image.network)
-    // Idéalement, vous téléchargeriez le SVG et l'utiliseriez avec flutter_svg.
-    // Pour cet exemple, nous utilisons une URL pointant vers une ressource PNG.
-    // Assurez-vous que cette URL est stable ou hébergez le logo vous-même.
-    const String googleLogoUrl = "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg";
-    // Note: Wikimedia SVG peut ne pas s'afficher directement avec Image.network.
-    // Un PNG serait plus fiable :
-    const String googleLogoPngUrl = "http://pngimg.com/uploads/google/google_PNG19635.png";
-
-
     return Scaffold(
       appBar: AppBar(title: const Text('Se connecter')),
       body: Center(

@@ -23,8 +23,11 @@ class ActiveJournalNotifier extends ChangeNotifier {
   StreamSubscription<DocumentSnapshot?>? _journalSubscription;
 
   String? get activeJournalId => _activeJournalId;
+
   Journal? get activeJournal => _activeJournal;
+
   bool get isLoading => _isLoading;
+
   String? get errorMessage => _errorMessage;
 
   ActiveJournalNotifier(this._authService, this._firestoreService) {
@@ -97,37 +100,39 @@ class ActiveJournalNotifier extends ChangeNotifier {
 
     _activeJournalId = journalId;
 
-    _journalSubscription = _firestoreService.getJournalStream(journalId).listen(
-            (journalDoc) {
-          if (journalDoc.exists && journalDoc.data() != null) {
-            final journalData = journalDoc.data() as Map<String, dynamic>;
-            if (journalData['userId'] == userId) {
-              _activeJournal = Journal.fromMap(journalData, journalDoc.id);
-              _logger.i('Journal actif màj: ${_activeJournal?.name} (ID: $journalId)');
-              _errorMessage = null;
+    _journalSubscription = _firestoreService
+        .getJournalStream(journalId)
+        .listen(
+          (journalDoc) {
+            if (journalDoc.exists && journalDoc.data() != null) {
+              final journalData = journalDoc.data() as Map<String, dynamic>;
+              if (journalData['userId'] == userId) {
+                _activeJournal = Journal.fromMap(journalData, journalDoc.id);
+                _logger.i('Journal actif màj: ${_activeJournal?.name} (ID: $journalId)');
+                _errorMessage = null;
+              } else {
+                _logger.w('Tentative de définition d\'un journal actif ($journalId) n\'appartenant pas à l\'utilisateur ($userId). Appartenance: ${journalData['userId']}');
+                _errorMessage = 'Accès non autorisé à ce journal.';
+                clearActiveJournalState();
+                if (!isInitialLoad) _loadInitialJournalForUser(userId);
+              }
             } else {
-              _logger.w('Tentative de définition d\'un journal actif ($journalId) n\'appartenant pas à l\'utilisateur ($userId). Appartenance: ${journalData['userId']}');
-              _errorMessage = 'Accès non autorisé à ce journal.';
+              _logger.w('Journal actif $journalId n\'existe plus ou accès refusé.');
+              _errorMessage = 'Le journal sélectionné n\'est plus accessible.';
               clearActiveJournalState();
               if (!isInitialLoad) _loadInitialJournalForUser(userId);
             }
-          } else {
-            _logger.w('Journal actif $journalId n\'existe plus ou accès refusé.');
-            _errorMessage = 'Le journal sélectionné n\'est plus accessible.';
+            _isLoading = false;
+            notifyListeners();
+          },
+          onError: (error, stackTrace) {
+            _logger.e('Erreur écoute journal actif $journalId', error: error, stackTrace: stackTrace);
+            _errorMessage = 'Erreur de chargement du journal actif.';
             clearActiveJournalState();
-            if (!isInitialLoad) _loadInitialJournalForUser(userId);
-          }
-          _isLoading = false;
-          notifyListeners();
-        },
-        onError: (error, stackTrace) {
-          _logger.e('Erreur écoute journal actif $journalId', error: error, stackTrace: stackTrace);
-          _errorMessage = 'Erreur de chargement du journal actif.';
-          clearActiveJournalState();
-          _isLoading = false;
-          notifyListeners();
-        }
-    );
+            _isLoading = false;
+            notifyListeners();
+          },
+        );
   }
 
   void clearActiveJournalState() {

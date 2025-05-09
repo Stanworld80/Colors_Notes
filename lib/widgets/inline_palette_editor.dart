@@ -85,8 +85,8 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
 
   void _showEditColorDialog({ColorData? existingColorData, int? existingColorIndex}) {
     final bool isAdding = existingColorData == null;
-    Color pickerColor = isAdding ? Colors.grey : existingColorData!.color;
-    String initialTitle = isAdding ? '' : existingColorData!.title;
+    Color pickerColor = isAdding ? Colors.grey : existingColorData.color;
+    String initialTitle = isAdding ? '' : existingColorData.title;
 
     final TextEditingController titleController = TextEditingController(text: initialTitle);
     final GlobalKey<FormState> dialogFormKey = GlobalKey<FormState>();
@@ -114,7 +114,7 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                       final newTitleLower = value.trim().toLowerCase();
                       if (_editableColors.any((c) =>
                       c.title.toLowerCase() == newTitleLower &&
-                          (isAdding || c.paletteElementId != existingColorData!.paletteElementId))) {
+                          (isAdding || c.paletteElementId != existingColorData.paletteElementId))) {
                         return 'Ce titre de couleur existe déjà dans cette palette.';
                       }
                       return null;
@@ -187,7 +187,7 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
 
                 if (_editableColors.any((c) =>
                 c.hexCode.toUpperCase() == newHexCode.toUpperCase() &&
-                    (isAdding || c.paletteElementId != existingColorData!.paletteElementId))) {
+                    (isAdding || c.paletteElementId != existingColorData.paletteElementId))) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Cette couleur (valeur hexadécimale) existe déjà dans cette palette.'), backgroundColor: Colors.orange),
                   );

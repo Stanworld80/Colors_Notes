@@ -9,7 +9,6 @@ import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
 import '../models/note.dart';
 import '../models/journal.dart';
-import '../models/color_data.dart';
 import '../providers/active_journal_provider.dart';
 
 final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0, printTime: true));

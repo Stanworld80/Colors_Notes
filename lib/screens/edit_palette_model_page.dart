@@ -70,8 +70,8 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
 
   void _showEditColorDialog({ColorData? existingColorData}) {
     final bool isAdding = existingColorData == null;
-    Color pickerColor = isAdding ? Color(0xFF808080) : existingColorData!.color; // Gris par défaut pour ajout
-    String initialTitle = isAdding ? '' : existingColorData!.title; // Laisser vide si ajout
+    Color pickerColor = isAdding ? Color(0xFF808080) : existingColorData.color; // Gris par défaut pour ajout
+    String initialTitle = isAdding ? '' : existingColorData.title; // Laisser vide si ajout
 
     final TextEditingController titleController = TextEditingController(text: initialTitle);
     final GlobalKey<FormState> dialogFormKey = GlobalKey<FormState>();
@@ -132,7 +132,7 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
 
                 bool titleExists = _currentColors.any((c) =>
                 c.title.toLowerCase() == newTitle.toLowerCase() &&
-                    (isAdding || c.paletteElementId != existingColorData!.paletteElementId));
+                    (isAdding || c.paletteElementId != existingColorData.paletteElementId));
                 if (titleExists) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Ce titre de couleur existe déjà dans cette palette.'), backgroundColor: Colors.red),
@@ -142,7 +142,7 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
 
                 bool colorExists = _currentColors.any((c) =>
                 c.hexCode.toUpperCase() == newHexCode.toUpperCase() &&
-                    (isAdding || c.paletteElementId != existingColorData!.paletteElementId));
+                    (isAdding || c.paletteElementId != existingColorData.paletteElementId));
                 if (colorExists) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Cette couleur existe déjà dans cette palette.'), backgroundColor: Colors.red),
@@ -158,7 +158,7 @@ class _EditPaletteModelPageState extends State<EditPaletteModelPage> {
                       paletteElementId: _uuid.v4(),
                     ));
                   } else {
-                    final index = _currentColors.indexWhere((c) => c.paletteElementId == existingColorData!.paletteElementId);
+                    final index = _currentColors.indexWhere((c) => c.paletteElementId == existingColorData.paletteElementId);
                     if (index != -1) {
                       _currentColors[index] = _currentColors[index].copyWith(
                         title: newTitle,

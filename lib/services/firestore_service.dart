@@ -116,7 +116,7 @@ class FirestoreService {
           .orderBy('createdAt', descending: true)
           .snapshots()
           .map((snapshot) => snapshot.docs
-          .map((doc) => Journal.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+          .map((doc) => Journal.fromMap(doc.data(), doc.id))
           .toList())
           .handleError((error, stackTrace) {
         _logger.e('Erreur stream journaux pour $userId', error: error, stackTrace: stackTrace);
@@ -277,7 +277,7 @@ class FirestoreService {
           .where('userId', isEqualTo: userId)
           .snapshots()
           .map((snapshot) => snapshot.docs
-          .map((doc) => PaletteModel.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+          .map((doc) => PaletteModel.fromMap(doc.data(), doc.id))
           .toList())
           .handleError((error, stackTrace) {
         _logger.e('Erreur stream modèles palette pour $userId', error: error, stackTrace: stackTrace);
@@ -296,7 +296,7 @@ class FirestoreService {
           .where('isPredefined', isEqualTo: true)
           .snapshots()
           .map((snapshot) => snapshot.docs
-          .map((doc) => PaletteModel.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+          .map((doc) => PaletteModel.fromMap(doc.data(), doc.id))
           .toList())
           .handleError((error, stackTrace) {
         _logger.e('Erreur stream modèles palette prédéfinis', error: error, stackTrace: stackTrace);
