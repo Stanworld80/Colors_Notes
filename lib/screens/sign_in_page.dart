@@ -1,4 +1,6 @@
+// lib/screens/sign_in_page.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
 
@@ -9,7 +11,7 @@ import '../screens/license_page.dart';
 final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0, printTime: true));
 
 class SignInPage extends StatefulWidget {
-  SignInPage({Key? key}) : super(key: key);
+  const SignInPage({Key? key}) : super(key: key);
 
   @override
   _SignInPageState createState() => _SignInPageState();
@@ -21,6 +23,8 @@ class _SignInPageState extends State<SignInPage> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _isLoadingGoogle = false;
+  bool _obscurePassword = true;
+
 
   @override
   void dispose() {
@@ -78,34 +82,63 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
+    // URL du logo Google officiel (SVG converti en PNG pour Image.network)
+    // Idéalement, vous téléchargeriez le SVG et l'utiliseriez avec flutter_svg.
+    // Pour cet exemple, nous utilisons une URL pointant vers une ressource PNG.
+    // Assurez-vous que cette URL est stable ou hébergez le logo vous-même.
+    const String googleLogoUrl = "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg";
+    // Note: Wikimedia SVG peut ne pas s'afficher directement avec Image.network.
+    // Un PNG serait plus fiable :
+    const String googleLogoPngUrl = "http://pngimg.com/uploads/google/google_PNG19635.png";
+
+
     return Scaffold(
-      appBar: AppBar(title: Text('Se connecter')),
+      appBar: AppBar(title: const Text('Se connecter')),
       body: Center(
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(20.0),
           child: Form(
             key: _formKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text("Colors & Notes", style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Theme.of(context).primaryColor)),
-                SizedBox(height: 30),
+                Text(
+                    "Colors & Notes",
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Theme.of(context).primaryColor)
+                ),
+                const SizedBox(height: 30),
                 TextFormField(
                   controller: _emailController,
-                  decoration: InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.email_outlined)
+                  ),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
-                    if (value == null || value.isEmpty || !value.contains('@')) {
+                    if (value == null || value.isEmpty || !value.contains('@') || !value.contains('.')) {
                       return 'Veuillez entrer une adresse e-mail valide.';
                     }
                     return null;
                   },
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
-                  decoration: InputDecoration(labelText: 'Mot de passe', border: OutlineInputBorder()),
-                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Mot de passe',
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    suffixIcon: IconButton(
+                      icon: Icon(_obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
+                  ),
+                  obscureText: _obscurePassword,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Veuillez entrer votre mot de passe.';
@@ -113,82 +146,134 @@ class _SignInPageState extends State<SignInPage> {
                     return null;
                   },
                 ),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 _isLoading
-                    ? CircularProgressIndicator()
+                    ? const CircularProgressIndicator()
                     : ElevatedButton(
                   onPressed: _signInWithEmail,
-                  child: Text('Se connecter'),
-                  style: ElevatedButton.styleFrom(minimumSize: Size(double.infinity, 50)),
-                ),
-                SizedBox(height: 12),
-                _isLoadingGoogle
-                    ? CircularProgressIndicator()
-                    : ElevatedButton.icon(
-                  icon: Icon(Icons.login), // Icône originale
-                  label: Text('Se connecter avec Google'),
-                  onPressed: _signInWithGoogle,
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      minimumSize: Size(double.infinity, 50)
+                    minimumSize: const Size(double.infinity, 50),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Se connecter', style: TextStyle(fontSize: 16)),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0), // Espace vertical autour du séparateur
+                  child: Row(
+                    children: <Widget>[
+                      const Expanded(
+                        child: Divider(
+                          thickness: 3, // Épaisseur de la ligne
+                          color: Colors.black26, // Couleur de la ligne
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0), // Espace autour du texte "ou"
+                        child: Text(
+                          'ou',
+                          style: TextStyle(
+                            color: Colors.grey.shade600, // Couleur du texte
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      const Expanded(
+                        child: Divider(
+                          thickness: 3,
+                          color: Colors.black26,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
+                _isLoadingGoogle
+                    ? const CircularProgressIndicator()
+                    : ElevatedButton(
+                  onPressed: _signInWithGoogle,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white, // Fond blanc pour le bouton Google standard
+                    foregroundColor: Colors.black.withOpacity(0.70), // Texte gris foncé (similaire à Google)
+                    minimumSize: const Size(double.infinity, 50),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0), // Bords arrondis
+                        side: BorderSide(color: Colors.grey.shade400) // Bordure légère
+                    ),
+                    elevation: 1.0, // Légère élévation
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Utilisation d'un Image.network pour le logo.
+                      // Remplacez par Image.asset si vous avez le logo localement
+                      // ou un widget SVG si vous utilisez flutter_svg.
+                      SvgPicture.asset('assets/signin-assets/Web/svg/light/web_light_sq_na.svg')
+                     ,
+                      const SizedBox(width: 12), // Espacement entre logo et texte
+                      const Text(
+                        'Se connecter avec Google',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 60),
                 TextButton(
                   onPressed: () {
                     Navigator.pushNamed(context, '/register');
                   },
-                  child: Text('Pas encore de compte ? S\'inscrire'),
+                  child: const Text('Pas encore de compte ? S\'inscrire'),
                 ),
-                SizedBox(height: 30), // Espace avant les liens discrets
-                  // --- Liens discrets ajoutés ici ---
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => AboutPage()));
-                        },
-                        child: Text(
-                          'À Propos',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600], // Couleur discrète
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          minimumSize: Size(0, 0), // Taille minimale pour réduire le padding autour
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Réduit la zone de clic
+                const SizedBox(height: 30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutPage()));
+                      },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        'À Propos',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                          decoration: TextDecoration.underline,
                         ),
                       ),
-                      SizedBox(width: 10), // Espace entre les liens
-                      Text(
-                        '|', // Séparateur
-                        style: TextStyle(fontSize: 12, color: Colors.grey[400]),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text('|', style: TextStyle(fontSize: 12, color: Colors.grey[400])),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => const ColorsNotesLicensePage()));
+                      },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                      SizedBox(width: 10), // Espace entre les liens
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => ColorsNotesLicensePage()));
-                        },
-                        child: Text(
-                          'Licence',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600], // Couleur discrète
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          minimumSize: Size(0, 0), // Taille minimale
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Réduit la zone de clic
+                      child: Text(
+                        'Licence',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                          decoration: TextDecoration.underline,
                         ),
                       ),
-                    ],
+                    ),
+                  ],
                 ),
               ],
             ),
