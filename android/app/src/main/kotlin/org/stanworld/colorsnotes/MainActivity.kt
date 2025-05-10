@@ -1,4 +1,4 @@
-package org.stanworld.colors_notes
+package org.stanworld.colorsnotes
 
 import io.flutter.embedding.android.FlutterActivity
 
