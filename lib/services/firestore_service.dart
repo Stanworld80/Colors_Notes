@@ -1,3 +1,4 @@
+// lib/services/firestore_service.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' show User;
 import 'package:logger/logger.dart';
@@ -43,7 +44,7 @@ class FirestoreService {
             id: _uuid.v4(),
             name: "Palette de Base",
             colors: [ColorData(title: "Défaut", hexCode: "808080", paletteElementId: _uuid.v4(), isDefault: true)],
-            userId: firebaseUser.uid,
+            userId: firebaseUser.uid, // Assigner le userId ici aussi
             isPredefined: false
         );
         Journal defaultJournal = Journal(
@@ -54,6 +55,9 @@ class FirestoreService {
           createdAt: Timestamp.now(),
           lastUpdatedAt: Timestamp.now(),
         );
+        // Correction: Utiliser la collection 'journals' directement, pas en sous-collection de user pour cette structure.
+        // Si la structure est users/{userId}/journals, alors la création est différente.
+        // Basé sur getJournalsStream, la collection 'journals' est à la racine.
         await _db.collection('journals').doc(defaultJournal.id).set(defaultJournal.toMap());
         _logger.i('Journal par défaut créé avec palette de secours pour ${firebaseUser.uid} avec ID ${defaultJournal.id}');
         return;
@@ -66,23 +70,23 @@ class FirestoreService {
           title: colorTemplate.title,
           hexCode: colorTemplate.hexCode,
           isDefault: colorTemplate.isDefault,
-          paletteElementId: _uuid.v4(),
+          paletteElementId: _uuid.v4(), // Générer un ID unique pour l'instance de couleur
         );
       }).toList();
 
       Palette paletteForJournal = Palette(
-        id: _uuid.v4(),
-        name: defaultPaletteTemplate.name,
+        id: _uuid.v4(), // ID unique pour l'instance de palette
+        name: defaultPaletteTemplate.name, // Nom hérité du modèle
         colors: instanceColors,
-        isPredefined: false,
-        userId: firebaseUser.uid,
+        isPredefined: false, // Ce n'est pas un modèle prédéfini, mais une instance
+        userId: firebaseUser.uid, // Associer l'userId à l'instance de palette
       );
 
       Journal defaultJournal = Journal(
-        id: _uuid.v4(),
+        id: _uuid.v4(), // ID unique pour le journal
         userId: firebaseUser.uid,
         name: 'Mon Premier Journal',
-        palette: paletteForJournal,
+        palette: paletteForJournal, // Instance de palette
         createdAt: Timestamp.now(),
         lastUpdatedAt: Timestamp.now(),
       );
@@ -120,7 +124,10 @@ class FirestoreService {
           .toList())
           .handleError((error, stackTrace) {
         _logger.e('Erreur stream journaux pour $userId', error: error, stackTrace: stackTrace);
-        throw error;
+        // Ne pas relancer l'erreur ici directement peut masquer le problème dans l'UI
+        // Il est préférable de laisser l'erreur se propager pour que StreamBuilder puisse la gérer.
+        // throw error; // Commenté
+        return <Journal>[]; // Ou retourner une liste vide en cas d'erreur pour éviter de casser l'UI
       });
     } catch (e, stackTrace) {
       _logger.e('Erreur config stream journaux pour $userId', error: e, stackTrace: stackTrace);
@@ -133,7 +140,9 @@ class FirestoreService {
       return _db.collection('journals').doc(journalId).snapshots()
           .handleError((error, stackTrace) {
         _logger.e('Erreur stream journal $journalId', error: error, stackTrace: stackTrace);
-        throw error;
+        // throw error; // Commenté
+        // Retourner un stream d'erreur spécifique ou gérer autrement
+        return Stream.error(error);
       });
     } catch (e, stackTrace) {
       _logger.e('Erreur config stream pour journal $journalId', error: e, stackTrace: stackTrace);
@@ -141,8 +150,31 @@ class FirestoreService {
     }
   }
 
+  // Nouvelle méthode pour vérifier l'existence d'un nom de journal pour un utilisateur
+  Future<bool> checkJournalNameExists(String name, String userId) async {
+    try {
+      final querySnapshot = await _db
+          .collection('journals')
+          .where('userId', isEqualTo: userId)
+          .where('name', isEqualTo: name)
+          .limit(1) // On a juste besoin de savoir si au moins un existe
+          .get();
+      return querySnapshot.docs.isNotEmpty;
+    } catch (e, stackTrace) {
+      _logger.e('Erreur vérification nom journal "$name" pour utilisateur $userId', error: e, stackTrace: stackTrace);
+      // En cas d'erreur, il est plus sûr de supposer que le nom pourrait exister
+      // ou de relancer l'exception pour que l'appelant la gère.
+      // Pour cette fonction, relancer l'exception est probablement mieux.
+      throw Exception('Erreur lors de la vérification du nom du journal.');
+    }
+  }
+
+
   Future<void> createJournal(Journal journal) async {
     try {
+      // La vérification du nom du journal devrait être faite AVANT d'appeler cette méthode.
+      // Mais par sécurité, on pourrait la remettre ici si ce service est appelé d'ailleurs.
+      // Pour l'instant, on suppose qu'elle est faite dans CreateJournalPage.
       await _db.collection('journals').doc(journal.id).set(journal.toMap());
       _logger.i('Journal créé: ${journal.id} pour ${journal.userId}');
     } catch (e, stackTrace) {
@@ -163,6 +195,7 @@ class FirestoreService {
   }
 
   Future<void> updateJournalName(String journalId, String newName) async {
+    // Idéalement, vérifier aussi l'unicité du nouveau nom ici si appelé directement.
     try {
       await _db.collection('journals').doc(journalId).update({
         'name': newName,
@@ -178,7 +211,7 @@ class FirestoreService {
   Future<void> updateJournalPaletteInstance(String journalId, Palette newPaletteInstance) async {
     try {
       await _db.collection('journals').doc(journalId).update({
-        'palette': newPaletteInstance.toMap(),
+        'palette': newPaletteInstance.toMap(), // S'assurer que Palette.toMap() est correct
         'lastUpdatedAt': Timestamp.now(),
       });
       _logger.i('Palette du journal $journalId mise à jour.');
@@ -191,14 +224,24 @@ class FirestoreService {
   Future<void> deleteJournal(String journalId, String userId) async {
     try {
       WriteBatch batch = _db.batch();
+
+      // Supprimer les notes associées au journal
+      // Note: S'assurer que la collection 'notes' est bien à la racine et non une sous-collection de 'journals'
+      // Si c'est une sous-collection, la requête serait _db.collection('journals').doc(journalId).collection('notes')
+      // D'après getJournalNotesStream, 'notes' semble être une collection racine avec un champ 'journalId'.
       QuerySnapshot notesSnapshot = await _db.collection('notes')
           .where('journalId', isEqualTo: journalId)
+      // Optionnel: .where('userId', isEqualTo: userId) pour plus de sécurité si les règles ne le font pas
           .get();
+
       for (DocumentSnapshot noteDoc in notesSnapshot.docs) {
         batch.delete(noteDoc.reference);
       }
       _logger.i('${notesSnapshot.docs.length} notes marquées pour suppression pour le journal $journalId.');
+
+      // Supprimer le journal lui-même
       batch.delete(_db.collection('journals').doc(journalId));
+
       await batch.commit();
       _logger.i('Journal $journalId et ses notes associées supprimés.');
     } catch (e, stackTrace) {
@@ -210,13 +253,20 @@ class FirestoreService {
   Stream<List<Note>> getJournalNotesStream(String journalId, {String? sortBy, bool descending = false}) {
     try {
       Query query = _db.collection('notes').where('journalId', isEqualTo: journalId);
-      query = query.orderBy(sortBy ?? 'eventTimestamp', descending: descending);
+
+      // Appliquer le tri si spécifié
+      if (sortBy != null) {
+        query = query.orderBy(sortBy, descending: descending);
+      } else {
+        // Tri par défaut si aucun n'est spécifié (par exemple, par date de création ou d'événement)
+        query = query.orderBy('eventTimestamp', descending: true);
+      }
 
       return query.snapshots().map((snapshot) {
         return snapshot.docs.map((doc) => Note.fromMap(doc.data() as Map<String, dynamic>, doc.id)).toList();
       }).handleError((error, stackTrace) {
         _logger.e('Erreur stream notes journal $journalId', error: error, stackTrace: stackTrace);
-        throw error;
+        return <Note>[]; // Retourner une liste vide en cas d'erreur
       });
     } catch (e, stackTrace) {
       _logger.e('Erreur config stream notes $journalId', error: e, stackTrace: stackTrace);
@@ -275,13 +325,15 @@ class FirestoreService {
       return _db
           .collection('paletteModels')
           .where('userId', isEqualTo: userId)
+      // Optionnel: trier les modèles par nom ou date de création
+          .orderBy('name')
           .snapshots()
           .map((snapshot) => snapshot.docs
           .map((doc) => PaletteModel.fromMap(doc.data(), doc.id))
           .toList())
           .handleError((error, stackTrace) {
         _logger.e('Erreur stream modèles palette pour $userId', error: error, stackTrace: stackTrace);
-        throw error;
+        return <PaletteModel>[];
       });
     } catch (e, stackTrace) {
       _logger.e('Erreur config stream modèles palette pour $userId', error: e, stackTrace: stackTrace);
@@ -290,17 +342,23 @@ class FirestoreService {
   }
 
   Stream<List<PaletteModel>> getPredefinedPaletteModelsStream() {
+    // Pour les modèles prédéfinis, il est plus simple de les retourner directement
+    // depuis la liste `predefinedPalettes` plutôt que de les lire depuis Firestore,
+    // sauf si vous les stockez aussi dans Firestore pour une gestion centralisée par un admin.
+    // Si `predefinedPalettes` est la source de vérité, la méthode devient synchrone.
+    // Si vous les stockez dans Firestore avec isPredefined = true:
     try {
       return _db
           .collection('paletteModels')
           .where('isPredefined', isEqualTo: true)
+          .orderBy('name')
           .snapshots()
           .map((snapshot) => snapshot.docs
           .map((doc) => PaletteModel.fromMap(doc.data(), doc.id))
           .toList())
           .handleError((error, stackTrace) {
         _logger.e('Erreur stream modèles palette prédéfinis', error: error, stackTrace: stackTrace);
-        throw error;
+        return <PaletteModel>[];
       });
     } catch (e, stackTrace) {
       _logger.e('Erreur config stream modèles palette prédéfinis', error: e, stackTrace: stackTrace);
@@ -310,6 +368,7 @@ class FirestoreService {
 
   Future<void> createPaletteModel(PaletteModel paletteModel) async {
     try {
+      // La vérification du nom du modèle devrait être faite AVANT d'appeler cette méthode.
       await _db.collection('paletteModels').doc(paletteModel.id).set(paletteModel.toMap());
       _logger.i('Modèle de palette créé: ${paletteModel.id} par ${paletteModel.userId}');
     } catch (e, stackTrace) {
