@@ -1,16 +1,18 @@
+// lib/screens/main_screen.dart
 // ignore_for_file: unused_local_variable
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'logged_homepage.dart';
-import 'note_list_page.dart';
-import 'entry_page.dart';
-import 'journal_management_page.dart'; // Importer la page de gestion des journaux
-// import 'palette_model_management_page.dart'; // Pas directement dans la bottom bar
+// Import des autres écrans et widgets nécessaires
+import 'package:colors_notes/screens/logged_homepage.dart';
+// Correction de l'import pour note_list_page.dart : utilisation d'un import de package
+import 'package:colors_notes/screens/note_list_page.dart';
+import 'package:colors_notes/screens/entry_page.dart';
+import 'package:colors_notes/screens/journal_management_page.dart';
 
-import '../providers/active_journal_provider.dart';
-import '../widgets/dynamic_journal_app_bar.dart';
+import 'package:colors_notes/providers/active_journal_provider.dart';
+import 'package:colors_notes/widgets/dynamic_journal_app_bar.dart';
 
 class MainScreen extends StatefulWidget {
   MainScreen({Key? key}) : super(key: key);
@@ -28,35 +30,26 @@ class _MainScreenState extends State<MainScreen> {
     final options = <Widget>[
       LoggedHomepage(), // Index 0: Accueil
     ];
-    if (activeJournalId != null) {
-      // Index 1: Notes (seulement si un journal est actif)
-      options.add(NoteListPage(journalId: activeJournalId));
-    }
-    // Index 2 (ou 1 si pas de journal actif): Gestion des Journaux
+    // JournalManagementPage est toujours ajouté, que activeJournalId soit null ou non.
+    // Sa position dans la liste `options` dépendra de la présence de `NoteListPage`.
     options.add(JournalManagementPage());
     return options;
   }
 
   void _onItemTapped(int index) {
-    final activeJournalNotifier = Provider.of<ActiveJournalNotifier>(context, listen: false);
-    final bool notesTabExists = activeJournalNotifier.activeJournalId != null;
+    // final activeJournalNotifier = Provider.of<ActiveJournalNotifier>(context, listen: false);
+    // final bool notesTabExists = activeJournalNotifier.activeJournalId != null;
 
-    // Logique pour mapper l'index de la barre de navigation à l'index de la liste _buildWidgetOptions
-    int targetWidgetIndex = index;
-    if (!notesTabExists && index == 1) {
-      // Si l'onglet Notes n'existe pas et qu'on clique sur l'index 1 (qui serait Journals)
-      targetWidgetIndex = 1; // L'index 1 dans _buildWidgetOptions correspond à JournalManagementPage
-    } else if (notesTabExists && index == 2) {
-      // Si l'onglet Notes existe et qu'on clique sur l'index 2 (Journals)
-      targetWidgetIndex = 2; // L'index 2 dans _buildWidgetOptions correspond à JournalManagementPage
-    }
-    // Si on clique sur Notes (index 1) et qu'il existe, targetWidgetIndex est déjà 1.
-    // Si on clique sur Accueil (index 0), targetWidgetIndex est déjà 0.
-
+    // int targetWidgetIndex = index;
+    // if (!notesTabExists && index == 1) {
+    //   targetWidgetIndex = 1;
+    // } else if (notesTabExists && index == 2) {
+    //   targetWidgetIndex = 2;
+    // }
 
     if (mounted) {
       setState(() {
-        _selectedIndex = index; // L'index sélectionné dans la barre reste celui cliqué
+        _selectedIndex = index;
       });
     }
   }
@@ -67,22 +60,19 @@ class _MainScreenState extends State<MainScreen> {
     final String? journalId = activeJournalNotifier.activeJournalId;
     final List<Widget> currentWidgetOptions = _buildWidgetOptions(journalId);
 
-    // Définir les items de la BottomNavigationBar
-    // Ils sont toujours 3, mais l'onglet Notes est conceptuellement
-    // lié à l'index 1 du widget body *seulement si* journalId n'est pas null.
     List<BottomNavigationBarItem> navBarItems = [
-      BottomNavigationBarItem(
-        icon: Icon(Icons.home_outlined), // Icône Accueil originale
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.home_outlined),
         activeIcon: Icon(Icons.home),
         label: 'Accueil',
       ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.list_alt_outlined), // Icône Notes originale
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.list_alt_outlined),
         activeIcon: Icon(Icons.list_alt),
         label: 'Notes',
       ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.book_outlined), // Icône Journals originale
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.book_outlined),
         activeIcon: Icon(Icons.book),
         label: 'Journals',
       ),
@@ -91,23 +81,26 @@ class _MainScreenState extends State<MainScreen> {
     // Déterminer quel widget afficher en fonction de l'index sélectionné
     // et de la présence de l'onglet Notes
     int bodyIndexToShow = _selectedIndex;
-    if (journalId == null && _selectedIndex > 0) {
-      // Si pas de journal actif, l'index 1 (Notes) n'existe pas dans le body,
-      // donc l'index 1 de la barre (Notes) doit afficher l'index 1 du body (Journals)
-      // et l'index 2 de la barre (Journals) doit aussi afficher l'index 1 du body (Journals).
-      // Cependant, si on clique sur "Notes" (index 1), on veut afficher Journals (index 1 du body)
-      // Si on clique sur "Journals" (index 2), on veut afficher Journals (index 1 du body)
-      bodyIndexToShow = 1; // Toujours l'index 1 du body si pas de journal actif et index > 0
-    } else if (journalId != null && _selectedIndex == 2) {
-      // Si journal actif et on clique sur Journals (index 2), on affiche l'index 2 du body (Journals)
-      bodyIndexToShow = 2;
-    }
-    // Si journal actif et on clique sur Notes (index 1), on affiche l'index 1 du body (Notes) -> bodyIndexToShow = 1
-    // Si on clique sur Accueil (index 0), on affiche l'index 0 du body (Accueil) -> bodyIndexToShow = 0
 
-    // S'assurer que bodyIndexToShow est valide
+    if (journalId == null) { // Pas de journal actif
+      if (_selectedIndex == 1) { // Si l'utilisateur clique sur l'onglet "Notes" (qui est visuellement le 2ème)
+        bodyIndexToShow = 1; // Afficher JournalManagementPage (qui est à l'index 1 de currentWidgetOptions)
+      } else if (_selectedIndex == 2) { // Si l'utilisateur clique sur l'onglet "Journals" (qui est visuellement le 3ème)
+        bodyIndexToShow = 1; // Afficher aussi JournalManagementPage
+      }
+      // Si _selectedIndex == 0 (Accueil), bodyIndexToShow reste 0.
+    } else { // Un journal est actif
+      // Les index de la BottomNavigationBar correspondent directement aux index de currentWidgetOptions
+      // _selectedIndex 0 -> Accueil (index 0)
+      // _selectedIndex 1 -> Notes (index 1)
+      // _selectedIndex 2 -> Journals (index 2)
+      bodyIndexToShow = _selectedIndex;
+    }
+
+
+    // S'assurer que bodyIndexToShow est valide pour éviter les erreurs de plage.
     if (bodyIndexToShow >= currentWidgetOptions.length) {
-      bodyIndexToShow = 0; // Fallback sécurité
+      bodyIndexToShow = 0; // Fallback sur le premier widget (Accueil) en cas de problème.
     }
 
     return Scaffold(
@@ -117,11 +110,11 @@ class _MainScreenState extends State<MainScreen> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: navBarItems,
-        currentIndex: _selectedIndex, // L'index visuel de la barre
-        type: BottomNavigationBarType.fixed,
+        currentIndex: _selectedIndex,
+        type: BottomNavigationBarType.fixed, // Assure que tous les labels sont visibles
         onTap: _onItemTapped,
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      // Le FloatingActionButton a été retiré précédemment, donc pas de FAB ici.
     );
   }
 }
