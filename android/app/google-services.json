@@ -12,12 +12,7 @@
           "package_name": "org.stanworld.colorsnotes"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "523869870608-f9jnvfkdq74fjhj3davircu7unu1mjnb.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
           "current_key": "AIzaSyB8e2IdFFWKKyLdwQGf-bvxhRKZmWzxdKI"
@@ -27,7 +22,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "523869870608-f9jnvfkdq74fjhj3davircu7unu1mjnb.apps.googleusercontent.com",
+              "client_id": "523869870608-c167do1sb6lfrhcg8tsgughi6gcckcdi.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
