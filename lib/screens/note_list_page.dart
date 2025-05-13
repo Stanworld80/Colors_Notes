@@ -120,7 +120,7 @@ class _NoteListPageState extends State<NoteListPage> {
   }
 
   Widget _buildNoteGridItem(BuildContext context, Note note, ColorData? colorData, FirestoreService firestoreService, Journal? journal) {
-    final DateFormat dateFormat = DateFormat('dd/MM/yy', 'fr_FR'); // Format plus court pour la date
+    final DateFormat dateFormat = DateFormat('dd/MM/yy hh:mm', 'fr_FR');
     final Color cardColor = colorData?.color ?? Colors.grey.shade100;
     final Color textColor = cardColor.computeLuminance() > 0.5 ? Colors.black87 : Colors.white;
     final Color subtleTextColor = cardColor.computeLuminance() > 0.5 ? Colors.black54 : Colors.white70;
@@ -348,7 +348,7 @@ class _NoteListPageState extends State<NoteListPage> {
                   itemBuilder: (context, index) {
                     final note = notes[index];
                     final colorData = _getColorDataById(journalForPalette, note.paletteElementId);
-                    final DateFormat dateFormat = DateFormat('EEEE dd MMMM HH:mm', 'fr_FR');
+                    final DateFormat dateFormat = DateFormat('EEEE dd MMMM yyyy à HH:mm', 'fr_FR');
 
                     final Color cardColor = colorData?.color ?? Theme.of(context).cardColor;
                     final Color textColor = cardColor.computeLuminance() > 0.5 ? Colors.black87 : Colors.white;
@@ -366,10 +366,6 @@ class _NoteListPageState extends State<NoteListPage> {
                         leading: colorData != null
                             ? CircleAvatar(
                           backgroundColor: Colors.transparent,
-                          child: Text(
-                            colorData.title.isNotEmpty ? colorData.title[0].toUpperCase() : '?',
-                            style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
-                          ),
                         )
                             : CircleAvatar(backgroundColor: Colors.grey, child: Icon(Icons.palette_outlined, color: Colors.white)),
                         title: Text(
@@ -383,7 +379,7 @@ class _NoteListPageState extends State<NoteListPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (colorData != null) Text("Humeur: ${colorData.title}", style: TextStyle(fontSize: 12, color: subtleTextColor)),
+                              if (colorData != null) Text("${colorData.title}", style: TextStyle(fontSize: 12, color: subtleTextColor)),
                               Text(
                                 'Date: ${dateFormat.format(note.eventTimestamp.toDate().toLocal())}',
                                 style: TextStyle(fontSize: 12, color: subtleTextColor),
