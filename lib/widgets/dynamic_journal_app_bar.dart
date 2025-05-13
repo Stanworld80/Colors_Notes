@@ -100,7 +100,7 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
       actions: <Widget>[
         if (activeJournal != null)
           IconButton(
-            icon: Icon(Icons.palette_outlined),
+            icon: Icon(Icons.palette_rounded),
             tooltip: "Modifier la palette de '${activeJournal.name}'",
             onPressed: () {
               Navigator.push(
@@ -145,15 +145,15 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
               const PopupMenuItem<String>(
                 value: 'manage_journals',
                 child: ListTile(
-                  leading: Icon(Icons.settings_outlined),
-                  title: Text('Gérer les journaux'),
+                  leading: Icon(Icons.collections_bookmark_outlined),
+                  title: Text('Journaux'),
                 ),
               ),
               const PopupMenuItem<String>(
                 value: 'manage_palette_models',
                 child: ListTile(
-                  leading: Icon(Icons.collections_bookmark_outlined),
-                  title: Text('Gérer les modèles'),
+                  leading: Icon(Icons.palette_outlined),
+                  title: Text('Modèles de palette'),
                 ),
               ),
               const PopupMenuDivider(), // Séparateur
