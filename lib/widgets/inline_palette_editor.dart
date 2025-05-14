@@ -9,7 +9,7 @@ import '../models/color_data.dart';
 final _logger = Logger(printer: PrettyPrinter(methodCount: 1, printTime: false));
 const _uuid = Uuid();
 
-const int MIN_COLORS_IN_PALETTE_EDITOR = 3; // Min colors for a model/palette (can be 1 if user wants a single color)
+const int MIN_COLORS_IN_PALETTE_EDITOR = 1; // Min colors for a model/palette (can be 1 if user wants a single color)
 const int MAX_COLORS_IN_PALETTE_EDITOR = 48;
 const int MAX_GRADIENT_STEPS = 48;
 

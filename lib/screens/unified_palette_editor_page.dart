@@ -17,9 +17,6 @@ import '../widgets/loading_indicator.dart';
 final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 1, printTime: true));
 const _uuid = Uuid();
 
-// Constants for palette editor defined in inline_palette_editor.dart
-// const int MIN_COLORS_IN_PALETTE_EDITOR = 1;
-// const int MAX_COLORS_IN_PALETTE_EDITOR = 48;
 
 class UnifiedPaletteEditorPage extends StatefulWidget {
   final Journal? journalToUpdatePaletteFor;
