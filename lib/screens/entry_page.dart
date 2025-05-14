@@ -1,3 +1,4 @@
+// lib/screens/entry_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
@@ -10,6 +11,7 @@ import '../services/firestore_service.dart';
 import '../models/note.dart';
 import '../models/journal.dart';
 import '../providers/active_journal_provider.dart';
+import '../models/color_data.dart'; // Importation nécessaire pour le sélecteur de couleur
 
 final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0, printTime: true));
 const _uuid = Uuid();
@@ -41,6 +43,7 @@ class _EntryPageState extends State<EntryPage> {
   bool _isLoadingJournalDetails = true;
   String? _userId;
   bool _isSaving = false;
+  bool _isSavingAsNew = false;
 
   @override
   void initState() {
@@ -54,6 +57,7 @@ class _EntryPageState extends State<EntryPage> {
       _selectedEventTime = TimeOfDay.fromDateTime(_selectedEventDate);
     } else {
       _selectedPaletteElementId = widget.initialPaletteElementId;
+      // Pour une nouvelle note, la date et l'heure sont déjà initialisées à "maintenant"
     }
     _loadJournalDetails();
   }
@@ -79,7 +83,30 @@ class _EntryPageState extends State<EntryPage> {
         final defaultColor = _currentJournalDetails!.palette.colors.firstWhere((c) => c.isDefault, orElse: () => _currentJournalDetails!.palette.colors.first);
         _selectedPaletteElementId = defaultColor.paletteElementId;
       }
-
+      else if (widget.noteToEdit != null && _currentJournalDetails != null) {
+        bool currentPaletteElementExists = _currentJournalDetails!.palette.colors.any((c) => c.paletteElementId == _selectedPaletteElementId);
+        if (!currentPaletteElementExists && _currentJournalDetails!.palette.colors.isNotEmpty) {
+          _selectedPaletteElementId = _currentJournalDetails!.palette.colors.first.paletteElementId;
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("La couleur d'origine de cette note n'existe plus dans la palette. Une couleur par défaut a été sélectionnée."),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          }
+        } else if (!currentPaletteElementExists && _currentJournalDetails!.palette.colors.isEmpty) {
+          _selectedPaletteElementId = null;
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("La palette de ce journal est vide. Veuillez ajouter des couleurs à la palette pour pouvoir associer cette note."),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      }
     } catch (e) {
       _loggerPage.e("Erreur chargement détails journal: $e");
       if (mounted) {
@@ -94,7 +121,6 @@ class _EntryPageState extends State<EntryPage> {
     }
   }
 
-
   @override
   void dispose() {
     _contentController.dispose();
@@ -105,15 +131,13 @@ class _EntryPageState extends State<EntryPage> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedEventDate,
-      firstDate: DateTime(DateTime.now().year - 5),
-      lastDate: DateTime(DateTime.now().year + 5),
+      firstDate: DateTime(DateTime.now().year - 50),
+      lastDate: DateTime(DateTime.now().year + 50),
       locale: const Locale('fr', 'FR'),
     );
-    // Vérification cruciale : est-ce que l'utilisateur a choisi une date ET est-ce qu'elle est différente ?
     if (picked != null && picked != _selectedEventDate) {
-      // Vérifier si le widget est toujours monté avant d'appeler setState
       if (mounted) {
-        setState(() { // L'appel à setState est essentiel pour rafraîchir l'UI
+        setState(() {
           _selectedEventDate = picked;
         });
       }
@@ -131,7 +155,6 @@ class _EntryPageState extends State<EntryPage> {
         );
       },
     );
-
     if (picked != null && picked != _selectedEventTime) {
       if (mounted) {
         setState(() {
@@ -141,16 +164,30 @@ class _EntryPageState extends State<EntryPage> {
     }
   }
 
+  // NOUVELLE méthode pour régler la date et l'heure sur "maintenant"
+  void _setDateTimeToNow() {
+    if (mounted) {
+      final now = DateTime.now();
+      setState(() {
+        _selectedEventDate = now;
+        _selectedEventTime = TimeOfDay.fromDateTime(now);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Date et heure réglées sur maintenant."), duration: Duration(seconds: 2))
+      );
+    }
+  }
+
   Future<void> _saveNote() async {
     if (_userId == null) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Utilisateur non identifié.")));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Utilisateur non identifié.")));
       return;
     }
     if (!_formKey.currentState!.validate()) {
       return;
     }
     if (_selectedPaletteElementId == null) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Veuillez sélectionner une couleur.")));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Veuillez sélectionner une couleur pour la note.")));
       return;
     }
 
@@ -179,7 +216,7 @@ class _EntryPageState extends State<EntryPage> {
         );
         await firestoreService.createNote(newNote);
         _loggerPage.i("Note créée: ${newNote.id}");
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Note sauvegardée.")));
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Note sauvegardée.")));
       } else {
         final updatedNote = widget.noteToEdit!.copyWith(
           content: _contentController.text.trim(),
@@ -189,7 +226,7 @@ class _EntryPageState extends State<EntryPage> {
         );
         await firestoreService.updateNote(updatedNote);
         _loggerPage.i("Note mise à jour: ${updatedNote.id}");
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Note mise à jour.")));
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Note mise à jour.")));
       }
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
@@ -206,87 +243,229 @@ class _EntryPageState extends State<EntryPage> {
     }
   }
 
+  Future<void> _saveAsNewNote() async {
+    if (_userId == null) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Utilisateur non identifié.")));
+      return;
+    }
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    if (_selectedPaletteElementId == null) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Veuillez sélectionner une couleur pour la nouvelle note.")));
+      return;
+    }
+
+    if (mounted) setState(() { _isSavingAsNew = true; });
+
+    final firestoreService = Provider.of<FirestoreService>(context, listen: false);
+    final eventTimestamp = Timestamp.fromDate(DateTime(
+      _selectedEventDate.year,
+      _selectedEventDate.month,
+      _selectedEventDate.day,
+      _selectedEventTime.hour,
+      _selectedEventTime.minute,
+    ));
+
+    try {
+      final newNote = Note(
+        id: _uuid.v4(),
+        journalId: widget.journalId,
+        userId: _userId!,
+        content: _contentController.text.trim(),
+        paletteElementId: _selectedPaletteElementId!,
+        eventTimestamp: eventTimestamp,
+        createdAt: Timestamp.now(),
+        lastUpdatedAt: Timestamp.now(),
+      );
+      await firestoreService.createNote(newNote);
+      _loggerPage.i("Note sauvegardée comme nouvelle: ${newNote.id}");
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Note sauvegardée comme nouvelle.")));
+      if (mounted) Navigator.of(context).pop();
+    } catch (e) {
+      _loggerPage.e("Erreur sauvegarde comme nouvelle note: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Erreur: ${e.toString()}")),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() { _isSavingAsNew = false; });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final DateFormat dateFormat = DateFormat('EEEE dd MMMM yyyy', 'fr_FR'); // Format long pour le bouton
+    final DateFormat dateFormat = DateFormat('EEEE dd MMMM yyyy', 'fr_FR'); // Changé pour yyyy pour l'année complète
+    final bool isEditing = widget.noteToEdit != null;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.noteToEdit == null ? 'Nouvelle Note' : 'Modifier la Note'),
+        title: Text(isEditing ? 'Modifier la Note' : 'Nouvelle Note'),
         actions: [
-          if (_isSaving) Padding(padding: EdgeInsets.all(16.0), child: CircularProgressIndicator(color: Colors.white))
+          if (_isSaving || _isSavingAsNew)
+            const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.0))
+            )
           else
             IconButton(
-              icon: Icon(Icons.save_alt_outlined),
+              icon: const Icon(Icons.save_alt_outlined),
               onPressed: _saveNote,
-              tooltip: "Sauvegarder",
+              tooltip: isEditing ? "Mettre à jour la note" : "Sauvegarder la note",
             )
         ],
       ),
       body: _isLoadingJournalDetails
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : _currentJournalDetails == null
           ? Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, color: Colors.red, size: 40),
-              SizedBox(height: 8),
-              Text("Impossible de charger les détails du journal."),
-              SizedBox(height: 8),
-              ElevatedButton(onPressed: _loadJournalDetails, child: Text("Réessayer"))
+              const Icon(Icons.error_outline, color: Colors.red, size: 40),
+              const SizedBox(height: 8),
+              const Text("Impossible de charger les détails du journal."),
+              const SizedBox(height: 8),
+              ElevatedButton(onPressed: _loadJournalDetails, child: const Text("Réessayer"))
             ],
-          )
-      )
+          ))
           : SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
+              if (_currentJournalDetails!.palette.colors.isNotEmpty)
+                DropdownButtonFormField<String>(
+                  value: _selectedPaletteElementId,
+                  decoration: InputDecoration(
+                    labelText: 'Couleur associée',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+
+                  ),
+                  items: _currentJournalDetails!.palette.colors.map((ColorData colorData) {
+                    return DropdownMenuItem<String>(
+                      value: colorData.paletteElementId,
+                      child: Row(
+                        children: [
+                          CircleAvatar(backgroundColor: colorData.color, radius: 10),
+                          const SizedBox(width: 10),
+                          Text(colorData.title),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    if (mounted) {
+                      setState(() {
+                        _selectedPaletteElementId = newValue;
+                      });
+                    }
+                  },
+                  validator: (value) => value == null ? 'Veuillez choisir une couleur.' : null,
+                )
+              else
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text(
+                    "Aucune couleur disponible dans la palette de ce journal. Veuillez d'abord ajouter des couleurs à la palette.",
+                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                  ),
+                ),
+              const SizedBox(height: 20),
+
               TextFormField(
                 controller: _contentController,
                 decoration: InputDecoration(
                   labelText: 'Contenu de la note...',
-                  hintText: 'Décrivez votre note...',
+                  hintText: 'Décrivez votre pensée, événement, ou tâche...',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  alignLabelWithHint: true,
                 ),
-                maxLines: 5,
+                maxLines: 8,
+                textCapitalization: TextCapitalization.sentences,
                 validator: (value) {
-                  if (value == null ) {
+                  if (value == null || value.trim().isEmpty) {
                     return 'Veuillez entrer le contenu de la note.';
+                  }
+                  if (value.length > 1024) {
+                    return 'Le contenu est trop long (max 1024 caractères).';
                   }
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
+              // Section pour la date et l'heure
               Row(
                 children: [
                   Expanded(
                     child: TextButton.icon(
-                      icon: Icon(Icons.calendar_today_outlined),
-                      label: Text(dateFormat.format(_selectedEventDate)), // Affichage de la date sélectionnée
+                      icon: const Icon(Icons.calendar_today_outlined),
+                      label: Text(dateFormat.format(_selectedEventDate)),
                       onPressed: () => _selectEventDate(context),
+                      style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8), // Ajustement du padding
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          side: BorderSide(color: Theme.of(context).dividerColor)
+                      ),
                     ),
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 8), // Espace réduit
                   Expanded(
                     child: TextButton.icon(
-                      icon: Icon(Icons.access_time_outlined),
-                      label: Text(_selectedEventTime.format(context)), // Affichage de l'heure sélectionnée
+                      icon: const Icon(Icons.access_time_outlined),
+                      label: Text(_selectedEventTime.format(context)),
                       onPressed: () => _selectEventTime(context),
+                      style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8), // Ajustement du padding
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          side: BorderSide(color: Theme.of(context).dividerColor)
+                      ),
                     ),
                   ),
+                  // NOUVEAU BOUTON "Maintenant"
+                  const SizedBox(width: 8),
+                  Tooltip(
+                    message: "Régler sur maintenant",
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_circle_left_outlined),
+                      onPressed: _setDateTimeToNow,
+                      style: IconButton.styleFrom(
+                        padding: const EdgeInsets.all(12),
+                        side: BorderSide(color: Theme.of(context).dividerColor),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                    ),
+                  )
                 ],
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
               ElevatedButton.icon(
-                icon: Icon(_isSaving ? Icons.hourglass_empty_outlined : Icons.save_outlined),
-                label: Text(_isSaving ? "Sauvegarde..." : (widget.noteToEdit == null ? 'Sauvegarder la Note' : 'Mettre à jour la Note')),
-                onPressed: _isSaving ? null : _saveNote,
-                style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 12)),
+                icon: Icon(_isSaving ? Icons.hourglass_empty_outlined : (isEditing ? Icons.sync_alt_outlined : Icons.save_outlined)),
+                label: Text(_isSaving ? "Sauvegarde..." : (isEditing ? 'Mettre à jour la Note' : 'Sauvegarder la Note')),
+                onPressed: (_isSaving || _isSavingAsNew || _selectedPaletteElementId == null) ? null : _saveNote,
+                style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    textStyle: const TextStyle(fontSize: 16)
+                ),
               ),
+              if (isEditing) ...[
+                const SizedBox(height: 15),
+                OutlinedButton.icon(
+                  icon: Icon(_isSavingAsNew ? Icons.hourglass_empty_outlined : Icons.add_circle_outline),
+                  label: Text(_isSavingAsNew ? "Sauvegarde..." : 'Sauvegarder comme nouvelle note'),
+                  onPressed: (_isSaving || _isSavingAsNew || _selectedPaletteElementId == null) ? null : _saveAsNewNote,
+                  style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      textStyle: const TextStyle(fontSize: 16),
+                      side: BorderSide(color: Theme.of(context).colorScheme.primary)
+                  ),
+                ),
+              ]
             ],
           ),
         ),
