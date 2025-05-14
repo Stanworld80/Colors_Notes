@@ -1,3 +1,4 @@
+// lib/models/color_data.dart
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
@@ -18,12 +19,25 @@ class ColorData {
 
   Color get color {
     final buffer = StringBuffer();
-    if (hexCode.length == 6 || hexCode.length == 7) buffer.write('ff');
-    buffer.write(hexCode.replaceFirst('#', ''));
+    // S'assurer que le hexCode est valide avant de tenter de le parser
+    if (hexCode.isEmpty || !(hexCode.length == 6 || hexCode.length == 7 || hexCode.length == 3 || hexCode.length == 4)) {
+      return const Color(0xFF808080); // Gris par défaut pour hex invalide ou vide
+    }
+
+    String cleanedHex = hexCode.replaceFirst('#', '');
+    if (cleanedHex.length == 6 || cleanedHex.length == 8) { // Supporte AARRGGBB et RRGGBB
+      buffer.write(cleanedHex.length == 6 ? 'ff' : ''); // Ajoute alpha si seulement RGB
+      buffer.write(cleanedHex);
+    } else {
+      return const Color(0xFF808080); // Gris par défaut pour autres formats incorrects
+    }
+
     try {
       return Color(int.parse(buffer.toString(), radix: 16));
     } catch (e) {
-      return Colors.grey;
+      // Log l'erreur si nécessaire, puis retourne une couleur par défaut
+      // print('Erreur de parsing couleur hex "$hexCode": $e');
+      return const Color(0xFF808080); // Gris par défaut en cas d'échec du parsing
     }
   }
 
@@ -40,7 +54,7 @@ class ColorData {
     return ColorData(
       paletteElementId: map['paletteElementId'] as String? ?? _uuid.v4(),
       title: map['title'] as String? ?? 'Sans titre',
-      hexCode: map['hexCode'] as String? ?? '808080',
+      hexCode: map['hexCode'] as String? ?? '808080', // Default hex
       isDefault: map['isDefault'] as bool? ?? false,
     );
   }

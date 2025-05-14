@@ -1,75 +1,109 @@
-// lib/models/color_data.dart
+// test/unit/models/color_data_test.dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:colors_notes/models/color_data.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
-const Uuid _uuid = Uuid();
+void main() {
+  group('ColorData Model Tests', () {
+    const defaultGreyColor = Color(0xFF808080);
 
-class ColorData {
-  String paletteElementId;
-  String title;
-  String hexCode;
-  bool isDefault;
+    test('Constructeur devrait assigner les valeurs et générer un paletteElementId si non fourni', () {
+      final colorData = ColorData(title: 'Rouge', hexCode: '#FF0000');
+      expect(colorData.title, 'Rouge');
+      expect(colorData.hexCode, '#FF0000');
+      expect(colorData.isDefault, isFalse);
+      expect(colorData.paletteElementId, isNotEmpty);
+      expect(Uuid.isValidUUID(fromString: colorData.paletteElementId), isTrue);
 
-  ColorData({
-    String? paletteElementId,
-    required this.title,
-    required this.hexCode,
-    this.isDefault = false,
-  }) : paletteElementId = paletteElementId ?? _uuid.v4();
+      final colorDataWithId = ColorData(paletteElementId: 'custom-id-123', title: 'Bleu', hexCode: '#0000FF');
+      expect(colorDataWithId.paletteElementId, 'custom-id-123');
+    });
 
-  Color get color {
-    final buffer = StringBuffer();
-    // S'assurer que le hexCode est valide avant de tenter de le parser
-    if (hexCode.isEmpty || !(hexCode.length == 6 || hexCode.length == 7 || hexCode.length == 3 || hexCode.length == 4)) {
-      return const Color(0xFF808080); // Gris par défaut pour hex invalide ou vide
-    }
+    test('toMap devrait retourner une map correcte', () {
+      final colorData = ColorData(paletteElementId: 'id1', title: 'Vert', hexCode: '#00FF00', isDefault: true);
+      final map = colorData.toMap();
 
-    String cleanedHex = hexCode.replaceFirst('#', '');
-    if (cleanedHex.length == 6 || cleanedHex.length == 8) { // Supporte AARRGGBB et RRGGBB
-      buffer.write(cleanedHex.length == 6 ? 'ff' : ''); // Ajoute alpha si seulement RGB
-      buffer.write(cleanedHex);
-    } else {
-      return const Color(0xFF808080); // Gris par défaut pour autres formats incorrects
-    }
+      expect(map['paletteElementId'], 'id1');
+      expect(map['title'], 'Vert');
+      expect(map['hexCode'], '#00FF00');
+      expect(map['isDefault'], isTrue);
+    });
 
-    try {
-      return Color(int.parse(buffer.toString(), radix: 16));
-    } catch (e) {
-      // Log l'erreur si nécessaire, puis retourne une couleur par défaut
-      // print('Erreur de parsing couleur hex "$hexCode": $e');
-      return const Color(0xFF808080); // Gris par défaut en cas d'échec du parsing
-    }
-  }
+    test('fromMap devrait créer une instance ColorData correcte', () {
+      final map = {'paletteElementId': 'id2', 'title': 'Jaune', 'hexCode': '#FFFF00', 'isDefault': false};
+      final colorData = ColorData.fromMap(map);
 
-  Map<String, dynamic> toMap() {
-    return {
-      'paletteElementId': paletteElementId,
-      'title': title,
-      'hexCode': hexCode,
-      'isDefault': isDefault,
-    };
-  }
+      expect(colorData.paletteElementId, 'id2');
+      expect(colorData.title, 'Jaune');
+      expect(colorData.hexCode, '#FFFF00');
+      expect(colorData.isDefault, isFalse);
+    });
 
-  factory ColorData.fromMap(Map<String, dynamic> map) {
-    return ColorData(
-      paletteElementId: map['paletteElementId'] as String? ?? _uuid.v4(),
-      title: map['title'] as String? ?? 'Sans titre',
-      hexCode: map['hexCode'] as String? ?? '808080', // Default hex
-      isDefault: map['isDefault'] as bool? ?? false,
-    );
-  }
+    test('fromMap devrait utiliser des valeurs par défaut si des champs sont manquants ou nuls', () {
+      final mapWithoutOptionalFields = {'hexCode': '#123456'}; // title, paletteElementId, isDefault manquants
+      final colorData1 = ColorData.fromMap(mapWithoutOptionalFields);
+      expect(colorData1.paletteElementId, isNotEmpty);
+      expect(Uuid.isValidUUID(fromString: colorData1.paletteElementId), isTrue);
+      expect(colorData1.title, 'Sans titre');
+      expect(colorData1.isDefault, isFalse);
 
-  ColorData copyWith({
-    String? paletteElementId,
-    String? title,
-    String? hexCode,
-    bool? isDefault,
-  }) {
-    return ColorData(
-      paletteElementId: paletteElementId ?? this.paletteElementId,
-      title: title ?? this.title,
-      hexCode: hexCode ?? this.hexCode,
-      isDefault: isDefault ?? this.isDefault,
-    );
-  }
+      final mapWithNulls = {
+        'paletteElementId': null,
+        'title': null,
+        'hexCode': null,
+        'isDefault': null,
+      };
+      final colorData2 = ColorData.fromMap(mapWithNulls);
+      expect(colorData2.paletteElementId, isNotEmpty);
+      expect(Uuid.isValidUUID(fromString: colorData2.paletteElementId), isTrue);
+      expect(colorData2.title, 'Sans titre');
+      expect(colorData2.hexCode, '808080'); // Default hex
+      expect(colorData2.isDefault, isFalse);
+    });
+
+    test('copyWith devrait copier l\'instance avec/sans nouvelles valeurs', () {
+      final original = ColorData(paletteElementId: 'orig-id', title: 'Original', hexCode: '#AAAAAA', isDefault: true);
+
+      final copiedIdentical = original.copyWith();
+      expect(copiedIdentical.paletteElementId, original.paletteElementId);
+      expect(copiedIdentical.title, original.title);
+      expect(copiedIdentical.hexCode, original.hexCode);
+      expect(copiedIdentical.isDefault, original.isDefault);
+
+      final copiedModified = original.copyWith(
+          title: 'Modifié',
+          hexCode: '#BBBBBB',
+          isDefault: false,
+          paletteElementId: 'new-id-for-copy'
+      );
+      expect(copiedModified.paletteElementId, 'new-id-for-copy');
+      expect(copiedModified.title, 'Modifié');
+      expect(copiedModified.hexCode, '#BBBBBB');
+      expect(copiedModified.isDefault, false);
+    });
+
+    test('getter color devrait convertir hexCode en Color et gérer les erreurs', () {
+      final colorDataRed = ColorData(title: 'Rouge', hexCode: '#FF0000');
+      expect(colorDataRed.color, const Color(0xFFFF0000));
+
+      final colorDataGreenNoHash = ColorData(title: 'Vert', hexCode: '00FF00');
+      expect(colorDataGreenNoHash.color, const Color(0xFF00FF00));
+
+      final colorDataAlpha = ColorData(title: 'Bleu Alpha', hexCode: '#800000FF');
+      expect(colorDataAlpha.color, const Color(0x800000FF));
+
+      final colorDataInvalidHex = ColorData(title: 'Invalide', hexCode: 'XYZ123');
+      expect(colorDataInvalidHex.color, defaultGreyColor);
+
+      final colorDataEmptyHex = ColorData(title: 'Vide', hexCode: '');
+      expect(colorDataEmptyHex.color, defaultGreyColor);
+
+      final colorDataShortHex = ColorData(title: 'Court', hexCode: '#123'); // Format court non géré par la logique actuelle
+      expect(colorDataShortHex.color, defaultGreyColor);
+
+      final colorDataTooLong = ColorData(title: 'Trop Long', hexCode: '#123456789');
+      expect(colorDataTooLong.color, defaultGreyColor);
+    });
+  });
 }

@@ -1,3 +1,4 @@
+// lib/models/palette_model.dart
 import 'package:uuid/uuid.dart';
 import 'color_data.dart';
 
@@ -20,6 +21,7 @@ class PaletteModel {
 
   Map<String, dynamic> toMap() {
     return {
+      // L'ID du PaletteModel (documentId) n'est pas stocké dans sa propre map
       'name': name,
       'colors': colors.map((color) => color.toMap()).toList(),
       'userId': userId,
@@ -45,12 +47,13 @@ class PaletteModel {
     List<ColorData>? colors,
     String? userId,
     bool? isPredefined,
+    bool clearUserId = false, // AJOUTÉ pour la cohérence
   }) {
     return PaletteModel(
       id: id ?? this.id,
       name: name ?? this.name,
       colors: colors ?? this.colors.map((c) => c.copyWith()).toList(),
-      userId: userId ?? this.userId,
+      userId: clearUserId ? null : (userId ?? this.userId), // Logique cohérente
       isPredefined: isPredefined ?? this.isPredefined,
     );
   }

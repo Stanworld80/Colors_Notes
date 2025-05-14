@@ -17,7 +17,7 @@ void main() {
       final model = PaletteModel(
         name: 'Mon Modèle',
         colors: colors,
-        userId: testUserId, // Un modèle personnel
+        userId: testUserId,
         isPredefined: false,
       );
 
@@ -33,7 +33,7 @@ void main() {
         id: 'custom-model-id',
         name: 'Autre Modèle',
         colors: [],
-        isPredefined: true, // Un modèle prédéfini (userId peut être null)
+        isPredefined: true,
       );
       expect(modelWithId.id, 'custom-model-id');
       expect(modelWithId.userId, isNull);
@@ -45,7 +45,7 @@ void main() {
         createTestColor('mc1', 'Modèle Couleur 1', '#ABCDEF'),
       ];
       final model = PaletteModel(
-        id: 'modelX', // L'ID du modèle lui-même n'est pas dans toMap
+        id: 'modelX',
         name: 'Modèle X',
         colors: colors,
         userId: testUserId,
@@ -64,7 +64,7 @@ void main() {
     });
 
     test('fromMap devrait créer une instance PaletteModel correcte', () {
-      final map = {
+      final Map<String, dynamic> map = {
         'name': 'Modèle de Map',
         'colors': [
           {'paletteElementId': 'cmd-1', 'title': 'Couleur de Modèle Map', 'hexCode': '#123456', 'isDefault': false}
@@ -84,19 +84,19 @@ void main() {
     });
 
     test('fromMap devrait gérer les champs nuls et fournir des valeurs par défaut', () {
-      final mapNoName = { 'colors': [], 'userId': testUserId }; // name manquant
+      final Map<String, dynamic> mapNoName = { 'colors': [], 'userId': testUserId };
       final model1 = PaletteModel.fromMap(mapNoName, 'model1-defaults');
-      expect(model1.name, 'Modèle sans nom'); // Valeur par défaut
+      expect(model1.name, 'Modèle sans nom');
       expect(model1.userId, testUserId);
-      expect(model1.isPredefined, false); // Valeur par défaut
+      expect(model1.isPredefined, false);
 
-      final mapNoUserId = { 'name': 'Modèle Prédéfini Test', 'colors': [], 'isPredefined': true };
+      final Map<String, dynamic> mapNoUserId = { 'name': 'Modèle Prédéfini Test', 'colors': [], 'isPredefined': true };
       final model2 = PaletteModel.fromMap(mapNoUserId, 'model2-predefined');
       expect(model2.name, 'Modèle Prédéfini Test');
-      expect(model2.userId, isNull); // userId peut être null pour les prédéfinis
+      expect(model2.userId, isNull);
       expect(model2.isPredefined, isTrue);
 
-      final mapAllNull = { 'name': null, 'colors': null, 'userId': null, 'isPredefined': null };
+      final Map<String, dynamic> mapAllNull = { 'name': null, 'colors': null, 'userId': null, 'isPredefined': null };
       final model3 = PaletteModel.fromMap(mapAllNull, 'model3-all-null');
       expect(model3.name, 'Modèle sans nom');
       expect(model3.colors, isEmpty);
@@ -104,14 +104,13 @@ void main() {
       expect(model3.isPredefined, isFalse);
     });
 
-
     test('copyWith devrait copier l\'instance avec/sans nouvelles valeurs', () {
       final colorOrig = createTestColor('mco1', 'Couleur Modèle Orig', '#EEE');
       final modelOrig = PaletteModel(
         id: 'orig-m',
         name: 'Modèle Original',
         colors: [colorOrig],
-        userId: testUserId,
+        userId: testUserId, // userId initial
         isPredefined: false,
       );
 
@@ -120,23 +119,34 @@ void main() {
       expect(modelCopiedIdentical.name, modelOrig.name);
       expect(modelCopiedIdentical.colors.length, 1);
       expect(modelCopiedIdentical.colors.first.title, 'Couleur Modèle Orig');
+      expect(modelCopiedIdentical.userId, testUserId); // Doit conserver l'userId original
       expect(identical(modelCopiedIdentical.colors, modelOrig.colors), isFalse);
       expect(identical(modelCopiedIdentical.colors[0], modelOrig.colors[0]), isFalse);
 
-
       final colorNew = createTestColor('mcn1', 'Nouvelle Couleur Modèle', '#FFF');
-      final modelCopiedModified = modelOrig.copyWith(
+      // Test de la modification de userId vers une nouvelle valeur
+      final modelCopiedModifiedUser = modelOrig.copyWith(userId: 'newUser');
+      expect(modelCopiedModifiedUser.userId, 'newUser');
+
+      // Test de la suppression de userId en utilisant clearUserId
+      final modelCopiedClearedUser = modelOrig.copyWith(
         name: 'Modèle Modifié',
         colors: [colorNew],
-        userId: null, // Peut devenir un modèle prédéfini
+        clearUserId: true, // Explicitement pour mettre userId à null
         isPredefined: true,
       );
+      expect(modelCopiedClearedUser.id, modelOrig.id);
+      expect(modelCopiedClearedUser.name, 'Modèle Modifié');
+      expect(modelCopiedClearedUser.colors.first.title, 'Nouvelle Couleur Modèle');
+      expect(modelCopiedClearedUser.userId, isNull); // Attendu null à cause de clearUserId: true
+      expect(modelCopiedClearedUser.isPredefined, isTrue);
 
-      expect(modelCopiedModified.id, modelOrig.id);
-      expect(modelCopiedModified.name, 'Modèle Modifié');
-      expect(modelCopiedModified.colors.first.title, 'Nouvelle Couleur Modèle');
-      expect(modelCopiedModified.userId, isNull);
-      expect(modelCopiedModified.isPredefined, isTrue);
+      // Test où userId est fourni mais clearUserId est aussi true (clearUserId doit l'emporter)
+      final modelCopiedClearedUserDespiteNew = modelOrig.copyWith(
+        userId: 'anotherUser',
+        clearUserId: true,
+      );
+      expect(modelCopiedClearedUserDespiteNew.userId, isNull);
     });
   });
 }

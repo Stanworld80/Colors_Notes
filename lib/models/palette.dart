@@ -1,3 +1,4 @@
+// lib/models/palette.dart
 import 'package:uuid/uuid.dart';
 import 'color_data.dart';
 
@@ -20,6 +21,7 @@ class Palette {
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id, // AJOUTÉ : L'ID de la palette est maintenant inclus
       'name': name,
       'colors': colors.map((color) => color.toMap()).toList(),
       'isPredefined': isPredefined,
@@ -29,7 +31,7 @@ class Palette {
 
   factory Palette.fromMap(Map<String, dynamic> map, String documentId) {
     return Palette(
-      id: documentId,
+      id: documentId, // L'ID vient du document Firestore
       name: map['name'] as String? ?? 'Palette sans nom',
       colors: (map['colors'] as List<dynamic>? ?? [])
           .map((colorMap) => ColorData.fromMap(colorMap as Map<String, dynamic>))
@@ -39,9 +41,10 @@ class Palette {
     );
   }
 
+  // Utilisé pour désérialiser une palette imbriquée dans un document Journal
   factory Palette.fromEmbeddedMap(Map<String, dynamic> map) {
     return Palette(
-      id: map['id'] as String? ?? _uuid.v4(),
+      id: map['id'] as String? ?? _uuid.v4(), // Attend un 'id' dans la map imbriquée
       name: map['name'] as String? ?? 'Palette sans nom',
       colors: (map['colors'] as List<dynamic>? ?? [])
           .map((colorMap) => ColorData.fromMap(colorMap as Map<String, dynamic>))

@@ -47,7 +47,7 @@ void main() {
 
     test('toMap devrait retourner une map correcte', () {
       final note = Note(
-        id: 'noteX', // L'ID n'est pas dans toMap
+        id: 'noteX',
         journalId: testJournalId,
         userId: testUserId,
         content: 'Contenu X',
@@ -69,7 +69,7 @@ void main() {
     });
 
     test('fromMap devrait créer une instance Note correcte', () {
-      final map = {
+      final Map<String, dynamic> map = { // Explicitement typé
         'journalId': testJournalId,
         'userId': testUserId,
         'content': 'Note depuis Map',
@@ -92,18 +92,15 @@ void main() {
     });
 
     test('fromMap devrait gérer les champs nuls et fournir des valeurs par défaut', () {
-      final map = {
-        // Tous les champs requis sont manquants ou nuls, sauf ceux avec des valeurs par défaut dans le constructeur
-      };
+      final Map<String, dynamic> map = {}; // Explicitement typé et vide
       final documentId = 'note-defaults';
       final note = Note.fromMap(map, documentId);
 
       expect(note.id, documentId);
-      expect(note.journalId, ''); // Valeur par défaut
-      expect(note.userId, '');    // Valeur par défaut
-      expect(note.content, '');   // Valeur par défaut
-      expect(note.paletteElementId, ''); // Valeur par défaut
-      // Pour les Timestamps, ils prendront Timestamp.now() par défaut
+      expect(note.journalId, '');
+      expect(note.userId, '');
+      expect(note.content, '');
+      expect(note.paletteElementId, '');
       expect(note.eventTimestamp.toDate().difference(DateTime.now()).inSeconds.abs(), lessThan(5));
       expect(note.createdAt.toDate().difference(DateTime.now()).inSeconds.abs(), lessThan(5));
       expect(note.lastUpdatedAt.toDate().difference(DateTime.now()).inSeconds.abs(), lessThan(5));
@@ -125,7 +122,12 @@ void main() {
       expect(copiedIdentical.id, originalNote.id);
       expect(copiedIdentical.content, originalNote.content);
       expect(copiedIdentical.paletteElementId, originalNote.paletteElementId);
-      // ... vérifier tous les champs
+      expect(copiedIdentical.journalId, originalNote.journalId);
+      expect(copiedIdentical.userId, originalNote.userId);
+      expect(copiedIdentical.eventTimestamp, originalNote.eventTimestamp);
+      expect(copiedIdentical.createdAt, originalNote.createdAt);
+      expect(copiedIdentical.lastUpdatedAt, originalNote.lastUpdatedAt);
+
 
       final newEventTime = Timestamp.fromMillisecondsSinceEpoch(now.millisecondsSinceEpoch + 10000);
       final copiedModified = originalNote.copyWith(
@@ -134,11 +136,11 @@ void main() {
           paletteElementId: 'new-color-id'
       );
 
-      expect(copiedModified.id, originalNote.id); // ID reste le même par défaut
+      expect(copiedModified.id, originalNote.id);
       expect(copiedModified.content, 'Contenu Modifié');
       expect(copiedModified.eventTimestamp, newEventTime);
       expect(copiedModified.paletteElementId, 'new-color-id');
-      expect(copiedModified.lastUpdatedAt, originalNote.lastUpdatedAt); // Non modifié explicitement
+      expect(copiedModified.lastUpdatedAt, originalNote.lastUpdatedAt);
     });
   });
 }
