@@ -18,26 +18,27 @@ class ColorData {
   }) : paletteElementId = paletteElementId ?? _uuid.v4();
 
   Color get color {
-    final buffer = StringBuffer();
-    // S'assurer que le hexCode est valide avant de tenter de le parser
-    if (hexCode.isEmpty || !(hexCode.length == 6 || hexCode.length == 7 || hexCode.length == 3 || hexCode.length == 4)) {
-      return const Color(0xFF808080); // Gris par défaut pour hex invalide ou vide
-    }
+    String cleanedHex = hexCode.replaceFirst('#', '').toUpperCase();
 
-    String cleanedHex = hexCode.replaceFirst('#', '');
-    if (cleanedHex.length == 6 || cleanedHex.length == 8) { // Supporte AARRGGBB et RRGGBB
-      buffer.write(cleanedHex.length == 6 ? 'ff' : ''); // Ajoute alpha si seulement RGB
-      buffer.write(cleanedHex);
+    // Gérer différentes longueurs pour le parsing
+    if (cleanedHex.length == 6) { // Format RRGGBB
+      cleanedHex = 'FF' + cleanedHex; // Ajouter alpha opaque par défaut
+    } else if (cleanedHex.length == 8) { // Format AARRGGBB
+      // Déjà au bon format avec alpha
     } else {
-      return const Color(0xFF808080); // Gris par défaut pour autres formats incorrects
+      // Longueur invalide pour un code hexadécimal sans alpha ou avec alpha
+      return const Color(0xFF808080); // Gris par défaut
     }
 
     try {
-      return Color(int.parse(buffer.toString(), radix: 16));
+      final intValue = int.tryParse(cleanedHex, radix: 16);
+      if (intValue == null) {
+        return const Color(0xFF808080); // Échec du parsing
+      }
+      return Color(intValue);
     } catch (e) {
-      // Log l'erreur si nécessaire, puis retourne une couleur par défaut
-      // print('Erreur de parsing couleur hex "$hexCode": $e');
-      return const Color(0xFF808080); // Gris par défaut en cas d'échec du parsing
+      // Autre erreur de parsing
+      return const Color(0xFF808080); // Gris par défaut
     }
   }
 
@@ -54,7 +55,7 @@ class ColorData {
     return ColorData(
       paletteElementId: map['paletteElementId'] as String? ?? _uuid.v4(),
       title: map['title'] as String? ?? 'Sans titre',
-      hexCode: map['hexCode'] as String? ?? '808080', // Default hex
+      hexCode: map['hexCode'] as String? ?? '808080',
       isDefault: map['isDefault'] as bool? ?? false,
     );
   }

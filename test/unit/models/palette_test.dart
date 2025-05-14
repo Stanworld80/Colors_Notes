@@ -51,7 +51,9 @@ void main() {
       );
       final map = palette.toMap();
 
-      expect(map['id'], 'paletteX-ID'); // CORRECTION: Vérifier que l'ID est présent
+      // CORRECTION: S'attendre à ce que la clé 'id' SOIT présente
+      expect(map.containsKey('id'), isTrue);
+      expect(map['id'], 'paletteX-ID');
       expect(map['name'], 'Palette X');
       expect(map['userId'], testUserId);
       expect(map['isPredefined'], isTrue);
@@ -63,8 +65,7 @@ void main() {
     });
 
     test('fromMap (pour document Firestore) devrait créer une instance Palette correcte', () {
-      final Map<String, dynamic> map = { // Explicitement typé
-        // 'id' n'est pas dans la map du document, il vient du documentId
+      final Map<String, dynamic> map = {
         'name': 'Palette de Map Doc',
         'colors': [
           {'paletteElementId': 'cd-map-1', 'title': 'Vert Map', 'hexCode': '#00FF00', 'isDefault': false}
@@ -84,7 +85,7 @@ void main() {
     });
 
     test('fromEmbeddedMap (pour palette imbriquée) devrait créer une instance Palette correcte', () {
-      final Map<String, dynamic> embeddedMap = { // Explicitement typé
+      final Map<String, dynamic> embeddedMap = {
         'id': 'embedded-palette-id',
         'name': 'Palette Imbriquée',
         'colors': [
@@ -97,19 +98,29 @@ void main() {
 
       expect(palette.id, 'embedded-palette-id');
       expect(palette.name, 'Palette Imbriquée');
-      // ... autres assertions ...
+      expect(palette.userId, testUserId);
+      expect(palette.isPredefined, true);
+      expect(palette.colors.length, 1);
+      expect(palette.colors.first.title, 'Orange Emb');
+      expect(palette.colors.first.isDefault, isTrue);
     });
 
     test('fromMap/fromEmbeddedMap devraient gérer les champs nuls et fournir des valeurs par défaut', () {
       final Map<String, dynamic> mapNoName = { 'colors': [] };
       final palette1 = Palette.fromMap(mapNoName, 'p1-defaults');
       expect(palette1.name, 'Palette sans nom');
-      // ... autres assertions ...
+      expect(palette1.colors, isEmpty);
+      expect(palette1.isPredefined, false);
+      expect(palette1.userId, isNull);
+
 
       final Map<String, dynamic> embeddedMapNoIdOrName = { 'colors': null, 'userId': testUserId };
       final palette2 = Palette.fromEmbeddedMap(embeddedMapNoIdOrName);
       expect(palette2.id, isNotEmpty);
-      // ... autres assertions ...
+      expect(palette2.name, 'Palette sans nom');
+      expect(palette2.colors, isEmpty);
+      expect(palette2.userId, testUserId); // userId est passé, donc il est conservé
+      expect(palette2.isPredefined, false);
     });
 
     test('copyWith devrait copier l\'instance avec/sans nouvelles valeurs', () {
@@ -123,15 +134,25 @@ void main() {
 
       final paletteCopiedIdentical = paletteOrig.copyWith();
       expect(paletteCopiedIdentical.id, paletteOrig.id);
-      // ... autres assertions ...
+      expect(paletteCopiedIdentical.name, paletteOrig.name);
+      expect(paletteCopiedIdentical.colors.length, 1);
+      expect(paletteCopiedIdentical.colors[0].title, 'Orig1');
+      expect(identical(paletteCopiedIdentical.colors, paletteOrig.colors), isFalse);
+      expect(identical(paletteCopiedIdentical.colors[0], paletteOrig.colors[0]), isFalse);
+
 
       final colorNew = createTestColor('cn1', 'Nouvelle Couleur', '#333');
       final paletteCopiedModified = paletteOrig.copyWith(
-        name: 'Palette Modifiée',
-        colors: [colorNew],
+          name: 'Palette Modifiée',
+          colors: [colorNew],
+          userId: 'newUser',
+          isPredefined: true
       );
       expect(paletteCopiedModified.name, 'Palette Modifiée');
-      // ... autres assertions ...
+      expect(paletteCopiedModified.colors.length, 1);
+      expect(paletteCopiedModified.colors.first.title, 'Nouvelle Couleur');
+      expect(paletteCopiedModified.userId, 'newUser');
+      expect(paletteCopiedModified.isPredefined, isTrue);
     });
 
     test('copyWith avec clearUserId devrait mettre userId à null', () {
