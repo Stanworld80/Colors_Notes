@@ -1,0 +1,9 @@
+{
+  "@@locale": "en",
+  "welcomeMessage": "Welcome to Colors & Notes!",
+  "@welcomeMessage": {
+    "description": "The welcome message on the main screen"
+  },
+  "chooseJournal": "Choose or create a journal",
+  "signInTitle" : "Sign In"
+}

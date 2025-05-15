@@ -22,7 +22,7 @@ class ColorData {
 
     // Gérer différentes longueurs pour le parsing
     if (cleanedHex.length == 6) { // Format RRGGBB
-      cleanedHex = 'FF' + cleanedHex; // Ajouter alpha opaque par défaut
+      cleanedHex = 'FF$cleanedHex'; // Ajouter alpha opaque par défaut
     } else if (cleanedHex.length == 8) { // Format AARRGGBB
       // Déjà au bon format avec alpha
     } else {

@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
 
+import '../l10n/app_localizations.dart';
 import '../services/auth_service.dart';
 import '../screens/about_page.dart';
 import '../screens/license_page.dart';
@@ -80,7 +81,7 @@ class _SignInPageState extends State<SignInPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Se connecter')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.signInTitle)),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20.0),
