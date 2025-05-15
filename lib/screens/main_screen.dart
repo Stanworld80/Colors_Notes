@@ -65,7 +65,7 @@ class _MainScreenState extends State<MainScreen> {
     if (journalId != null) {
       navBarItems.insert(1, const BottomNavigationBarItem(icon: Icon(Icons.list_alt_outlined), activeIcon: Icon(Icons.list_alt), label: 'Notes'));
     }
-    navBarItems.add(const BottomNavigationBarItem(icon: Icon(Icons.book_outlined), activeIcon: Icon(Icons.book), label: 'Journals'));
+    navBarItems.add(const BottomNavigationBarItem(icon: Icon(Icons.book_outlined), activeIcon: Icon(Icons.book), label: 'Journaux'));
 
     // Logique pour déterminer quel widget afficher en fonction de _selectedIndex et de l'état de journalId
     int bodyIndexToShow = _selectedIndex;
