@@ -188,7 +188,6 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
               ),
               actions: <Widget>[
                 if (deleteButton != null) deleteButton,
-                const Spacer(),
                 TextButton(child: const Text('Annuler'), onPressed: () => Navigator.of(dialogContext).pop()),
                 FilledButton(
                   child: Text(addButtonText),

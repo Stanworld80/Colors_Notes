@@ -1,9 +1,16 @@
 {
   "@@locale": "en",
-  "welcomeMessage": "Welcome to Colors & Notes!",
-  "@welcomeMessage": {
-    "description": "The welcome message on the main screen"
-  },
-  "chooseJournal": "Choose or create a journal",
-  "signInTitle" : "Sign In"
+  "signInPageTitle": "Sign In",
+  "appName": "Colors & Notes",
+  "emailLabel": "Email",
+  "emailValidationError": "Please enter a valid email address.",
+  "passwordLabel": "Password",
+  "passwordValidationError": "Please enter your password.",
+  "signInButton": "Sign In",
+  "orSeparator": "or",
+  "signInWithGoogleButton": "Sign In with Google",
+  "noAccountYetSignUp": "No account yet? Sign Up",
+  "aboutLink": "About",
+  "licenseLink": "License",
+  "downloadForAndroidLink": "Download for Android"
 }

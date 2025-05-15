@@ -16,7 +16,7 @@ final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0, printTime: fal
 class NoteListPage extends StatefulWidget {
   final String journalId;
 
-  NoteListPage({Key? key, required this.journalId}) : super(key: key);
+  NoteListPage({super.key, required this.journalId});
 
   @override
   _NoteListPageState createState() => _NoteListPageState();
@@ -139,10 +139,11 @@ class _NoteListPageState extends State<NoteListPage> {
     );
 
     if (secondConfirm == true) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _isDeletingAllNotes = true;
         });
+      }
       try {
         await firestoreService.deleteAllNotesInJournal(journalId, userId);
         if (mounted) {
@@ -154,10 +155,11 @@ class _NoteListPageState extends State<NoteListPage> {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur lors de la suppression de toutes les notes: ${e.toString()}'), backgroundColor: Colors.red));
         }
       } finally {
-        if (mounted)
+        if (mounted) {
           setState(() {
             _isDeletingAllNotes = false;
           });
+        }
       }
     }
   }
@@ -299,20 +301,21 @@ class _NoteListPageState extends State<NoteListPage> {
 
           final screenWidth = MediaQuery.of(context).size.width;
           int gridCrossAxisCount;
-          if (screenWidth < 400)
+          if (screenWidth < 400) {
             gridCrossAxisCount = 3;
-          else if (screenWidth < 600)
+          } else if (screenWidth < 600) {
             gridCrossAxisCount = 4;
-          else if (screenWidth < 800)
+          } else if (screenWidth < 800) {
             gridCrossAxisCount = 5;
-          else if (screenWidth < 1000)
+          } else if (screenWidth < 1000) {
             gridCrossAxisCount = 6;
-          else if (screenWidth < 1200)
+          } else if (screenWidth < 1200) {
             gridCrossAxisCount = 7;
-          else if (screenWidth < 1400)
+          } else if (screenWidth < 1400) {
             gridCrossAxisCount = 8;
-          else
+          } else {
             gridCrossAxisCount = 9;
+          }
 
           return Column(
             children: [

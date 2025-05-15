@@ -8,10 +8,8 @@ import 'package:logger/logger.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 // Flutter Localization Imports
-import 'package:flutter_localizations/flutter_localizations.dart';
-// Import YOUR generated AppLocalizations class!
-// The exact path will depend on your setup and package name.
-// If your package is 'colors_notes' and app_localizations.dart is in lib/l10n:
+// import 'package:flutter_localizations/flutter_localizations.dart';
+
 import 'package:colors_notes/l10n/app_localizations.dart'; // Adjust if necessary
 
 import 'firebase_options.dart';

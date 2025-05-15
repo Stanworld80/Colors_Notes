@@ -7,7 +7,7 @@ import 'main_screen.dart';
 import 'sign_in_page.dart';
 
 class AuthGate extends StatelessWidget {
-  AuthGate({Key? key}) : super(key: key);
+  const AuthGate({super.key});
 
   @override
   Widget build(BuildContext context) {

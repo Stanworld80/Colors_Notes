@@ -24,10 +24,10 @@ class UnifiedPaletteEditorPage extends StatefulWidget {
   final PaletteModel? paletteModelToEdit;
 
   const UnifiedPaletteEditorPage({
-    Key? key,
+    super.key,
     this.journalToUpdatePaletteFor,
     this.paletteModelToEdit,
-  }) : super(key: key);
+  });
 
   @override
   _UnifiedPaletteEditorPageState createState() => _UnifiedPaletteEditorPageState();

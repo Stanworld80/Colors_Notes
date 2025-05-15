@@ -1,6 +1,16 @@
 {
   "@@locale": "fr",
-  "welcomeMessage": "Bienvenue sur Colors & Notes !",
-  "chooseJournal": "Choisir ou créer un journal",
-  "signInTitle" : "Se Connecter"
+  "signInPageTitle": "Se connecter",
+  "appName": "Colors & Notes",
+  "emailLabel": "Email",
+  "emailValidationError": "Veuillez entrer une adresse e-mail valide.",
+  "passwordLabel": "Mot de passe",
+  "passwordValidationError": "Veuillez entrer votre mot de passe.",
+  "signInButton": "Se connecter",
+  "orSeparator": "ou",
+  "signInWithGoogleButton": "Se connecter avec Google",
+  "noAccountYetSignUp": "Pas encore de compte ? S'inscrire",
+  "aboutLink": "À Propos",
+  "licenseLink": "Licence",
+  "downloadForAndroidLink": "Télécharger pour Android"
 }

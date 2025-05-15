@@ -23,7 +23,7 @@ enum JournalCreationMode { emptyPalette, fromPaletteModel, fromExistingJournal }
 enum PaletteSourceType { empty, model, existingJournal }
 
 class CreateJournalPage extends StatefulWidget {
-  const CreateJournalPage({Key? key}) : super(key: key);
+  const CreateJournalPage({super.key});
 
   @override
   _CreateJournalPageState createState() => _CreateJournalPageState();

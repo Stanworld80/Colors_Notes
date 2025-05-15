@@ -21,12 +21,12 @@ class EntryPage extends StatefulWidget {
   final Note? noteToEdit;
   final String? initialPaletteElementId;
 
-  EntryPage({
-    Key? key,
+  const EntryPage({
+    super.key,
     required this.journalId,
     this.noteToEdit,
     this.initialPaletteElementId,
-  }) : super(key: key);
+  });
 
   @override
   _EntryPageState createState() => _EntryPageState();

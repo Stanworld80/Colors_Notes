@@ -12,7 +12,7 @@ import 'unified_palette_editor_page.dart';
 final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0));
 
 class PaletteModelManagementPage extends StatelessWidget {
-  PaletteModelManagementPage({Key? key}) : super(key: key);
+  const PaletteModelManagementPage({super.key});
 
   Widget _buildColorPreviews(List<ColorData> colors, BuildContext context) {
     if (colors.isEmpty) {
