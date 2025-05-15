@@ -1,4 +1,3 @@
-// lib/screens/sign_in_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +24,6 @@ class _SignInPageState extends State<SignInPage> {
   bool _isLoadingGoogle = false;
   bool _obscurePassword = true;
 
-
   @override
   void dispose() {
     _emailController.dispose();
@@ -35,47 +33,46 @@ class _SignInPageState extends State<SignInPage> {
 
   Future<void> _signInWithEmail() async {
     if (_formKey.currentState!.validate()) {
-      setState(() { _isLoading = true; });
+      setState(() {
+        _isLoading = true;
+      });
       try {
         final authService = Provider.of<AuthService>(context, listen: false);
-        await authService.signInWithEmailAndPassword(
-          _emailController.text.trim(),
-          _passwordController.text.trim(),
-        );
+        await authService.signInWithEmailAndPassword(_emailController.text.trim(), _passwordController.text.trim());
         _loggerPage.i("Tentative de connexion réussie pour ${_emailController.text.trim()}");
-        // AuthGate gère la navigation
       } catch (e) {
         _loggerPage.e("Erreur connexion email: ${e.toString()}");
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent),
-          );
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent));
         }
       } finally {
         if (mounted) {
-          setState(() { _isLoading = false; });
+          setState(() {
+            _isLoading = false;
+          });
         }
       }
     }
   }
 
   Future<void> _signInWithGoogle() async {
-    setState(() { _isLoadingGoogle = true; });
+    setState(() {
+      _isLoadingGoogle = true;
+    });
     try {
       final authService = Provider.of<AuthService>(context, listen: false);
       await authService.signInWithGoogle();
       _loggerPage.i("Tentative de connexion Google réussie.");
-      // AuthGate gère la navigation
     } catch (e) {
       _loggerPage.e("Erreur connexion Google: ${e.toString()}");
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent));
       }
     } finally {
       if (mounted) {
-        setState(() { _isLoadingGoogle = false; });
+        setState(() {
+          _isLoadingGoogle = false;
+        });
       }
     }
   }
@@ -92,18 +89,11 @@ class _SignInPageState extends State<SignInPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(
-                    "Colors & Notes",
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Theme.of(context).primaryColor)
-                ),
+                Text("Colors & Notes", style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Theme.of(context).primaryColor)),
                 const SizedBox(height: 30),
                 TextFormField(
                   controller: _emailController,
-                  decoration: const InputDecoration(
-                      labelText: 'Email',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.email_outlined)
-                  ),
+                  decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder(), prefixIcon: Icon(Icons.email_outlined)),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty || !value.contains('@') || !value.contains('.')) {
@@ -140,43 +130,22 @@ class _SignInPageState extends State<SignInPage> {
                 _isLoading
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
-                  onPressed: _signInWithEmail,
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 50),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      onPressed: _signInWithEmail,
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 50),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: const Text('Se connecter', style: TextStyle(fontSize: 16)),
                     ),
-                  ),
-                  child: const Text('Se connecter', style: TextStyle(fontSize: 16)),
-                ),
 
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0), // Espace vertical autour du séparateur
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: Row(
                     children: <Widget>[
-                      const Expanded(
-                        child: Divider(
-                          thickness: 3, // Épaisseur de la ligne
-                          color: Colors.black26, // Couleur de la ligne
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0), // Espace autour du texte "ou"
-                        child: Text(
-                          'ou',
-                          style: TextStyle(
-                            color: Colors.grey.shade600, // Couleur du texte
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      const Expanded(
-                        child: Divider(
-                          thickness: 3,
-                          color: Colors.black26,
-                        ),
-                      ),
+                      const Expanded(child: Divider(thickness: 3, color: Colors.black26)),
+                      Padding(padding: const EdgeInsets.symmetric(horizontal: 10.0), child: Text('ou', style: TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.w500))),
+                      const Expanded(child: Divider(thickness: 3, color: Colors.black26)),
                     ],
                   ),
                 ),
@@ -184,34 +153,24 @@ class _SignInPageState extends State<SignInPage> {
                 _isLoadingGoogle
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
-                  onPressed: _signInWithGoogle,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white, // Fond blanc pour le bouton Google standard
-                    foregroundColor: Colors.black.withOpacity(0.70), // Texte gris foncé (similaire à Google)
-                    minimumSize: const Size(double.infinity, 50),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0), // Bords arrondis
-                        side: BorderSide(color: Colors.grey.shade400) // Bordure légère
-                    ),
-                    elevation: 1.0, // Légère élévation
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Utilisation d'un Image.network pour le logo.
-                      // Remplacez par Image.asset si vous avez le logo localement
-                      // ou un widget SVG si vous utilisez flutter_svg.
-                      SvgPicture.asset('assets/signin-assets/Web/svg/light/web_light_sq_na.svg')
-                     ,
-                      const SizedBox(width: 12), // Espacement entre logo et texte
-                      const Text(
-                        'Se connecter avec Google',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                      onPressed: _signInWithGoogle,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black.withOpacity(0.70),
+                        minimumSize: const Size(double.infinity, 50),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0), side: BorderSide(color: Colors.grey.shade400)),
+                        elevation: 1.0,
                       ),
-                    ],
-                  ),
-                ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SvgPicture.asset('assets/signin-assets/Web/svg/light/web_light_sq_na.svg'),
+                          const SizedBox(width: 12),
+                          const Text('Se connecter avec Google', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+                        ],
+                      ),
+                    ),
                 const SizedBox(height: 60),
                 TextButton(
                   onPressed: () {
@@ -227,41 +186,16 @@ class _SignInPageState extends State<SignInPage> {
                       onPressed: () {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutPage()));
                       },
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: Text(
-                        'À Propos',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
+                      style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                      child: Text('À Propos', style: TextStyle(fontSize: 12, color: Colors.grey[600], decoration: TextDecoration.underline)),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text('|', style: TextStyle(fontSize: 12, color: Colors.grey[400])),
-                    ),
+                    Padding(padding: const EdgeInsets.symmetric(horizontal: 8.0), child: Text('|', style: TextStyle(fontSize: 12, color: Colors.grey[400]))),
                     TextButton(
                       onPressed: () {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => const ColorsNotesLicensePage()));
                       },
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: Text(
-                        'Licence',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
+                      style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                      child: Text('Licence', style: TextStyle(fontSize: 12, color: Colors.grey[600], decoration: TextDecoration.underline)),
                     ),
                   ],
                 ),

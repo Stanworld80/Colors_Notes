@@ -1,11 +1,10 @@
-// lib/screens/register_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
 
 import '../services/auth_service.dart';
-import 'about_page.dart'; // Pour les liens en bas de page
-import 'license_page.dart'; // Pour les liens en bas de page
+import 'about_page.dart';
+import 'license_page.dart';
 
 final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0, printTime: true));
 
@@ -35,7 +34,6 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  /// Valide la complexité du mot de passe.
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Veuillez entrer un mot de passe.';
@@ -52,19 +50,17 @@ class _RegisterPageState extends State<RegisterPage> {
     if (!value.contains(RegExp(r'[0-9]'))) {
       return 'Le mot de passe doit contenir au moins un chiffre.';
     }
-    // Note: Le caractère '$' doit être échappé en Dart avec '\$' dans une RegExp.
+
     if (!value.contains(RegExp(r'[+\-*_#=@%:$]'))) {
       return 'Le mot de passe doit contenir au moins un caractère spécial (+-*_#=@%:\$).';
     }
-    return null; // Valide
+    return null;
   }
 
   Future<void> _signUp() async {
     if (_formKey.currentState!.validate()) {
       if (_passwordController.text != _confirmPasswordController.text) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Les mots de passe ne correspondent pas.'), backgroundColor: Colors.orangeAccent),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Les mots de passe ne correspondent pas.'), backgroundColor: Colors.orangeAccent));
         return;
       }
 
@@ -74,29 +70,20 @@ class _RegisterPageState extends State<RegisterPage> {
 
       try {
         final authService = Provider.of<AuthService>(context, listen: false);
-        // Capture navigator before async gap, if context might become invalid
+
         final navigator = Navigator.of(context);
 
-        await authService.signUpWithEmailAndPassword(
-          _emailController.text.trim(),
-          _passwordController.text.trim(),
-          _displayNameController.text.trim(),
-        );
+        await authService.signUpWithEmailAndPassword(_emailController.text.trim(), _passwordController.text.trim(), _displayNameController.text.trim());
 
         _loggerPage.i('Inscription réussie pour ${_emailController.text.trim()}');
 
-        // Redirection vers la racine de l'application. AuthGate s'occupera d'afficher MainScreen.
-        // Cela retire toutes les routes précédentes de la pile.
-        if (mounted) { // Vérifie si le widget est toujours dans l'arbre des widgets
+        if (mounted) {
           navigator.pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
         }
-
       } catch (e) {
         if (mounted) {
           _loggerPage.e('Erreur lors de l\'inscription sur RegisterPage: ${e.toString()}');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent),
-          );
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent));
         }
       } finally {
         if (mounted) {
@@ -120,18 +107,11 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(
-                  "Rejoignez Colors & Notes",
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Theme.of(context).primaryColor),
-                ),
+                Text("Rejoignez Colors & Notes", style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Theme.of(context).primaryColor)),
                 const SizedBox(height: 30),
                 TextFormField(
                   controller: _displayNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Nom d\'affichage',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person_outline),
-                  ),
+                  decoration: const InputDecoration(labelText: 'Nom d\'affichage', border: OutlineInputBorder(), prefixIcon: Icon(Icons.person_outline)),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Veuillez entrer votre nom d\'affichage.';
@@ -145,11 +125,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.email_outlined),
-                  ),
+                  decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder(), prefixIcon: Icon(Icons.email_outlined)),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty || !value.contains('@') || !value.contains('.')) {
@@ -208,17 +184,15 @@ class _RegisterPageState extends State<RegisterPage> {
                 _isLoading
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
-                  onPressed: _signUp,
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 50),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      onPressed: _signUp,
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 50),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+
+                      child: const Text('S\'inscrire et se connecter', style: TextStyle(fontSize: 16)),
                     ),
-                  ),
-                  // Changement du texte du bouton ici
-                  child: const Text('S\'inscrire et se connecter', style: TextStyle(fontSize: 16)),
-                ),
                 const SizedBox(height: 20),
                 TextButton(
                   onPressed: () {
@@ -238,41 +212,16 @@ class _RegisterPageState extends State<RegisterPage> {
                       onPressed: () {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutPage()));
                       },
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: Text(
-                        'À Propos',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
+                      style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                      child: Text('À Propos', style: TextStyle(fontSize: 12, color: Colors.grey[600], decoration: TextDecoration.underline)),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text('|', style: TextStyle(fontSize: 12, color: Colors.grey[400])),
-                    ),
+                    Padding(padding: const EdgeInsets.symmetric(horizontal: 8.0), child: Text('|', style: TextStyle(fontSize: 12, color: Colors.grey[400]))),
                     TextButton(
                       onPressed: () {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => const ColorsNotesLicensePage()));
                       },
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: Text(
-                        'Licence',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
+                      style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                      child: Text('Licence', style: TextStyle(fontSize: 12, color: Colors.grey[600], decoration: TextDecoration.underline)),
                     ),
                   ],
                 ),

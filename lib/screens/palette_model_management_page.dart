@@ -1,4 +1,3 @@
-// lib/screens/palette_model_management_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
@@ -6,7 +5,7 @@ import 'package:logger/logger.dart';
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
 import '../models/palette_model.dart';
-import '../models/color_data.dart'; // Importer ColorData
+import '../models/color_data.dart';
 import '../core/predefined_templates.dart';
 import 'unified_palette_editor_page.dart';
 
@@ -15,33 +14,24 @@ final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0));
 class PaletteModelManagementPage extends StatelessWidget {
   PaletteModelManagementPage({Key? key}) : super(key: key);
 
-  // Widget pour afficher les carrés de couleur
   Widget _buildColorPreviews(List<ColorData> colors, BuildContext context) {
     if (colors.isEmpty) {
-      return SizedBox.shrink(); // Ne rien afficher si pas de couleurs
+      return SizedBox.shrink();
     }
-    // Limiter le nombre de carrés affichés pour ne pas surcharger, ou afficher tout
-    // Ici on affiche tout avec un Wrap qui gère le passage à la ligne.
 
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Wrap(
-        spacing: 4.0, // Espace horizontal entre les carrés
-        runSpacing: 4.0, // Espace vertical entre les lignes de carrés
-        children: colors.map((colorData) {
-          return Container(
-            width: 20.0, // Taille des carrés de couleur
-            height: 20.0,
-            decoration: BoxDecoration(
-                color: colorData.color,
-                borderRadius: BorderRadius.circular(4.0),
-                border: Border.all(
-                    color: Theme.of(context).dividerColor.withOpacity(0.5),
-                    width: 0.5
-                )
-            ),
-          );
-        }).toList(),
+        spacing: 4.0,
+        runSpacing: 4.0,
+        children:
+            colors.map((colorData) {
+              return Container(
+                width: 20.0,
+                height: 20.0,
+                decoration: BoxDecoration(color: colorData.color, borderRadius: BorderRadius.circular(4.0), border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.5), width: 0.5)),
+              );
+            }).toList(),
       ),
     );
   }
@@ -54,13 +44,9 @@ class PaletteModelManagementPage extends StatelessWidget {
 
     if (currentUserId == null) {
       _loggerPage.w("PaletteModelManagementPage: currentUserId est null.");
-      return Scaffold(
-        appBar: AppBar(title: Text('Gérer les Modèles de Palette')),
-        body: Center(child: Text("Utilisateur non connecté.")),
-      );
+      return Scaffold(appBar: AppBar(title: Text('Gérer les Modèles de Palette')), body: Center(child: Text("Utilisateur non connecté.")));
     }
 
-    // Les modèles prédéfinis sont statiques
     final List<PaletteModel> staticPredefinedPalettes = predefinedPalettes;
 
     return Scaffold(
@@ -71,12 +57,7 @@ class PaletteModelManagementPage extends StatelessWidget {
             icon: Icon(Icons.add_circle_outline),
             tooltip: "Créer un nouveau modèle personnel",
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => UnifiedPaletteEditorPage(),
-                ),
-              );
+              Navigator.push(context, MaterialPageRoute(builder: (context) => UnifiedPaletteEditorPage()));
             },
           ),
         ],
@@ -94,7 +75,6 @@ class PaletteModelManagementPage extends StatelessWidget {
 
           final List<PaletteModel> userModels = userModelsSnapshot.data ?? [];
 
-          // Trier : modèles utilisateur d'abord, puis prédéfinis
           final List<PaletteModel> allModels = [...userModels, ...staticPredefinedPalettes];
 
           if (allModels.isEmpty) {
@@ -106,16 +86,9 @@ class PaletteModelManagementPage extends StatelessWidget {
                   children: [
                     Icon(Icons.palette_outlined, size: 60, color: Theme.of(context).colorScheme.secondary),
                     SizedBox(height: 16),
-                    Text(
-                      'Aucun modèle de palette disponible.',
-                      style: Theme.of(context).textTheme.headlineSmall,
-                      textAlign: TextAlign.center,
-                    ),
+                    Text('Aucun modèle de palette disponible.', style: Theme.of(context).textTheme.headlineSmall, textAlign: TextAlign.center),
                     SizedBox(height: 8),
-                    Text(
-                      'Créez votre premier modèle personnel en appuyant sur le bouton "+" en haut.',
-                      textAlign: TextAlign.center,
-                    ),
+                    Text('Créez votre premier modèle personnel en appuyant sur le bouton "+" en haut.', textAlign: TextAlign.center),
                   ],
                 ),
               ),
@@ -126,17 +99,17 @@ class PaletteModelManagementPage extends StatelessWidget {
             itemCount: allModels.length,
             itemBuilder: (context, index) {
               final model = allModels[index];
-              final bool isEditable = !model.isPredefined; // Seuls les modèles non prédéfinis sont éditables
+              final bool isEditable = !model.isPredefined;
 
               return Card(
                 margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                child: Padding( // Ajouter un Padding interne à la Card
+                child: Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ListTile(
-                        contentPadding: EdgeInsets.zero, // Retirer le padding par défaut de ListTile
+                        contentPadding: EdgeInsets.zero,
                         title: Text(model.name, style: Theme.of(context).textTheme.titleMedium),
                         subtitle: Padding(
                           padding: const EdgeInsets.only(top: 4.0),
@@ -145,40 +118,35 @@ class PaletteModelManagementPage extends StatelessWidget {
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ),
-                        // L'icône de gauche peut être retirée si les carrés de couleur sont suffisants
-                        // leading: Icon(Icons.style_outlined, color: model.colors.isNotEmpty ? model.colors.first.color : Theme.of(context).colorScheme.primary),
-                        trailing: isEditable ? Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.edit_outlined),
-                              tooltip: "Modifier le modèle",
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => UnifiedPaletteEditorPage(paletteModelToEdit: model),
-                                  ),
-                                );
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete_forever_outlined, color: Colors.redAccent),
-                              tooltip: "Supprimer le modèle",
-                              onPressed: () => _confirmDeleteModel(context, firestoreService, model),
-                            ),
-                          ],
-                        ) : null, // Pas de boutons pour les modèles prédéfinis
-                        onTap: isEditable ? () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => UnifiedPaletteEditorPage(paletteModelToEdit: model),
-                            ),
-                          );
-                        } : null,
+
+                        trailing:
+                            isEditable
+                                ? Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(Icons.edit_outlined),
+                                      tooltip: "Modifier le modèle",
+                                      onPressed: () {
+                                        Navigator.push(context, MaterialPageRoute(builder: (context) => UnifiedPaletteEditorPage(paletteModelToEdit: model)));
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: Icon(Icons.delete_forever_outlined, color: Colors.redAccent),
+                                      tooltip: "Supprimer le modèle",
+                                      onPressed: () => _confirmDeleteModel(context, firestoreService, model),
+                                    ),
+                                  ],
+                                )
+                                : null,
+                        onTap:
+                            isEditable
+                                ? () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => UnifiedPaletteEditorPage(paletteModelToEdit: model)));
+                                }
+                                : null,
                       ),
-                      // Afficher les carrés de couleur ici
+
                       _buildColorPreviews(model.colors, context),
                     ],
                   ),
@@ -192,10 +160,8 @@ class PaletteModelManagementPage extends StatelessWidget {
   }
 
   Future<void> _confirmDeleteModel(BuildContext context, FirestoreService firestoreService, PaletteModel modelToDelete) async {
-    if (modelToDelete.isPredefined) { // Double vérification, bien que le bouton ne devrait pas être là
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Les modèles prédéfinis ne peuvent pas être supprimés.')),
-      );
+    if (modelToDelete.isPredefined) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Les modèles prédéfinis ne peuvent pas être supprimés.')));
       return;
     }
 
@@ -206,15 +172,8 @@ class PaletteModelManagementPage extends StatelessWidget {
           title: Text('Supprimer le Modèle ?'),
           content: Text('Voulez-vous vraiment supprimer le modèle de palette "${modelToDelete.name}" ? Cette action est irréversible.'),
           actions: <Widget>[
-            TextButton(
-              child: Text('Annuler'),
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-            ),
-            TextButton(
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: Text('Supprimer'),
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-            ),
+            TextButton(child: Text('Annuler'), onPressed: () => Navigator.of(dialogContext).pop(false)),
+            TextButton(style: TextButton.styleFrom(foregroundColor: Colors.red), child: Text('Supprimer'), onPressed: () => Navigator.of(dialogContext).pop(true)),
           ],
         );
       },
@@ -225,16 +184,12 @@ class PaletteModelManagementPage extends StatelessWidget {
         await firestoreService.deletePaletteModel(modelToDelete.id);
         _loggerPage.i("Modèle ${modelToDelete.name} supprimé.");
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Modèle "${modelToDelete.name}" supprimé.')),
-          );
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Modèle "${modelToDelete.name}" supprimé.')));
         }
       } catch (e) {
         _loggerPage.e("Erreur suppression modèle: $e");
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erreur de suppression: ${e.toString()}')),
-          );
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur de suppression: ${e.toString()}')));
         }
       }
     }

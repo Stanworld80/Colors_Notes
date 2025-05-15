@@ -1,4 +1,3 @@
-// lib/screens/unified_palette_editor_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
@@ -21,11 +20,7 @@ class UnifiedPaletteEditorPage extends StatefulWidget {
   final Journal? journalToUpdatePaletteFor;
   final PaletteModel? paletteModelToEdit;
 
-  const UnifiedPaletteEditorPage({
-    Key? key,
-    this.journalToUpdatePaletteFor,
-    this.paletteModelToEdit,
-  }) : super(key: key);
+  const UnifiedPaletteEditorPage({Key? key, this.journalToUpdatePaletteFor, this.paletteModelToEdit}) : super(key: key);
 
   @override
   _UnifiedPaletteEditorPageState createState() => _UnifiedPaletteEditorPageState();
@@ -92,23 +87,24 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
       return true;
     }
     final firestoreService = Provider.of<FirestoreService>(context, listen: false);
-    if(mounted) setState(() { _isLoading = true; });
+    if (mounted)
+      setState(() {
+        _isLoading = true;
+      });
     try {
-      final isUsed = await firestoreService.isPaletteElementUsedInNotes(
-        widget.journalToUpdatePaletteFor!.id,
-        paletteElementId,
-      );
+      final isUsed = await firestoreService.isPaletteElementUsedInNotes(widget.journalToUpdatePaletteFor!.id, paletteElementId);
       return !isUsed;
     } catch (e) {
       _loggerPage.e("Erreur vérification utilisation couleur: $e");
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur vérification utilisation couleur: ${e.toString()}'), backgroundColor: Colors.red),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur vérification utilisation couleur: ${e.toString()}'), backgroundColor: Colors.red));
       }
       return false;
     } finally {
-      if(mounted) setState(() { _isLoading = false; });
+      if (mounted)
+        setState(() {
+          _isLoading = false;
+        });
     }
   }
 
@@ -125,15 +121,15 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
     }
 
     if (_currentColors.isEmpty && _isEditingModel) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Un modèle de palette doit avoir au moins $MIN_COLORS_IN_PALETTE_EDITOR couleur."), backgroundColor: Colors.orange));
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Un modèle de palette doit avoir au moins $MIN_COLORS_IN_PALETTE_EDITOR couleur."), backgroundColor: Colors.orange));
       _hasMadeChangesSinceLastSave = true;
       return;
-    } else if (_currentColors.isNotEmpty) {
-
-    }
+    } else if (_currentColors.isNotEmpty) {}
 
     if (_currentColors.length > MAX_COLORS_IN_PALETTE_EDITOR) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Une palette ne peut pas avoir plus de $MAX_COLORS_IN_PALETTE_EDITOR couleurs."), backgroundColor: Colors.orange));
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Une palette ne peut pas avoir plus de $MAX_COLORS_IN_PALETTE_EDITOR couleurs."), backgroundColor: Colors.orange));
       _hasMadeChangesSinceLastSave = true;
       return;
     }
@@ -144,7 +140,10 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
       return;
     }
 
-    if (mounted) setState(() { _isLoading = true; });
+    if (mounted)
+      setState(() {
+        _isLoading = true;
+      });
     final firestoreService = Provider.of<FirestoreService>(context, listen: false);
     bool saveSucceeded = false;
     PaletteModel? createdModel;
@@ -170,13 +169,7 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
           bool nameExists = await firestoreService.checkPaletteModelNameExists(_currentPaletteName, _userId!);
           if (nameExists) throw Exception("Un modèle de palette avec ce nom existe déjà.");
 
-          createdModel = PaletteModel(
-            id: _uuid.v4(),
-            name: _currentPaletteName,
-            colors: _currentColors,
-            userId: _userId!,
-            isPredefined: false,
-          );
+          createdModel = PaletteModel(id: _uuid.v4(), name: _currentPaletteName, colors: _currentColors, userId: _userId!, isPredefined: false);
           await firestoreService.createPaletteModel(createdModel);
           _loggerPage.i("Nouveau modèle de palette créé: ${createdModel.name}");
           if (mounted && _pageTitle == "Nouveau Modèle de Palette") {
@@ -188,22 +181,15 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
           bool nameExists = await firestoreService.checkPaletteModelNameExists(_currentPaletteName, _userId!, excludeId: widget.paletteModelToEdit!.id);
           if (nameExists) throw Exception("Un autre modèle de palette avec ce nom existe déjà.");
 
-          final updatedModel = widget.paletteModelToEdit!.copyWith(
-            name: _currentPaletteName,
-            colors: _currentColors,
-          );
+          final updatedModel = widget.paletteModelToEdit!.copyWith(name: _currentPaletteName, colors: _currentColors);
           await firestoreService.updatePaletteModel(updatedModel);
           _loggerPage.i("Modèle de palette mis à jour: ${updatedModel.name}");
         }
         if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Modèle de palette sauvegardé."), backgroundColor: Colors.green, duration: Duration(seconds: 2)));
         saveSucceeded = true;
-
       } else if (widget.journalToUpdatePaletteFor != null) {
         final Journal currentJournal = widget.journalToUpdatePaletteFor!;
-        final Palette updatedPaletteInstance = currentJournal.palette.copyWith(
-          name: _currentPaletteName,
-          colors: _currentColors,
-        );
+        final Palette updatedPaletteInstance = currentJournal.palette.copyWith(name: _currentPaletteName, colors: _currentColors);
         await firestoreService.updateJournalPaletteInstance(currentJournal.id, updatedPaletteInstance);
         _loggerPage.i("Palette du journal ${currentJournal.name} mise à jour.");
 
@@ -226,19 +212,21 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
       } else {
         _hasMadeChangesSinceLastSave = true;
       }
-
     } catch (e) {
       _loggerPage.e("Erreur sauvegarde palette: $e");
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erreur de sauvegarde: ${e.toString()}"), backgroundColor: Colors.red));
       _hasMadeChangesSinceLastSave = true;
     } finally {
-      if (mounted) setState(() { _isLoading = false; });
+      if (mounted)
+        setState(() {
+          _isLoading = false;
+        });
     }
   }
 
   Future<bool> _handleDeleteAllColorsRequested() async {
     if (_userId == null) {
-      if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Utilisateur non identifié.")));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Utilisateur non identifié.")));
       return false;
     }
 
@@ -247,16 +235,14 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text('Supprimer toutes les couleurs ?'),
-          content: Text(!_isEditingModel && widget.journalToUpdatePaletteFor != null
-              ? 'Cela supprimera toutes les couleurs de la palette du journal "${widget.journalToUpdatePaletteFor!.name}". ATTENTION : Toutes les notes de ce journal seront également DÉFINITIVEMENT supprimées.'
-              : 'Voulez-vous vraiment supprimer toutes les couleurs de ce modèle de palette ?'),
+          content: Text(
+            !_isEditingModel && widget.journalToUpdatePaletteFor != null
+                ? 'Cela supprimera toutes les couleurs de la palette du journal "${widget.journalToUpdatePaletteFor!.name}". ATTENTION : Toutes les notes de ce journal seront également DÉFINITIVEMENT supprimées.'
+                : 'Voulez-vous vraiment supprimer toutes les couleurs de ce modèle de palette ?',
+          ),
           actions: <Widget>[
             TextButton(child: const Text('Annuler'), onPressed: () => Navigator.of(dialogContext).pop(false)),
-            TextButton(
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('Supprimer Tout'),
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-            ),
+            TextButton(style: TextButton.styleFrom(foregroundColor: Colors.red), child: const Text('Supprimer Tout'), onPressed: () => Navigator.of(dialogContext).pop(true)),
           ],
         );
       },
@@ -269,9 +255,11 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: Text(!_isEditingModel ? 'CONFIRMATION FINALE' : 'Confirmer la suppression'),
-          content: Text(!_isEditingModel
-              ? 'Êtes-vous absolument certain(e) ? La suppression des couleurs de cette palette entraînera la suppression IRRÉVERSIBLE de TOUTES les notes de ce journal.'
-              : 'Confirmez-vous la suppression de toutes les couleurs de ce modèle ?'),
+          content: Text(
+            !_isEditingModel
+                ? 'Êtes-vous absolument certain(e) ? La suppression des couleurs de cette palette entraînera la suppression IRRÉVERSIBLE de TOUTES les notes de ce journal.'
+                : 'Confirmez-vous la suppression de toutes les couleurs de ce modèle ?',
+          ),
           actions: <Widget>[
             TextButton(child: const Text('NON, ANNULER'), onPressed: () => Navigator.of(dialogContext).pop(false)),
             TextButton(
@@ -286,7 +274,10 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
 
     if (secondConfirm != true) return false;
 
-    if (mounted) setState(() { _isLoading = true; });
+    if (mounted)
+      setState(() {
+        _isLoading = true;
+      });
     try {
       if (!_isEditingModel && widget.journalToUpdatePaletteFor != null) {
         final firestoreService = Provider.of<FirestoreService>(context, listen: false);
@@ -296,18 +287,19 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
       return true;
     } catch (e) {
       _loggerPage.e("Erreur lors de la suppression de toutes les couleurs/notes: $e");
-      if(mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erreur: ${e.toString()}"), backgroundColor: Colors.red));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erreur: ${e.toString()}"), backgroundColor: Colors.red));
       return false;
     } finally {
-      if(mounted) setState(() { _isLoading = false; });
+      if (mounted)
+        setState(() {
+          _isLoading = false;
+        });
     }
   }
 
   Future<bool> _onWillPop() async {
     if (_isLoading) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Sauvegarde en cours, veuillez patienter..."), duration: Duration(seconds: 1)),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Sauvegarde en cours, veuillez patienter..."), duration: Duration(seconds: 1)));
       return false;
     }
     return true;
@@ -320,16 +312,7 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(_pageTitle),
-          actions: [
-            if (_isLoading)
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: SizedBox(
-                    width: 20, height: 20,
-                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.0)
-                ),
-              )
-          ],
+          actions: [if (_isLoading) const Padding(padding: EdgeInsets.all(16.0), child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.0)))],
         ),
         body: Stack(
           children: [
