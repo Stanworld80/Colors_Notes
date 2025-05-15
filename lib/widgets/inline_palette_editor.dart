@@ -1,4 +1,3 @@
-// lib/widgets/inline_palette_editor.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -99,6 +98,43 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
     final TextEditingController gradientStepsController = TextEditingController(text: '1');
     final GlobalKey<FormState> dialogFormKey = GlobalKey<FormState>();
     String addButtonText = isAdding ? 'Ajouter la couleur' : 'Sauvegarder';
+    Widget? deleteButton;
+
+    if (!isAdding && existingColorData != null && existingColorIndex != null) {
+      deleteButton = TextButton.icon(
+        icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
+        label: Text(
+          'Supprimer cette couleur',
+          style: TextStyle(color: Theme.of(context).colorScheme.error),
+        ),
+        onPressed: () async {
+          Navigator.of(context).pop();
+          final bool? confirmDelete = await showDialog<bool>(
+            context: context,
+            builder: (BuildContext confirmCtx) {
+              return AlertDialog(
+                title: const Text('Confirmer la suppression'),
+                content: Text('Voulez-vous vraiment supprimer la couleur "${existingColorData.title}" ?'),
+                actions: <Widget>[
+                  TextButton(
+                    child: const Text('Annuler'),
+                    onPressed: () => Navigator.of(confirmCtx).pop(false),
+                  ),
+                  TextButton(
+                    child: Text('Supprimer', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                    onPressed: () => Navigator.of(confirmCtx).pop(true),
+                  ),
+                ],
+              );
+            },
+          );
+          if (confirmDelete == true) {
+            await _removeColor(existingColorIndex);
+          }
+        },
+      );
+    }
+
 
     showDialog(
       context: context,
@@ -164,47 +200,13 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                           paletteType: PaletteType.hsvWithValue,
                           pickerAreaBorderRadius: const BorderRadius.all(Radius.circular(2.0)),
                         ),
-                        if (!isAdding && existingColorData != null && existingColorIndex != null) ...[
-                          const SizedBox(height: 20),
-                          const Divider(),
-                          TextButton.icon(
-                            icon: Icon(Icons.delete_outline, color: Colors.red.shade700),
-                            label: Text(
-                              'Supprimer cette couleur',
-                              style: TextStyle(color: Colors.red.shade700),
-                            ),
-                            onPressed: () async {
-                              Navigator.of(dialogContext).pop();
-                              final bool? confirmDelete = await showDialog<bool>(
-                                context: context,
-                                builder: (BuildContext confirmCtx) {
-                                  return AlertDialog(
-                                    title: const Text('Confirmer la suppression'),
-                                    content: Text('Voulez-vous vraiment supprimer la couleur "${existingColorData.title}" ?'),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        child: const Text('Annuler'),
-                                        onPressed: () => Navigator.of(confirmCtx).pop(false),
-                                      ),
-                                      TextButton(
-                                        child: Text('Supprimer', style: TextStyle(color: Colors.red.shade700)),
-                                        onPressed: () => Navigator.of(confirmCtx).pop(true),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                              if (confirmDelete == true) {
-                                await _removeColor(existingColorIndex);
-                              }
-                            },
-                          ),
-                        ]
                       ],
                     ),
                   ),
                 ),
-                actions: [
+                actions: <Widget>[
+                  if (deleteButton != null) deleteButton,
+                  const Spacer(),
                   TextButton(
                     child: const Text('Annuler'),
                     onPressed: () => Navigator.of(dialogContext).pop(),
@@ -516,17 +518,30 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
           child: InkWell(
             onTap: () => _showEditColorDialog(existingColorData: colorData, existingColorIndex: index),
             borderRadius: BorderRadius.circular(10.0),
-            child: Padding(
-              padding: const EdgeInsets.all(6.0),
-              child: Center(
-                child: Text(
-                  colorData.title,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: fontSize, color: textColor, fontWeight: FontWeight.w500),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(6.0),
+                  child: Center(
+                    child: Text(
+                      colorData.title,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: fontSize, color: textColor, fontWeight: FontWeight.w500),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                    ),
+                  ),
                 ),
-              ),
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: Icon(
+                    Icons.edit_note_outlined,
+                    size: 16,
+                    color: textColor.withOpacity(0.7),
+                  ),
+                ),
+              ],
             ),
           ),
         );
@@ -540,17 +555,33 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
     List<Widget> children = _editableColors.asMap().entries.map((entry) {
       int idx = entry.key;
       ColorData colorData = entry.value;
+      final Color textColorOnCard = colorData.color.computeLuminance() > 0.5 ? Colors.black87 : Colors.white;
+
       return Card(
         key: ValueKey(colorData.paletteElementId),
         margin: const EdgeInsets.symmetric(vertical: 4),
+        color: colorData.color,
         child: ListTile(
-          leading: CircleAvatar(backgroundColor: colorData.color, radius: 20),
-          title: Text(colorData.title),
-          subtitle: Text(colorData.hexCode.toUpperCase()),
+          leading: CircleAvatar(
+            backgroundColor: Colors.white.withOpacity(0.2),
+            child: Text(
+                (idx + 1).toString(),
+                style: TextStyle(color: textColorOnCard, fontWeight: FontWeight.bold)
+            ),
+          ),
+          title: Text(colorData.title, style: TextStyle(color: textColorOnCard, fontWeight: FontWeight.w500)),
+          subtitle: Text(colorData.hexCode.toUpperCase(), style: TextStyle(color: textColorOnCard.withOpacity(0.85))),
           onTap: () => _showEditColorDialog(existingColorData: colorData, existingColorIndex: idx),
-          trailing: ReorderableDragStartListener(
-            index: idx,
-            child: const Icon(Icons.drag_handle_outlined),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.edit_note_outlined, size: 20, color: textColorOnCard.withOpacity(0.7)),
+              const SizedBox(width: 8),
+              ReorderableDragStartListener(
+                index: idx,
+                child: Icon(Icons.drag_handle_outlined, color: textColorOnCard.withOpacity(0.9)),
+              ),
+            ],
           ),
         ),
       );
