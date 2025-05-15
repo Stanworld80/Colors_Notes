@@ -50,7 +50,15 @@ class ActiveJournalNotifier extends ChangeNotifier {
       await _loadInitialJournalForUser(user.uid);
     }
 
-    if (isLoading) _isLoading = false;
+    // Correction: S'assurer que isLoading est mis à false si ce n'est pas déjà fait
+    // dans _loadInitialJournalForUser ou clearActiveJournalState.
+    // Cependant, la logique actuelle semble le couvrir.
+    // Si _isLoading est toujours true ici, cela signifie qu'une opération asynchrone
+    // n'a pas correctement mis à jour son état.
+    // Pour plus de robustesse, on peut ajouter :
+    if (_isLoading) {
+      _isLoading = false;
+    }
     notifyListeners();
   }
 
@@ -58,27 +66,28 @@ class ActiveJournalNotifier extends ChangeNotifier {
     _logger.i('Chargement journal initial pour utilisateur: $userId');
 
     try {
-      String? lastUsedJournalId;
+      // CORRECTION: Suppression de la variable `lastUsedJournalId` et de la condition `if (lastUsedJournalId != null)`
+      // car `lastUsedJournalId` n'était jamais initialisé et la condition était toujours fausse.
+      // La logique charge maintenant toujours le premier journal trouvé par défaut.
+      // Si une logique de "dernier journal utilisé" doit être implémentée,
+      // `lastUsedJournalId` devrait être chargé (par ex. depuis SharedPreferences).
 
-      if (lastUsedJournalId != null) {
-        _logger.i('Dernier journal utilisé: $lastUsedJournalId');
-        await setActiveJournal(lastUsedJournalId, userId, isInitialLoad: true);
+      _logger.i('Chargement du premier journal disponible.');
+      final journals = await _firestoreService.getJournalsStream(userId).first;
+      if (journals.isNotEmpty) {
+        _logger.i('Premier journal trouvé: ${journals.first.id}');
+        await setActiveJournal(journals.first.id, userId, isInitialLoad: true);
       } else {
-        _logger.i('Aucun dernier journal, chargement du premier.');
-        final journals = await _firestoreService.getJournalsStream(userId).first;
-        if (journals.isNotEmpty) {
-          _logger.i('Premier journal trouvé: ${journals.first.id}');
-          await setActiveJournal(journals.first.id, userId, isInitialLoad: true);
-        } else {
-          _logger.w('Aucun journal pour utilisateur $userId.');
-          clearActiveJournalState();
-        }
+        _logger.w('Aucun journal pour utilisateur $userId.');
+        clearActiveJournalState(); // Met _isLoading à false et notifie si nécessaire
       }
     } catch (e, stackTrace) {
       _logger.e('Erreur chargement journal initial', error: e, stackTrace: stackTrace);
       _errorMessage = 'Impossible de charger le journal initial.';
-      clearActiveJournalState();
+      clearActiveJournalState(); // Met _isLoading à false et notifie si nécessaire
     }
+    // _isLoading est géré dans setActiveJournal ou clearActiveJournalState,
+    // et finalement dans _onUserChanged.
   }
 
   Future<void> setActiveJournal(String journalId, String userId, {bool isInitialLoad = false}) async {
@@ -94,10 +103,9 @@ class ActiveJournalNotifier extends ChangeNotifier {
 
     _isLoading = true;
     _errorMessage = null;
-    if (!isInitialLoad) notifyListeners();
+    if (!isInitialLoad) notifyListeners(); // Notifie pour les changements initiés par l'utilisateur
 
     await _journalSubscription?.cancel();
-
     _activeJournalId = journalId;
 
     _journalSubscription = _firestoreService
@@ -113,23 +121,28 @@ class ActiveJournalNotifier extends ChangeNotifier {
               } else {
                 _logger.w('Tentative de définition d\'un journal actif ($journalId) n\'appartenant pas à l\'utilisateur ($userId). Appartenance: ${journalData['userId']}');
                 _errorMessage = 'Accès non autorisé à ce journal.';
-                clearActiveJournalState();
-                if (!isInitialLoad) _loadInitialJournalForUser(userId);
+                clearActiveJournalState(); // Ceci mettra aussi _isLoading à false et notifiera
+                if (!isInitialLoad) _loadInitialJournalForUser(userId); // Tente de charger un journal valide
               }
             } else {
               _logger.w('Journal actif $journalId n\'existe plus ou accès refusé.');
               _errorMessage = 'Le journal sélectionné n\'est plus accessible.';
-              clearActiveJournalState();
-              if (!isInitialLoad) _loadInitialJournalForUser(userId);
+              clearActiveJournalState(); // Ceci mettra aussi _isLoading à false et notifiera
+              if (!isInitialLoad) _loadInitialJournalForUser(userId); // Tente de charger un journal valide
             }
-            _isLoading = false;
+            // Si clearActiveJournalState n'a pas été appelé, mettre isLoading à false ici.
+            // Si clearActiveJournalState a été appelé, il a déjà géré isLoading et notifyListeners.
+            if (_activeJournalId == journalId) {
+              // Vérifie si le journal est toujours celui qu'on traite
+              _isLoading = false;
+            }
             notifyListeners();
           },
           onError: (error, stackTrace) {
             _logger.e('Erreur écoute journal actif $journalId', error: error, stackTrace: stackTrace);
             _errorMessage = 'Erreur de chargement du journal actif.';
-            clearActiveJournalState();
-            _isLoading = false;
+            clearActiveJournalState(); // Ceci mettra aussi _isLoading à false et notifiera
+            _isLoading = false; // Assurez-vous que isLoading est false après une erreur
             notifyListeners();
           },
         );

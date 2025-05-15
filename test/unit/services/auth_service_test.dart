@@ -3,7 +3,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+
 
 import 'package:colors_notes/services/auth_service.dart';
 import 'package:colors_notes/services/firestore_service.dart';

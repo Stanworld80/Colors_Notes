@@ -4,15 +4,12 @@ import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:colors_notes/models/app_user.dart';
-import 'package:colors_notes/models/journal.dart';
-import 'package:colors_notes/models/palette.dart';
+
 import 'package:colors_notes/models/color_data.dart';
-import 'package:colors_notes/models/note.dart';
+
 import 'package:colors_notes/models/palette_model.dart';
 import 'package:colors_notes/services/firestore_service.dart';
-import 'package:colors_notes/core/predefined_templates.dart';
+
 import 'package:uuid/uuid.dart';
 
 import 'firestore_service_test.mocks.dart';
@@ -134,7 +131,7 @@ void main() {
             .where('userId', isEqualTo: 'newUserWithPaletteCheck').limit(1).get();
         expect(journalQuery.docs.isNotEmpty, isTrue);
         final journalData = journalQuery.docs.first.data();
-        final paletteData = journalData!['palette'] as Map<String, dynamic>; // data ne sera pas null ici
+        final paletteData = journalData['palette'] as Map<String, dynamic>; // data ne sera pas null ici
         final colorsList = paletteData['colors'] as List<dynamic>;
 
         expect(colorsList.isNotEmpty, isTrue);

@@ -95,7 +95,7 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
     String addButtonText = isAdding ? 'Ajouter la couleur' : 'Sauvegarder';
     Widget? deleteButton;
 
-    if (!isAdding && existingColorData != null && existingColorIndex != null) {
+    if (!isAdding && existingColorIndex != null) {
       deleteButton = TextButton.icon(
         icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
         label: Text('Supprimer cette couleur', style: TextStyle(color: Theme.of(context).colorScheme.error)),
@@ -193,6 +193,9 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                 FilledButton(
                   child: Text(addButtonText),
                   onPressed: () {
+                    // CORRECTION: unnecessary_null_comparison
+                    // if (dialogFormKey.currentState != null && !dialogFormKey.currentState!.validate()) return;
+                    // Devient:
                     if (!dialogFormKey.currentState!.validate()) return;
 
                     final String baseTitle = titleController.text.trim();
@@ -203,15 +206,21 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
 
                     if (gradientSteps == 1) {
                       final String newHexCode = '#${pickerColor.value.toRadixString(16).substring(2).toUpperCase()}';
-                      if (_editableColors.any((c) => c.title.toLowerCase() == baseTitle.toLowerCase() && (isAdding || c.paletteElementId != existingColorData!.paletteElementId))) {
+                      // CORRECTION: unnecessary_non_null_assertion
+                      // if (_editableColors.any((c) => c.title.toLowerCase() == baseTitle.toLowerCase() && (isAdding || c.paletteElementId != existingColorData!.paletteElementId))) {
+                      if (_editableColors.any((c) => c.title.toLowerCase() == baseTitle.toLowerCase() && (isAdding || c.paletteElementId != existingColorData.paletteElementId))) {
                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ce titre de couleur existe déjà.'), backgroundColor: Colors.orange));
                         return;
                       }
-                      if (_editableColors.any((c) => c.hexCode.toUpperCase() == newHexCode.toUpperCase() && (isAdding || c.paletteElementId != existingColorData!.paletteElementId))) {
+                      // CORRECTION: unnecessary_non_null_assertion
+                      // if (_editableColors.any((c) => c.hexCode.toUpperCase() == newHexCode.toUpperCase() && (isAdding || c.paletteElementId != existingColorData!.paletteElementId))) {
+                      if (_editableColors.any((c) => c.hexCode.toUpperCase() == newHexCode.toUpperCase() && (isAdding || c.paletteElementId != existingColorData.paletteElementId))) {
                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cette couleur (hex) existe déjà.'), backgroundColor: Colors.orange));
                         return;
                       }
-                      colorsToAdd.add(ColorData(paletteElementId: isAdding ? _uuid.v4() : existingColorData!.paletteElementId, title: baseTitle, hexCode: newHexCode));
+                      // CORRECTION: unnecessary_non_null_assertion
+                      // colorsToAdd.add(ColorData(paletteElementId: isAdding ? _uuid.v4() : existingColorData!.paletteElementId, title: baseTitle, hexCode: newHexCode));
+                      colorsToAdd.add(ColorData(paletteElementId: isAdding ? _uuid.v4() : existingColorData.paletteElementId, title: baseTitle, hexCode: newHexCode));
                     } else {
                       if (_editableColors.length + gradientSteps > MAX_COLORS_IN_PALETTE_EDITOR) {
                         ScaffoldMessenger.of(
@@ -481,31 +490,31 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
     bool canAddMore = _editableColors.length < MAX_COLORS_IN_PALETTE_EDITOR;
 
     List<Widget> children =
-        _editableColors.asMap().entries.map((entry) {
-          int idx = entry.key;
-          ColorData colorData = entry.value;
-          final Color textColorOnCard = colorData.color.computeLuminance() > 0.5 ? Colors.black87 : Colors.white;
+    _editableColors.asMap().entries.map((entry) {
+      int idx = entry.key;
+      ColorData colorData = entry.value;
+      final Color textColorOnCard = colorData.color.computeLuminance() > 0.5 ? Colors.black87 : Colors.white;
 
-          return Card(
-            key: ValueKey(colorData.paletteElementId),
-            margin: const EdgeInsets.symmetric(vertical: 4),
-            color: colorData.color,
-            child: ListTile(
-              leading: CircleAvatar(backgroundColor: Colors.white.withOpacity(0.2), child: Text((idx + 1).toString(), style: TextStyle(color: textColorOnCard, fontWeight: FontWeight.bold))),
-              title: Text(colorData.title, style: TextStyle(color: textColorOnCard, fontWeight: FontWeight.w500)),
-              subtitle: Text(colorData.hexCode.toUpperCase(), style: TextStyle(color: textColorOnCard.withOpacity(0.85))),
-              onTap: () => _showEditColorDialog(existingColorData: colorData, existingColorIndex: idx),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.edit_note_outlined, size: 20, color: textColorOnCard.withOpacity(0.7)),
-                  const SizedBox(width: 8),
-                  ReorderableDragStartListener(index: idx, child: Icon(Icons.drag_handle_outlined, color: textColorOnCard.withOpacity(0.9))),
-                ],
-              ),
-            ),
-          );
-        }).toList();
+      return Card(
+        key: ValueKey(colorData.paletteElementId),
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        color: colorData.color,
+        child: ListTile(
+          leading: CircleAvatar(backgroundColor: Colors.white.withOpacity(0.2), child: Text((idx + 1).toString(), style: TextStyle(color: textColorOnCard, fontWeight: FontWeight.bold))),
+          title: Text(colorData.title, style: TextStyle(color: textColorOnCard, fontWeight: FontWeight.w500)),
+          subtitle: Text(colorData.hexCode.toUpperCase(), style: TextStyle(color: textColorOnCard.withOpacity(0.85))),
+          onTap: () => _showEditColorDialog(existingColorData: colorData, existingColorIndex: idx),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.edit_note_outlined, size: 20, color: textColorOnCard.withOpacity(0.7)),
+              const SizedBox(width: 8),
+              ReorderableDragStartListener(index: idx, child: Icon(Icons.drag_handle_outlined, color: textColorOnCard.withOpacity(0.9))),
+            ],
+          ),
+        ),
+      );
+    }).toList();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
