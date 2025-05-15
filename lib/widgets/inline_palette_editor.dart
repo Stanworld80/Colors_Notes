@@ -60,12 +60,10 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
   @override
   void didUpdateWidget(covariant InlinePaletteEditorWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialPaletteName != oldWidget.initialPaletteName &&
-        widget.initialPaletteName != _paletteNameController.text) {
+    if (widget.initialPaletteName != oldWidget.initialPaletteName && widget.initialPaletteName != _paletteNameController.text) {
       _paletteNameController.text = widget.initialPaletteName;
     }
-    if (!_listEquals(widget.initialColors, _editableColors) &&
-        (!_listEquals(widget.initialColors, oldWidget.initialColors) || widget.initialColors.length != oldWidget.initialColors.length)) {
+    if (!_listEquals(widget.initialColors, _editableColors) && (!_listEquals(widget.initialColors, oldWidget.initialColors) || widget.initialColors.length != oldWidget.initialColors.length)) {
       _editableColors = widget.initialColors.map((c) => c.copyWith()).toList();
     }
   }
@@ -76,10 +74,7 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
       if (a[i] is ColorData && b[i] is ColorData) {
         final colorA = a[i] as ColorData;
         final colorB = b[i] as ColorData;
-        if (colorA.paletteElementId != colorB.paletteElementId ||
-            colorA.title != colorB.title ||
-            colorA.hexCode != colorB.hexCode ||
-            colorA.isDefault != colorB.isDefault) {
+        if (colorA.paletteElementId != colorB.paletteElementId || colorA.title != colorB.title || colorA.hexCode != colorB.hexCode || colorA.isDefault != colorB.isDefault) {
           return false;
         }
       } else if (a[i] != b[i]) {
@@ -103,10 +98,7 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
     if (!isAdding && existingColorData != null && existingColorIndex != null) {
       deleteButton = TextButton.icon(
         icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
-        label: Text(
-          'Supprimer cette couleur',
-          style: TextStyle(color: Theme.of(context).colorScheme.error),
-        ),
+        label: Text('Supprimer cette couleur', style: TextStyle(color: Theme.of(context).colorScheme.error)),
         onPressed: () async {
           Navigator.of(context).pop();
           final bool? confirmDelete = await showDialog<bool>(
@@ -116,14 +108,8 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                 title: const Text('Confirmer la suppression'),
                 content: Text('Voulez-vous vraiment supprimer la couleur "${existingColorData.title}" ?'),
                 actions: <Widget>[
-                  TextButton(
-                    child: const Text('Annuler'),
-                    onPressed: () => Navigator.of(confirmCtx).pop(false),
-                  ),
-                  TextButton(
-                    child: Text('Supprimer', style: TextStyle(color: Theme.of(context).colorScheme.error)),
-                    onPressed: () => Navigator.of(confirmCtx).pop(true),
-                  ),
+                  TextButton(child: const Text('Annuler'), onPressed: () => Navigator.of(confirmCtx).pop(false)),
+                  TextButton(child: Text('Supprimer', style: TextStyle(color: Theme.of(context).colorScheme.error)), onPressed: () => Navigator.of(confirmCtx).pop(true)),
                 ],
               );
             },
@@ -135,162 +121,143 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
       );
     }
 
-
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
         return StatefulBuilder(
-            builder: (context, setDialogState) {
-              return AlertDialog(
-                title: Text(isAdding ? 'Ajouter une couleur/dégradé' : 'Modifier la couleur'),
-                content: SingleChildScrollView(
-                  child: Form(
-                    key: dialogFormKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text(isAdding ? 'Ajouter une couleur/dégradé' : 'Modifier la couleur'),
+              content: SingleChildScrollView(
+                child: Form(
+                  key: dialogFormKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextFormField(
+                        controller: titleController,
+                        decoration: const InputDecoration(labelText: 'Nom de base pour la couleur/dégradé'),
+                        autofocus: true,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Le titre de base ne peut pas être vide.';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      if (isAdding)
                         TextFormField(
-                          controller: titleController,
-                          decoration: const InputDecoration(labelText: 'Nom de base pour la couleur/dégradé'),
-                          autofocus: true,
+                          controller: gradientStepsController,
+                          decoration: const InputDecoration(labelText: 'Nombre de couleurs (1 pour simple, 2-$MAX_GRADIENT_STEPS pour dégradé)', hintText: '1'),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          onChanged: (value) {
+                            int steps = int.tryParse(value) ?? 1;
+                            setDialogState(() {
+                              addButtonText = steps > 1 ? 'Ajouter le dégradé' : 'Ajouter la couleur';
+                            });
+                          },
                           validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Le titre de base ne peut pas être vide.';
+                            if (value == null || value.isEmpty) return 'Entrez un nombre.';
+                            int steps = int.tryParse(value) ?? 0;
+                            if (steps < 1 || steps > MAX_GRADIENT_STEPS) {
+                              return 'Entre 1 et $MAX_GRADIENT_STEPS.';
+                            }
+                            if (_editableColors.length + steps > MAX_COLORS_IN_PALETTE_EDITOR) {
+                              return 'Trop de couleurs (max ${MAX_COLORS_IN_PALETTE_EDITOR - _editableColors.length} permis).';
                             }
                             return null;
                           },
                         ),
-                        const SizedBox(height: 20),
-                        if (isAdding)
-                          TextFormField(
-                            controller: gradientStepsController,
-                            decoration: const InputDecoration(
-                              labelText: 'Nombre de couleurs (1 pour simple, 2-$MAX_GRADIENT_STEPS pour dégradé)',
-                              hintText: '1',
-                            ),
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                            onChanged: (value) {
-                              int steps = int.tryParse(value) ?? 1;
-                              setDialogState(() {
-                                addButtonText = steps > 1 ? 'Ajouter le dégradé' : 'Ajouter la couleur';
-                              });
-                            },
-                            validator: (value) {
-                              if (value == null || value.isEmpty) return 'Entrez un nombre.';
-                              int steps = int.tryParse(value) ?? 0;
-                              if (steps < 1 || steps > MAX_GRADIENT_STEPS) {
-                                return 'Entre 1 et $MAX_GRADIENT_STEPS.';
-                              }
-                              if (_editableColors.length + steps > MAX_COLORS_IN_PALETTE_EDITOR) {
-                                return 'Trop de couleurs (max ${MAX_COLORS_IN_PALETTE_EDITOR - _editableColors.length} permis).';
-                              }
-                              return null;
-                            },
-                          ),
-                        if (isAdding) const SizedBox(height: 20),
-                        ColorPicker(
-                          pickerColor: pickerColor,
-                          onColorChanged: (color) => pickerColor = color,
-                          colorPickerWidth: 300.0,
-                          pickerAreaHeightPercent: 0.7,
-                          enableAlpha: false,
-                          displayThumbColor: true,
-                          paletteType: PaletteType.hsvWithValue,
-                          pickerAreaBorderRadius: const BorderRadius.all(Radius.circular(2.0)),
-                        ),
-                      ],
-                    ),
+                      if (isAdding) const SizedBox(height: 20),
+                      ColorPicker(
+                        pickerColor: pickerColor,
+                        onColorChanged: (color) => pickerColor = color,
+                        colorPickerWidth: 300.0,
+                        pickerAreaHeightPercent: 0.7,
+                        enableAlpha: false,
+                        displayThumbColor: true,
+                        paletteType: PaletteType.hsvWithValue,
+                        pickerAreaBorderRadius: const BorderRadius.all(Radius.circular(2.0)),
+                      ),
+                    ],
                   ),
                 ),
-                actions: <Widget>[
-                  if (deleteButton != null) deleteButton,
-                  const Spacer(),
-                  TextButton(
-                    child: const Text('Annuler'),
-                    onPressed: () => Navigator.of(dialogContext).pop(),
-                  ),
-                  FilledButton(
-                    child: Text(addButtonText),
-                    onPressed: () {
-                      if (!dialogFormKey.currentState!.validate()) return;
+              ),
+              actions: <Widget>[
+                if (deleteButton != null) deleteButton,
+                const Spacer(),
+                TextButton(child: const Text('Annuler'), onPressed: () => Navigator.of(dialogContext).pop()),
+                FilledButton(
+                  child: Text(addButtonText),
+                  onPressed: () {
+                    if (!dialogFormKey.currentState!.validate()) return;
 
-                      final String baseTitle = titleController.text.trim();
-                      final int gradientSteps = isAdding ? (int.tryParse(gradientStepsController.text) ?? 1) : 1;
-                      List<ColorData> colorsToAdd = [];
-                      List<String> tempGeneratedTitles = [];
-                      List<String> tempGeneratedHexCodes = [];
+                    final String baseTitle = titleController.text.trim();
+                    final int gradientSteps = isAdding ? (int.tryParse(gradientStepsController.text) ?? 1) : 1;
+                    List<ColorData> colorsToAdd = [];
+                    List<String> tempGeneratedTitles = [];
+                    List<String> tempGeneratedHexCodes = [];
 
-                      if (gradientSteps == 1) {
-                        final String newHexCode = '#${pickerColor.value.toRadixString(16).substring(2).toUpperCase()}';
-                        if (_editableColors.any((c) =>
-                        c.title.toLowerCase() == baseTitle.toLowerCase() &&
-                            (isAdding || c.paletteElementId != existingColorData!.paletteElementId))) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Ce titre de couleur existe déjà.'), backgroundColor: Colors.orange),
-                          );
-                          return;
-                        }
-                        if (_editableColors.any((c) =>
-                        c.hexCode.toUpperCase() == newHexCode.toUpperCase() &&
-                            (isAdding || c.paletteElementId != existingColorData!.paletteElementId))) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Cette couleur (hex) existe déjà.'), backgroundColor: Colors.orange),
-                          );
-                          return;
-                        }
-                        colorsToAdd.add(ColorData(
-                          paletteElementId: isAdding ? _uuid.v4() : existingColorData!.paletteElementId,
-                          title: baseTitle,
-                          hexCode: newHexCode,
-                        ));
-                      } else {
-                        if (_editableColors.length + gradientSteps > MAX_COLORS_IN_PALETTE_EDITOR) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Impossible d\'ajouter $gradientSteps couleurs, maximum de la palette atteint.'), backgroundColor: Colors.orange),
-                          );
-                          return;
-                        }
-                        HSLColor hslPickerColor = HSLColor.fromColor(pickerColor);
-                        double centerLightness = hslPickerColor.lightness;
-                        double maxLightnessDeviation = 0.3;
-                        for (int i = 0; i < gradientSteps; i++) {
-                          double stepFactor = (gradientSteps == 1) ? 0 : (i / (gradientSteps - 1) * 2.0) - 1.0;
-                          double currentLightness = (centerLightness + stepFactor * maxLightnessDeviation).clamp(0.0, 1.0);
-                          Color newColor = hslPickerColor.withLightness(currentLightness).toColor();
-                          String newHex = '#${newColor.value.toRadixString(16).substring(2).toUpperCase()}';
-                          String newTitle = "$baseTitle ${i + 1}";
-
-                          if (tempGeneratedTitles.contains(newTitle.toLowerCase()) || _editableColors.any((c) => c.title.toLowerCase() == newTitle.toLowerCase())) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Titre généré "$newTitle" existe déjà.'), backgroundColor: Colors.orange));
-                            return;
-                          }
-                          if (tempGeneratedHexCodes.contains(newHex.toUpperCase()) || _editableColors.any((c) => c.hexCode.toUpperCase() == newHex.toUpperCase())) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Couleur générée $newHex existe déjà.'), backgroundColor: Colors.orange));
-                            return;
-                          }
-                          tempGeneratedTitles.add(newTitle.toLowerCase());
-                          tempGeneratedHexCodes.add(newHex.toUpperCase());
-                          colorsToAdd.add(ColorData(paletteElementId: _uuid.v4(), title: newTitle, hexCode: newHex));
-                        }
+                    if (gradientSteps == 1) {
+                      final String newHexCode = '#${pickerColor.value.toRadixString(16).substring(2).toUpperCase()}';
+                      if (_editableColors.any((c) => c.title.toLowerCase() == baseTitle.toLowerCase() && (isAdding || c.paletteElementId != existingColorData!.paletteElementId))) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ce titre de couleur existe déjà.'), backgroundColor: Colors.orange));
+                        return;
                       }
+                      if (_editableColors.any((c) => c.hexCode.toUpperCase() == newHexCode.toUpperCase() && (isAdding || c.paletteElementId != existingColorData!.paletteElementId))) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cette couleur (hex) existe déjà.'), backgroundColor: Colors.orange));
+                        return;
+                      }
+                      colorsToAdd.add(ColorData(paletteElementId: isAdding ? _uuid.v4() : existingColorData!.paletteElementId, title: baseTitle, hexCode: newHexCode));
+                    } else {
+                      if (_editableColors.length + gradientSteps > MAX_COLORS_IN_PALETTE_EDITOR) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text('Impossible d\'ajouter $gradientSteps couleurs, maximum de la palette atteint.'), backgroundColor: Colors.orange));
+                        return;
+                      }
+                      HSLColor hslPickerColor = HSLColor.fromColor(pickerColor);
+                      double centerLightness = hslPickerColor.lightness;
+                      double maxLightnessDeviation = 0.3;
+                      for (int i = 0; i < gradientSteps; i++) {
+                        double stepFactor = (gradientSteps == 1) ? 0 : (i / (gradientSteps - 1) * 2.0) - 1.0;
+                        double currentLightness = (centerLightness + stepFactor * maxLightnessDeviation).clamp(0.0, 1.0);
+                        Color newColor = hslPickerColor.withLightness(currentLightness).toColor();
+                        String newHex = '#${newColor.value.toRadixString(16).substring(2).toUpperCase()}';
+                        String newTitle = "$baseTitle ${i + 1}";
 
-                      setState(() {
-                        if (isAdding) {
-                          _editableColors.addAll(colorsToAdd);
-                        } else if (existingColorIndex != null && colorsToAdd.isNotEmpty) {
-                          _editableColors[existingColorIndex] = colorsToAdd.first;
+                        if (tempGeneratedTitles.contains(newTitle.toLowerCase()) || _editableColors.any((c) => c.title.toLowerCase() == newTitle.toLowerCase())) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Titre généré "$newTitle" existe déjà.'), backgroundColor: Colors.orange));
+                          return;
                         }
-                        widget.onColorsChanged(List.from(_editableColors));
-                        widget.onPaletteNeedsSave?.call();
-                      });
-                      Navigator.of(dialogContext).pop();
-                    },
-                  ),
-                ],
-              );
-            }
+                        if (tempGeneratedHexCodes.contains(newHex.toUpperCase()) || _editableColors.any((c) => c.hexCode.toUpperCase() == newHex.toUpperCase())) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Couleur générée $newHex existe déjà.'), backgroundColor: Colors.orange));
+                          return;
+                        }
+                        tempGeneratedTitles.add(newTitle.toLowerCase());
+                        tempGeneratedHexCodes.add(newHex.toUpperCase());
+                        colorsToAdd.add(ColorData(paletteElementId: _uuid.v4(), title: newTitle, hexCode: newHex));
+                      }
+                    }
+
+                    setState(() {
+                      if (isAdding) {
+                        _editableColors.addAll(colorsToAdd);
+                      } else if (existingColorIndex != null && colorsToAdd.isNotEmpty) {
+                        _editableColors[existingColorIndex] = colorsToAdd.first;
+                      }
+                      widget.onColorsChanged(List.from(_editableColors));
+                      widget.onPaletteNeedsSave?.call();
+                    });
+                    Navigator.of(dialogContext).pop();
+                  },
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -306,9 +273,7 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
             widget.onColorsChanged(List.from(_editableColors));
             widget.onPaletteNeedsSave?.call();
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Toutes les couleurs ont été supprimées de la palette en cours d\'édition.'), backgroundColor: Colors.green),
-          );
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Toutes les couleurs ont été supprimées de la palette en cours d\'édition.'), backgroundColor: Colors.green));
         }
       }
     }
@@ -319,9 +284,9 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
 
     if (!widget.isEditingJournalPalette && _editableColors.length <= MIN_COLORS_IN_PALETTE_EDITOR) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Un modèle de palette doit contenir au moins $MIN_COLORS_IN_PALETTE_EDITOR couleur(s). Impossible de supprimer "${colorTitle}".')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Un modèle de palette doit contenir au moins $MIN_COLORS_IN_PALETTE_EDITOR couleur(s). Impossible de supprimer "${colorTitle}".')));
       }
       return;
     }
@@ -331,12 +296,7 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
       final bool canDelete = await widget.canDeleteColorCallback!(colorToDelete.paletteElementId);
       if (!canDelete) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('La couleur "${colorToDelete.title}" est utilisée et ne peut être supprimée.'),
-              backgroundColor: Colors.orange,
-            ),
-          );
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('La couleur "${colorToDelete.title}" est utilisée et ne peut être supprimée.'), backgroundColor: Colors.orange));
         }
         return;
       }
@@ -346,9 +306,7 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
       _editableColors.removeAt(indexToRemove);
       widget.onColorsChanged(List.from(_editableColors));
       widget.onPaletteNeedsSave?.call();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Couleur "${colorTitle}" supprimée.'), duration: const Duration(seconds: 1)),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Couleur "${colorTitle}" supprimée.'), duration: const Duration(seconds: 1)));
     });
   }
 
@@ -384,11 +342,7 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
         if (widget.showNameEditor)
           TextFormField(
             controller: _paletteNameController,
-            decoration: const InputDecoration(
-              labelText: 'Nom de la palette',
-              hintText: 'Ex: Ma palette de travail',
-              border: OutlineInputBorder(),
-            ),
+            decoration: const InputDecoration(labelText: 'Nom de la palette', hintText: 'Ex: Ma palette de travail', border: OutlineInputBorder()),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
                 return 'Le nom de la palette ne peut pas être vide.';
@@ -408,10 +362,7 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                 if (widget.onDeleteAllColorsRequested != null && _editableColors.isNotEmpty)
                   Tooltip(
                     message: "Supprimer toutes les couleurs",
-                    child: IconButton(
-                      icon: Icon(Icons.delete_sweep_outlined, color: Theme.of(context).colorScheme.error),
-                      onPressed: _handleDeleteAllColors,
-                    ),
+                    child: IconButton(icon: Icon(Icons.delete_sweep_outlined, color: Theme.of(context).colorScheme.error), onPressed: _handleDeleteAllColors),
                   ),
                 IconButton(
                   icon: Icon(_isGridView ? Icons.view_list_outlined : Icons.grid_view_outlined),
@@ -419,15 +370,12 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                   onPressed: () => setState(() => _isGridView = !_isGridView),
                 ),
               ],
-            )
+            ),
           ],
         ),
         const SizedBox(height: 8),
         if (_editableColors.isEmpty && !canShowAddButtonInList)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16.0),
-            child: Center(child: Text("La palette est vide et a atteint le nombre maximum de couleurs.", textAlign: TextAlign.center)),
-          )
+          const Padding(padding: EdgeInsets.symmetric(vertical: 16.0), child: Center(child: Text("La palette est vide et a atteint le nombre maximum de couleurs.", textAlign: TextAlign.center)))
         else if (_editableColors.isEmpty && canShowAddButtonInList)
           _isGridView ? _buildGridView() : _buildListView()
         else
@@ -441,20 +389,11 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
       key: const ValueKey('add_new_color_grid_card'),
       elevation: 2.0,
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
-          side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant, width: 1.5)
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0), side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant, width: 1.5)),
       child: InkWell(
         onTap: () => _showEditColorDialog(),
         borderRadius: BorderRadius.circular(10.0),
-        child: Center(
-          child: Icon(
-            Icons.add_circle_outline,
-            size: 30.0,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ),
+        child: Center(child: Icon(Icons.add_circle_outline, size: 30.0, color: Theme.of(context).colorScheme.primary)),
       ),
     );
   }
@@ -465,10 +404,7 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
       elevation: 1.0,
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
       margin: const EdgeInsets.symmetric(vertical: 4),
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
-          side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant)
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0), side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant)),
       child: ListTile(
         leading: Icon(Icons.add_circle_outline, color: Theme.of(context).colorScheme.primary, size: 28),
         title: Text("Ajouter une nouvelle couleur/dégradé", style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w500)),
@@ -481,11 +417,16 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
   Widget _buildGridView() {
     final screenWidth = MediaQuery.of(context).size.width;
     int gridCrossAxisCount;
-    if (screenWidth < 350) gridCrossAxisCount = 3;
-    else if (screenWidth < 450) gridCrossAxisCount = 4;
-    else if (screenWidth < 600) gridCrossAxisCount = 5;
-    else if (screenWidth < 800) gridCrossAxisCount = 6;
-    else gridCrossAxisCount = 7;
+    if (screenWidth < 350)
+      gridCrossAxisCount = 3;
+    else if (screenWidth < 450)
+      gridCrossAxisCount = 4;
+    else if (screenWidth < 600)
+      gridCrossAxisCount = 5;
+    else if (screenWidth < 800)
+      gridCrossAxisCount = 6;
+    else
+      gridCrossAxisCount = 7;
 
     double fontSize = 11.0;
     if (gridCrossAxisCount > 5) fontSize = 9.0;
@@ -497,12 +438,7 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(vertical: 5),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: gridCrossAxisCount,
-        crossAxisSpacing: 8.0,
-        mainAxisSpacing: 8.0,
-        childAspectRatio: 1.0,
-      ),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: gridCrossAxisCount, crossAxisSpacing: 8.0, mainAxisSpacing: 8.0, childAspectRatio: 1.0),
       itemCount: itemCount,
       itemBuilder: (context, index) {
         if (canAddMore && index == _editableColors.length) {
@@ -532,15 +468,7 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                     ),
                   ),
                 ),
-                Positioned(
-                  top: 4,
-                  right: 4,
-                  child: Icon(
-                    Icons.edit_note_outlined,
-                    size: 16,
-                    color: textColor.withOpacity(0.7),
-                  ),
-                ),
+                Positioned(top: 4, right: 4, child: Icon(Icons.edit_note_outlined, size: 16, color: textColor.withOpacity(0.7))),
               ],
             ),
           ),
@@ -552,51 +480,37 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
   Widget _buildListView() {
     bool canAddMore = _editableColors.length < MAX_COLORS_IN_PALETTE_EDITOR;
 
-    List<Widget> children = _editableColors.asMap().entries.map((entry) {
-      int idx = entry.key;
-      ColorData colorData = entry.value;
-      final Color textColorOnCard = colorData.color.computeLuminance() > 0.5 ? Colors.black87 : Colors.white;
+    List<Widget> children =
+        _editableColors.asMap().entries.map((entry) {
+          int idx = entry.key;
+          ColorData colorData = entry.value;
+          final Color textColorOnCard = colorData.color.computeLuminance() > 0.5 ? Colors.black87 : Colors.white;
 
-      return Card(
-        key: ValueKey(colorData.paletteElementId),
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        color: colorData.color,
-        child: ListTile(
-          leading: CircleAvatar(
-            backgroundColor: Colors.white.withOpacity(0.2),
-            child: Text(
-                (idx + 1).toString(),
-                style: TextStyle(color: textColorOnCard, fontWeight: FontWeight.bold)
-            ),
-          ),
-          title: Text(colorData.title, style: TextStyle(color: textColorOnCard, fontWeight: FontWeight.w500)),
-          subtitle: Text(colorData.hexCode.toUpperCase(), style: TextStyle(color: textColorOnCard.withOpacity(0.85))),
-          onTap: () => _showEditColorDialog(existingColorData: colorData, existingColorIndex: idx),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.edit_note_outlined, size: 20, color: textColorOnCard.withOpacity(0.7)),
-              const SizedBox(width: 8),
-              ReorderableDragStartListener(
-                index: idx,
-                child: Icon(Icons.drag_handle_outlined, color: textColorOnCard.withOpacity(0.9)),
+          return Card(
+            key: ValueKey(colorData.paletteElementId),
+            margin: const EdgeInsets.symmetric(vertical: 4),
+            color: colorData.color,
+            child: ListTile(
+              leading: CircleAvatar(backgroundColor: Colors.white.withOpacity(0.2), child: Text((idx + 1).toString(), style: TextStyle(color: textColorOnCard, fontWeight: FontWeight.bold))),
+              title: Text(colorData.title, style: TextStyle(color: textColorOnCard, fontWeight: FontWeight.w500)),
+              subtitle: Text(colorData.hexCode.toUpperCase(), style: TextStyle(color: textColorOnCard.withOpacity(0.85))),
+              onTap: () => _showEditColorDialog(existingColorData: colorData, existingColorIndex: idx),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.edit_note_outlined, size: 20, color: textColorOnCard.withOpacity(0.7)),
+                  const SizedBox(width: 8),
+                  ReorderableDragStartListener(index: idx, child: Icon(Icons.drag_handle_outlined, color: textColorOnCard.withOpacity(0.9))),
+                ],
               ),
-            ],
-          ),
-        ),
-      );
-    }).toList();
+            ),
+          );
+        }).toList();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (_editableColors.isNotEmpty)
-          ReorderableListView(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            children: children,
-            onReorder: _onReorder,
-          ),
+        if (_editableColors.isNotEmpty) ReorderableListView(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), onReorder: _onReorder, children: children),
         if (canAddMore) _buildAddButtonListTile(),
       ],
     );
