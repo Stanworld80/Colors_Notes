@@ -1,15 +1,13 @@
 // lib/widgets/inline_palette_editor.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Required for FilteringTextInputFormatter
+import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 import '../models/color_data.dart';
 
-final _logger = Logger(printer: PrettyPrinter(methodCount: 1, printTime: false));
 const _uuid = Uuid();
 
-const int MIN_COLORS_IN_PALETTE_EDITOR = 1; // Min colors for a model/palette (can be 1 if user wants a single color)
+const int MIN_COLORS_IN_PALETTE_EDITOR = 1;
 const int MAX_COLORS_IN_PALETTE_EDITOR = 48;
 const int MAX_GRADIENT_STEPS = 48;
 
@@ -22,6 +20,7 @@ class InlinePaletteEditorWidget extends StatefulWidget {
   final Future<bool> Function(String paletteElementId)? canDeleteColorCallback;
   final Future<void> Function()? onPaletteNeedsSave;
   final bool showNameEditor;
+  final Future<bool> Function()? onDeleteAllColorsRequested;
 
   const InlinePaletteEditorWidget({
     Key? key,
@@ -33,6 +32,7 @@ class InlinePaletteEditorWidget extends StatefulWidget {
     this.canDeleteColorCallback,
     this.onPaletteNeedsSave,
     this.showNameEditor = true,
+    this.onDeleteAllColorsRequested,
   }) : super(key: key);
 
   @override
@@ -65,10 +65,9 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
         widget.initialPaletteName != _paletteNameController.text) {
       _paletteNameController.text = widget.initialPaletteName;
     }
-    if (!_listEquals(widget.initialColors, _editableColors)) {
-      if(!_listEquals(widget.initialColors, oldWidget.initialColors) || oldWidget.initialColors.length != widget.initialColors.length){
-        _editableColors = widget.initialColors.map((c) => c.copyWith()).toList();
-      }
+    if (!_listEquals(widget.initialColors, _editableColors) &&
+        (!_listEquals(widget.initialColors, oldWidget.initialColors) || widget.initialColors.length != oldWidget.initialColors.length)) {
+      _editableColors = widget.initialColors.map((c) => c.copyWith()).toList();
     }
   }
 
@@ -80,7 +79,8 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
         final colorB = b[i] as ColorData;
         if (colorA.paletteElementId != colorB.paletteElementId ||
             colorA.title != colorB.title ||
-            colorA.hexCode != colorB.hexCode) {
+            colorA.hexCode != colorB.hexCode ||
+            colorA.isDefault != colorB.isDefault) {
           return false;
         }
       } else if (a[i] != b[i]) {
@@ -98,13 +98,11 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
     final TextEditingController titleController = TextEditingController(text: initialTitle);
     final TextEditingController gradientStepsController = TextEditingController(text: '1');
     final GlobalKey<FormState> dialogFormKey = GlobalKey<FormState>();
-
     String addButtonText = isAdding ? 'Ajouter la couleur' : 'Sauvegarder';
 
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
-        // Use a StatefulWidget for the dialog content to manage the button text dynamically
         return StatefulBuilder(
             builder: (context, setDialogState) {
               return AlertDialog(
@@ -124,12 +122,11 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                             if (value == null || value.trim().isEmpty) {
                               return 'Le titre de base ne peut pas être vide.';
                             }
-                            // Further validation for uniqueness will happen on submit based on gradient steps
                             return null;
                           },
                         ),
                         const SizedBox(height: 20),
-                        if (isAdding) // Show gradient options only when adding
+                        if (isAdding)
                           TextFormField(
                             controller: gradientStepsController,
                             decoration: const InputDecoration(
@@ -140,7 +137,7 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                             onChanged: (value) {
                               int steps = int.tryParse(value) ?? 1;
-                              setDialogState(() { // Update button text dynamically
+                              setDialogState(() {
                                 addButtonText = steps > 1 ? 'Ajouter le dégradé' : 'Ajouter la couleur';
                               });
                             },
@@ -213,36 +210,31 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                     onPressed: () => Navigator.of(dialogContext).pop(),
                   ),
                   FilledButton(
-                    child: Text(addButtonText), // Use dynamic button text
+                    child: Text(addButtonText),
                     onPressed: () {
                       if (!dialogFormKey.currentState!.validate()) return;
 
                       final String baseTitle = titleController.text.trim();
                       final int gradientSteps = isAdding ? (int.tryParse(gradientStepsController.text) ?? 1) : 1;
-
                       List<ColorData> colorsToAdd = [];
                       List<String> tempGeneratedTitles = [];
                       List<String> tempGeneratedHexCodes = [];
 
-
                       if (gradientSteps == 1) {
-                        // Logic for single color (add or edit)
                         final String newHexCode = '#${pickerColor.value.toRadixString(16).substring(2).toUpperCase()}';
-                        // Validate title uniqueness for single add/edit
                         if (_editableColors.any((c) =>
                         c.title.toLowerCase() == baseTitle.toLowerCase() &&
                             (isAdding || c.paletteElementId != existingColorData!.paletteElementId))) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Ce titre de couleur existe déjà.'), backgroundColor: Colors.orange),
+                            const SnackBar(content: Text('Ce titre de couleur existe déjà.'), backgroundColor: Colors.orange),
                           );
                           return;
                         }
-                        // Validate hex uniqueness for single add/edit
                         if (_editableColors.any((c) =>
                         c.hexCode.toUpperCase() == newHexCode.toUpperCase() &&
                             (isAdding || c.paletteElementId != existingColorData!.paletteElementId))) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Cette couleur (hex) existe déjà.'), backgroundColor: Colors.orange),
+                            const SnackBar(content: Text('Cette couleur (hex) existe déjà.'), backgroundColor: Colors.orange),
                           );
                           return;
                         }
@@ -252,35 +244,22 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                           hexCode: newHexCode,
                         ));
                       } else {
-                        // Logic for gradient
                         if (_editableColors.length + gradientSteps > MAX_COLORS_IN_PALETTE_EDITOR) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Impossible d\'ajouter $gradientSteps couleurs, maximum de la palette atteint.'), backgroundColor: Colors.orange),
                           );
                           return;
                         }
-
                         HSLColor hslPickerColor = HSLColor.fromColor(pickerColor);
                         double centerLightness = hslPickerColor.lightness;
-                        // Max deviation from centerLightness. e.g. 0.2 means lightness can go from L-0.2 to L+0.2
-                        // This creates a gradient range of 0.4.
                         double maxLightnessDeviation = 0.3;
-
                         for (int i = 0; i < gradientSteps; i++) {
-                          double stepFactor;
-                          if (gradientSteps == 1) {
-                            stepFactor = 0; // Middle color
-                          } else {
-                            // Distributes steps from -1 (lightest) to +1 (darkest) relative to the center position
-                            stepFactor = (i / (gradientSteps - 1) * 2.0) - 1.0;
-                          }
-
+                          double stepFactor = (gradientSteps == 1) ? 0 : (i / (gradientSteps - 1) * 2.0) - 1.0;
                           double currentLightness = (centerLightness + stepFactor * maxLightnessDeviation).clamp(0.0, 1.0);
                           Color newColor = hslPickerColor.withLightness(currentLightness).toColor();
                           String newHex = '#${newColor.value.toRadixString(16).substring(2).toUpperCase()}';
                           String newTitle = "$baseTitle ${i + 1}";
 
-                          // Check for title and hex uniqueness within the batch and against existing
                           if (tempGeneratedTitles.contains(newTitle.toLowerCase()) || _editableColors.any((c) => c.title.toLowerCase() == newTitle.toLowerCase())) {
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Titre généré "$newTitle" existe déjà.'), backgroundColor: Colors.orange));
                             return;
@@ -298,7 +277,7 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                       setState(() {
                         if (isAdding) {
                           _editableColors.addAll(colorsToAdd);
-                        } else if (existingColorIndex != null && colorsToAdd.isNotEmpty) { // Editing single color
+                        } else if (existingColorIndex != null && colorsToAdd.isNotEmpty) {
                           _editableColors[existingColorIndex] = colorsToAdd.first;
                         }
                         widget.onColorsChanged(List.from(_editableColors));
@@ -315,24 +294,35 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
     );
   }
 
+  Future<void> _handleDeleteAllColors() async {
+    if (widget.onDeleteAllColorsRequested != null) {
+      final bool shouldProceed = await widget.onDeleteAllColorsRequested!();
+      if (shouldProceed) {
+        if (mounted) {
+          setState(() {
+            _editableColors.clear();
+            widget.onColorsChanged(List.from(_editableColors));
+            widget.onPaletteNeedsSave?.call();
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Toutes les couleurs ont été supprimées de la palette en cours d\'édition.'), backgroundColor: Colors.green),
+          );
+        }
+      }
+    }
+  }
+
   Future<void> _removeColor(int indexToRemove) async {
     final String colorTitle = _editableColors[indexToRemove].title;
-    // Check minimum colors constraint only if NOT editing a journal palette (i.e., editing a model)
-    int minColors = widget.isEditingJournalPalette ? 0 : MIN_COLORS_IN_PALETTE_EDITOR;
-    // For journal instances, allow removing down to 0. For models, enforce MIN_COLORS_IN_PALETTE_EDITOR.
-    // However, the SF-PALETTE-04 for instance is 3-48. This MIN_COLORS_IN_PALETTE_EDITOR is for models.
-    // Let's use a more direct check for models:
+
     if (!widget.isEditingJournalPalette && _editableColors.length <= MIN_COLORS_IN_PALETTE_EDITOR) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Un modèle de palette doit contenir au moins $MIN_COLORS_IN_PALETTE_EDITOR couleurs. Impossible de supprimer "${colorTitle}".')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Un modèle de palette doit contenir au moins $MIN_COLORS_IN_PALETTE_EDITOR couleur(s). Impossible de supprimer "${colorTitle}".')),
+        );
+      }
       return;
     }
-    // For journal instances, the check is different (can it be empty or must it have MIN_COLORS_IN_PALETTE_EDITOR?)
-    // According to SF-PALETTE-04, an *instance* also has 3-48 colors.
-    // So the check should be similar, but the message might differ or the check happens at a higher level (on save).
-    // For now, let's assume the immediate feedback for models is good.
-    // For instances, the canDeleteColorCallback is the primary gate.
 
     if (widget.isEditingJournalPalette && widget.canDeleteColorCallback != null) {
       final colorToDelete = _editableColors[indexToRemove];
@@ -355,11 +345,10 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
       widget.onColorsChanged(List.from(_editableColors));
       widget.onPaletteNeedsSave?.call();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Couleur "${colorTitle}" supprimée.'), duration: Duration(seconds: 1)),
+        SnackBar(content: Text('Couleur "${colorTitle}" supprimée.'), duration: const Duration(seconds: 1)),
       );
     });
   }
-
 
   void _onReorder(int oldIndex, int newIndex) {
     if (oldIndex >= _editableColors.length) return;
@@ -412,11 +401,23 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Couleurs (${_editableColors.length} / $MAX_COLORS_IN_PALETTE_EDITOR) :', style: Theme.of(context).textTheme.titleMedium),
-            IconButton(
-              icon: Icon(_isGridView ? Icons.view_list_outlined : Icons.grid_view_outlined),
-              tooltip: _isGridView ? "Afficher en liste" : "Afficher en grille",
-              onPressed: () => setState(() => _isGridView = !_isGridView),
-            ),
+            Row(
+              children: [
+                if (widget.onDeleteAllColorsRequested != null && _editableColors.isNotEmpty)
+                  Tooltip(
+                    message: "Supprimer toutes les couleurs",
+                    child: IconButton(
+                      icon: Icon(Icons.delete_sweep_outlined, color: Theme.of(context).colorScheme.error),
+                      onPressed: _handleDeleteAllColors,
+                    ),
+                  ),
+                IconButton(
+                  icon: Icon(_isGridView ? Icons.view_list_outlined : Icons.grid_view_outlined),
+                  tooltip: _isGridView ? "Afficher en liste" : "Afficher en grille",
+                  onPressed: () => setState(() => _isGridView = !_isGridView),
+                ),
+              ],
+            )
           ],
         ),
         const SizedBox(height: 8),
@@ -437,7 +438,7 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
     return Card(
       key: const ValueKey('add_new_color_grid_card'),
       elevation: 2.0,
-      color: Theme.of(context).colorScheme.surfaceContainerHighest, // Adjusted for better visibility
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
           side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant, width: 1.5)
@@ -474,7 +475,6 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
       ),
     );
   }
-
 
   Widget _buildGridView() {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -571,4 +571,3 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
     );
   }
 }
-

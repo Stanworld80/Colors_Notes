@@ -17,7 +17,6 @@ import '../widgets/loading_indicator.dart';
 final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 1, printTime: true));
 const _uuid = Uuid();
 
-
 class UnifiedPaletteEditorPage extends StatefulWidget {
   final Journal? journalToUpdatePaletteFor;
   final PaletteModel? paletteModelToEdit;
@@ -38,7 +37,6 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
   late String _currentPaletteName;
   late List<ColorData> _currentColors;
 
-  // Store initial state for comparison to detect actual changes
   late String _initialPaletteNameToCompare;
   late List<ColorData> _initialColorsToCompare;
 
@@ -46,7 +44,7 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
   String? _userId;
   bool _isEditingModel = false;
   String _pageTitle = "";
-  bool _hasMadeChangesSinceLastSave = false; // Tracks if changes occurred since the last successful save
+  bool _hasMadeChangesSinceLastSave = false;
 
   @override
   void initState() {
@@ -67,24 +65,18 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
       _pageTitle = "Modèle: ${model.name}";
     } else {
       _isEditingModel = true;
-      _currentPaletteName = "Nouvelle Palette"; // Default name for new model
+      _currentPaletteName = "Nouveau Modèle de Palette";
       _currentColors = [];
       _pageTitle = "Nouveau Modèle de Palette";
-      _hasMadeChangesSinceLastSave = true; // New model implies changes to be saved
+      _hasMadeChangesSinceLastSave = true;
     }
-    // Initialize comparison states
     _initialPaletteNameToCompare = _currentPaletteName;
     _initialColorsToCompare = _currentColors.map((c) => c.copyWith()).toList();
   }
 
-  /// Checks if there are actual differences between current and last saved state.
   bool _checkForActualChanges() {
-    if (_currentPaletteName != _initialPaletteNameToCompare) {
-      return true;
-    }
-    if (_currentColors.length != _initialColorsToCompare.length) {
-      return true;
-    }
+    if (_currentPaletteName != _initialPaletteNameToCompare) return true;
+    if (_currentColors.length != _initialColorsToCompare.length) return true;
     for (int i = 0; i < _currentColors.length; i++) {
       if (_currentColors[i].paletteElementId != _initialColorsToCompare[i].paletteElementId ||
           _currentColors[i].title != _initialColorsToCompare[i].title ||
@@ -100,6 +92,7 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
       return true;
     }
     final firestoreService = Provider.of<FirestoreService>(context, listen: false);
+    if(mounted) setState(() { _isLoading = true; });
     try {
       final isUsed = await firestoreService.isPaletteElementUsedInNotes(
         widget.journalToUpdatePaletteFor!.id,
@@ -114,27 +107,31 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
         );
       }
       return false;
+    } finally {
+      if(mounted) setState(() { _isLoading = false; });
     }
   }
 
-  /// Triggers an automatic save if actual changes are detected.
   Future<void> _triggerAutomaticSave() async {
-    if (!_checkForActualChanges() && !_hasMadeChangesSinceLastSave) { // Also check _hasMadeChangesSinceLastSave for new models
+    if (!_checkForActualChanges() && !_hasMadeChangesSinceLastSave) {
       _loggerPage.i("Aucun changement réel détecté, sauvegarde automatique annulée.");
       return;
     }
 
     if (!_formKey.currentState!.validate()) {
       _loggerPage.w("Validation du formulaire (nom palette) échouée lors de la sauvegarde auto.");
-      _hasMadeChangesSinceLastSave = true; // Mark as dirty if validation fails
-      return;
-    }
-
-    if (_currentColors.length < MIN_COLORS_IN_PALETTE_EDITOR && _isEditingModel) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Un modèle doit avoir au moins $MIN_COLORS_IN_PALETTE_EDITOR couleurs."), backgroundColor: Colors.orange));
       _hasMadeChangesSinceLastSave = true;
       return;
     }
+
+    if (_currentColors.isEmpty && _isEditingModel) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Un modèle de palette doit avoir au moins $MIN_COLORS_IN_PALETTE_EDITOR couleur."), backgroundColor: Colors.orange));
+      _hasMadeChangesSinceLastSave = true;
+      return;
+    } else if (_currentColors.isNotEmpty) {
+
+    }
+
     if (_currentColors.length > MAX_COLORS_IN_PALETTE_EDITOR) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Une palette ne peut pas avoir plus de $MAX_COLORS_IN_PALETTE_EDITOR couleurs."), backgroundColor: Colors.orange));
       _hasMadeChangesSinceLastSave = true;
@@ -150,11 +147,11 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
     if (mounted) setState(() { _isLoading = true; });
     final firestoreService = Provider.of<FirestoreService>(context, listen: false);
     bool saveSucceeded = false;
+    PaletteModel? createdModel;
 
     try {
-      if (widget.journalToUpdatePaletteFor != null) {
+      if (!_isEditingModel && widget.journalToUpdatePaletteFor != null) {
         List<String> attemptedDeletionsFailed = [];
-        // Compare _currentColors with _initialColorsToCompare to find deleted colors
         for (var initialColor in _initialColorsToCompare) {
           if (!_currentColors.any((currentColor) => currentColor.paletteElementId == initialColor.paletteElementId)) {
             final bool canActuallyDelete = await _canDeleteColor(initialColor.paletteElementId);
@@ -173,23 +170,18 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
           bool nameExists = await firestoreService.checkPaletteModelNameExists(_currentPaletteName, _userId!);
           if (nameExists) throw Exception("Un modèle de palette avec ce nom existe déjà.");
 
-          final newModel = PaletteModel(
+          createdModel = PaletteModel(
             id: _uuid.v4(),
             name: _currentPaletteName,
             colors: _currentColors,
             userId: _userId!,
             isPredefined: false,
           );
-          await firestoreService.createPaletteModel(newModel);
-          _loggerPage.i("Nouveau modèle de palette créé: ${newModel.name}");
-          // If it's a new model, we might need to update widget.paletteModelToEdit if the page stays open
-          // For now, we assume navigation or state management handles this.
-          // Or, more simply, update the _pageTitle if it was "Nouveau Modèle de Palette"
+          await firestoreService.createPaletteModel(createdModel);
+          _loggerPage.i("Nouveau modèle de palette créé: ${createdModel.name}");
           if (mounted && _pageTitle == "Nouveau Modèle de Palette") {
             setState(() {
-              _pageTitle = "Modèle: ${newModel.name}";
-              // Potentially update widget.paletteModelToEdit if the instance is passed around,
-              // but this page doesn't directly modify its own widget parameters.
+              _pageTitle = "Modèle: ${createdModel!.name}";
             });
           }
         } else {
@@ -215,7 +207,6 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
         await firestoreService.updateJournalPaletteInstance(currentJournal.id, updatedPaletteInstance);
         _loggerPage.i("Palette du journal ${currentJournal.name} mise à jour.");
 
-        // ignore: use_build_context_synchronously
         final activeJournalNotifier = Provider.of<ActiveJournalNotifier>(context, listen: false);
         if (activeJournalNotifier.activeJournalId == currentJournal.id) {
           await activeJournalNotifier.setActiveJournal(currentJournal.id, _userId!);
@@ -228,7 +219,7 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
         if (mounted) {
           setState(() {
             _hasMadeChangesSinceLastSave = false;
-            _initialPaletteNameToCompare = _currentPaletteName; // Update comparison baseline
+            _initialPaletteNameToCompare = _currentPaletteName;
             _initialColorsToCompare = _currentColors.map((c) => c.copyWith()).toList();
           });
         }
@@ -245,20 +236,82 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
     }
   }
 
-  /// Handles the back button press.
-  /// Allows popping if no save operation is in progress.
+  Future<bool> _handleDeleteAllColorsRequested() async {
+    if (_userId == null) {
+      if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Utilisateur non identifié.")));
+      return false;
+    }
+
+    final bool? firstConfirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Supprimer toutes les couleurs ?'),
+          content: Text(!_isEditingModel && widget.journalToUpdatePaletteFor != null
+              ? 'Cela supprimera toutes les couleurs de la palette du journal "${widget.journalToUpdatePaletteFor!.name}". ATTENTION : Toutes les notes de ce journal seront également DÉFINITIVEMENT supprimées.'
+              : 'Voulez-vous vraiment supprimer toutes les couleurs de ce modèle de palette ?'),
+          actions: <Widget>[
+            TextButton(child: const Text('Annuler'), onPressed: () => Navigator.of(dialogContext).pop(false)),
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Supprimer Tout'),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (firstConfirm != true) return false;
+
+    final bool? secondConfirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text(!_isEditingModel ? 'CONFIRMATION FINALE' : 'Confirmer la suppression'),
+          content: Text(!_isEditingModel
+              ? 'Êtes-vous absolument certain(e) ? La suppression des couleurs de cette palette entraînera la suppression IRRÉVERSIBLE de TOUTES les notes de ce journal.'
+              : 'Confirmez-vous la suppression de toutes les couleurs de ce modèle ?'),
+          actions: <Widget>[
+            TextButton(child: const Text('NON, ANNULER'), onPressed: () => Navigator.of(dialogContext).pop(false)),
+            TextButton(
+              style: TextButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+              child: const Text('OUI, TOUT SUPPRIMER'),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (secondConfirm != true) return false;
+
+    if (mounted) setState(() { _isLoading = true; });
+    try {
+      if (!_isEditingModel && widget.journalToUpdatePaletteFor != null) {
+        final firestoreService = Provider.of<FirestoreService>(context, listen: false);
+        await firestoreService.deleteAllNotesInJournal(widget.journalToUpdatePaletteFor!.id, _userId!);
+        _loggerPage.i("Toutes les notes du journal ${widget.journalToUpdatePaletteFor!.id} ont été supprimées avant de vider la palette.");
+      }
+      return true;
+    } catch (e) {
+      _loggerPage.e("Erreur lors de la suppression de toutes les couleurs/notes: $e");
+      if(mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erreur: ${e.toString()}"), backgroundColor: Colors.red));
+      return false;
+    } finally {
+      if(mounted) setState(() { _isLoading = false; });
+    }
+  }
+
   Future<bool> _onWillPop() async {
     if (_isLoading) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Sauvegarde en cours, veuillez patienter..."), duration: Duration(seconds: 1)),
       );
-      return false; // Prevent popping if loading
+      return false;
     }
-    // If there were changes that failed to save, _hasMadeChangesSinceLastSave would be true.
-    // The user has already been notified of the error. Allow exit.
     return true;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -267,9 +320,8 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(_pageTitle),
-          // actions list is now empty as the save button is removed
           actions: [
-            if (_isLoading) // Still show loading indicator in AppBar if a save is in progress
+            if (_isLoading)
               const Padding(
                 padding: EdgeInsets.all(16.0),
                 child: SizedBox(
@@ -286,37 +338,36 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
               child: Form(
                 key: _formKey,
                 child: InlinePaletteEditorWidget(
-                  // Use a key that changes if the source (journal/model) changes, to force re-init
                   key: ValueKey(widget.journalToUpdatePaletteFor?.id ?? widget.paletteModelToEdit?.id ?? 'new_palette_editor_autosave_instance'),
                   initialPaletteName: _currentPaletteName,
                   initialColors: _currentColors,
-                  isEditingJournalPalette: widget.journalToUpdatePaletteFor != null,
-                  canDeleteColorCallback: widget.journalToUpdatePaletteFor != null ? _canDeleteColor : null,
+                  isEditingJournalPalette: !_isEditingModel,
+                  canDeleteColorCallback: !_isEditingModel ? _canDeleteColor : null,
                   onPaletteNameChanged: (newName) {
-                    if (_currentPaletteName != newName) { // Check if name actually changed
+                    if (_currentPaletteName != newName) {
                       if (mounted) {
                         setState(() {
                           _currentPaletteName = newName;
-                          _hasMadeChangesSinceLastSave = true; // Mark dirty
+                          _hasMadeChangesSinceLastSave = true;
                         });
                       }
                     }
                   },
                   onColorsChanged: (newColors) {
-                    // A more robust list comparison might be needed if ColorData objects are mutated directly
-                    // For now, assume newColors is a new list or its content differs significantly
                     if (mounted) {
                       setState(() {
                         _currentColors = newColors;
-                        _hasMadeChangesSinceLastSave = true; // Mark dirty
+                        _hasMadeChangesSinceLastSave = true;
                       });
                     }
                   },
-                  onPaletteNeedsSave: _triggerAutomaticSave, // Pass the automatic save trigger
+                  onPaletteNeedsSave: _triggerAutomaticSave,
+                  showNameEditor: _isEditingModel,
+                  onDeleteAllColorsRequested: _handleDeleteAllColorsRequested,
                 ),
               ),
             ),
-            if (_isLoading) const LoadingIndicator(), // Full screen loading indicator
+            if (_isLoading) const LoadingIndicator(),
           ],
         ),
       ),

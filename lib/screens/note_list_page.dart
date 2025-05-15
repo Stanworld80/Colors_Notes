@@ -1,8 +1,8 @@
+// lib/screens/note_list_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
-// import 'package:collection/collection.dart';
 
 import '../services/firestore_service.dart';
 import '../models/note.dart';
@@ -10,6 +10,7 @@ import '../models/journal.dart';
 import '../models/color_data.dart';
 import '../providers/active_journal_provider.dart';
 import 'entry_page.dart';
+import '../services/auth_service.dart';
 
 final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0, printTime: false));
 
@@ -26,6 +27,7 @@ class _NoteListPageState extends State<NoteListPage> {
   String _sortBy = 'eventTimestamp';
   bool _sortDescending = true;
   bool _isGridView = false;
+  bool _isDeletingAllNotes = false;
 
   ColorData? _getColorDataById(Journal? journal, String paletteElementId) {
     if (journal == null) return null;
@@ -77,22 +79,21 @@ class _NoteListPageState extends State<NoteListPage> {
     );
   }
 
-
   Future<void> _confirmDeleteNote(BuildContext context, FirestoreService firestoreService, String noteId) async {
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: Text('Confirmer la suppression'),
-          content: Text('Voulez-vous vraiment supprimer cette note ?'),
+          title: const Text('Confirmer la suppression'),
+          content: const Text('Voulez-vous vraiment supprimer cette note ?'),
           actions: <Widget>[
             TextButton(
-              child: Text('Annuler'),
+              child: const Text('Annuler'),
               onPressed: () => Navigator.of(dialogContext).pop(false),
             ),
             TextButton(
               style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: Text('Supprimer'),
+              child: const Text('Supprimer'),
               onPressed: () => Navigator.of(dialogContext).pop(true),
             ),
           ],
@@ -105,7 +106,7 @@ class _NoteListPageState extends State<NoteListPage> {
         await firestoreService.deleteNote(noteId);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Note supprimée avec succès.')),
+            const SnackBar(content: Text('Note supprimée avec succès.')),
           );
         }
       } catch (e) {
@@ -119,33 +120,93 @@ class _NoteListPageState extends State<NoteListPage> {
     }
   }
 
+  Future<void> _confirmDeleteAllNotes(BuildContext context, FirestoreService firestoreService, String journalId, String userId) async {
+    if (_isDeletingAllNotes) return;
+
+    final bool? firstConfirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Supprimer toutes les notes ?'),
+          content: const Text('Cette action supprimera DÉFINITIVEMENT toutes les notes de ce journal. Voulez-vous continuer ?'),
+          actions: <Widget>[
+            TextButton(child: const Text('Annuler'), onPressed: () => Navigator.of(dialogContext).pop(false)),
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Supprimer Tout'),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (firstConfirm != true) return;
+
+    final bool? secondConfirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('CONFIRMATION FINALE'),
+          content: const Text('Êtes-vous absolument certain(e) ? Cette action est IRRÉVERSIBLE.'),
+          actions: <Widget>[
+            TextButton(child: const Text('NON, ANNULER'), onPressed: () => Navigator.of(dialogContext).pop(false)),
+            TextButton(
+              style: TextButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+              child: const Text('OUI, SUPPRIMER TOUTES LES NOTES'),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (secondConfirm == true) {
+      if(mounted) setState(() { _isDeletingAllNotes = true; });
+      try {
+        await firestoreService.deleteAllNotesInJournal(journalId, userId);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Toutes les notes ont été supprimées.'), backgroundColor: Colors.green),
+          );
+        }
+      } catch (e) {
+        _loggerPage.e("Erreur suppression de toutes les notes: $e");
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Erreur lors de la suppression de toutes les notes: ${e.toString()}'), backgroundColor: Colors.red),
+          );
+        }
+      } finally {
+        if(mounted) setState(() { _isDeletingAllNotes = false; });
+      }
+    }
+  }
+
   Widget _buildNoteGridItem(BuildContext context, Note note, ColorData? colorData, FirestoreService firestoreService, Journal? journal) {
-    final DateFormat dateFormat = DateFormat('dd/MM/yy hh:mm', 'fr_FR');
+    final DateFormat dateFormat = DateFormat('dd/MM/yy HH:mm', 'fr_FR');
     final Color cardColor = colorData?.color ?? Colors.grey.shade100;
     final Color textColor = cardColor.computeLuminance() > 0.5 ? Colors.black87 : Colors.white;
     final Color subtleTextColor = cardColor.computeLuminance() > 0.5 ? Colors.black54 : Colors.white70;
 
-    // Ajuster la taille de la police pour les petites cartes
     double titleFontSize = 10.0;
     double contentFontSize = 11.0;
     double dateFontSize = 9.0;
     int maxLinesForContent = 2;
 
-    // Si la carte est très petite (par exemple, 9 par ligne), réduire davantage
     final screenWidth = MediaQuery.of(context).size.width;
-    if (screenWidth / 9 < 80) { // Estimation approximative de la largeur de la carte
+    if (screenWidth / 9 < 80) {
       titleFontSize = 8.0;
       contentFontSize = 9.0;
       dateFontSize = 7.0;
       maxLinesForContent = 1;
     }
 
-
     return Card(
-      elevation: 2.0, // Réduire l'élévation pour un look plus plat si beaucoup d'éléments
+      elevation: 2.0,
       color: cardColor,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0), // Rayon plus petit pour les petites cartes
+        borderRadius: BorderRadius.circular(8.0),
       ),
       child: InkWell(
         onTap: () {
@@ -161,7 +222,7 @@ class _NoteListPageState extends State<NoteListPage> {
         },
         borderRadius: BorderRadius.circular(8.0),
         child: Padding(
-          padding: const EdgeInsets.all(6.0), // Padding réduit
+          padding: const EdgeInsets.all(6.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -176,22 +237,20 @@ class _NoteListPageState extends State<NoteListPage> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  // Optionnel: Rendre le bouton de suppression plus petit ou conditionnel
-                  // if (screenWidth / 9 > 60) // Afficher seulement si la carte n'est pas trop petite
                   IconButton(
-                    icon: Icon(Icons.delete_outline, color: textColor.withOpacity(0.7), size: 16), // Taille d'icône réduite
+                    icon: Icon(Icons.delete_outline, color: textColor.withOpacity(0.7), size: 16),
                     padding: EdgeInsets.zero,
-                    constraints: BoxConstraints(minWidth: 24, minHeight: 24), // Contraintes plus petites
+                    constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
                     tooltip: "Supprimer la note",
                     onPressed: () => _confirmDeleteNote(context, firestoreService, note.id),
                   )
                 ],
               ),
-              SizedBox(height: 4), // Espace réduit
+              const SizedBox(height: 4),
               Expanded(
                 child: Text(
                   note.content,
-                  style: TextStyle(fontWeight: FontWeight.normal, fontSize: contentFontSize, color: textColor), // Police moins grasse
+                  style: TextStyle(fontWeight: FontWeight.normal, fontSize: contentFontSize, color: textColor),
                   maxLines: maxLinesForContent,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -207,7 +266,6 @@ class _NoteListPageState extends State<NoteListPage> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     final firestoreService = Provider.of<FirestoreService>(context, listen: false);
@@ -215,6 +273,8 @@ class _NoteListPageState extends State<NoteListPage> {
     final Journal? journalForPalette = activeJournalNotifier.activeJournalId == widget.journalId
         ? activeJournalNotifier.activeJournal
         : null;
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final String? currentUserId = authService.currentUser?.uid;
 
     String firestoreSortField = _sortBy;
     bool firestoreSortDescending = _sortDescending;
@@ -224,28 +284,30 @@ class _NoteListPageState extends State<NoteListPage> {
       firestoreSortDescending = true;
     }
 
-
     return Scaffold(
       body: StreamBuilder<List<Note>>(
         stream: firestoreService.getJournalNotesStream(widget.journalId, sortBy: firestoreSortField, descending: firestoreSortDescending),
         builder: (context, snapshot) {
           if (activeJournalNotifier.isLoading && journalForPalette == null && activeJournalNotifier.activeJournalId == widget.journalId) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
             _loggerPage.e("Erreur chargement notes: ${snapshot.error}");
             return Center(child: Text('Erreur de chargement des notes. ${snapshot.error}'));
           }
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+
+          List<Note> notes = snapshot.data ?? [];
+
+          if (notes.isEmpty && !_isDeletingAllNotes) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.notes_outlined, size: 60, color: Theme.of(context).colorScheme.secondary),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Text(
                     'Aucune note dans ce journal.',
                     style: Theme.of(context).textTheme.headlineSmall,
@@ -254,8 +316,6 @@ class _NoteListPageState extends State<NoteListPage> {
               ),
             );
           }
-
-          List<Note> notes = List.from(snapshot.data!);
 
           if (_sortBy == 'paletteOrder' && journalForPalette != null) {
             final paletteOrderMap = {
@@ -275,13 +335,11 @@ class _NoteListPageState extends State<NoteListPage> {
             });
           }
 
-
           if (journalForPalette == null && activeJournalNotifier.activeJournalId != widget.journalId && !activeJournalNotifier.isLoading) {
             _loggerPage.w("Détails du journal (pour la palette) non disponibles pour ${widget.journalId}. Le tri par couleur peut ne pas fonctionner correctement.");
           }
 
           final screenWidth = MediaQuery.of(context).size.width;
-          // Logique pour gridCrossAxisCount pour atteindre jusqu'à 9 éléments
           int gridCrossAxisCount;
           if (screenWidth < 400) gridCrossAxisCount = 3;
           else if (screenWidth < 600) gridCrossAxisCount = 4;
@@ -291,7 +349,6 @@ class _NoteListPageState extends State<NoteListPage> {
           else if (screenWidth < 1400) gridCrossAxisCount = 8;
           else gridCrossAxisCount = 9;
 
-
           return Column(
             children: [
               Padding(
@@ -299,6 +356,15 @@ class _NoteListPageState extends State<NoteListPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    if (currentUserId != null && notes.isNotEmpty)
+                      Tooltip(
+                        message: "Supprimer toutes les notes de ce journal",
+                        child: IconButton(
+                          icon: Icon(Icons.delete_sweep_outlined, color: Theme.of(context).colorScheme.error),
+                          onPressed: _isDeletingAllNotes ? null : () => _confirmDeleteAllNotes(context, firestoreService, widget.journalId, currentUserId),
+                        ),
+                      ),
+                    if (_isDeletingAllNotes) const Padding(padding: EdgeInsets.all(8.0), child: SizedBox(width:20, height:20, child: CircularProgressIndicator(strokeWidth: 2.0))),
                     IconButton(
                       icon: Icon(_isGridView ? Icons.view_list_outlined : Icons.grid_view_outlined),
                       tooltip: _isGridView ? "Afficher en liste" : "Afficher en grille",
@@ -318,7 +384,6 @@ class _NoteListPageState extends State<NoteListPage> {
                         children: [
                           _buildSortButton('eventTimestamp', Icons.event_note_outlined, "Trier par date d'événement"),
                           _buildSortButton('paletteOrder', Icons.palette_outlined, "Trier par couleur de palette"),
-                          //_buildSortButton('content', Icons.sort_by_alpha_outlined, "Trier par contenu"),
                         ],
                       ),
                     ),
@@ -328,12 +393,12 @@ class _NoteListPageState extends State<NoteListPage> {
               Expanded(
                 child: _isGridView
                     ? GridView.builder(
-                  padding: EdgeInsets.all(8.0), // Padding réduit pour la grille
+                  padding: const EdgeInsets.all(8.0),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: gridCrossAxisCount,
-                    crossAxisSpacing: 4.0, // Espacement réduit
-                    mainAxisSpacing: 4.0,  // Espacement réduit
-                    childAspectRatio: 1.1, // Rendre les cartes plus carrées ou légèrement plus hautes que larges
+                    crossAxisSpacing: 4.0,
+                    mainAxisSpacing: 4.0,
+                    childAspectRatio: 1.1,
                   ),
                   itemCount: notes.length,
                   itemBuilder: (context, index) {
@@ -343,7 +408,7 @@ class _NoteListPageState extends State<NoteListPage> {
                   },
                 )
                     : ListView.builder(
-                  padding: EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0),
                   itemCount: notes.length,
                   itemBuilder: (context, index) {
                     final note = notes[index];
@@ -357,17 +422,17 @@ class _NoteListPageState extends State<NoteListPage> {
                     return Card(
                       elevation: 2.0,
                       color: cardColor,
-                      margin: EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
+                      margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       child: ListTile(
-                        contentPadding: EdgeInsets.all(12.0),
+                        contentPadding: const EdgeInsets.all(12.0),
                         leading: colorData != null
                             ? CircleAvatar(
                           backgroundColor: Colors.transparent,
                         )
-                            : CircleAvatar(backgroundColor: Colors.grey, child: Icon(Icons.palette_outlined, color: Colors.white)),
+                            : const CircleAvatar(backgroundColor: Colors.grey, child: Icon(Icons.help_outline, color: Colors.white)),
                         title: Text(
                           note.content,
                           style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: textColor),
@@ -379,7 +444,7 @@ class _NoteListPageState extends State<NoteListPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (colorData != null) Text("${colorData.title}", style: TextStyle(fontSize: 12, color: subtleTextColor)),
+                              if (colorData != null) Text(colorData.title, style: TextStyle(fontSize: 12, color: subtleTextColor, fontWeight: FontWeight.bold)),
                               Text(
                                 'Date: ${dateFormat.format(note.eventTimestamp.toDate().toLocal())}',
                                 style: TextStyle(fontSize: 12, color: subtleTextColor),
@@ -393,6 +458,7 @@ class _NoteListPageState extends State<NoteListPage> {
                         ),
                         trailing: IconButton(
                           icon: Icon(Icons.delete_forever_outlined, color: textColor.withOpacity(0.7)),
+                          tooltip: "Supprimer cette note",
                           onPressed: () => _confirmDeleteNote(context, firestoreService, note.id),
                         ),
                         onTap: () {

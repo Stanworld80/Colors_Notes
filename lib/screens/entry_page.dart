@@ -389,7 +389,7 @@ class _EntryPageState extends State<EntryPage> {
                 maxLines: 8,
                 textCapitalization: TextCapitalization.sentences,
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
+                  if (value == null ) {
                     return 'Veuillez entrer le contenu de la note.';
                   }
                   if (value.length > 1024) {
