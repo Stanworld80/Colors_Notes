@@ -13,10 +13,13 @@ import '../models/color_data.dart';
 import '../providers/active_journal_provider.dart';
 import '../core/predefined_templates.dart';
 import '../widgets/inline_palette_editor.dart';
+import 'package:logger/logger.dart';
 
+final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0, printTime: true));
 const _uuid = Uuid();
 
-enum JournalCreationMode { fromPaletteModel, fromExistingJournal }
+// AJOUT: Nouvelle option pour le mode de création
+enum JournalCreationMode { fromPaletteModel, fromExistingJournal, emptyPalette }
 
 class CreateJournalPage extends StatefulWidget {
   const CreateJournalPage({Key? key}) : super(key: key);
@@ -29,7 +32,8 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
   final _formKey = GlobalKey<FormState>();
   final _journalNameController = TextEditingController();
 
-  JournalCreationMode _creationMode = JournalCreationMode.fromPaletteModel;
+  // MODIFICATION: Initialisation par défaut sur emptyPalette si souhaité, ou conserver fromPaletteModel
+  JournalCreationMode _creationMode = JournalCreationMode.emptyPalette;
 
   PaletteModel? _selectedPaletteModel;
   List<PaletteModel> _availablePaletteModels = [];
@@ -74,37 +78,13 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
       final List<PaletteModel> predefinedPalettesList = predefinedPalettes;
       final List<PaletteModel> userModels = await firestoreService.getUserPaletteModelsStream(_userId!).first;
       _availablePaletteModels = [...predefinedPalettesList, ...userModels];
-
       _availableUserJournals = await firestoreService.getJournalsStream(_userId!).first;
 
-      if (_creationMode == JournalCreationMode.fromPaletteModel && _availablePaletteModels.isNotEmpty) {
-        _selectedPaletteModel = _availablePaletteModels.first;
-        _updatePreparedPaletteFromModel(_selectedPaletteModel);
-      } else if (_creationMode == JournalCreationMode.fromExistingJournal && _availableUserJournals.isNotEmpty) {
-        _selectedExistingJournal = _availableUserJournals.first;
-        _updatePreparedPaletteFromJournal(_selectedExistingJournal);
-      } else if (_availablePaletteModels.isEmpty && _availableUserJournals.isNotEmpty) {
-        _creationMode = JournalCreationMode.fromExistingJournal;
-        _selectedExistingJournal = _availableUserJournals.first;
-        _updatePreparedPaletteFromJournal(_selectedExistingJournal);
-      } else if (_availablePaletteModels.isNotEmpty) {
-        _creationMode = JournalCreationMode.fromPaletteModel;
-        _selectedPaletteModel = _availablePaletteModels.first;
-        _updatePreparedPaletteFromModel(_selectedPaletteModel);
-      } else {
-        _preparedPaletteName = "Palette du nouveau journal";
-        _preparedColors = [
-          ColorData(paletteElementId: _uuid.v4(), title: "Couleur 1", hexCode: "#FFC107"),
-        ];
-        if (MIN_COLORS_IN_PALETTE_EDITOR > 1) {
-          _preparedColors.add(ColorData(paletteElementId: _uuid.v4(), title: "Couleur 2", hexCode: "#4CAF50"));
-        }
-        if (MIN_COLORS_IN_PALETTE_EDITOR > 2) {
-          _preparedColors.add(ColorData(paletteElementId: _uuid.v4(), title: "Couleur 3", hexCode: "#2196F3"));
-        }
-        _paletteEditorKey = UniqueKey();
-      }
+      // Logique d'initialisation de la palette en fonction du mode
+      _updatePaletteBasedOnMode();
+
     } catch (e) {
+      _loggerPage.e("Erreur chargement données initiales: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erreur chargement des options: ${e.toString()}")));
       }
@@ -117,10 +97,45 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
     }
   }
 
-  void _updatePreparedPaletteFromModel(PaletteModel? model) {
+  // NOUVELLE méthode pour centraliser la mise à jour de la palette en fonction du mode
+  void _updatePaletteBasedOnMode() {
+    final journalName = _journalNameController.text.trim();
+    String defaultPaletteName = journalName.isNotEmpty ? "Palette de '$journalName'" : "Nouvelle Palette";
+
+    if (_creationMode == JournalCreationMode.fromPaletteModel) {
+      if (_availablePaletteModels.isNotEmpty) {
+        _selectedPaletteModel ??= _availablePaletteModels.first; // Sélectionne le premier si aucun n'est sélectionné
+        _updatePreparedPaletteFromModel(_selectedPaletteModel, defaultPaletteName: defaultPaletteName);
+      } else {
+        // S'il n'y a pas de modèles, basculer vers une palette vide ou un autre mode par défaut
+        _creationMode = JournalCreationMode.emptyPalette; // Fallback
+        _updatePaletteBasedOnMode(); // Appel récursif pour gérer le nouveau mode
+        return;
+      }
+    } else if (_creationMode == JournalCreationMode.fromExistingJournal) {
+      if (_availableUserJournals.isNotEmpty) {
+        _selectedExistingJournal ??= _availableUserJournals.first;
+        _updatePreparedPaletteFromJournal(_selectedExistingJournal, defaultPaletteName: defaultPaletteName);
+      } else {
+        _creationMode = JournalCreationMode.emptyPalette; // Fallback
+        _updatePaletteBasedOnMode();
+        return;
+      }
+    } else if (_creationMode == JournalCreationMode.emptyPalette) {
+      _preparedPaletteName = defaultPaletteName;
+      _preparedColors = []; // Palette initialement vide
+      _selectedPaletteModel = null;
+      _selectedExistingJournal = null;
+    }
+    _paletteEditorKey = UniqueKey();
+    if (mounted) setState(() {});
+  }
+
+
+  void _updatePreparedPaletteFromModel(PaletteModel? model, {String? defaultPaletteName}) {
     final journalName = _journalNameController.text.trim();
     if (model == null) {
-      _preparedPaletteName = journalName.isNotEmpty ? "Palette de '$journalName'" : "Nouvelle Palette";
+      _preparedPaletteName = defaultPaletteName ?? (journalName.isNotEmpty ? "Palette de '$journalName'" : "Nouvelle Palette");
       _preparedColors = [];
       if (MIN_COLORS_IN_PALETTE_EDITOR == 1 && _preparedColors.isEmpty) {
         _preparedColors.add(ColorData(paletteElementId: _uuid.v4(), title: "Couleur par défaut", hexCode: "#CCCCCC"));
@@ -129,14 +144,14 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
       _preparedPaletteName = journalName.isNotEmpty ? "Palette de '$journalName' (Modèle: ${model.name})" : "Palette (Modèle: ${model.name})";
       _preparedColors = model.colors.map((c) => c.copyWith(paletteElementId: _uuid.v4())).toList();
     }
-    _paletteEditorKey = UniqueKey();
-    if (mounted) setState(() {});
+    // _paletteEditorKey = UniqueKey(); // Déplacé dans _updatePaletteBasedOnMode
+    // if (mounted) setState(() {});
   }
 
-  void _updatePreparedPaletteFromJournal(Journal? journal) {
+  void _updatePreparedPaletteFromJournal(Journal? journal, {String? defaultPaletteName}) {
     final journalName = _journalNameController.text.trim();
     if (journal == null) {
-      _preparedPaletteName = journalName.isNotEmpty ? "Palette de '$journalName'" : "Nouvelle Palette";
+      _preparedPaletteName = defaultPaletteName ?? (journalName.isNotEmpty ? "Palette de '$journalName'" : "Nouvelle Palette");
       _preparedColors = [];
       if (MIN_COLORS_IN_PALETTE_EDITOR == 1 && _preparedColors.isEmpty) {
         _preparedColors.add(ColorData(paletteElementId: _uuid.v4(), title: "Couleur par défaut", hexCode: "#CCCCCC"));
@@ -145,14 +160,35 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
       _preparedPaletteName = journalName.isNotEmpty ? "Palette de '$journalName' (Copiée de ${journal.name})" : "Palette (Copiée de ${journal.name})";
       _preparedColors = journal.palette.colors.map((c) => c.copyWith(paletteElementId: _uuid.v4())).toList();
     }
-    _paletteEditorKey = UniqueKey();
-    if (mounted) setState(() {});
+    // _paletteEditorKey = UniqueKey(); // Déplacé dans _updatePaletteBasedOnMode
+    // if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
     _journalNameController.dispose();
     super.dispose();
+  }
+
+  Future<bool> _handleDeleteAllColorsInCreation() async {
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Vider la palette ?'),
+          content: const Text('Voulez-vous vraiment supprimer toutes les couleurs de cette nouvelle palette ?'),
+          actions: <Widget>[
+            TextButton(child: const Text('Annuler'), onPressed: () => Navigator.of(dialogContext).pop(false)),
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Vider'),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+            ),
+          ],
+        );
+      },
+    );
+    return confirm ?? false;
   }
 
   Future<void> _createJournal() async {
@@ -179,6 +215,10 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
       }
       return;
     }
+    // La constante MIN_COLORS_IN_PALETTE_EDITOR est maintenant 1
+    // Donc, si _preparedColors n'est pas vide, elle a au moins 1 couleur.
+    // La vérification _preparedColors.length < MIN_COLORS_IN_PALETTE_EDITOR devient redondante si MIN_COLORS_IN_PALETTE_EDITOR = 1.
+    // On la garde pour la flexibilité si MIN_COLORS_IN_PALETTE_EDITOR devait rechanger.
     if (_preparedColors.length < MIN_COLORS_IN_PALETTE_EDITOR) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("La palette doit contenir au moins $MIN_COLORS_IN_PALETTE_EDITOR couleur(s).")));
@@ -205,6 +245,8 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
       final Journal newJournal = Journal(id: _uuid.v4(), userId: _userId!, name: journalName, palette: newPaletteInstance, createdAt: Timestamp.now(), lastUpdatedAt: Timestamp.now());
 
       await firestoreService.createJournal(newJournal);
+      _loggerPage.i('Journal créé: ${newJournal.name} avec palette: ${newPaletteInstance.name}');
+
       await activeJournalNotifier.setActiveJournal(newJournal.id, _userId!);
 
       if (mounted) {
@@ -212,6 +254,7 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
         Navigator.of(context).pop();
       }
     } catch (e) {
+      _loggerPage.e('Erreur création journal: ${e.toString()}');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: ${e.toString()}')));
       }
@@ -237,9 +280,10 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
       onChanged: (PaletteModel? newValue) {
         if (mounted) {
           setState(() {
+            _creationMode = JournalCreationMode.fromPaletteModel; // Assurer que le mode est correct
             _selectedPaletteModel = newValue;
             _selectedExistingJournal = null;
-            _updatePreparedPaletteFromModel(newValue);
+            _updatePaletteBasedOnMode();
           });
         }
       },
@@ -261,9 +305,10 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
       onChanged: (Journal? newValue) {
         if (mounted) {
           setState(() {
+            _creationMode = JournalCreationMode.fromExistingJournal; // Assurer que le mode est correct
             _selectedExistingJournal = newValue;
             _selectedPaletteModel = null;
-            _updatePreparedPaletteFromJournal(newValue);
+            _updatePaletteBasedOnMode();
           });
         }
       },
@@ -279,12 +324,6 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
       canAttemptCreation = false;
     }
     if (_creationMode == JournalCreationMode.fromExistingJournal && _selectedExistingJournal == null && _availableUserJournals.isNotEmpty) {
-      canAttemptCreation = false;
-    }
-    if (_creationMode == JournalCreationMode.fromPaletteModel && _availablePaletteModels.isEmpty) {
-      canAttemptCreation = false;
-    }
-    if (_creationMode == JournalCreationMode.fromExistingJournal && _availableUserJournals.isEmpty) {
       canAttemptCreation = false;
     }
 
@@ -319,19 +358,10 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
                   return null;
                 },
                 onChanged: (value) {
-                  if (mounted) {
+                  // Mettre à jour le nom de la palette préparée dynamiquement
+                  if(mounted) {
                     setState(() {
-                      final trimmedValue = value.trim();
-                      if (_creationMode == JournalCreationMode.fromPaletteModel && _selectedPaletteModel != null) {
-                        _preparedPaletteName =
-                        trimmedValue.isNotEmpty ? "Palette de '$trimmedValue' (Modèle: ${_selectedPaletteModel!.name})" : "Palette (Modèle: ${_selectedPaletteModel!.name})";
-                      } else if (_creationMode == JournalCreationMode.fromExistingJournal && _selectedExistingJournal != null) {
-                        _preparedPaletteName =
-                        trimmedValue.isNotEmpty ? "Palette de '$trimmedValue' (Copiée de ${_selectedExistingJournal!.name})" : "Palette (Copiée de ${_selectedExistingJournal!.name})";
-                      } else {
-                        _preparedPaletteName = trimmedValue.isNotEmpty ? "Palette de '$trimmedValue'" : "Nouvelle Palette";
-                      }
-                      _paletteEditorKey = UniqueKey();
+                      _updatePaletteBasedOnMode();
                     });
                   }
                 },
@@ -341,20 +371,28 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
               const SizedBox(height: 10),
               Text('Source de la palette :', style: Theme.of(context).textTheme.titleMedium),
               RadioListTile<JournalCreationMode>(
+                title: const Text('Palette Vierge (à composer)'),
+                value: JournalCreationMode.emptyPalette,
+                groupValue: _creationMode,
+                onChanged: (JournalCreationMode? value) {
+                  if (value != null && mounted) {
+                    setState(() {
+                      _creationMode = value;
+                      _updatePaletteBasedOnMode();
+                    });
+                  }
+                },
+              ),
+              RadioListTile<JournalCreationMode>(
                 title: const Text('À partir d\'un modèle de palette'),
                 value: JournalCreationMode.fromPaletteModel,
                 groupValue: _creationMode,
-                onChanged:
-                _availablePaletteModels.isNotEmpty
+                onChanged: _availablePaletteModels.isNotEmpty
                     ? (JournalCreationMode? value) {
                   if (value != null && mounted) {
                     setState(() {
                       _creationMode = value;
-                      if (_selectedPaletteModel == null && _availablePaletteModels.isNotEmpty) {
-                        _selectedPaletteModel = _availablePaletteModels.first;
-                      }
-                      _selectedExistingJournal = null;
-                      _updatePreparedPaletteFromModel(_selectedPaletteModel);
+                      _updatePaletteBasedOnMode();
                     });
                   }
                 }
@@ -364,17 +402,12 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
                 title: const Text('En copiant la palette d\'un journal existant'),
                 value: JournalCreationMode.fromExistingJournal,
                 groupValue: _creationMode,
-                onChanged:
-                _availableUserJournals.isNotEmpty
+                onChanged: _availableUserJournals.isNotEmpty
                     ? (JournalCreationMode? value) {
                   if (value != null && mounted) {
                     setState(() {
                       _creationMode = value;
-                      if (_selectedExistingJournal == null && _availableUserJournals.isNotEmpty) {
-                        _selectedExistingJournal = _availableUserJournals.first;
-                      }
-                      _selectedPaletteModel = null;
-                      _updatePreparedPaletteFromJournal(_selectedExistingJournal);
+                      _updatePaletteBasedOnMode();
                     });
                   }
                 }
@@ -383,8 +416,15 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
               const SizedBox(height: 15),
               if (_creationMode == JournalCreationMode.fromPaletteModel) _buildPaletteModelSelector(),
               if (_creationMode == JournalCreationMode.fromExistingJournal) _buildExistingJournalSelector(),
+
+              // L'éditeur de palette est toujours visible, mais son contenu dépend du mode
               const Divider(height: 30, thickness: 1),
-              Text('Prévisualisation et édition de la palette :', style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                  _creationMode == JournalCreationMode.emptyPalette
+                      ? 'Composez votre nouvelle palette :'
+                      : 'Prévisualisation et édition de la palette :',
+                  style: Theme.of(context).textTheme.titleSmall
+              ),
               const SizedBox(height: 10),
               if (!_isLoading)
                 InlinePaletteEditorWidget(
@@ -407,6 +447,7 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
                   },
                   showNameEditor: false,
                   isEditingJournalPalette: false,
+                  onDeleteAllColorsRequested: _handleDeleteAllColorsInCreation,
                 ),
               const SizedBox(height: 30),
               Center(
