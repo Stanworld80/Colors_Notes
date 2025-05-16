@@ -478,7 +478,7 @@ class _NoteListPageState extends State<NoteListPage> {
                     final note = notes[index];
                     final colorData = _getColorDataById(journalForPalette, note.paletteElementId);
                     // Date formatter for list view items.
-                    final DateFormat dateFormat = DateFormat('EEEE dd MMMM HH:mm', 'fr_FR'); // Using a more complete date format. Note: yyyy was GGGGGy before
+                    final DateFormat dateFormat = DateFormat('EEEE d MMMM y HH:mm', 'fr_FR');
 
                     final Color cardColor = colorData?.color ?? Theme.of(context).cardColor; // Default if colorData is null
                     final Color textColor = cardColor.computeLuminance() > 0.5 ? Colors.black87 : Colors.white;

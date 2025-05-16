@@ -53,3 +53,4 @@ build/036592f0c6014b40cf5d6d3d85082f2c/gen_localizations.stamp
 
 #flutter mock
 *.mocks.dart
+/chromedriver/
