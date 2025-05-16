@@ -12,5 +12,6 @@
   "noAccountYetSignUp": "No account yet? Sign Up",
   "aboutLink": "About",
   "licenseLink": "License",
-  "downloadForAndroidLink": "Download for Android"
+  "downloadForAndroidLink": "Download for Android",
+  "errorLaunchingUrl" : "loading error"
 }

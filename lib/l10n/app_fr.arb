@@ -12,5 +12,6 @@
   "noAccountYetSignUp": "Pas encore de compte ? S'inscrire",
   "aboutLink": "À Propos",
   "licenseLink": "Licence",
-  "downloadForAndroidLink": "Télécharger pour Android"
+  "downloadForAndroidLink": "Télécharger pour Android",
+  "errorLaunchingUrl" : "erreur de chargement"
 }

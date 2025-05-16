@@ -2,13 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
-import 'package:url_launcher/url_launcher.dart'; // Importez url_launcher
-import 'package:package_info_plus/package_info_plus.dart';
-
-import '../services/auth_service.dart';
-import 'about_page.dart';
-import 'license_page.dart';
 import 'package:colors_notes/l10n/app_localizations.dart';
+import '../services/auth_service.dart';
+import '../widgets/auth_page_footer.dart';
+
 
 final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0, printTime: true));
 
@@ -27,8 +24,6 @@ class _SignInPageState extends State<SignInPage> {
   bool _isLoadingGoogle = false;
   bool _obscurePassword = true;
 
- final String _apkUrl = "https://www.stanworld.org/main/web/ColorsNotes-1.5.4.apk";
- // final String _apkUrl = "https://colorsnotes-e9142.web.app/apk/ColorsNotes-1.5.4-unavaible.txt";
 
   @override
   void dispose() {
@@ -85,18 +80,6 @@ class _SignInPageState extends State<SignInPage> {
     }
   }
 
-  Future<void> _launchAPKUrl() async {
-    if (await canLaunchUrl(Uri.parse(_apkUrl))) {
-      await launchUrl(Uri.parse(_apkUrl), mode: LaunchMode.externalApplication);
-    } else {
-      _loggerPage.e("Impossible de lancer l'URL: $_apkUrl");
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Impossible d'ouvrir le lien de téléchargement.")),
-        );
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,16 +99,16 @@ class _SignInPageState extends State<SignInPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                    l10n.appName, // Clé pour "Colors & Notes"
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Theme.of(context).primaryColor)
+                  l10n.appName, // Clé pour "Colors & Notes"
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Theme.of(context).primaryColor),
                 ),
                 const SizedBox(height: 30),
                 TextFormField(
                   controller: _emailController,
                   decoration: InputDecoration(
-                      labelText: l10n.emailLabel, // Clé pour "Email"
-                      border: const OutlineInputBorder(),
-                      prefixIcon: const Icon(Icons.email_outlined)
+                    labelText: l10n.emailLabel, // Clé pour "Email"
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.email_outlined),
                   ),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
@@ -163,22 +146,22 @@ class _SignInPageState extends State<SignInPage> {
                 _isLoading
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
-                  onPressed: _signInWithEmail,
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 50),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                  child: Text(l10n.signInButton, style: const TextStyle(fontSize: 16)), // Clé pour "Se connecter"
-                ),
+                      onPressed: _signInWithEmail,
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 50),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: Text(l10n.signInButton, style: const TextStyle(fontSize: 16)), // Clé pour "Se connecter"
+                    ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: Row(
                     children: <Widget>[
                       const Expanded(child: Divider(thickness: 1)), // Épaisseur réduite
                       Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                          child: Text(l10n.orSeparator, style: TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.w500)) // Clé pour "ou"
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                        child: Text(l10n.orSeparator, style: TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.w500)), // Clé pour "ou"
                       ),
                       const Expanded(child: Divider(thickness: 1)), // Épaisseur réduite
                     ],
@@ -188,24 +171,24 @@ class _SignInPageState extends State<SignInPage> {
                 _isLoadingGoogle
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
-                  onPressed: _signInWithGoogle,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black.withOpacity(0.70),
-                    minimumSize: const Size(double.infinity, 50),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0), side: BorderSide(color: Colors.grey.shade400)),
-                    elevation: 1.0,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SvgPicture.asset('assets/signin-assets/Web/svg/light/web_light_sq_na.svg'),
-                      const SizedBox(width: 12),
-                      Text(l10n.signInWithGoogleButton, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)), // Clé pour "Se connecter avec Google"
-                    ],
-                  ),
-                ),
+                      onPressed: _signInWithGoogle,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black.withOpacity(0.70),
+                        minimumSize: const Size(double.infinity, 50),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0), side: BorderSide(color: Colors.grey.shade400)),
+                        elevation: 1.0,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SvgPicture.asset('assets/signin-assets/Web/svg/light/web_light_sq_na.svg'),
+                          const SizedBox(width: 12),
+                          Text(l10n.signInWithGoogleButton, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)), // Clé pour "Se connecter avec Google"
+                        ],
+                      ),
+                    ),
                 const SizedBox(height: 30), // Espacement avant les liens
                 TextButton(
                   onPressed: () {
@@ -213,39 +196,8 @@ class _SignInPageState extends State<SignInPage> {
                   },
                   child: Text(l10n.noAccountYetSignUp), // Clé pour "Pas encore de compte ? S'inscrire"
                 ),
-                const SizedBox(height: 20), // Espacement ajusté
-                Wrap( // Utilisation de Wrap pour une meilleure gestion sur petits écrans
-                  alignment: WrapAlignment.center,
-                  spacing: 4.0, // Espace horizontal entre les éléments
-                  runSpacing: 0.0, // Espace vertical entre les lignes (si Wrap passe à la ligne)
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutPage()));
-                      },
-                      style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                      child: Text("A Propos", style: TextStyle(fontSize: 12, color: Colors.grey[600], decoration: TextDecoration.underline)), // Clé pour "À Propos"
-                    ),
-                    Text('|', style: TextStyle(fontSize: 12, color: Colors.grey[400])),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => const ColorsNotesLicensePage()));
-                      },
-                      style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                      child: Text("License", style: TextStyle(fontSize: 12, color: Colors.grey[600], decoration: TextDecoration.underline)), // Clé pour "Licence"
-                    ),
-
-                    Text('|', style: TextStyle(fontSize: 12, color: Colors.grey[400])),
-                    TextButton(
-                      onPressed: _launchAPKUrl,
-                      style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                      child: Text(
-                          "Télécharger l'application Android",
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600], decoration: TextDecoration.underline)
-                      ),
-                    ),
-                  ],
-                ),
+                const SizedBox(height: 24), // Espacement ajusté
+                const AuthPageFooter(),
               ],
             ),
           ),

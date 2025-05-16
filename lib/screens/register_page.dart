@@ -3,8 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
 
 import '../services/auth_service.dart';
-import 'about_page.dart';
-import 'license_page.dart';
+import '../widgets/auth_page_footer.dart';
 
 final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0, printTime: true));
 
@@ -205,26 +204,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: const Text('Déjà un compte ? Se connecter'),
                 ),
                 const SizedBox(height: 30),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutPage()));
-                      },
-                      style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                      child: Text('À Propos', style: TextStyle(fontSize: 12, color: Colors.grey[600], decoration: TextDecoration.underline)),
-                    ),
-                    Padding(padding: const EdgeInsets.symmetric(horizontal: 8.0), child: Text('|', style: TextStyle(fontSize: 12, color: Colors.grey[400]))),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => const ColorsNotesLicensePage()));
-                      },
-                      style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                      child: Text('Licence', style: TextStyle(fontSize: 12, color: Colors.grey[600], decoration: TextDecoration.underline)),
-                    ),
-                  ],
-                ),
+                const SizedBox(height: 24), // Espacement ajusté
+                const AuthPageFooter(),
               ],
             ),
           ),
