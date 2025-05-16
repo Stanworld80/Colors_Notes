@@ -43,16 +43,16 @@ void main() {
       final testUserId = 'paletteModelUser';
       final colorM1 = createTestColorData(title: 'ModelColor1', hex: '#ABCDEF', id: 'mc1');
       // Noms choisis pour tester le tri alphabétique
-      final paletteModel_B = PaletteModel(id: 'pmB', name: 'Modèle B - Beta', colors: [colorM1], userId: testUserId);
-      final paletteModel_A = PaletteModel(id: 'pmA', name: 'Modèle A - Alpha', colors: [colorM1], userId: testUserId);
-      final paletteModel_C = PaletteModel(id: 'pmC', name: 'Modèle C - Charlie', colors: [colorM1], userId: testUserId);
+      final palettemodelB = PaletteModel(id: 'pmB', name: 'Modèle B - Beta', colors: [colorM1], userId: testUserId);
+      final palettemodelA = PaletteModel(id: 'pmA', name: 'Modèle A - Alpha', colors: [colorM1], userId: testUserId);
+      final palettemodelC = PaletteModel(id: 'pmC', name: 'Modèle C - Charlie', colors: [colorM1], userId: testUserId);
 
 
       test('getUserPaletteModelsStream devrait retourner les modèles de l\'utilisateur triés par nom', () async {
         // Ajouter dans un ordre non alphabétique pour vérifier le tri
-        await firestoreService.createPaletteModel(paletteModel_B);
-        await firestoreService.createPaletteModel(paletteModel_C);
-        await firestoreService.createPaletteModel(paletteModel_A);
+        await firestoreService.createPaletteModel(palettemodelB);
+        await firestoreService.createPaletteModel(palettemodelC);
+        await firestoreService.createPaletteModel(palettemodelA);
 
         await Future.delayed(Duration.zero); // Permettre à FakeFirestore de traiter
 
@@ -69,10 +69,10 @@ void main() {
       });
 
       test('getPredefinedPaletteModelsStream devrait retourner les modèles prédéfinis triés par nom', () async {
-        final predefined_Z = PaletteModel(id: 'predefZ', name: 'Z Predefined', colors: [], isPredefined: true);
-        final predefined_A = PaletteModel(id: 'predefA', name: 'A Predefined', colors: [], isPredefined: true);
-        await fakeFirestore.collection('paletteModels').doc(predefined_Z.id).set(predefined_Z.toMap());
-        await fakeFirestore.collection('paletteModels').doc(predefined_A.id).set(predefined_A.toMap());
+        final predefinedZ = PaletteModel(id: 'predefZ', name: 'Z Predefined', colors: [], isPredefined: true);
+        final predefinedA = PaletteModel(id: 'predefA', name: 'A Predefined', colors: [], isPredefined: true);
+        await fakeFirestore.collection('paletteModels').doc(predefinedZ.id).set(predefinedZ.toMap());
+        await fakeFirestore.collection('paletteModels').doc(predefinedA.id).set(predefinedA.toMap());
 
         await Future.delayed(Duration.zero);
 
@@ -88,33 +88,33 @@ void main() {
 
       // ... autres tests pour PaletteModel Management (create, update, delete, checkNameExists)
       test('createPaletteModel devrait ajouter un modèle de palette', () async {
-        await firestoreService.createPaletteModel(paletteModel_A);
-        final doc = await fakeFirestore.collection('paletteModels').doc(paletteModel_A.id).get();
+        await firestoreService.createPaletteModel(palettemodelA);
+        final doc = await fakeFirestore.collection('paletteModels').doc(palettemodelA.id).get();
         expect(doc.exists, isTrue);
-        expect(doc.data()?['name'], paletteModel_A.name);
+        expect(doc.data()?['name'], palettemodelA.name);
       });
 
       test('updatePaletteModel devrait mettre à jour un modèle', () async {
-        await firestoreService.createPaletteModel(paletteModel_A);
+        await firestoreService.createPaletteModel(palettemodelA);
         final updatedName = 'Modèle A - Alpha Modifié';
-        final updatedModel = paletteModel_A.copyWith(name: updatedName);
+        final updatedModel = palettemodelA.copyWith(name: updatedName);
 
         await firestoreService.updatePaletteModel(updatedModel);
-        final doc = await fakeFirestore.collection('paletteModels').doc(paletteModel_A.id).get();
+        final doc = await fakeFirestore.collection('paletteModels').doc(palettemodelA.id).get();
         expect(doc.data()?['name'], updatedName);
       });
 
       test('deletePaletteModel devrait supprimer un modèle', () async {
-        await firestoreService.createPaletteModel(paletteModel_A);
-        await firestoreService.deletePaletteModel(paletteModel_A.id);
-        final doc = await fakeFirestore.collection('paletteModels').doc(paletteModel_A.id).get();
+        await firestoreService.createPaletteModel(palettemodelA);
+        await firestoreService.deletePaletteModel(palettemodelA.id);
+        final doc = await fakeFirestore.collection('paletteModels').doc(palettemodelA.id).get();
         expect(doc.exists, isFalse);
       });
 
       test('checkPaletteModelNameExists devrait fonctionner correctement', () async {
-        await firestoreService.createPaletteModel(paletteModel_A);
-        expect(await firestoreService.checkPaletteModelNameExists(paletteModel_A.name, testUserId), isTrue);
-        expect(await firestoreService.checkPaletteModelNameExists(paletteModel_A.name, testUserId, excludeId: paletteModel_A.id), isFalse);
+        await firestoreService.createPaletteModel(palettemodelA);
+        expect(await firestoreService.checkPaletteModelNameExists(palettemodelA.name, testUserId), isTrue);
+        expect(await firestoreService.checkPaletteModelNameExists(palettemodelA.name, testUserId, excludeId: palettemodelA.id), isFalse);
         expect(await firestoreService.checkPaletteModelNameExists('Nouveau Nom Inexistant', testUserId), isFalse);
       });
     });

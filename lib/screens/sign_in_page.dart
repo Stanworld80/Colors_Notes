@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
 import 'package:url_launcher/url_launcher.dart'; // Importez url_launcher
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../services/auth_service.dart';
 import 'about_page.dart';
@@ -26,7 +27,8 @@ class _SignInPageState extends State<SignInPage> {
   bool _isLoadingGoogle = false;
   bool _obscurePassword = true;
 
-  final String _apkUrl = "https://colorsnotes-e9142.web.app/apk/ColorsNotes-1.5.4.apk";
+ final String _apkUrl = "https://www.stanworld.org/main/web/ColorsNotes-1.5.4.apk";
+ // final String _apkUrl = "https://colorsnotes-e9142.web.app/apk/ColorsNotes-1.5.4-unavaible.txt";
 
   @override
   void dispose() {

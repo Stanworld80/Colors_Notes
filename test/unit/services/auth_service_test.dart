@@ -50,11 +50,11 @@ void main() {
     when(mockAdditionalUserInfo.isNewUser).thenReturn(false);
 
     when(mockFirestoreService.initializeNewUserData(any, displayName: anyNamed('displayName'), email: anyNamed('email')))
-        .thenAnswer((_) async => null);
-    when(mockUser.updateDisplayName(any)).thenAnswer((_) async => null);
+        .thenAnswer((_) async {});
+    when(mockUser.updateDisplayName(any)).thenAnswer((_) async {});
     when(mockGoogleSignIn.isSignedIn()).thenAnswer((_) async => false);
     when(mockGoogleSignIn.signOut()).thenAnswer((_) async => null);
-    when(mockFirebaseAuth.signOut()).thenAnswer((_) async => null);
+    when(mockFirebaseAuth.signOut()).thenAnswer((_) async {});
   });
 
   tearDown(() {
