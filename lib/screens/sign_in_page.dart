@@ -7,9 +7,7 @@ import 'package:url_launcher/url_launcher.dart'; // Importez url_launcher
 import '../services/auth_service.dart';
 import 'about_page.dart';
 import 'license_page.dart';
-
-import 'package:colors_notes/l10n/app_localizations.dart'; // Adaptez le chemin/nom du package si nécessaire
-
+import 'package:colors_notes/l10n/app_localizations.dart';
 
 final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0, printTime: true));
 
@@ -28,7 +26,7 @@ class _SignInPageState extends State<SignInPage> {
   bool _isLoadingGoogle = false;
   bool _obscurePassword = true;
 
-  final String _apkUrl = "https://VOTRE_DOMAINE_FIREBASE_HOSTING/chemin/vers/votre_app.apk";
+  final String _apkUrl = "https://colorsnotes-e9142.web.app/apk/ColorsNotes-1.5.4.apk";
 
   @override
   void dispose() {
@@ -240,7 +238,7 @@ class _SignInPageState extends State<SignInPage> {
                       onPressed: _launchAPKUrl,
                       style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                       child: Text(
-                          "Télécharger l'application Android", // Clé pour "Télécharger pour Android"
+                          "Télécharger l'application Android",
                           style: TextStyle(fontSize: 12, color: Colors.grey[600], decoration: TextDecoration.underline)
                       ),
                     ),
