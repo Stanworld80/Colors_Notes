@@ -1,17 +1,11 @@
 // File: lib/widgets/auth_page_footer.dart
-// (New reusable widget for the authentication pages footer)
-
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:package_info_plus/package_info_plus.dart'; // Already in app_version_display, but good for clarity
-import 'package:logger/logger.dart'; // For logging URL launch errors
+import 'package:logger/logger.dart';
 
-// Import your localization class
 import 'package:colors_notes/l10n/app_localizations.dart';
-// Import your screen routes
 import '../screens/about_page.dart';
 import '../screens/license_page.dart';
-// Import the AppVersionDisplay widget
 import 'app_version_display.dart';
 
 final _loggerFooter = Logger(printer: PrettyPrinter(methodCount: 0));
@@ -19,7 +13,6 @@ final _loggerFooter = Logger(printer: PrettyPrinter(methodCount: 0));
 class AuthPageFooter extends StatelessWidget {
 
   final String apkUrl = "https://www.stanworld.org/main/web/ColorsNotes-1.5.4.apk";
-
   // final String apkUrl = "https://colorsnotes-e9142.web.app/apk/ColorsNotes-1.5.4-unavaible.txt";
 
   const AuthPageFooter({super.key});
