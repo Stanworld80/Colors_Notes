@@ -4,21 +4,11 @@ import 'package:mockito/mockito.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-
 import 'package:colors_notes/services/auth_service.dart';
 import 'package:colors_notes/services/firestore_service.dart';
 import 'auth_service_test.mocks.dart';
 
-@GenerateMocks([
-  FirebaseAuth,
-  GoogleSignIn,
-  GoogleSignInAccount,
-  GoogleSignInAuthentication,
-  User,
-  UserCredential,
-  FirestoreService,
-  AdditionalUserInfo
-])
+@GenerateMocks([FirebaseAuth, GoogleSignIn, GoogleSignInAccount, GoogleSignInAuthentication, User, UserCredential, FirestoreService, AdditionalUserInfo])
 void main() {
   late AuthService authService;
   late MockFirebaseAuth mockFirebaseAuth;
@@ -49,8 +39,7 @@ void main() {
     when(mockUserCredential.additionalUserInfo).thenReturn(mockAdditionalUserInfo);
     when(mockAdditionalUserInfo.isNewUser).thenReturn(false);
 
-    when(mockFirestoreService.initializeNewUserData(any, displayName: anyNamed('displayName'), email: anyNamed('email')))
-        .thenAnswer((_) async {});
+    when(mockFirestoreService.initializeNewUserData(any, displayName: anyNamed('displayName'), email: anyNamed('email'))).thenAnswer((_) async {});
     when(mockUser.updateDisplayName(any)).thenAnswer((_) async {});
     when(mockGoogleSignIn.isSignedIn()).thenAnswer((_) async => false);
     when(mockGoogleSignIn.signOut()).thenAnswer((_) async => null);
@@ -68,12 +57,9 @@ void main() {
     clearInteractions(mockAdditionalUserInfo);
   });
 
-
   group('AuthService Tests', () {
-
     test('signInWithEmailAndPassword - Success', () async {
-      when(mockFirebaseAuth.signInWithEmailAndPassword(email: anyNamed('email'), password: anyNamed('password')))
-          .thenAnswer((_) async => mockUserCredential);
+      when(mockFirebaseAuth.signInWithEmailAndPassword(email: anyNamed('email'), password: anyNamed('password'))).thenAnswer((_) async => mockUserCredential);
 
       final user = await authService.signInWithEmailAndPassword('test@example.com', 'password123');
 
@@ -86,13 +72,9 @@ void main() {
     });
 
     test('signInWithEmailAndPassword - Failure (Wrong Password)', () async {
-      when(mockFirebaseAuth.signInWithEmailAndPassword(email: anyNamed('email'), password: anyNamed('password')))
-          .thenThrow(FirebaseAuthException(code: 'wrong-password'));
+      when(mockFirebaseAuth.signInWithEmailAndPassword(email: anyNamed('email'), password: anyNamed('password'))).thenThrow(FirebaseAuthException(code: 'wrong-password'));
 
-      expect(
-              () async => await authService.signInWithEmailAndPassword('test@example.com', 'wrongpass'),
-          throwsA(predicate((e) => e is String && e.contains('Mot de passe incorrect')))
-      );
+      expect(() async => await authService.signInWithEmailAndPassword('test@example.com', 'wrongpass'), throwsA(predicate((e) => e is String && e.contains('Mot de passe incorrect'))));
       verify(mockFirebaseAuth.signInWithEmailAndPassword(email: 'test@example.com', password: 'wrongpass')).called(1);
       verifyNoMoreInteractions(mockFirebaseAuth);
       verifyNoMoreInteractions(mockFirestoreService);
@@ -100,8 +82,7 @@ void main() {
     });
 
     test('signUpWithEmailAndPassword - Success (New User)', () async {
-      when(mockFirebaseAuth.createUserWithEmailAndPassword(email: anyNamed('email'), password: anyNamed('password')))
-          .thenAnswer((_) async => mockUserCredential);
+      when(mockFirebaseAuth.createUserWithEmailAndPassword(email: anyNamed('email'), password: anyNamed('password'))).thenAnswer((_) async => mockUserCredential);
 
       final user = await authService.signUpWithEmailAndPassword('new@example.com', 'password123', 'New User');
 
@@ -110,11 +91,7 @@ void main() {
       verify(mockFirebaseAuth.createUserWithEmailAndPassword(email: 'new@example.com', password: 'password123')).called(1);
       // *** Simplification de la vérification updateDisplayName ***
       verify(mockUser.updateDisplayName(any)).called(1);
-      verify(mockFirestoreService.initializeNewUserData(
-          any,
-          displayName: 'New User',
-          email: 'new@example.com'
-      )).called(1);
+      verify(mockFirestoreService.initializeNewUserData(any, displayName: 'New User', email: 'new@example.com')).called(1);
       verifyNoMoreInteractions(mockFirebaseAuth);
       verifyNoMoreInteractions(mockFirestoreService);
       // verifyNoMoreInteractions(mockUser); // Temporairement commenté
@@ -134,11 +111,7 @@ void main() {
       expect(user, isNotNull);
       verify(mockGoogleSignIn.signIn()).called(1);
       verify(mockFirebaseAuth.signInWithCredential(any)).called(1);
-      verify(mockFirestoreService.initializeNewUserData(
-          any,
-          displayName: anyNamed('displayName'),
-          email: anyNamed('email')
-      )).called(1);
+      verify(mockFirestoreService.initializeNewUserData(any, displayName: anyNamed('displayName'), email: anyNamed('email'))).called(1);
       verifyNoMoreInteractions(mockFirebaseAuth);
       verifyNoMoreInteractions(mockGoogleSignIn);
       verifyNoMoreInteractions(mockFirestoreService);
@@ -163,7 +136,6 @@ void main() {
       verifyNoMoreInteractions(mockFirestoreService);
     });
 
-
     test('signOut - Success', () async {
       when(mockGoogleSignIn.isSignedIn()).thenAnswer((_) async => true);
 
@@ -177,6 +149,5 @@ void main() {
       verifyNoMoreInteractions(mockGoogleSignIn);
       verifyNoMoreInteractions(mockFirestoreService);
     });
-
   });
 }

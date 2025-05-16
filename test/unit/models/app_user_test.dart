@@ -8,12 +8,7 @@ void main() {
     final Timestamp now = Timestamp.now();
 
     test('Constructeur devrait assigner les valeurs correctement', () {
-      final appUser = AppUser(
-        id: 'user123',
-        email: 'test@example.com',
-        displayName: 'Test User',
-        registrationDate: now,
-      );
+      final appUser = AppUser(id: 'user123', email: 'test@example.com', displayName: 'Test User', registrationDate: now);
 
       expect(appUser.id, 'user123');
       expect(appUser.email, 'test@example.com');
@@ -22,12 +17,7 @@ void main() {
     });
 
     test('toMap devrait retourner une map correcte', () {
-      final appUser = AppUser(
-        id: 'user123',
-        email: 'test@example.com',
-        displayName: 'Test User',
-        registrationDate: now,
-      );
+      final appUser = AppUser(id: 'user123', email: 'test@example.com', displayName: 'Test User', registrationDate: now);
       final map = appUser.toMap();
 
       // L'ID n'est pas inclus dans toMap car il est utilisé comme ID de document
@@ -38,11 +28,7 @@ void main() {
     });
 
     test('fromMap devrait créer une instance AppUser correcte', () {
-      final map = {
-        'email': 'test@example.com',
-        'displayName': 'Test User',
-        'registrationDate': now,
-      };
+      final map = {'email': 'test@example.com', 'displayName': 'Test User', 'registrationDate': now};
       final documentId = 'user123';
       final appUser = AppUser.fromMap(map, documentId);
 
@@ -53,11 +39,7 @@ void main() {
     });
 
     test('fromMap devrait gérer les champs optionnels nuls', () {
-      final map = {
-        'email': null,
-        'displayName': null,
-        'registrationDate': now,
-      };
+      final map = {'email': null, 'displayName': null, 'registrationDate': now};
       final documentId = 'user456';
       final appUser = AppUser.fromMap(map, documentId);
 
@@ -68,21 +50,14 @@ void main() {
     });
 
     test('fromMap devrait utiliser Timestamp.now() si registrationDate est nulle ou manquante', () {
-      final mapWithoutDate = {
-        'email': 'test@example.com',
-        'displayName': 'Test User',
-      };
+      final mapWithoutDate = {'email': 'test@example.com', 'displayName': 'Test User'};
       final appUser1 = AppUser.fromMap(mapWithoutDate, 'user1');
       // La comparaison exacte des Timestamps peut être délicate,
       // donc nous vérifions qu'elle n'est pas nulle et proche de maintenant.
       expect(appUser1.registrationDate, isNotNull);
       expect(appUser1.registrationDate.toDate().difference(DateTime.now()).inSeconds.abs(), lessThan(5));
 
-      final mapWithNullDate = {
-        'email': 'test@example.com',
-        'displayName': 'Test User',
-        'registrationDate': null,
-      };
+      final mapWithNullDate = {'email': 'test@example.com', 'displayName': 'Test User', 'registrationDate': null};
       final appUser2 = AppUser.fromMap(mapWithNullDate, 'user2');
       expect(appUser2.registrationDate, isNotNull);
       expect(appUser2.registrationDate.toDate().difference(DateTime.now()).inSeconds.abs(), lessThan(5));

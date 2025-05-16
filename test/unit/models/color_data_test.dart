@@ -48,12 +48,7 @@ void main() {
       expect(colorData1.title, 'Sans titre');
       expect(colorData1.isDefault, isFalse);
 
-      final mapWithNulls = {
-        'paletteElementId': null,
-        'title': null,
-        'hexCode': null,
-        'isDefault': null,
-      };
+      final mapWithNulls = {'paletteElementId': null, 'title': null, 'hexCode': null, 'isDefault': null};
       final colorData2 = ColorData.fromMap(mapWithNulls);
       expect(colorData2.paletteElementId, isNotEmpty);
       expect(Uuid.isValidUUID(fromString: colorData2.paletteElementId), isTrue);
@@ -71,12 +66,7 @@ void main() {
       expect(copiedIdentical.hexCode, original.hexCode);
       expect(copiedIdentical.isDefault, original.isDefault);
 
-      final copiedModified = original.copyWith(
-          title: 'Modifié',
-          hexCode: '#BBBBBB',
-          isDefault: false,
-          paletteElementId: 'new-id-for-copy'
-      );
+      final copiedModified = original.copyWith(title: 'Modifié', hexCode: '#BBBBBB', isDefault: false, paletteElementId: 'new-id-for-copy');
       expect(copiedModified.paletteElementId, 'new-id-for-copy');
       expect(copiedModified.title, 'Modifié');
       expect(copiedModified.hexCode, '#BBBBBB');

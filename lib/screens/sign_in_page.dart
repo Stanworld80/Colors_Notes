@@ -1,51 +1,81 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_svg/flutter_svg.dart'; // For displaying SVG images like the Google logo.
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
-import 'package:colors_notes/l10n/app_localizations.dart';
+import 'package:colors_notes/l10n/app_localizations.dart'; // For localized strings.
+
 import '../services/auth_service.dart';
-import '../widgets/auth_page_footer.dart';
+import '../widgets/auth_page_footer.dart'; // Common footer for authentication pages.
 
-
+/// Logger instance for this page.
 final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0, printTime: true));
 
+/// A StatefulWidget screen for user sign-in.
+///
+/// This page provides options for users to sign in using their email and password,
+/// or via Google Sign-In. It includes form validation and loading indicators
+/// during authentication attempts.
 class SignInPage extends StatefulWidget {
-  const SignInPage({Key? key}) : super(key: key);
+  /// Creates an instance of [SignInPage].
+  const SignInPage({super.key});
 
   @override
   _SignInPageState createState() => _SignInPageState();
 }
 
+/// The state for the [SignInPage].
+///
+/// Manages the sign-in form, input controllers, loading states for different
+/// sign-in methods, and password visibility.
 class _SignInPageState extends State<SignInPage> {
+  /// Global key for the sign-in form to manage validation and state.
   final _formKey = GlobalKey<FormState>();
+  /// Controller for the email input field.
   final _emailController = TextEditingController();
+  /// Controller for the password input field.
   final _passwordController = TextEditingController();
+  /// Flag to indicate if email/password sign-in is in progress.
   bool _isLoading = false;
+  /// Flag to indicate if Google Sign-In is in progress.
   bool _isLoadingGoogle = false;
+  /// Flag to toggle password visibility.
   bool _obscurePassword = true;
 
 
   @override
   void dispose() {
+    // Dispose controllers when the widget is removed from the widget tree.
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
+  /// Attempts to sign in the user with their email and password.
+  ///
+  /// Validates the form. If valid, it calls the [AuthService] to authenticate.
+  /// Navigation upon successful sign-in is handled by [AuthGate].
+  /// Displays an error message on failure.
   Future<void> _signInWithEmail() async {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
+        });
+      }
       try {
         final authService = Provider.of<AuthService>(context, listen: false);
-        await authService.signInWithEmailAndPassword(_emailController.text.trim(), _passwordController.text.trim());
-        _loggerPage.i("Tentative de connexion réussie pour ${_emailController.text.trim()}");
-        // La navigation est gérée par AuthGate après un changement d'état d'authentification réussi
+        await authService.signInWithEmailAndPassword(
+            _emailController.text.trim(),
+            _passwordController.text.trim()
+        );
+        _loggerPage.i("Tentative de connexion réussie pour ${_emailController.text.trim()}"); // Log message in French
+        // Navigation is handled by AuthGate after a successful authentication state change.
       } catch (e) {
-        _loggerPage.e("Erreur connexion email: ${e.toString()}");
+        _loggerPage.e("Erreur connexion email: ${e.toString()}"); // Log message in French
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent));
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent)
+          );
         }
       } finally {
         if (mounted) {
@@ -57,19 +87,28 @@ class _SignInPageState extends State<SignInPage> {
     }
   }
 
+  /// Attempts to sign in the user using Google Sign-In.
+  ///
+  /// Calls the [AuthService] to initiate the Google Sign-In flow.
+  /// Navigation upon successful sign-in is handled by [AuthGate].
+  /// Displays an error message on failure.
   Future<void> _signInWithGoogle() async {
-    setState(() {
-      _isLoadingGoogle = true;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoadingGoogle = true;
+      });
+    }
     try {
       final authService = Provider.of<AuthService>(context, listen: false);
       await authService.signInWithGoogle();
-      _loggerPage.i("Tentative de connexion Google réussie.");
-      // La navigation est gérée par AuthGate
+      _loggerPage.i("Tentative de connexion Google réussie."); // Log message in French
+      // Navigation is handled by AuthGate after a successful authentication state change.
     } catch (e) {
-      _loggerPage.e("Erreur connexion Google: ${e.toString()}");
+      _loggerPage.e("Erreur connexion Google: ${e.toString()}"); // Log message in French
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent)
+        );
       }
     } finally {
       if (mounted) {
@@ -83,12 +122,12 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Accès aux traductions
+    // Access localized strings.
     final AppLocalizations l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.signInPageTitle), // Exemple d'utilisation d'une clé de traduction
+        title: Text(l10n.signInPageTitle), // Uses a localization key for "Se Connecter"
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -99,105 +138,122 @@ class _SignInPageState extends State<SignInPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  l10n.appName, // Clé pour "Colors & Notes"
+                  l10n.appName, // Uses a localization key for "Colors & Notes"
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Theme.of(context).primaryColor),
                 ),
                 const SizedBox(height: 30),
+                // Email Text Field
                 TextFormField(
                   controller: _emailController,
                   decoration: InputDecoration(
-                    labelText: l10n.emailLabel, // Clé pour "Email"
+                    labelText: l10n.emailLabel, // Uses a localization key for "Email"
                     border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.email_outlined),
                   ),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty || !value.contains('@') || !value.contains('.')) {
-                      return l10n.emailValidationError; // Clé pour "Veuillez entrer une adresse e-mail valide."
+                      return l10n.emailValidationError; // Uses a localization key for "Veuillez entrer une adresse e-mail valide."
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
+                // Password Text Field
                 TextFormField(
                   controller: _passwordController,
                   decoration: InputDecoration(
-                    labelText: l10n.passwordLabel, // Clé pour "Mot de passe"
+                    labelText: l10n.passwordLabel, // Uses a localization key for "Mot de passe"
                     border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(_obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined),
                       onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
+                        if (mounted) {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        }
                       },
                     ),
                   ),
                   obscureText: _obscurePassword,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return l10n.passwordValidationError; // Clé pour "Veuillez entrer votre mot de passe."
+                      return l10n.passwordValidationError; // Uses a localization key for "Veuillez entrer votre mot de passe."
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 24),
+                // Email Sign-In Button or Loading Indicator
                 _isLoading
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
-                      onPressed: _signInWithEmail,
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 50),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      child: Text(l10n.signInButton, style: const TextStyle(fontSize: 16)), // Clé pour "Se connecter"
-                    ),
+                  onPressed: _signInWithEmail,
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 50), // Full width button
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: Text(l10n.signInButton, style: const TextStyle(fontSize: 16)), // Uses a localization key for "Se connecter"
+                ),
+                // "Or" Separator
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: Row(
                     children: <Widget>[
-                      const Expanded(child: Divider(thickness: 1)), // Épaisseur réduite
+                      const Expanded(child: Divider(thickness: 1)),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Text(l10n.orSeparator, style: TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.w500)), // Clé pour "ou"
+                        child: Text(
+                            l10n.orSeparator, // Uses a localization key for "ou"
+                            style: TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.w500)
+                        ),
                       ),
-                      const Expanded(child: Divider(thickness: 1)), // Épaisseur réduite
+                      const Expanded(child: Divider(thickness: 1)),
                     ],
                   ),
                 ),
-                // SizedBox(height: 20), // Ajusté pour un meilleur espacement
+                // Google Sign-In Button or Loading Indicator
                 _isLoadingGoogle
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
-                      onPressed: _signInWithGoogle,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black.withOpacity(0.70),
-                        minimumSize: const Size(double.infinity, 50),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0), side: BorderSide(color: Colors.grey.shade400)),
-                        elevation: 1.0,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SvgPicture.asset('assets/signin-assets/Web/svg/light/web_light_sq_na.svg'),
-                          const SizedBox(width: 12),
-                          Text(l10n.signInWithGoogleButton, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)), // Clé pour "Se connecter avec Google"
-                        ],
-                      ),
+                  onPressed: _signInWithGoogle,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black.withOpacity(0.70), // Text color for Google button
+                    minimumSize: const Size(double.infinity, 50), // Full width button
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        side: BorderSide(color: Colors.grey.shade400) // Border for Google button
                     ),
-                const SizedBox(height: 30), // Espacement avant les liens
+                    elevation: 1.0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Google logo SVG asset.
+                      SvgPicture.asset('assets/signin-assets/Web/svg/light/web_light_sq_na.svg'),
+                      const SizedBox(width: 12),
+                      Text(
+                          l10n.signInWithGoogleButton, // Uses a localization key for "Se connecter avec Google"
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 30), // Spacing before navigation links
+                // Link to Registration Page
                 TextButton(
                   onPressed: () {
                     Navigator.pushNamed(context, '/register');
                   },
-                  child: Text(l10n.noAccountYetSignUp), // Clé pour "Pas encore de compte ? S'inscrire"
+                  child: Text(l10n.noAccountYetSignUp), // Uses a localization key for "Pas encore de compte ? S'inscrire"
                 ),
-                const SizedBox(height: 24), // Espacement ajusté
-                const AuthPageFooter(),
+                const SizedBox(height: 24), // Spacing before footer
+                const AuthPageFooter(), // Common footer for authentication pages
               ],
             ),
           ),

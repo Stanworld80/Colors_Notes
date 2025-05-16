@@ -22,13 +22,7 @@ void main() {
 
     test('Constructeur devrait assigner les valeurs et générer un ID si non fourni', () {
       final palette = createSamplePalette();
-      final journal = Journal(
-        userId: testUserId,
-        name: 'Mon Journal',
-        palette: palette,
-        createdAt: now,
-        lastUpdatedAt: now,
-      );
+      final journal = Journal(userId: testUserId, name: 'Mon Journal', palette: palette, createdAt: now, lastUpdatedAt: now);
 
       expect(journal.id, isNotEmpty);
       expect(Uuid.isValidUUID(fromString: journal.id), isTrue);
@@ -38,28 +32,14 @@ void main() {
       expect(journal.createdAt, now);
       expect(journal.lastUpdatedAt, now);
 
-      final journalWithId = Journal(
-        id: 'custom-journal-id',
-        userId: testUserId,
-        name: 'Autre Journal',
-        palette: palette,
-        createdAt: now,
-        lastUpdatedAt: now,
-      );
+      final journalWithId = Journal(id: 'custom-journal-id', userId: testUserId, name: 'Autre Journal', palette: palette, createdAt: now, lastUpdatedAt: now);
       expect(journalWithId.id, 'custom-journal-id');
     });
 
     test('toMap devrait retourner une map correcte incluant palette.id', () {
       final color1 = ColorData(paletteElementId: 'c1', title: 'Rouge', hexCode: '#FF0000');
       final palette = createSamplePalette(id: 'p1', colors: [color1]); // ID de la palette est 'p1'
-      final journal = Journal(
-        id: 'journalX',
-        userId: testUserId,
-        name: 'Journal X',
-        palette: palette,
-        createdAt: now,
-        lastUpdatedAt: now,
-      );
+      final journal = Journal(id: 'journalX', userId: testUserId, name: 'Journal X', palette: palette, createdAt: now, lastUpdatedAt: now);
       final map = journal.toMap();
 
       expect(map['userId'], testUserId);
@@ -80,18 +60,12 @@ void main() {
         'id': 'palette-from-map', // L'ID est présent dans la map pour fromEmbeddedMap
         'name': 'Palette de la Map',
         'colors': [
-          {'paletteElementId': 'color-fm-1', 'title': 'Bleu Map', 'hexCode': '#0000FF', 'isDefault': false}
+          {'paletteElementId': 'color-fm-1', 'title': 'Bleu Map', 'hexCode': '#0000FF', 'isDefault': false},
         ],
         'userId': testUserId,
         'isPredefined': false,
       };
-      final Map<String, dynamic> map = {
-        'userId': testUserId,
-        'name': 'Journal de la Map',
-        'palette': paletteMapData,
-        'createdAt': now,
-        'lastUpdatedAt': now,
-      };
+      final Map<String, dynamic> map = {'userId': testUserId, 'name': 'Journal de la Map', 'palette': paletteMapData, 'createdAt': now, 'lastUpdatedAt': now};
       final documentId = 'journal-from-map-id';
       final journal = Journal.fromMap(map, documentId);
 
@@ -108,7 +82,8 @@ void main() {
     });
 
     test('fromMap devrait gérer les champs optionnels/nuls et fournir des valeurs par défaut pour Journal et Palette', () {
-      final Map<String, dynamic> map = { // userId, name, et palette sont nuls ou manquants
+      final Map<String, dynamic> map = {
+        // userId, name, et palette sont nuls ou manquants
         'createdAt': null,
         'lastUpdatedAt': now,
         // 'palette': null, // Implicitement null si non fourni
@@ -143,18 +118,10 @@ void main() {
       expect(journal.palette.userId, testUserId); // La palette par défaut doit prendre le userId du journal
     });
 
-
     test('copyWith devrait copier l\'instance avec/sans nouvelles valeurs, y compris la palette en profondeur', () {
       final colorOrig = ColorData(paletteElementId: 'orig-c1', title: 'Couleur Originale', hexCode: '#111111');
       final paletteOrig = createSamplePalette(id: 'orig-p1', name: 'Palette Originale', colors: [colorOrig]);
-      final journalOrig = Journal(
-        id: 'orig-j1',
-        userId: testUserId,
-        name: 'Journal Original',
-        palette: paletteOrig,
-        createdAt: now,
-        lastUpdatedAt: now,
-      );
+      final journalOrig = Journal(id: 'orig-j1', userId: testUserId, name: 'Journal Original', palette: paletteOrig, createdAt: now, lastUpdatedAt: now);
 
       final journalCopiedIdentical = journalOrig.copyWith();
       expect(journalCopiedIdentical.id, journalOrig.id);
@@ -164,14 +131,9 @@ void main() {
       expect(identical(journalCopiedIdentical.palette.colors, journalOrig.palette.colors), isFalse);
       expect(identical(journalCopiedIdentical.palette, journalOrig.palette), isFalse);
 
-
       final colorNew = ColorData(paletteElementId: 'new-c1', title: 'Nouvelle Couleur', hexCode: '#222222');
       final paletteNew = createSamplePalette(id: 'new-p1', name: 'Nouvelle Palette', colors: [colorNew]);
-      final journalCopiedModified = journalOrig.copyWith(
-          name: 'Journal Modifié',
-          palette: paletteNew,
-          lastUpdatedAt: Timestamp.fromMillisecondsSinceEpoch(now.millisecondsSinceEpoch + 1000)
-      );
+      final journalCopiedModified = journalOrig.copyWith(name: 'Journal Modifié', palette: paletteNew, lastUpdatedAt: Timestamp.fromMillisecondsSinceEpoch(now.millisecondsSinceEpoch + 1000));
 
       expect(journalCopiedModified.id, journalOrig.id);
       expect(journalCopiedModified.name, 'Journal Modifié');

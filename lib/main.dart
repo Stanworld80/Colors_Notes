@@ -16,6 +16,7 @@ import 'firebase_options.dart';
 import 'services/auth_service.dart';
 import 'services/firestore_service.dart';
 import 'providers/active_journal_provider.dart';
+
 // import 'providers/locale_provider.dart'; // Uncomment if you create a LocaleProvider
 import 'screens/auth_gate.dart';
 import 'screens/sign_in_page.dart';
@@ -23,14 +24,7 @@ import 'screens/register_page.dart';
 import 'screens/main_screen.dart';
 
 /// Logger instance for application-wide logging.
-final _logger = Logger(
-  printer: PrettyPrinter(
-    methodCount: 1,
-    dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart,
-    printEmojis: true,
-    colors: true,
-  ),
-);
+final _logger = Logger(printer: PrettyPrinter(methodCount: 1, dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart, printEmojis: true, colors: true));
 
 /// The main entry point for the application.
 ///
@@ -41,9 +35,7 @@ Future<void> main() async {
   await initializeDateFormatting('fr_FR', null);
 
   try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     _logger.i('Firebase initialized successfully.');
   } catch (e, stackTrace) {
     _logger.e('Error initializing Firebase', error: e, stackTrace: stackTrace);
@@ -61,12 +53,7 @@ Future<void> main() async {
       providers: [
         Provider<AuthService>.value(value: authService),
         Provider<FirestoreService>.value(value: firestoreService),
-        ChangeNotifierProvider<ActiveJournalNotifier>(
-          create: (context) => ActiveJournalNotifier(
-            authService,
-            firestoreService,
-          ),
-        ),
+        ChangeNotifierProvider<ActiveJournalNotifier>(create: (context) => ActiveJournalNotifier(authService, firestoreService)),
         // ChangeNotifierProvider<LocaleProvider>( // Add your LocaleProvider here
         //   create: (_) => LocaleProvider(),
         // ),
@@ -90,25 +77,28 @@ class MyApp extends StatelessWidget {
     // final localeProvider = Provider.of<LocaleProvider>(context);
 
     return MaterialApp(
-      title: 'Colors & Notes', // This title could also be localized later.
+      title: 'Colors & Notes',
+      // This title could also be localized later.
       theme: ThemeData(
         primarySwatch: Colors.teal,
         visualDensity: VisualDensity.adaptivePlatformDensity,
-        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal).copyWith(
-          secondary: Colors.amberAccent,
-        ),
+        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal).copyWith(secondary: Colors.amberAccent),
       ),
 
       // --- Crucial Localization Setup ---
-      localizationsDelegates: AppLocalizations.localizationsDelegates, // USE THIS
-      supportedLocales: AppLocalizations.supportedLocales,       // AND THIS
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      // USE THIS
+      supportedLocales: AppLocalizations.supportedLocales,
+      // AND THIS
 
       // Manage the current locale (either forced, via provider, or system detection)
       // Example with a LocaleProvider (to be created and provided via MultiProvider):
       // locale: localeProvider.locale,
 
       // OR to force a language on startup for testing:
-      locale: const Locale('fr'), // or const Locale('en')
+      locale: const Locale('fr'),
+
+      // or const Locale('en')
 
       // OR for more advanced system locale detection:
       // localeResolutionCallback: (locale, supportedLocales) {
@@ -123,13 +113,8 @@ class MyApp extends StatelessWidget {
       //   // If the system locale is not supported, use the first in your list as a fallback
       //   return supportedLocales.first;
       // },
-
       home: AuthGate(),
-      routes: {
-        '/signin': (context) => const SignInPage(),
-        '/register': (context) => const RegisterPage(),
-        '/main': (context) => MainScreen(),
-      },
+      routes: {'/signin': (context) => const SignInPage(), '/register': (context) => const RegisterPage(), '/main': (context) => MainScreen()},
     );
   }
 }

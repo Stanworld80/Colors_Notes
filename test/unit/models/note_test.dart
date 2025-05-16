@@ -69,7 +69,8 @@ void main() {
     });
 
     test('fromMap devrait créer une instance Note correcte', () {
-      final Map<String, dynamic> map = { // Explicitement typé
+      final Map<String, dynamic> map = {
+        // Explicitement typé
         'journalId': testJournalId,
         'userId': testUserId,
         'content': 'Note depuis Map',
@@ -128,13 +129,8 @@ void main() {
       expect(copiedIdentical.createdAt, originalNote.createdAt);
       expect(copiedIdentical.lastUpdatedAt, originalNote.lastUpdatedAt);
 
-
       final newEventTime = Timestamp.fromMillisecondsSinceEpoch(now.millisecondsSinceEpoch + 10000);
-      final copiedModified = originalNote.copyWith(
-          content: 'Contenu Modifié',
-          eventTimestamp: newEventTime,
-          paletteElementId: 'new-color-id'
-      );
+      final copiedModified = originalNote.copyWith(content: 'Contenu Modifié', eventTimestamp: newEventTime, paletteElementId: 'new-color-id');
 
       expect(copiedModified.id, originalNote.id);
       expect(copiedModified.content, 'Contenu Modifié');

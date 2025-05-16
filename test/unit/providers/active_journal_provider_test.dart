@@ -38,8 +38,7 @@ void main() {
     when(mockAuthService.userStream).thenAnswer((_) => userStreamController.stream);
     when(mockAuthService.currentUser).thenReturn(null);
 
-    when(mockFirestoreService.getJournalStream(any))
-        .thenAnswer((invocation) => fakeFirestore.collection('journals').doc(invocation.positionalArguments[0]).snapshots());
+    when(mockFirestoreService.getJournalStream(any)).thenAnswer((invocation) => fakeFirestore.collection('journals').doc(invocation.positionalArguments[0]).snapshots());
 
     notifier = ActiveJournalNotifier(mockAuthService, mockFirestoreService);
   });
@@ -51,16 +50,21 @@ void main() {
   });
 
   group('ActiveJournalNotifier Tests', () {
-
     final journal1 = Journal(
-        id: 'journal1', userId: 'user123', name: 'Journal 1',
-        createdAt: Timestamp.now(), lastUpdatedAt: Timestamp.now(),
-        palette: Palette(id: 'p1', name: 'Palette 1', colors: [ColorData(paletteElementId: 'c1', title: 'Red', hexCode: 'FF0000')])
+      id: 'journal1',
+      userId: 'user123',
+      name: 'Journal 1',
+      createdAt: Timestamp.now(),
+      lastUpdatedAt: Timestamp.now(),
+      palette: Palette(id: 'p1', name: 'Palette 1', colors: [ColorData(paletteElementId: 'c1', title: 'Red', hexCode: 'FF0000')]),
     );
     final journal2 = Journal(
-        id: 'journal2', userId: 'user123', name: 'Journal 2',
-        createdAt: Timestamp.now(), lastUpdatedAt: Timestamp.now(),
-        palette: Palette(id: 'p2', name: 'Palette 2', colors: [ColorData(paletteElementId: 'c2', title: 'Blue', hexCode: '0000FF')])
+      id: 'journal2',
+      userId: 'user123',
+      name: 'Journal 2',
+      createdAt: Timestamp.now(),
+      lastUpdatedAt: Timestamp.now(),
+      palette: Palette(id: 'p2', name: 'Palette 2', colors: [ColorData(paletteElementId: 'c2', title: 'Blue', hexCode: '0000FF')]),
     );
 
     test('Initial state is correct (no user)', () {
@@ -73,8 +77,7 @@ void main() {
     test('Loads first journal when user logs in', () async {
       await fakeFirestore.collection('journals').doc(journal1.id).set(journal1.toMap());
       await fakeFirestore.collection('journals').doc(journal2.id).set(journal2.toMap());
-      when(mockFirestoreService.getJournalsStream('user123'))
-          .thenAnswer((_) => Stream.value([journal1, journal2]));
+      when(mockFirestoreService.getJournalsStream('user123')).thenAnswer((_) => Stream.value([journal1, journal2]));
       when(mockAuthService.currentUser).thenReturn(mockUser);
       userStreamController.add(mockUser);
       await Future.delayed(Duration(milliseconds: 10));
@@ -147,9 +150,11 @@ void main() {
     test('setActiveJournal handles journal not belonging to user', () async {
       await fakeFirestore.collection('journals').doc(journal1.id).set(journal1.toMap());
       await fakeFirestore.collection('journals').doc('otherUserJournal').set({
-        'userId': 'otherUser', 'name': 'Autre Journal',
-        'createdAt': Timestamp.now(), 'lastUpdatedAt': Timestamp.now(),
-        'palette': {'id': 'p3', 'name': 'Palette 3', 'colors': []}
+        'userId': 'otherUser',
+        'name': 'Autre Journal',
+        'createdAt': Timestamp.now(),
+        'lastUpdatedAt': Timestamp.now(),
+        'palette': {'id': 'p3', 'name': 'Palette 3', 'colors': []},
       });
       when(mockFirestoreService.getJournalsStream('user123')).thenAnswer((_) => Stream.value([journal1]));
       when(mockAuthService.currentUser).thenReturn(mockUser);
@@ -169,6 +174,5 @@ void main() {
       verify(mockFirestoreService.getJournalStream('otherUserJournal')).called(1);
       verify(mockFirestoreService.getJournalsStream('user123')).called(2);
     });
-
   });
 }

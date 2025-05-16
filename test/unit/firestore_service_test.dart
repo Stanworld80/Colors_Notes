@@ -47,7 +47,6 @@ void main() {
       final palettemodelA = PaletteModel(id: 'pmA', name: 'Modèle A - Alpha', colors: [colorM1], userId: testUserId);
       final palettemodelC = PaletteModel(id: 'pmC', name: 'Modèle C - Charlie', colors: [colorM1], userId: testUserId);
 
-
       test('getUserPaletteModelsStream devrait retourner les modèles de l\'utilisateur triés par nom', () async {
         // Ajouter dans un ordre non alphabétique pour vérifier le tri
         await firestoreService.createPaletteModel(palettemodelB);
@@ -127,8 +126,7 @@ void main() {
 
         await firestoreService.initializeNewUserData(mockFbUser, displayName: 'New Palette User', email: 'newpalette@example.com');
 
-        final journalQuery = await fakeFirestore.collection('journals')
-            .where('userId', isEqualTo: 'newUserWithPaletteCheck').limit(1).get();
+        final journalQuery = await fakeFirestore.collection('journals').where('userId', isEqualTo: 'newUserWithPaletteCheck').limit(1).get();
         expect(journalQuery.docs.isNotEmpty, isTrue);
         final journalData = journalQuery.docs.first.data();
         final paletteData = journalData['palette'] as Map<String, dynamic>; // data ne sera pas null ici
