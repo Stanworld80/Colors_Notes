@@ -87,10 +87,11 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
       return true;
     }
     final firestoreService = Provider.of<FirestoreService>(context, listen: false);
-    if (mounted)
+    if (mounted) {
       setState(() {
         _isLoading = true;
       });
+    }
     try {
       final isUsed = await firestoreService.isPaletteElementUsedInNotes(widget.journalToUpdatePaletteFor!.id, paletteElementId);
       return !isUsed;
@@ -101,10 +102,11 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
       }
       return false;
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _isLoading = false;
         });
+      }
     }
   }
 
@@ -140,10 +142,11 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
       return;
     }
 
-    if (mounted)
+    if (mounted) {
       setState(() {
         _isLoading = true;
       });
+    }
     final firestoreService = Provider.of<FirestoreService>(context, listen: false);
     bool saveSucceeded = false;
     PaletteModel? createdModel;
@@ -307,53 +310,57 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(_pageTitle),
-          actions: [if (_isLoading) const Padding(padding: EdgeInsets.all(16.0), child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.0)))],
-        ),
-        body: Stack(
-          children: [
-            SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: InlinePaletteEditorWidget(
-                  key: ValueKey(widget.journalToUpdatePaletteFor?.id ?? widget.paletteModelToEdit?.id ?? 'new_palette_editor_autosave_instance'),
-                  initialPaletteName: _currentPaletteName,
-                  initialColors: _currentColors,
-                  isEditingJournalPalette: !_isEditingModel,
-                  canDeleteColorCallback: !_isEditingModel ? _canDeleteColor : null,
-                  onPaletteNameChanged: (newName) {
-                    if (_currentPaletteName != newName) {
-                      if (mounted) {
-                        setState(() {
-                          _currentPaletteName = newName;
-                          _hasMadeChangesSinceLastSave = true;
-                        });
-                      }
-                    }
-                  },
-                  onColorsChanged: (newColors) {
-                    if (mounted) {
-                      setState(() {
-                        _currentColors = newColors;
-                        _hasMadeChangesSinceLastSave = true;
-                      });
-                    }
-                  },
-                  onPaletteNeedsSave: _triggerAutomaticSave,
-                  showNameEditor: _isEditingModel,
-                  onDeleteAllColorsRequested: _handleDeleteAllColorsRequested,
-                ),
-              ),
+    return Builder(
+      builder: (context) {
+        return WillPopScope(
+          onWillPop: _onWillPop,
+          child: Scaffold(
+            appBar: AppBar(
+              title: Text(_pageTitle),
+              actions: [if (_isLoading) const Padding(padding: EdgeInsets.all(16.0), child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.0)))],
             ),
-            if (_isLoading) const LoadingIndicator(),
-          ],
-        ),
-      ),
+            body: Stack(
+              children: [
+                SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Form(
+                    key: _formKey,
+                    child: InlinePaletteEditorWidget(
+                      key: ValueKey(widget.journalToUpdatePaletteFor?.id ?? widget.paletteModelToEdit?.id ?? 'new_palette_editor_autosave_instance'),
+                      initialPaletteName: _currentPaletteName,
+                      initialColors: _currentColors,
+                      isEditingJournalPalette: !_isEditingModel,
+                      canDeleteColorCallback: !_isEditingModel ? _canDeleteColor : null,
+                      onPaletteNameChanged: (newName) {
+                        if (_currentPaletteName != newName) {
+                          if (mounted) {
+                            setState(() {
+                              _currentPaletteName = newName;
+                              _hasMadeChangesSinceLastSave = true;
+                            });
+                          }
+                        }
+                      },
+                      onColorsChanged: (newColors) {
+                        if (mounted) {
+                          setState(() {
+                            _currentColors = newColors;
+                            _hasMadeChangesSinceLastSave = true;
+                          });
+                        }
+                      },
+                      onPaletteNeedsSave: _triggerAutomaticSave,
+                      showNameEditor: _isEditingModel,
+                      onDeleteAllColorsRequested: _handleDeleteAllColorsRequested,
+                    ),
+                  ),
+                ),
+                if (_isLoading) const LoadingIndicator(),
+              ],
+            ),
+          ),
+        );
+      }
     );
   }
 }
