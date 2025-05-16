@@ -1,5 +1,7 @@
 # Miscellaneous
 *.class
+*.apk
+*.sha1
 *.log
 *.pyc
 *.swp
