@@ -160,8 +160,8 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
   /// [existingColorIndex] The index of the color being edited. Null if adding.
   void _showEditColorDialog({ColorData? existingColorData, int? existingColorIndex}) {
     final bool isAdding = existingColorData == null;
-    Color pickerColor = isAdding ? Colors.grey : existingColorData!.color; // Initial color for the picker.
-    String initialTitle = isAdding ? '' : existingColorData!.title; // Initial title. Note: `title` in ColorData is non-nullable.
+    Color pickerColor = isAdding ? Colors.grey : existingColorData.color; // Initial color for the picker.
+    String initialTitle = isAdding ? '' : existingColorData.title; // Initial title. Note: `title` in ColorData is non-nullable.
 
     final TextEditingController titleController = TextEditingController(text: initialTitle);
     final TextEditingController gradientStepsController = TextEditingController(text: '1'); // For adding gradients.
@@ -182,7 +182,7 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
             builder: (BuildContext confirmCtx) {
               return AlertDialog(
                 title: const Text('Confirmer la suppression'), // UI Text in French
-                content: Text('Voulez-vous vraiment supprimer la couleur "${existingColorData!.title}" ?'), // UI Text in French
+                content: Text('Voulez-vous vraiment supprimer la couleur "${existingColorData.title}" ?'), // UI Text in French
                 actions: <Widget>[
                   TextButton(child: const Text('Annuler'), onPressed: () => Navigator.of(confirmCtx).pop(false)), // UI Text in French
                   TextButton(child: Text('Supprimer', style: TextStyle(color: Theme.of(context).colorScheme.error)), onPressed: () => Navigator.of(confirmCtx).pop(true)), // UI Text in French
@@ -282,16 +282,16 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                     if (gradientSteps == 1) { // Adding a single color or editing an existing one.
                       final String newHexCode = '#${pickerColor.value.toRadixString(16).substring(2).toUpperCase()}';
                       // Check for duplicate title.
-                      if (_editableColors.any((c) => c.title.toLowerCase() == baseTitle.toLowerCase() && (isAdding || c.paletteElementId != existingColorData!.paletteElementId))) {
+                      if (_editableColors.any((c) => c.title.toLowerCase() == baseTitle.toLowerCase() && (isAdding || c.paletteElementId != existingColorData.paletteElementId))) {
                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ce titre de couleur existe déjà.'), backgroundColor: Colors.orange)); // UI Text in French
                         return;
                       }
                       // Check for duplicate hex code.
-                      if (_editableColors.any((c) => c.hexCode.toUpperCase() == newHexCode.toUpperCase() && (isAdding || c.paletteElementId != existingColorData!.paletteElementId))) {
+                      if (_editableColors.any((c) => c.hexCode.toUpperCase() == newHexCode.toUpperCase() && (isAdding || c.paletteElementId != existingColorData.paletteElementId))) {
                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cette couleur (hex) existe déjà.'), backgroundColor: Colors.orange)); // UI Text in French
                         return;
                       }
-                      colorsToAdd.add(ColorData(paletteElementId: isAdding ? _uuid.v4() : existingColorData!.paletteElementId, title: baseTitle, hexCode: newHexCode));
+                      colorsToAdd.add(ColorData(paletteElementId: isAdding ? _uuid.v4() : existingColorData.paletteElementId, title: baseTitle, hexCode: newHexCode));
                     } else { // Adding a gradient of colors.
                       if (_editableColors.length + gradientSteps > MAX_COLORS_IN_PALETTE_EDITOR) {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Impossible d\'ajouter $gradientSteps couleurs, maximum de la palette atteint.'), backgroundColor: Colors.orange)); // UI Text in French
@@ -330,7 +330,7 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                           _editableColors.addAll(colorsToAdd);
                         } else if (existingColorIndex != null && colorsToAdd.isNotEmpty) {
                           // Replace the existing color with the (first) modified color.
-                          _editableColors[existingColorIndex!] = colorsToAdd.first;
+                          _editableColors[existingColorIndex] = colorsToAdd.first;
                         }
                         widget.onColorsChanged(List.from(_editableColors)); // Notify parent of changes.
                         widget.onPaletteNeedsSave?.call(); // Trigger save.
