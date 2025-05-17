@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // For FilteringTextInputFormatter
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 import '../models/color_data.dart'; // Defines the ColorData model.
 
+
+/// Logger instance for this page.
+final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 1, printTime: true));
 /// A global Uuid instance for generating unique IDs for new ColorData items.
 const _uuid = Uuid();
 
@@ -437,7 +441,7 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
   Widget build(BuildContext context) {
     // Determine if the "Add" button should be shown (i.e., if max color limit not reached).
     bool canShowAddButtonInListOrGrid = _editableColors.length < MAX_COLORS_IN_PALETTE_EDITOR;
-
+    _loggerPage.d("DEBUG DELETE ALL : widget.onDeleteAllColorsRequested :${widget.onDeleteAllColorsRequested} \n _editableColors.isNotEmpty:${_editableColors.isNotEmpty}");
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

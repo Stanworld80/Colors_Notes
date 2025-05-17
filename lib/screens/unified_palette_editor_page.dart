@@ -305,6 +305,80 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
     }
   }
 
+
+  Future<bool> _handleDeleteAllColorsRequested() async {
+    if (_userId == null) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Utilisateur non identifié.")));
+      return false;
+    }
+
+    final bool? firstConfirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Supprimer toutes les couleurs ?'),
+          content: Text(
+            !_isEditingModel && widget.journalToUpdatePaletteFor != null
+                ? 'Cela supprimera toutes les couleurs de la palette du journal "${widget.journalToUpdatePaletteFor!.name}". ATTENTION : Toutes les notes de ce journal seront également DÉFINITIVEMENT supprimées.'
+                : 'Voulez-vous vraiment supprimer toutes les couleurs de ce modèle de palette ?',
+          ),
+          actions: <Widget>[
+            TextButton(child: const Text('Annuler'), onPressed: () => Navigator.of(dialogContext).pop(false)),
+            TextButton(style: TextButton.styleFrom(foregroundColor: Colors.red), child: const Text('Supprimer Tout'), onPressed: () => Navigator.of(dialogContext).pop(true)),
+          ],
+        );
+      },
+    );
+
+    if (firstConfirm != true) return false;
+
+    final bool? secondConfirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text(!_isEditingModel ? 'CONFIRMATION FINALE' : 'Confirmer la suppression'),
+          content: Text(
+            !_isEditingModel
+                ? 'Êtes-vous absolument certain(e) ? La suppression des couleurs de cette palette entraînera la suppression IRRÉVERSIBLE de TOUTES les notes de ce journal.'
+                : 'Confirmez-vous la suppression de toutes les couleurs de ce modèle ?',
+          ),
+          actions: <Widget>[
+            TextButton(child: const Text('NON, ANNULER'), onPressed: () => Navigator.of(dialogContext).pop(false)),
+            TextButton(
+              style: TextButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+              child: const Text('OUI, TOUT SUPPRIMER'),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (secondConfirm != true) return false;
+
+    if (mounted)
+      setState(() {
+        _isLoading = true;
+      });
+    try {
+      if (!_isEditingModel && widget.journalToUpdatePaletteFor != null) {
+        final firestoreService = Provider.of<FirestoreService>(context, listen: false);
+        await firestoreService.deleteAllNotesInJournal(widget.journalToUpdatePaletteFor!.id, _userId!);
+        _loggerPage.i("Toutes les notes du journal ${widget.journalToUpdatePaletteFor!.id} ont été supprimées avant de vider la palette.");
+      }
+      return true;
+    } catch (e) {
+      _loggerPage.e("Erreur lors de la suppression de toutes les couleurs/notes: $e");
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erreur: ${e.toString()}"), backgroundColor: Colors.red));
+      return false;
+    } finally {
+      if (mounted)
+        setState(() {
+          _isLoading = false;
+        });
+      if (mounted) setState(() { _isLoading = false; });
+    }
+  }
   /// Handles the `onWillPop` event to prevent navigation while saving.
   ///
   /// Returns `false` to block navigation if [_isLoading] is true, otherwise `true`.
@@ -378,6 +452,7 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
                   },
                   onPaletteNeedsSave: _triggerAutomaticSave, // Callback for automatic saving
                   showNameEditor: _isEditingModel, // Show name editor only when editing/creating a PaletteModel
+                  onDeleteAllColorsRequested: _handleDeleteAllColorsRequested,
                 ),
               ),
             ),
