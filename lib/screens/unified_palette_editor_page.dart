@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 
+import '../core/app_constants.dart';
 import '../models/journal.dart';
 import '../models/palette.dart';
 import '../models/palette_model.dart';

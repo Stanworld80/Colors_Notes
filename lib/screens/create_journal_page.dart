@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../core/app_constants.dart';
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
 import '../models/journal.dart';

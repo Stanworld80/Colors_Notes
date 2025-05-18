@@ -3,6 +3,7 @@ import 'package:flutter/services.dart'; // For FilteringTextInputFormatter
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
+import '../core/app_constants.dart';
 import '../models/color_data.dart'; // Defines the ColorData model.
 
 
@@ -10,14 +11,6 @@ import '../models/color_data.dart'; // Defines the ColorData model.
 final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 1, printTime: true));
 /// A global Uuid instance for generating unique IDs for new ColorData items.
 const _uuid = Uuid();
-
-/// The minimum number of colors allowed in a palette when using this editor,
-/// particularly relevant for palette models.
-const int MIN_COLORS_IN_PALETTE_EDITOR = 1;
-/// The maximum number of colors allowed in a palette when using this editor.
-const int MAX_COLORS_IN_PALETTE_EDITOR = 48;
-/// The maximum number of steps allowed when generating a gradient of colors.
-const int MAX_GRADIENT_STEPS = 48;
 
 
 /// A widget for inline editing of a color palette.
