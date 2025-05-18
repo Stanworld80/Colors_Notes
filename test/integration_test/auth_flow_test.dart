@@ -18,7 +18,7 @@ import 'package:colors_notes/widgets/dynamic_journal_app_bar.dart';
 // Main function for the test file
 Future<void> main() async {
   // Ensure the binding is initialized. This is critical and should be the first line.
-  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Firebase ONCE here, before any tests or app.main() is called.
   // This makes it available globally for the test run.
