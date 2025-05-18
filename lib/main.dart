@@ -6,32 +6,26 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
-// Flutter Localization Imports
-// import 'package:flutter_localizations/flutter_localizations.dart';
-
-import 'package:colors_notes/l10n/app_localizations.dart'; // Adjust if necessary
+import 'package:flutter_cookie_consent/flutter_cookie_consent.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:colors_notes/l10n/app_localizations.dart';
 
 import 'firebase_options.dart';
 import 'services/auth_service.dart';
 import 'services/firestore_service.dart';
 import 'providers/active_journal_provider.dart';
 
-// import 'providers/locale_provider.dart'; // Uncomment if you create a LocaleProvider
 import 'screens/auth_gate.dart';
 import 'screens/sign_in_page.dart';
 import 'screens/register_page.dart';
 import 'screens/main_screen.dart';
 
-/// Logger instance for application-wide logging.
 final _logger = Logger(printer: PrettyPrinter(methodCount: 1, dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart, printEmojis: true, colors: true));
 
-/// The main entry point for the application.
-///
-/// Initializes Firebase, date formatting, and sets up service providers.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Initialize date formatting for French locale before running the app.
   await initializeDateFormatting('fr_FR', null);
 
   try {
@@ -54,90 +48,138 @@ Future<void> main() async {
         Provider<AuthService>.value(value: authService),
         Provider<FirestoreService>.value(value: firestoreService),
         ChangeNotifierProvider<ActiveJournalNotifier>(create: (context) => ActiveJournalNotifier(authService, firestoreService)),
-        // ChangeNotifierProvider<LocaleProvider>( // Add your LocaleProvider here
-        //   create: (_) => LocaleProvider(),
-        // ),
       ],
       child: const MyApp(),
     ),
   );
 }
 
-/// The root widget of the application.
-///
-/// Configures the [MaterialApp], including theme, localization,
-/// and navigation routes.
-class MyApp extends StatelessWidget {
-  /// Creates the root application widget.
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // If using a LocaleProvider for dynamic language switching:
-    // final localeProvider = Provider.of<LocaleProvider>(context);
+  State<MyApp> createState() => _MyAppState();
+}
 
+class _MyAppState extends State<MyApp> {
+  final FlutterCookieConsent _cookieConsent = FlutterCookieConsent();
+  late final Future<void> _initConsentFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    if (kIsWeb) {
+      _initConsentFuture = _cookieConsent.initialize().then((_) {
+        if (mounted) {
+          _updateAnalyticsConsentFromPreferences();
+        }
+      });
+    } else {
+      _initConsentFuture = Future.value();
+      _applyAnalyticsConsent(true);
+      _logger.i("Plateforme non-web, consentement analytique activé par défaut.");
+    }
+  }
+
+  Future<void> _updateAnalyticsConsentFromPreferences() async {
+    final preferences = _cookieConsent.preferences;
+    final analyticsEnabled = preferences['analytics'] ?? false;
+    await _applyAnalyticsConsent(analyticsEnabled);
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  /// Applique le consentement pour Firebase Analytics.
+  Future<void> _applyAnalyticsConsent(bool consented) async {
+    try {
+      await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(consented);
+      _logger.i("Firebase Analytics collection ${consented ? 'activée' : 'désactivée'}.");
+    } catch (e) {
+      _logger.e("Erreur lors de la configuration de Firebase Analytics: $e");
+    }
+  }
+
+  /// Construit le widget MaterialApp de base avec un contenu d'accueil dynamique.
+  Widget _buildAppShell({required Widget homeWidget}) {
     return MaterialApp(
       title: 'Colors & Notes',
-      // This title could also be localized later.
       theme: ThemeData(
         primarySwatch: Colors.teal,
         visualDensity: VisualDensity.adaptivePlatformDensity,
         colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal).copyWith(secondary: Colors.amberAccent),
       ),
-
-      // --- Crucial Localization Setup ---
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      // USE THIS
       supportedLocales: AppLocalizations.supportedLocales,
-      // AND THIS
-
-      // Manage the current locale (either forced, via provider, or system detection)
-      // Example with a LocaleProvider (to be created and provided via MultiProvider):
-      // locale: localeProvider.locale,
-
-      // OR to force a language on startup for testing:
       locale: const Locale('fr'),
-
-      // or const Locale('en')
-
-      // OR for more advanced system locale detection:
-      // localeResolutionCallback: (locale, supportedLocales) {
-      //   if (locale != null) {
-      //     for (var supportedLocale in supportedLocales) {
-      //       if (supportedLocale.languageCode == locale.languageCode) {
-      //         // You can ignore countryCode for a broader match
-      //         return supportedLocale;
-      //       }
-      //     }
-      //   }
-      //   // If the system locale is not supported, use the first in your list as a fallback
-      //   return supportedLocales.first;
-      // },
-      home: AuthGate(),
+      home: homeWidget,
+      // Le contenu d'accueil est passé en paramètre
       routes: {'/signin': (context) => const SignInPage(), '/register': (context) => const RegisterPage(), '/main': (context) => MainScreen()},
     );
   }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!kIsWeb) {
+      return _buildAppShell(homeWidget: AuthGate());
+    }
+
+    return FutureBuilder<void>(
+      future: _initConsentFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const MaterialApp(home: Scaffold(body: Center(child: CircularProgressIndicator())));
+        }
+
+        if (snapshot.hasError) {
+          _logger.e("Erreur initialisation flutter_cookie_consent: ${snapshot.error}");
+          return MaterialApp(home: Scaffold(body: Center(child: Text("Erreur module consentement: ${snapshot.error}"))));
+        }
+
+        Widget mainAppContent = AuthGate();
+
+        if (_cookieConsent.shouldShowBanner) {
+          mainAppContent = Stack(
+            children: [
+              AuthGate(),
+              _cookieConsent.createBanner(
+                context: context,
+                title: 'Gestion des Cookies',
+                message:
+                    "Nous utilisons des cookies pour améliorer votre expérience. Les cookies essentiels sont nécessaires au fonctionnement du site. Acceptez-vous l'utilisation de cookies analytiques pour nous aider à améliorer nos services ?",
+                acceptButtonText: 'Tout Accepter',
+                declineButtonText: 'Refuser les cookies analytiques',
+                settingsButtonText: 'Paramètres',
+                showSettings: true,
+                position: BannerPosition.bottom,
+                onAccept: (bool accepted) async {
+                  _logger.i('Bouton "Tout Accepter" cliqué. Valeur booléenne reçue: $accepted');
+                  var currentPrefs = _cookieConsent.preferences;
+                  currentPrefs['analytics'] = true;
+                  await _cookieConsent.savePreferences(currentPrefs);
+                  await _updateAnalyticsConsentFromPreferences();
+                },
+                onDecline: (bool declined) async {
+                  _logger.i('Bouton "Refuser Analytiques" cliqué. Valeur booléenne reçue: $declined');
+                  var currentPrefs = _cookieConsent.preferences;
+                  currentPrefs['analytics'] = false;
+                  await _cookieConsent.savePreferences(currentPrefs);
+                  await _updateAnalyticsConsentFromPreferences();
+                },
+                onSettings: () {
+                  _logger.i('Ouverture des paramètres de cookies.');
+                  Future.delayed(const Duration(milliseconds: 500), () {
+                    if (mounted) {
+                      _updateAnalyticsConsentFromPreferences();
+                    }
+                  });
+                },
+              ),
+            ],
+          );
+        }
+        return _buildAppShell(homeWidget: mainAppContent);
+      },
+    );
+  }
 }
-
-// If implementing dynamic language switching, you'll need a LocaleProvider:
-// /// Manages the application's current locale.
-// class LocaleProvider extends ChangeNotifier {
-//   Locale _currentLocale = const Locale('fr'); // Default language
-
-//   /// The currently active locale.
-//   Locale get locale => _currentLocale;
-
-//   /// Sets the application's locale.
-//   ///
-//   /// If the [newLocale] is not among the [AppLocalizations.supportedLocales],
-//   /// this method does nothing. Otherwise, it updates the locale and notifies listeners.
-//   void setLocale(Locale newLocale) {
-//     if (!AppLocalizations.supportedLocales.contains(newLocale)) return;
-//     _currentLocale = newLocale;
-//     notifyListeners();
-//     // Optional: save user preference here (e.g., using shared_preferences)
-//   }
-
-//   // Optional: load saved preference on startup
-//   // Future<void> loadSavedLocale() async { ... }
-// }

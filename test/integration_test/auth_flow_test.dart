@@ -14,10 +14,6 @@ import 'package:firebase_core/firebase_core.dart';
 
 // Import your widgets
 import 'package:colors_notes/widgets/dynamic_journal_app_bar.dart';
-import 'package:colors_notes/widgets/inline_palette_editor.dart';
-
-// If you need to interact with FirebaseAuth directly in tests (e.g. to sign out a user)
-// import 'package:firebase_auth/firebase_auth.dart';
 
 // Main function for the test file
 Future<void> main() async {
