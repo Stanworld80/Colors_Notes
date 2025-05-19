@@ -179,7 +179,7 @@ class _MyAppState extends State<MyApp> {
                 message:
                     "Nous utilisons des cookies pour améliorer votre expérience. Les cookies essentiels sont nécessaires au fonctionnement du site. Acceptez-vous l'utilisation de cookies analytiques pour nous aider à améliorer nos services ?",
                 acceptButtonText: 'Tout Accepter',
-                declineButtonText: 'Refuser Analytiques',
+                declineButtonText: 'Refuser',
                 settingsButtonText: 'Paramètres',
                 showSettings: true,
                 position: 'bottom',
