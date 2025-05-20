@@ -7,11 +7,11 @@ if (keyPropertiesFile.exists()) {
     keyPropertiesFile.inputStream().use { input ->
         keyProperties.load(input)
         // Ligne de débogage (optionnelle, à supprimer après vérification) :
-        println(">>> DEBUG: Fichier key.properties trouvé. Valeur de storeFile: " + keyProperties.getProperty("storeFile"))
+       // println(">>> DEBUG: Fichier key.properties trouvé. Valeur de storeFile: " + keyProperties.getProperty("storeFile"))
     }
 } else {
     // Ligne de débogage (optionnelle, à supprimer après vérification) :
-     println(">>> DEBUG: Fichier key.properties NON TROUVÉ à l'emplacement attendu: " + keyPropertiesFile.absolutePath)
+     //println(">>> DEBUG: Fichier key.properties NON TROUVÉ à l'emplacement attendu: " + keyPropertiesFile.absolutePath)
 }
 
 plugins {
@@ -69,8 +69,8 @@ android {
         minSdk = 23 // minSdk de l'utilisateur
         targetSdk = 34 // targetSdk, peut aussi être flutter.targetSdkVersion
         // Utiliser les valeurs lues depuis local.properties comme fallback si les variables d'environnement ne sont pas définies
-        versionCode = (System.getenv("FLUTTER_BUILD_NUMBER") ?: localFlutterVersionCode ?: "1").toInt()
-        versionName = System.getenv("FLUTTER_BUILD_NAME") ?: localFlutterVersionName ?: "1.0"
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
         multiDexEnabled = true
     }
 
@@ -94,8 +94,8 @@ android {
                 keyPassword = keyProperties.getProperty("keyPassword")
             } else {
                 // Ligne de débogage (optionnelle) :
-                 println(">>> DEBUG: Propriétés de signature MANQUANTES dans key.properties pour la configuration 'release'.")
-                 println(">>> DEBUG: storeFile est: " + keyProperties.getProperty("storeFile"))
+             //    println(">>> DEBUG: Propriétés de signature MANQUANTES dans key.properties pour la configuration 'release'.")
+              //   println(">>> DEBUG: storeFile est: " + keyProperties.getProperty("storeFile"))
           //       Laisser Gradle échouer si les propriétés sont manquantes pour une release est une bonne pratique.
             }
         }

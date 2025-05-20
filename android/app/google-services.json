@@ -12,7 +12,24 @@
           "package_name": "org.stanworld.colorsnotes"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "523869870608-1pegi94cjv09m9v5pq9im8v0onms0vrl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.stanworld.colorsnotes",
+            "certificate_hash": "d3ab8f4d545ac91124a6617a7a9401d85153ae4f"
+          }
+        },
+        {
+          "client_id": "523869870608-bh68tk6olfr410n728l6kfae8q7007d9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.stanworld.colorsnotes",
+            "certificate_hash": "3fc5145ff457b0e9b9a0f5412f34738e203642d8"
+          }
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB8e2IdFFWKKyLdwQGf-bvxhRKZmWzxdKI"
