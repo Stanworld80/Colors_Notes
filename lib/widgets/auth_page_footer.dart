@@ -16,7 +16,7 @@ final _loggerFooter = Logger(printer: PrettyPrinter(methodCount: 0));
 /// the Android APK, and the application version using [AppVersionDisplay].
 class AuthPageFooter extends StatelessWidget {
   /// The URL for downloading the Android APK.
-  final String apkUrl = "https://www.stanworld.org/main/web/ColorsNotes-1.5.9.apk";
+  final String apkUrl = "https://www.stanworld.org/main/web/ColorsNotes-1.6.0.apk";
 
   /// Creates an [AuthPageFooter] widget.
   const AuthPageFooter({super.key});
