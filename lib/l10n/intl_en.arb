@@ -25,5 +25,147 @@
   "comingSoon": "Coming Soon",
   "themeSettingsComingSoon": "Theme settings are coming soon!",
   "notificationSettingsComingSoon": "Notification settings are coming soon!",
-  "notifications": "Notifications"
+  "notifications": "Notifications",
+  "english": "English",
+  "french": "French",
+  "portuguese": "Portuguese",
+  "portugueseBrazilian": "Portuguese (Brazil)",
+  "italian": "Italian",
+
+  "loadingTitle": "Loading...",
+  "@loadingTitle": {
+    "description": "Title displayed in AppBar when content is loading."
+  },
+  "errorTitle": "Error",
+  "@errorTitle": {
+    "description": "Title displayed in AppBar when an error occurs."
+  },
+  "chooseJournalTitle": "Choose a journal",
+  "@chooseJournalTitle": {
+    "description": "Title displayed in AppBar when no journal is active, prompting user to select one."
+  },
+  "changeJournalTooltip": "Change journal",
+  "@changeJournalTooltip": {
+    "description": "Tooltip for the journal selection dropdown in the AppBar."
+  },
+  "editPaletteTooltip": "Edit palette of '{journalName}'",
+  "@editPaletteTooltip": {
+    "description": "Tooltip for the palette edit icon in the app bar, where {journalName} is the name of the active journal.",
+    "placeholders": {
+      "journalName": {
+        "type": "String",
+        "example": "My Travel Diary"
+      }
+    }
+  },
+  "signOutErrorPrefix": "Error signing out: ",
+  "@signOutErrorPrefix": {
+    "description": "Prefix for the error message displayed in a SnackBar when sign-out fails."
+  },
+
+  "welcomeUser": "Welcome, {userName}!",
+  "@welcomeUser": {
+    "description": "Welcome message with user's display name.",
+    "placeholders": {
+      "userName": {
+        "type": "String",
+        "example": "John Doe"
+      }
+    }
+  },
+  "welcomeGuest": "Welcome!",
+  "@welcomeGuest": {
+    "description": "Generic welcome message when user's display name is not available."
+  },
+  "paletteIsEmptyMessage": "This journal's palette is empty.\nEdit the journal to add colors, or choose another journal.",
+  "@paletteIsEmptyMessage": {
+    "description": "Message displayed when the active journal's palette is empty."
+  },
+  "errorLoadingJournal": "Error loading journal:",
+  "@errorLoadingJournal": {
+    "description": "Prefix for the error message when loading a journal fails."
+  },
+  "createNewJournalButton": "Create a new journal",
+  "@createNewJournalButton": {
+    "description": "Text for the button to create a new journal."
+  },
+  "noActiveJournalTitle": "No active journal.",
+  "@noActiveJournalTitle": {
+    "description": "Title displayed when no journal is active."
+  },
+  "noActiveJournalMessage": "Select an existing journal or create a new one to get started.",
+  "@noActiveJournalMessage": {
+    "description": "Message displayed when no journal is active, prompting user action."
+  },
+  "chooseOrCreateJournalButton": "Choose or create a journal",
+  "@chooseOrCreateJournalButton": {
+    "description": "Text for the button to choose an existing journal or create a new one."
+  },
+  "optionsTooltip": "Options",
+  "@optionsTooltip": {
+    "description": "Tooltip for the 'more options' menu button in the AppBar."
+  },
+
+  "bottomNavHome": "Home",
+  "@bottomNavHome": {
+    "description": "Label for the Home tab in the bottom navigation bar."
+  },
+  "bottomNavNotes": "Notes",
+  "@bottomNavNotes": {
+    "description": "Label for the Notes tab in the bottom navigation bar."
+  },
+  "bottomNavJournals": "Journals",
+  "@bottomNavJournals": {
+    "description": "Label for the Journals tab in the bottom navigation bar."
+  },
+
+  "entryPageEditTitle": "Edit Note",
+  "entryPageNewTitle": "New Note",
+  "entryPageUpdateTooltip": "Update note",
+  "entryPageSaveTooltip": "Save note",
+  "entryPageAssociatedColorLabel": "Associated Color",
+  "entryPageSelectColorValidator": "Please select a color.",
+  "entryPageContentLabel": "Note content...",
+  "entryPageContentHint": "Describe your thought, event, or task...",
+  "entryPageContentValidatorEmpty": "Please enter the note content.",
+  "entryPageContentValidatorTooLong": "Content is too long (max 1024 characters).",
+  "entryPageDateTimeSetToNowSnackbar": "Date and time set to now.",
+  "entryPageSaveButtonUpdate": "Update Note",
+  "entryPageSaveButtonCreate": "Save Note",
+  "entryPageSavingButton": "Saving...",
+  "entryPageSaveAsNewButton": "Save as new note",
+  "entryPageUserNotIdentifiedError": "User not identified.",
+  "entryPageNoColorSelectedError": "Please select a color for the note.",
+  "entryPageNoteSavedSuccess": "Note saved.",
+  "entryPageNoteUpdatedSuccess": "Note updated.",
+  "entryPageNoteSavedAsNewSuccess": "Note saved as new.",
+  "entryPageGenericSaveError": "Error: {errorMessage}",
+  "@entryPageGenericSaveError": {
+    "placeholders": {
+      "errorMessage": {
+        "type": "String"
+      }
+    }
+  },
+  "entryPageJournalDetailsLoadError": "Could not load journal details.",
+  "entryPageJournalDetailsRetryButton": "Retry",
+  "entryPageOriginalColorMissingSnackbar": "This note's original color no longer exists in the palette. A default color has been selected.",
+  "entryPagePaletteEmptySnackbar": "This journal's palette is empty. Please add colors to the palette to associate this note.",
+
+  "registerPageTitle": "Create Account",
+  "registerPageHeading": "Join Colors & Notes",
+  "registerPageDisplayNameLabel": "Display Name",
+  "registerPageDisplayNameValidatorEmpty": "Please enter your display name.",
+  "registerPageDisplayNameValidatorTooShort": "Display name must be at least 3 characters.",
+  "registerPagePasswordValidatorEmpty": "Please enter a password.",
+  "registerPagePasswordValidatorLength": "Password must be at least 8 characters.",
+  "registerPagePasswordValidatorUppercase": "Password must contain at least one uppercase letter.",
+  "registerPagePasswordValidatorLowercase": "Password must contain at least one lowercase letter.",
+  "registerPagePasswordValidatorDigit": "Password must contain at least one digit.",
+  "registerPagePasswordValidatorSpecialChar": "Password must contain at least one special character (+-*_#=@%:$).",
+  "registerPageConfirmPasswordLabel": "Confirm Password",
+  "registerPageConfirmPasswordValidatorEmpty": "Please confirm your password.",
+  "registerPageConfirmPasswordValidatorMismatch": "Passwords do not match.",
+  "registerPageSignUpButton": "Sign Up & Sign In",
+  "registerPageAlreadyHaveAccountLink": "Already have an account? Sign In"
 }

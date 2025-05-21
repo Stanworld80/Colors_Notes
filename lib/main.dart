@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:firebase_analytics/firebase_analytics.dart';
 
 import 'package:colors_notes/l10n/app_localizations.dart';
+import 'providers/language_provider.dart';
 
 import 'firebase_options.dart';
 import 'services/auth_service.dart';
@@ -24,14 +25,16 @@ import 'screens/auth_gate.dart';
 import 'screens/sign_in_page.dart';
 import 'screens/register_page.dart';
 import 'screens/main_screen.dart';
-
-// NE PAS IMPORTER 'package:flutter_cookie_consent/flutter_cookie_consent.dart' DIRECTEMENT ICI
+import 'screens/settings_page.dart';
 
 final _logger = Logger(printer: PrettyPrinter(methodCount: 1, dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart, printEmojis: true, colors: true));
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Initialisation pour le formatage des dates en français, par exemple.
+  // Vous pouvez ajouter d'autres locales si nécessaire.
   await initializeDateFormatting('fr_FR', null);
+  await initializeDateFormatting('en_US', null); // Pour l'anglais si utilisé
 
   try {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -47,12 +50,19 @@ Future<void> main() async {
   final firestoreService = FirestoreService(firestoreInstance);
   final authService = AuthService(firebaseAuthInstance, googleSignInInstance, firestoreService);
 
+  // Création du LanguageProvider
+  final languageProvider = LanguageProvider();
+  // Il est important de charger la locale avant de construire l'UI principale
+  // Cependant, LanguageProvider le fait dans son constructeur.
+  // Si ce n'était pas le cas, on appellerait await languageProvider.loadLocale(); ici.
+
   runApp(
     MultiProvider(
       providers: [
         Provider<AuthService>.value(value: authService),
         Provider<FirestoreService>.value(value: firestoreService),
         ChangeNotifierProvider<ActiveJournalNotifier>(create: (context) => ActiveJournalNotifier(authService, firestoreService)),
+        ChangeNotifierProvider<LanguageProvider>.value(value: languageProvider), // AJOUTÉ
       ],
       child: const MyApp(),
     ),
@@ -67,36 +77,33 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // Utilise le service abstrait/conditionnel
   final CookieConsentService _cookieConsentService = CookieConsentService();
   late final Future<void> _initConsentFuture;
+  // LanguageProvider sera accédé via Consumer ou Provider.of dans build
 
   @override
   void initState() {
     super.initState();
-    // L'initialisation du service est toujours appelée.
-    // Sur non-web, l'implémentation stub sera utilisée.
+    // L'initialisation du LanguageProvider (chargement de la locale) se fait dans son constructeur.
+    // Si ce n'était pas le cas:
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   Provider.of<LanguageProvider>(context, listen: false).loadLocale();
+    // });
+
     _initConsentFuture = _cookieConsentService.initialize().then((_) {
       if (mounted) {
-        // Mettre à jour le consentement analytique basé sur les préférences chargées
-        // (ou les valeurs par défaut du stub sur non-web).
         _updateAnalyticsConsentFromPreferences();
       }
     });
 
-    // Logique spécifique à la plateforme pour la configuration initiale de l'analytique
-    // si elle ne dépend pas du service de consentement (par exemple, activer par défaut sur mobile).
     if (!kIsWeb) {
-      _applyAnalyticsConsent(true); // Exemple: activer par défaut pour non-web
+      _applyAnalyticsConsent(true);
       _logger.i("Plateforme non-web, consentement analytique activé par défaut (hors service cookie).");
     }
   }
 
-  /// Lit les préférences via le service et met à jour Firebase Analytics.
   Future<void> _updateAnalyticsConsentFromPreferences() async {
-    // kIsWeb est utilisé ici pour s'assurer que nous ne nous basons sur les préférences
-    // du service que si nous sommes sur le web. Sur mobile, le stub retourne des valeurs par défaut.
-    bool analyticsEnabledTarget = !kIsWeb; // Par défaut à true pour non-web
+    bool analyticsEnabledTarget = !kIsWeb;
 
     if (kIsWeb) {
       final preferences = _cookieConsentService.preferences;
@@ -104,14 +111,11 @@ class _MyAppState extends State<MyApp> {
     }
 
     await _applyAnalyticsConsent(analyticsEnabledTarget);
-
-    // Rafraîchir l'état pour reconstruire l'UI si shouldShowBanner a changé.
     if (mounted) {
       setState(() {});
     }
   }
 
-  /// Applique le consentement pour Firebase Analytics.
   Future<void> _applyAnalyticsConsent(bool consented) async {
     try {
       await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(consented);
@@ -121,10 +125,9 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  /// Construit le widget MaterialApp de base avec un contenu d'accueil dynamique.
-  Widget _buildAppShell({required Widget homeWidget}) {
+  Widget _buildAppShell({required Widget homeWidget, required Locale currentLocale}) { // MODIFIÉ pour accepter currentLocale
     return MaterialApp(
-      title: 'Colors & Notes',
+      title: 'Colors & Notes', // Sera localisé si vous utilisez AppLocalizations.of(context)!.appName ici
       theme: ThemeData(
         primarySwatch: Colors.teal,
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -132,65 +135,75 @@ class _MyAppState extends State<MyApp> {
       ),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      locale: const Locale('fr'),
+      locale: currentLocale, // MODIFIÉ pour utiliser la locale du provider
       home: homeWidget,
-      routes: {'/signin': (context) => const SignInPage(), '/register': (context) => const RegisterPage(), '/main': (context) => MainScreen()},
+      routes: {
+        '/signin': (context) => const SignInPage(),
+        '/register': (context) => const RegisterPage(),
+        '/main': (context) => const MainScreen(),
+        '/settings': (context) => const SettingsPage(), // AJOUTÉ
+        // Ajoutez d'autres routes ici
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Pour les plateformes non-web, le service stub sera utilisé,
-    // et `shouldShowBanner` retournera false.
-    // `_buildAppShell` est toujours utilisé.
+    // Consommer LanguageProvider pour obtenir la locale actuelle
+    final languageProvider = Provider.of<LanguageProvider>(context);
+
+    // Si LanguageProvider est toujours en train de charger la locale, afficher un indicateur de chargement.
+    // Cela évite un flash de contenu non localisé ou avec la mauvaise locale.
+    if (languageProvider.isLoading) {
+      return const MaterialApp(
+        home: Scaffold(body: Center(child: CircularProgressIndicator())),
+      );
+    }
 
     return FutureBuilder<void>(
       future: _initConsentFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const MaterialApp(
-            // Fournir un MaterialApp pendant le chargement
-            home: Scaffold(body: Center(child: CircularProgressIndicator())),
+          return MaterialApp( // MODIFIÉ pour passer la locale ici aussi
+            locale: languageProvider.appLocale,
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            home: const Scaffold(body: Center(child: CircularProgressIndicator())),
           );
         }
 
         if (snapshot.hasError) {
           _logger.e("Erreur initialisation CookieConsentService: ${snapshot.error}");
-          return MaterialApp(
-            // Fournir un MaterialApp pour l'erreur
+          return MaterialApp( // MODIFIÉ
+            locale: languageProvider.appLocale,
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
             home: Scaffold(body: Center(child: Text("Erreur module consentement: ${snapshot.error}"))),
           );
         }
 
-        // L'initialisation est terminée.
-        Widget mainPageContent = AuthGate(); // Contenu principal par défaut
+        Widget mainPageContent = AuthGate();
 
-        // Le bandeau ne sera construit que si kIsWeb est vrai ET shouldShowBanner est vrai.
         if (kIsWeb && _cookieConsentService.shouldShowBanner) {
           mainPageContent = Stack(
             children: [
-              AuthGate(), // Le contenu principal
-              // Utilise le service pour créer le bandeau.
-              // Sur non-web, createBanner du stub retournera SizedBox.shrink().
-              // Mais cette branche if(kIsWeb...) empêche son appel sur non-web.
+              AuthGate(),
               _cookieConsentService.createBanner(
                 context: context,
                 title: 'Gestion des Cookies',
                 message:
-                    "Nous utilisons des cookies pour améliorer votre expérience. Les cookies essentiels sont nécessaires au fonctionnement du site. Acceptez-vous l'utilisation de cookies analytiques pour nous aider à améliorer nos services ?",
+                "Nous utilisons des cookies pour améliorer votre expérience. Les cookies essentiels sont nécessaires au fonctionnement du site. Acceptez-vous l'utilisation de cookies analytiques pour nous aider à améliorer nos services ?",
                 acceptButtonText: 'Tout Accepter',
                 declineButtonText: 'Refuser',
                 settingsButtonText: 'Paramètres',
                 showSettings: true,
                 position: 'bottom',
-                // Le service web gère la conversion en BannerPosition
                 onAccept: (bool accepted) async {
                   _logger.i('Service: Bouton "Tout Accepter" cliqué. Valeur booléenne reçue: $accepted');
-                  // L'implémentation web de savePreferences mettra à jour les préférences réelles.
-                  var currentPrefs = _cookieConsentService.preferences; // Lire les prefs actuelles
-                  currentPrefs['analytics'] = true; // Modifier
-                  await _cookieConsentService.savePreferences(currentPrefs); // Sauvegarder via le service
-                  await _updateAnalyticsConsentFromPreferences(); // Mettre à jour l'état et l'analytique
+                  var currentPrefs = _cookieConsentService.preferences;
+                  currentPrefs['analytics'] = true;
+                  await _cookieConsentService.savePreferences(currentPrefs);
+                  await _updateAnalyticsConsentFromPreferences();
                 },
                 onDecline: (bool declined) async {
                   _logger.i('Service: Bouton "Refuser Analytiques" cliqué. Valeur booléenne reçue: $declined');
@@ -201,9 +214,6 @@ class _MyAppState extends State<MyApp> {
                 },
                 onSettings: () {
                   _logger.i('Service: Ouverture des paramètres de cookies.');
-                  // Après la fermeture du dialogue de paramètres (géré par le package dans l'implémentation web),
-                  // les préférences devraient être mises à jour. Nous rappelons
-                  // _updateAnalyticsConsentFromPreferences pour refléter ces changements.
                   Future.delayed(const Duration(milliseconds: 500), () {
                     if (mounted) {
                       _updateAnalyticsConsentFromPreferences();
@@ -214,7 +224,8 @@ class _MyAppState extends State<MyApp> {
             ],
           );
         }
-        return _buildAppShell(homeWidget: mainPageContent);
+        // Passer la locale actuelle à _buildAppShell
+        return _buildAppShell(homeWidget: mainPageContent, currentLocale: languageProvider.appLocale);
       },
     );
   }

@@ -14,9 +14,6 @@
   "licenseLink": "Licence",
   "downloadForAndroidLink": "Télécharger pour Android",
   "errorLaunchingUrl" : "erreur de chargement",
-  "Language" : "langue",
-  "english" : "anglais",
-  "french" : "français",
   "selectLanguage" : "Sélectionnez une langue",
   "settings": "Paramètres",
   "language": "Langue",
@@ -28,5 +25,147 @@
   "comingSoon": "Bientôt disponible",
   "themeSettingsComingSoon": "Les paramètres de thème arrivent bientôt !",
   "notificationSettingsComingSoon": "Les paramètres de notification arrivent bientôt !",
-  "notifications": "Notifications"
+  "notifications": "Notifications",
+  "english": "English",
+  "french": "Français",
+  "portuguese": "Portugais",
+  "portugueseBrazilian": "Português (Brasil)",
+  "italian": "Italien",
+
+  "loadingTitle": "Chargement...",
+  "@loadingTitle": {
+    "description": "Titre affiché dans l'AppBar lorsque le contenu est en cours de chargement."
+  },
+  "errorTitle": "Erreur",
+  "@errorTitle": {
+    "description": "Titre affiché dans l'AppBar lorsqu'une erreur se produit."
+  },
+  "chooseJournalTitle": "Choisir un journal",
+  "@chooseJournalTitle": {
+    "description": "Titre affiché dans l'AppBar lorsqu'aucun journal n'est actif, invitant l'utilisateur à en sélectionner un."
+  },
+  "changeJournalTooltip": "Changer de journal",
+  "@changeJournalTooltip": {
+    "description": "Info-bulle pour le menu déroulant de sélection du journal dans l'AppBar."
+  },
+  "editPaletteTooltip": "Modifier la palette de '{journalName}'",
+  "@editPaletteTooltip": {
+    "description": "Info-bulle pour l'icône de modification de la palette dans la barre d'applications, où {journalName} est le nom du journal actif.",
+    "placeholders": {
+      "journalName": {
+        "type": "String",
+        "example": "Mon Journal de Voyage"
+      }
+    }
+  },
+  "signOutErrorPrefix": "Erreur lors de la déconnexion : ",
+  "@signOutErrorPrefix": {
+    "description": "Préfixe du message d'erreur affiché dans un SnackBar lorsque la déconnexion échoue."
+  },
+
+  "welcomeUser": "Bienvenue, {userName} !",
+  "@welcomeUser": {
+    "description": "Message de bienvenue avec le nom d'affichage de l'utilisateur.",
+    "placeholders": {
+      "userName": {
+        "type": "String",
+        "example": "Jean Dupont"
+      }
+    }
+  },
+  "welcomeGuest": "Bienvenue !",
+  "@welcomeGuest": {
+    "description": "Message de bienvenue générique lorsque le nom d'affichage de l'utilisateur n'est pas disponible."
+  },
+  "paletteIsEmptyMessage": "La palette de ce journal est vide.\nModifiez le journal pour ajouter des couleurs, ou choisissez un autre journal.",
+  "@paletteIsEmptyMessage": {
+    "description": "Message affiché lorsque la palette du journal actif est vide."
+  },
+  "errorLoadingJournal": "Erreur de chargement du journal :",
+  "@errorLoadingJournal": {
+    "description": "Préfixe du message d'erreur lorsque le chargement d'un journal échoue."
+  },
+  "createNewJournalButton": "Créer un nouveau journal",
+  "@createNewJournalButton": {
+    "description": "Texte pour le bouton de création d'un nouveau journal."
+  },
+  "noActiveJournalTitle": "Aucun journal actif.",
+  "@noActiveJournalTitle": {
+    "description": "Titre affiché lorsqu'aucun journal n'est actif."
+  },
+  "noActiveJournalMessage": "Sélectionnez un journal existant ou créez-en un nouveau pour commencer.",
+  "@noActiveJournalMessage": {
+    "description": "Message affiché lorsqu'aucun journal n'est actif, invitant à une action de l'utilisateur."
+  },
+  "chooseOrCreateJournalButton": "Choisir ou créer un journal",
+  "@chooseOrCreateJournalButton": {
+    "description": "Texte pour le bouton permettant de choisir un journal existant ou d'en créer un nouveau."
+  },
+  "optionsTooltip": "Options",
+  "@optionsTooltip": {
+    "description": "Info-bulle pour le bouton du menu 'plus d'options' dans l'AppBar."
+  },
+
+  "bottomNavHome": "Accueil",
+  "@bottomNavHome": {
+    "description": "Étiquette pour l'onglet Accueil dans la barre de navigation inférieure."
+  },
+  "bottomNavNotes": "Notes",
+  "@bottomNavNotes": {
+    "description": "Étiquette pour l'onglet Notes dans la barre de navigation inférieure."
+  },
+  "bottomNavJournals": "Journaux",
+  "@bottomNavJournals": {
+    "description": "Étiquette pour l'onglet Journaux dans la barre de navigation inférieure."
+  },
+
+  "entryPageEditTitle": "Modifier la Note",
+  "entryPageNewTitle": "Nouvelle Note",
+  "entryPageUpdateTooltip": "Mettre à jour la note",
+  "entryPageSaveTooltip": "Sauvegarder la note",
+  "entryPageAssociatedColorLabel": "Couleur associée",
+  "entryPageSelectColorValidator": "Veuillez choisir une couleur.",
+  "entryPageContentLabel": "Contenu de la note...",
+  "entryPageContentHint": "Décrivez votre pensée, événement, ou tâche...",
+  "entryPageContentValidatorEmpty": "Veuillez entrer le contenu de la note.",
+  "entryPageContentValidatorTooLong": "Le contenu est trop long (max 1024 caractères).",
+  "entryPageDateTimeSetToNowSnackbar": "Date et heure réglées sur maintenant.",
+  "entryPageSaveButtonUpdate": "Mettre à jour la Note",
+  "entryPageSaveButtonCreate": "Sauvegarder la Note",
+  "entryPageSavingButton": "Sauvegarde...",
+  "entryPageSaveAsNewButton": "Sauvegarder comme nouvelle note",
+  "entryPageUserNotIdentifiedError": "Utilisateur non identifié.",
+  "entryPageNoColorSelectedError": "Veuillez sélectionner une couleur pour la note.",
+  "entryPageNoteSavedSuccess": "Note sauvegardée.",
+  "entryPageNoteUpdatedSuccess": "Note mise à jour.",
+  "entryPageNoteSavedAsNewSuccess": "Note sauvegardée comme nouvelle.",
+  "entryPageGenericSaveError": "Erreur: {errorMessage}",
+  "@entryPageGenericSaveError": {
+    "placeholders": {
+      "errorMessage": {
+        "type": "String"
+      }
+    }
+  },
+  "entryPageJournalDetailsLoadError": "Impossible de charger les détails du journal.",
+  "entryPageJournalDetailsRetryButton": "Réessayer",
+  "entryPageOriginalColorMissingSnackbar": "La couleur d'origine de cette note n'existe plus dans la palette. Une couleur par défaut a été sélectionnée.",
+  "entryPagePaletteEmptySnackbar": "La palette de ce journal est vide. Veuillez ajouter des couleurs à la palette pour pouvoir associer cette note.",
+
+  "registerPageTitle": "Créer un compte",
+  "registerPageHeading": "Rejoignez Colors & Notes",
+  "registerPageDisplayNameLabel": "Nom d'affichage",
+  "registerPageDisplayNameValidatorEmpty": "Veuillez entrer votre nom d'affichage.",
+  "registerPageDisplayNameValidatorTooShort": "Le nom d'affichage doit comporter au moins 3 caractères.",
+  "registerPagePasswordValidatorEmpty": "Veuillez entrer un mot de passe.",
+  "registerPagePasswordValidatorLength": "Le mot de passe doit contenir au moins 8 caractères.",
+  "registerPagePasswordValidatorUppercase": "Le mot de passe doit contenir au moins une majuscule.",
+  "registerPagePasswordValidatorLowercase": "Le mot de passe doit contenir au moins une minuscule.",
+  "registerPagePasswordValidatorDigit": "Le mot de passe doit contenir au moins un chiffre.",
+  "registerPagePasswordValidatorSpecialChar": "Le mot de passe doit contenir au moins un caractère spécial (+-*_#=@%:$).",
+  "registerPageConfirmPasswordLabel": "Confirmer le mot de passe",
+  "registerPageConfirmPasswordValidatorEmpty": "Veuillez confirmer votre mot de passe.",
+  "registerPageConfirmPasswordValidatorMismatch": "Les mots de passe ne correspondent pas.",
+  "registerPageSignUpButton": "S'inscrire et se connecter",
+  "registerPageAlreadyHaveAccountLink": "Déjà un compte ? Se connecter"
 }

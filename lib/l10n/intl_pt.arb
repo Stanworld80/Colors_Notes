@@ -1,0 +1,172 @@
+{
+  "@@locale": "pt",
+  "signInPageTitle": "Iniciar Sessão",
+  "appName": "Colors & Notes",
+  "emailLabel": "Email",
+  "emailValidationError": "Por favor, introduza um endereço de email válido.",
+  "passwordLabel": "Palavra-passe",
+  "passwordValidationError": "Por favor, introduza a sua palavra-passe.",
+  "signInButton": "Iniciar Sessão",
+  "orSeparator": "ou",
+  "signInWithGoogleButton": "Iniciar Sessão com Google",
+  "noAccountYetSignUp": "Ainda não tem conta? Registar",
+  "aboutLink": "Sobre",
+  "licenseLink": "Licença",
+  "downloadForAndroidLink": "Transferir para Android",
+  "errorLaunchingUrl" : "Erro ao carregar URL",
+  "selectLanguage" : "Selecionar Idioma",
+  "settings": "Definições",
+  "language": "Idioma",
+  "manageJournals": "Gerir Jornais",
+  "managePaletteModels": "Gerir Modelos de Paleta",
+  "about": "Sobre",
+  "logout": "Terminar Sessão",
+  "theme": "Tema",
+  "comingSoon": "Em breve",
+  "themeSettingsComingSoon": "Definições de tema em breve!",
+  "notificationSettingsComingSoon": "Definições de notificação em breve!",
+  "notifications": "Notificações",
+  "english": "Inglês",
+  "french": "Francês",
+  "portuguese": "Português",
+  "portugueseBrazilian": "Português (Brasil)",
+  "italian": "Italiano",
+
+
+  "loadingTitle": "A carregar...",
+  "@loadingTitle": {
+    "description": "Título exibido na AppBar quando o conteúdo está a carregar."
+  },
+  "errorTitle": "Erro",
+  "@errorTitle": {
+    "description": "Título exibido na AppBar quando ocorre um erro."
+  },
+  "chooseJournalTitle": "Escolher um jornal",
+  "@chooseJournalTitle": {
+    "description": "Título exibido na AppBar quando nenhum jornal está ativo, solicitando ao utilizador que selecione um."
+  },
+  "changeJournalTooltip": "Mudar de jornal",
+  "@changeJournalTooltip": {
+    "description": "Dica de ferramenta para o menu suspenso de seleção de jornal na AppBar."
+  },
+  "editPaletteTooltip": "Editar paleta de '{journalName}'",
+  "@editPaletteTooltip": {
+    "description": "Dica de ferramenta para o ícone de edição de paleta na barra de aplicações, onde {journalName} é o nome do jornal ativo.",
+    "placeholders": {
+      "journalName": {
+        "type": "String",
+        "example": "O Meu Diário de Viagem"
+      }
+    }
+  },
+  "signOutErrorPrefix": "Erro ao terminar sessão: ",
+  "@signOutErrorPrefix": {
+    "description": "Prefixo da mensagem de erro exibida num SnackBar quando terminar a sessão falha."
+  },
+
+  "welcomeUser": "Bem-vindo(a), {userName}!",
+  "@welcomeUser": {
+    "description": "Mensagem de boas-vindas com o nome de exibição do utilizador.",
+    "placeholders": {
+      "userName": {
+        "type": "String",
+        "example": "Maria Silva"
+      }
+    }
+  },
+  "welcomeGuest": "Bem-vindo(a)!",
+  "@welcomeGuest": {
+    "description": "Mensagem de boas-vindas genérica quando o nome de exibição do utilizador não está disponível."
+  },
+  "paletteIsEmptyMessage": "A paleta deste jornal está vazia.\nEdite o jornal para adicionar cores ou escolha outro jornal.",
+  "@paletteIsEmptyMessage": {
+    "description": "Mensagem exibida quando a paleta do jornal ativo está vazia."
+  },
+  "errorLoadingJournal": "Erro ao carregar jornal:",
+  "@errorLoadingJournal": {
+    "description": "Prefixo para a mensagem de erro quando o carregamento de um jornal falha."
+  },
+  "createNewJournalButton": "Criar um novo jornal",
+  "@createNewJournalButton": {
+    "description": "Texto para o botão para criar um novo jornal."
+  },
+  "noActiveJournalTitle": "Nenhum jornal ativo.",
+  "@noActiveJournalTitle": {
+    "description": "Título exibido quando nenhum jornal está ativo."
+  },
+  "noActiveJournalMessage": "Selecione um jornal existente ou crie um novo para começar.",
+  "@noActiveJournalMessage": {
+    "description": "Mensagem exibida quando nenhum jornal está ativo, solicitando uma ação do utilizador."
+  },
+  "chooseOrCreateJournalButton": "Escolher ou criar um jornal",
+  "@chooseOrCreateJournalButton": {
+    "description": "Texto para o botão para escolher um jornal existente ou criar um novo."
+  },
+  "optionsTooltip": "Opções",
+  "@optionsTooltip": {
+    "description": "Dica de ferramenta para o botão do menu 'mais opções' na AppBar."
+  },
+
+  "bottomNavHome": "Início",
+  "@bottomNavHome": {
+    "description": "Rótulo para o separador Início na barra de navegação inferior."
+  },
+  "bottomNavNotes": "Notas",
+  "@bottomNavNotes": {
+    "description": "Rótulo para o separador Notas na barra de navegação inferior."
+  },
+  "bottomNavJournals": "Jornais",
+  "@bottomNavJournals": {
+    "description": "Rótulo para o separador Jornais na barra de navegação inferior."
+  },
+
+  "entryPageEditTitle": "Editar Nota",
+  "entryPageNewTitle": "Nova Nota",
+  "entryPageUpdateTooltip": "Atualizar nota",
+  "entryPageSaveTooltip": "Guardar nota",
+  "entryPageAssociatedColorLabel": "Cor Associada",
+  "entryPageSelectColorValidator": "Por favor, selecione uma cor.",
+  "entryPageContentLabel": "Conteúdo da nota...",
+  "entryPageContentHint": "Descreva o seu pensamento, evento ou tarefa...",
+  "entryPageContentValidatorEmpty": "Por favor, introduza o conteúdo da nota.",
+  "entryPageContentValidatorTooLong": "O conteúdo é demasiado longo (máx. 1024 caracteres).",
+  "entryPageDateTimeSetToNowSnackbar": "Data e hora definidas para agora.",
+  "entryPageSaveButtonUpdate": "Atualizar Nota",
+  "entryPageSaveButtonCreate": "Guardar Nota",
+  "entryPageSavingButton": "A guardar...",
+  "entryPageSaveAsNewButton": "Guardar como nova nota",
+  "entryPageUserNotIdentifiedError": "Utilizador não identificado.",
+  "entryPageNoColorSelectedError": "Por favor, selecione uma cor para a nota.",
+  "entryPageNoteSavedSuccess": "Nota guardada.",
+  "entryPageNoteUpdatedSuccess": "Nota atualizada.",
+  "entryPageNoteSavedAsNewSuccess": "Nota guardada como nova.",
+  "entryPageGenericSaveError": "Erro: {errorMessage}",
+  "@entryPageGenericSaveError": {
+    "placeholders": {
+      "errorMessage": {
+        "type": "String"
+      }
+    }
+  },
+  "entryPageJournalDetailsLoadError": "Não foi possível carregar os detalhes do jornal.",
+  "entryPageJournalDetailsRetryButton": "Tentar Novamente",
+  "entryPageOriginalColorMissingSnackbar": "A cor original desta nota já não existe na paleta. Foi selecionada uma cor predefinida.",
+  "entryPagePaletteEmptySnackbar": "A paleta deste jornal está vazia. Adicione cores à paleta para associar esta nota.",
+
+  "registerPageTitle": "Criar Conta",
+  "registerPageHeading": "Junte-se ao Colors & Notes",
+  "registerPageDisplayNameLabel": "Nome de Exibição",
+  "registerPageDisplayNameValidatorEmpty": "Por favor, introduza o seu nome de exibição.",
+  "registerPageDisplayNameValidatorTooShort": "O nome de exibição deve ter pelo menos 3 caracteres.",
+  "registerPagePasswordValidatorEmpty": "Por favor, introduza uma palavra-passe.",
+  "registerPagePasswordValidatorLength": "A palavra-passe deve ter pelo menos 8 caracteres.",
+  "registerPagePasswordValidatorUppercase": "A palavra-passe deve conter pelo menos uma letra maiúscula.",
+  "registerPagePasswordValidatorLowercase": "A palavra-passe deve conter pelo menos uma letra minúscula.",
+  "registerPagePasswordValidatorDigit": "A palavra-passe deve conter pelo menos um dígito.",
+  "registerPagePasswordValidatorSpecialChar": "A palavra-passe deve conter pelo menos um caractere especial (+-*_#=@%:$).",
+  "registerPageConfirmPasswordLabel": "Confirmar Palavra-passe",
+  "registerPageConfirmPasswordValidatorEmpty": "Por favor, confirme a sua palavra-passe.",
+  "registerPageConfirmPasswordValidatorMismatch": "As palavras-passe não coincidem.",
+  "registerPageSignUpButton": "Registar e Iniciar Sessão",
+  "registerPageAlreadyHaveAccountLink": "Já tem uma conta? Iniciar Sessão"
+}

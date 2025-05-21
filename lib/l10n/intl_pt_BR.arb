@@ -1,0 +1,171 @@
+{
+  "@@locale": "pt_BR",
+  "signInPageTitle": "Entrar",
+  "appName": "Colors & Notes",
+  "emailLabel": "E-mail",
+  "emailValidationError": "Por favor, insira um endereço de e-mail válido.",
+  "passwordLabel": "Senha",
+  "passwordValidationError": "Por favor, insira sua senha.",
+  "signInButton": "Entrar",
+  "orSeparator": "ou",
+  "signInWithGoogleButton": "Entrar com o Google",
+  "noAccountYetSignUp": "Ainda não tem conta? Cadastre-se",
+  "aboutLink": "Sobre",
+  "licenseLink": "Licença",
+  "downloadForAndroidLink": "Baixar para Android",
+  "errorLaunchingUrl" : "Erro ao carregar URL",
+  "selectLanguage" : "Selecionar Idioma",
+  "settings": "Configurações",
+  "language": "Idioma",
+  "manageJournals": "Gerenciar Diários",
+  "managePaletteModels": "Gerenciar Modelos de Paleta",
+  "about": "Sobre",
+  "logout": "Sair",
+  "theme": "Tema",
+  "comingSoon": "Em breve",
+  "themeSettingsComingSoon": "Configurações de tema em breve!",
+  "notificationSettingsComingSoon": "Configurações de notificação em breve!",
+  "notifications": "Notificações",
+  "english": "Inglês",
+  "french": "Francês",
+  "portuguese": "Português",
+  "portugueseBrazilian": "Português (Brasil)",
+  "italian": "Italiano",
+
+  "loadingTitle": "Carregando...",
+  "@loadingTitle": {
+    "description": "Título exibido na AppBar quando o conteúdo está carregando."
+  },
+  "errorTitle": "Erro",
+  "@errorTitle": {
+    "description": "Título exibido na AppBar quando ocorre um erro."
+  },
+  "chooseJournalTitle": "Escolha um diário",
+  "@chooseJournalTitle": {
+    "description": "Título exibido na AppBar quando nenhum diário está ativo, solicitando ao usuário que selecione um."
+  },
+  "changeJournalTooltip": "Mudar diário",
+  "@changeJournalTooltip": {
+    "description": "Dica de ferramenta para o menu suspenso de seleção de diário na AppBar."
+  },
+  "editPaletteTooltip": "Editar paleta de '{journalName}'",
+  "@editPaletteTooltip": {
+    "description": "Dica de ferramenta para o ícone de edição de paleta na barra de aplicativos, onde {journalName} é o nome do diário ativo.",
+    "placeholders": {
+      "journalName": {
+        "type": "String",
+        "example": "Meu Diário de Viagem"
+      }
+    }
+  },
+  "signOutErrorPrefix": "Erro ao sair: ",
+  "@signOutErrorPrefix": {
+    "description": "Prefixo da mensagem de erro exibida em um SnackBar quando o logout falha."
+  },
+
+  "welcomeUser": "Bem-vindo(a), {userName}!",
+  "@welcomeUser": {
+    "description": "Mensagem de boas-vindas com o nome de exibição do usuário.",
+    "placeholders": {
+      "userName": {
+        "type": "String",
+        "example": "Maria Silva"
+      }
+    }
+  },
+  "welcomeGuest": "Bem-vindo(a)!",
+  "@welcomeGuest": {
+    "description": "Mensagem de boas-vindas genérica quando o nome de exibição do usuário não está disponível."
+  },
+  "paletteIsEmptyMessage": "A paleta deste diário está vazia.\nEdite o diário para adicionar cores ou escolha outro diário.",
+  "@paletteIsEmptyMessage": {
+    "description": "Mensagem exibida quando a paleta do diário ativo está vazia."
+  },
+  "errorLoadingJournal": "Erro ao carregar diário:",
+  "@errorLoadingJournal": {
+    "description": "Prefixo para a mensagem de erro quando o carregamento de um diário falha."
+  },
+  "createNewJournalButton": "Criar um novo diário",
+  "@createNewJournalButton": {
+    "description": "Texto para o botão para criar um novo diário."
+  },
+  "noActiveJournalTitle": "Nenhum diário ativo.",
+  "@noActiveJournalTitle": {
+    "description": "Título exibido quando nenhum diário está ativo."
+  },
+  "noActiveJournalMessage": "Selecione um diário existente ou crie um novo para começar.",
+  "@noActiveJournalMessage": {
+    "description": "Mensagem exibida quando nenhum diário está ativo, solicitando uma ação do usuário."
+  },
+  "chooseOrCreateJournalButton": "Escolher ou criar um diário",
+  "@chooseOrCreateJournalButton": {
+    "description": "Texto para o botão para escolher um diário existente ou criar um novo."
+  },
+  "optionsTooltip": "Opções",
+  "@optionsTooltip": {
+    "description": "Dica de ferramenta para o botão do menu 'mais opções' na AppBar."
+  },
+
+  "bottomNavHome": "Início",
+  "@bottomNavHome": {
+    "description": "Rótulo para a aba Início na barra de navegação inferior."
+  },
+  "bottomNavNotes": "Notas",
+  "@bottomNavNotes": {
+    "description": "Rótulo para a aba Notas na barra de navegação inferior."
+  },
+  "bottomNavJournals": "Diários",
+  "@bottomNavJournals": {
+    "description": "Rótulo para a aba Diários na barra de navegação inferior."
+  },
+
+  "entryPageEditTitle": "Editar Nota",
+  "entryPageNewTitle": "Nova Nota",
+  "entryPageUpdateTooltip": "Atualizar nota",
+  "entryPageSaveTooltip": "Salvar nota",
+  "entryPageAssociatedColorLabel": "Cor Associada",
+  "entryPageSelectColorValidator": "Por favor, selecione uma cor.",
+  "entryPageContentLabel": "Conteúdo da nota...",
+  "entryPageContentHint": "Descreva seu pensamento, evento ou tarefa...",
+  "entryPageContentValidatorEmpty": "Por favor, insira o conteúdo da nota.",
+  "entryPageContentValidatorTooLong": "O conteúdo é muito longo (máx. 1024 caracteres).",
+  "entryPageDateTimeSetToNowSnackbar": "Data e hora definidas para agora.",
+  "entryPageSaveButtonUpdate": "Atualizar Nota",
+  "entryPageSaveButtonCreate": "Salvar Nota",
+  "entryPageSavingButton": "Salvando...",
+  "entryPageSaveAsNewButton": "Salvar como nova nota",
+  "entryPageUserNotIdentifiedError": "Usuário não identificado.",
+  "entryPageNoColorSelectedError": "Por favor, selecione uma cor para a nota.",
+  "entryPageNoteSavedSuccess": "Nota salva.",
+  "entryPageNoteUpdatedSuccess": "Nota atualizada.",
+  "entryPageNoteSavedAsNewSuccess": "Nota salva como nova.",
+  "entryPageGenericSaveError": "Erro: {errorMessage}",
+  "@entryPageGenericSaveError": {
+    "placeholders": {
+      "errorMessage": {
+        "type": "String"
+      }
+    }
+  },
+  "entryPageJournalDetailsLoadError": "Não foi possível carregar os detalhes do diário.",
+  "entryPageJournalDetailsRetryButton": "Tentar Novamente",
+  "entryPageOriginalColorMissingSnackbar": "A cor original desta nota não existe mais na paleta. Uma cor padrão foi selecionada.",
+  "entryPagePaletteEmptySnackbar": "A paleta deste diário está vazia. Adicione cores à paleta para associar esta nota.",
+
+  "registerPageTitle": "Criar Conta",
+  "registerPageHeading": "Junte-se ao Colors & Notes",
+  "registerPageDisplayNameLabel": "Nome de Exibição",
+  "registerPageDisplayNameValidatorEmpty": "Por favor, insira seu nome de exibição.",
+  "registerPageDisplayNameValidatorTooShort": "O nome de exibição deve ter pelo menos 3 caracteres.",
+  "registerPagePasswordValidatorEmpty": "Por favor, insira uma senha.",
+  "registerPagePasswordValidatorLength": "A senha deve ter pelo menos 8 caracteres.",
+  "registerPagePasswordValidatorUppercase": "A senha deve conter pelo menos uma letra maiúscula.",
+  "registerPagePasswordValidatorLowercase": "A senha deve conter pelo menos uma letra minúscula.",
+  "registerPagePasswordValidatorDigit": "A senha deve conter pelo menos um dígito.",
+  "registerPagePasswordValidatorSpecialChar": "A senha deve conter pelo menos um caractere especial (+-*_#=@%:$).",
+  "registerPageConfirmPasswordLabel": "Confirmar Senha",
+  "registerPageConfirmPasswordValidatorEmpty": "Por favor, confirme sua senha.",
+  "registerPageConfirmPasswordValidatorMismatch": "As senhas não coincidem.",
+  "registerPageSignUpButton": "Cadastrar e Entrar",
+  "registerPageAlreadyHaveAccountLink": "Já tem uma conta? Entrar"
+}
