@@ -13,5 +13,20 @@
   "aboutLink": "À Propos",
   "licenseLink": "Licence",
   "downloadForAndroidLink": "Télécharger pour Android",
-  "errorLaunchingUrl" : "erreur de chargement"
+  "errorLaunchingUrl" : "erreur de chargement",
+  "Language" : "langue",
+  "english" : "anglais",
+  "french" : "français",
+  "selectLanguage" : "Sélectionnez une langue",
+  "settings": "Paramètres",
+  "language": "Langue",
+  "manageJournals": "Gérer les journaux",
+  "managePaletteModels": "Gérer les modèles de palettes",
+  "about": "À propos",
+  "logout": "Déconnexion",
+  "theme": "Thème",
+  "comingSoon": "Bientôt disponible",
+  "themeSettingsComingSoon": "Les paramètres de thème arrivent bientôt !",
+  "notificationSettingsComingSoon": "Les paramètres de notification arrivent bientôt !",
+  "notifications": "Notifications"
 }

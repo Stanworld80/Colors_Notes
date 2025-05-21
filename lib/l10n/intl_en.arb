@@ -13,5 +13,17 @@
   "aboutLink": "About",
   "licenseLink": "License",
   "downloadForAndroidLink": "Download for Android",
-  "errorLaunchingUrl" : "loading error"
+  "errorLaunchingUrl" : "loading error",
+  "selectLanguage" : "Select Language",
+  "settings": "Settings",
+  "language": "Language",
+  "manageJournals": "Manage Journals",
+  "managePaletteModels": "Manage Palette Models",
+  "about": "About",
+  "logout": "Logout",
+  "theme": "Theme",
+  "comingSoon": "Coming Soon",
+  "themeSettingsComingSoon": "Theme settings are coming soon!",
+  "notificationSettingsComingSoon": "Notification settings are coming soon!",
+  "notifications": "Notifications"
 }
