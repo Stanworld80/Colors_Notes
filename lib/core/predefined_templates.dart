@@ -64,7 +64,21 @@ List<PaletteModel> predefinedPalettes = [
     ],
   ),
 
-
+  // Mood Theme Palette
+  // A palette for tracking different moods and emotional states.
+  PaletteModel(
+    id: 'humeur_palette_theme',
+    name: 'Thème : Humeur', // UI Text in French: "Theme: Mood"
+    isPredefined: true,
+    colors: [
+      ColorData(paletteElementId: _generateColorId(), title: 'Joyeux', hexCode: '#FFF176'), // Jaune Soleil (Sunny Yellow) - UI Text in French: "Happy"
+      ColorData(paletteElementId: _generateColorId(), title: 'Calme', hexCode: '#9FA8DA'), // Bleu Lavande (Lavender Blue) - UI Text in French: "Calm"
+      ColorData(paletteElementId: _generateColorId(), title: 'Neutre', hexCode: '#E0E0E0'), // Gris Clair (Light Gray) - UI Text in French: "Neutral"
+      ColorData(paletteElementId: _generateColorId(), title: 'Triste', hexCode: '#3949AB'), // Bleu Foncé (Dark Blue) - UI Text in French: "Sad"
+      ColorData(paletteElementId: _generateColorId(), title: 'Colère', hexCode: '#F44336'), // Rouge Vif (Bright Red) - UI Text in French: "Anger"
+      ColorData(paletteElementId: _generateColorId(), title: 'Stressé', hexCode: '#FB8C00'), // Orange Foncé (Dark Orange) - UI Text in French: "Stressed"
+    ],
+  ),
 
   // Finance Theme Palette
   // A palette for financial tracking, such as income and expenses.
