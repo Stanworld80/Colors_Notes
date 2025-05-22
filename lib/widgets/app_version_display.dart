@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:colors_notes/l10n/app_localizations.dart';
 
 /// A widget that asynchronously loads and displays the application's
 /// version and build number.
@@ -30,8 +31,10 @@ class AppVersionDisplay extends StatefulWidget {
 ///
 /// Manages the loading of package information and the display of the version string.
 class _AppVersionDisplayState extends State<AppVersionDisplay> {
-  /// The text to display, showing the version and build number or a loading/error message.
-  String _versionText = 'Loading...'; // Initial text while loading version information.
+  String _version = "";
+  String _buildNumber = "";
+  bool _isLoading = true;
+  bool _hasError = false;
 
   @override
   void initState() {
@@ -41,22 +44,23 @@ class _AppVersionDisplayState extends State<AppVersionDisplay> {
 
   /// Asynchronously loads package information (version and build number).
   ///
-  /// Updates the [_versionText] state with the formatted version string upon
-  /// successful loading, or an error message if loading fails.
+  /// Updates state variables upon successful loading or error.
   Future<void> _loadVersionInfo() async {
     try {
       final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-      if (mounted) { // Check if the widget is still in the widget tree.
+      if (mounted) {
         setState(() {
-          _versionText = 'v${packageInfo.version} (Build ${packageInfo.buildNumber})';
+          _version = packageInfo.version;
+          _buildNumber = packageInfo.buildNumber;
+          _isLoading = false;
         });
       }
     } catch (e) {
       // In a real application, you might want to log this error.
-      // For example: _logger.e('Failed to load version info: $e');
-      if (mounted) { // Check if the widget is still in the widget tree.
+      if (mounted) {
         setState(() {
-          _versionText = 'Version unavailable';
+          _hasError = true;
+          _isLoading = false;
         });
       }
     }
@@ -64,12 +68,22 @@ class _AppVersionDisplayState extends State<AppVersionDisplay> {
 
   @override
   Widget build(BuildContext context) {
-    // Determine the text style: use the provided style or a default one.
+    final l10n = AppLocalizations.of(context)!;
+    String displayText;
+
+    if (_isLoading) {
+      displayText = l10n.versionLoading;
+    } else if (_hasError) {
+      displayText = l10n.versionUnavailable;
+    } else {
+      displayText = l10n.versionBuildFormat(_version, _buildNumber);
+    }
+
     final textStyle = widget.style ??
         Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600]);
 
     return Text(
-      _versionText,
+      displayText,
       style: textStyle,
       textAlign: widget.textAlign,
     );

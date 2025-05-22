@@ -90,9 +90,9 @@ class _RegisterPageState extends State<RegisterPage> {
         }
       } catch (e) {
         if (mounted) {
-          _loggerPage.e('Erreur lors de l\'inscription sur RegisterPage: ${e.toString()}');
+          _loggerPage.e('Error during sign-up on RegisterPage: ${e.toString()}'); // MODIFIED log to English
           ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent)
+              SnackBar(content: Text(l10n.genericAuthErrorSnackbar), backgroundColor: Colors.redAccent) // MODIFIED
           );
         }
       } finally {

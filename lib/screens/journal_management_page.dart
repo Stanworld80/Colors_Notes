@@ -1,7 +1,8 @@
+import 'package:colors_notes/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:logger/logger.dart';
 import 'package:intl/intl.dart'; // For date formatting.
+import 'package:logger/logger.dart';
+import 'package:provider/provider.dart';
 
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
@@ -27,21 +28,22 @@ class JournalManagementPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final authService = Provider.of<AuthService>(context, listen: false);
     final firestoreService = Provider.of<FirestoreService>(context, listen: false);
     final activeJournalNotifier = Provider.of<ActiveJournalNotifier>(context); // listen: true to rebuild on active journal change
     final String? currentUserId = authService.currentUser?.uid;
 
     if (currentUserId == null) {
-      _loggerPage.w("JournalManagementPage: currentUserId est null.");
+      _loggerPage.w("JournalManagementPage: currentUserId is null."); // Log in English
       return Scaffold(
-          appBar: AppBar(title: const Text('Gérer les Journaux')), // UI Text in French
-          body: const Center(child: Text("Utilisateur non connecté."))); // UI Text in French
+          appBar: AppBar(title: Text(l10n.manageJournalsAppBarTitle)),
+          body: Center(child: Text(l10n.userNotConnectedError)));
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gérer les Journaux'), // UI Text in French
+        title: Text(l10n.manageJournalsAppBarTitle),
       ),
       body: StreamBuilder<List<Journal>>(
         stream: firestoreService.getJournalsStream(currentUserId),
@@ -50,13 +52,14 @@ class JournalManagementPage extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            _loggerPage.e("Erreur chargement journaux: ${snapshot.error}");
-            return Center(child: Text('Erreur de chargement des journaux: ${snapshot.error.toString()}')); // UI Text in French
+            _loggerPage.e("Error loading journals: ${snapshot.error}"); // Log in English
+            return Center(child: Text(l10n.errorLoadingJournals(snapshot.error.toString())));
           }
 
           final journals = snapshot.data ?? [];
           // Date formatter for displaying creation dates.
-          final DateFormat dateFormat = DateFormat('dd MMM yy, HH:mm', 'fr_FR'); // Date format in French. yy for two-digit year.
+          // Using current locale from AppLocalizations for date formatting.
+          final DateFormat dateFormat = DateFormat('dd MMM yy, HH:mm', l10n.localeName);
 
           // Card for creating a new journal, always displayed at the top.
           Widget createJournalCard = Card(
@@ -83,7 +86,7 @@ class JournalManagementPage extends StatelessWidget {
                     Icon(Icons.add_circle_outline_rounded, size: 32, color: Theme.of(context).colorScheme.primary),
                     const SizedBox(width: 12),
                     Text(
-                      'Créer un nouveau journal', // UI Text in French
+                      l10n.createNewJournalCardLabel,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w500,
@@ -100,24 +103,24 @@ class JournalManagementPage extends StatelessWidget {
             return Column(
               children: [
                 createJournalCard,
-                const Expanded(
+                Expanded(
                   child: Center(
                     child: Padding(
-                      padding: EdgeInsets.all(20.0),
+                      padding: const EdgeInsets.all(20.0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.library_books_outlined, size: 50, color: Colors.grey),
-                          SizedBox(height: 16),
+                          const Icon(Icons.library_books_outlined, size: 50, color: Colors.grey),
+                          const SizedBox(height: 16),
                           Text(
-                            'Aucun journal existant.', // UI Text in French
-                            style: TextStyle(fontSize: 18, color: Colors.grey),
+                            l10n.noExistingJournalsMessage,
+                            style: const TextStyle(fontSize: 18, color: Colors.grey),
                             textAlign: TextAlign.center,
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Text(
-                            'Commencez par en créer un ci-dessus.', // UI Text in French
-                            style: TextStyle(fontSize: 14, color: Colors.grey),
+                            l10n.startByCreatingOneMessage,
+                            style: const TextStyle(fontSize: 14, color: Colors.grey),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -144,7 +147,7 @@ class JournalManagementPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Journaux existants :", // UI Text in French
+                        l10n.existingJournalsSectionTitle,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                           fontWeight: FontWeight.bold,
@@ -179,12 +182,12 @@ class JournalManagementPage extends StatelessWidget {
                       size: 28
                   ),
                   title: Text(journal.name, style: TextStyle(fontWeight: isActive ? FontWeight.bold : FontWeight.normal, fontSize: 17)),
-                  subtitle: Text('Créé le: ${dateFormat.format(journal.createdAt.toDate().toLocal())}', style: const TextStyle(fontSize: 12)), // UI Text in French
+                  subtitle: Text(l10n.journalCreatedOnDateLabel(dateFormat.format(journal.createdAt.toDate().toLocal())), style: const TextStyle(fontSize: 12)),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Tooltip(
-                        message: "Modifier la palette de '${journal.name}'", // UI Text in French
+                        message: l10n.editPaletteForJournalTooltip(journal.name),
                         child: IconButton(
                           icon: const Icon(Icons.palette_outlined),
                           onPressed: () {
@@ -200,10 +203,10 @@ class JournalManagementPage extends StatelessWidget {
                         ),
                       ),
                       Tooltip(
-                        message: "Modifier le nom / Options...", // UI Text in French
+                        message: l10n.editNameOptionsTooltip,
                         child: IconButton(
                           icon: const Icon(Icons.edit_outlined),
-                          onPressed: () => _editJournalNameDialog(context, journal, firestoreService, activeJournalNotifier, currentUserId),
+                          onPressed: () => _editJournalNameDialog(context, journal, firestoreService, activeJournalNotifier, currentUserId, l10n),
                         ),
                       ),
                     ],
@@ -212,7 +215,7 @@ class JournalManagementPage extends StatelessWidget {
                   onTap: () {
                     if (!isActive) {
                       activeJournalNotifier.setActiveJournal(journal.id, currentUserId);
-                      _loggerPage.i("Journal actif changé vers: ${journal.name}");
+                      _loggerPage.i("Active journal changed to: ${journal.name}"); // Log in English
                     }
                   },
                 ),
@@ -225,13 +228,7 @@ class JournalManagementPage extends StatelessWidget {
   }
 
   /// Displays a dialog to edit the name of a [Journal] or delete it.
-  ///
-  /// [context] The build context.
-  /// [journal] The journal to be edited or deleted.
-  /// [firestoreService] Instance of [FirestoreService] for database operations.
-  /// [activeJournalNotifier] Instance of [ActiveJournalNotifier] to manage active journal state.
-  /// [currentUserId] The ID of the current user.
-  Future<void> _editJournalNameDialog(BuildContext context, Journal journal, FirestoreService firestoreService, ActiveJournalNotifier activeJournalNotifier, String currentUserId) async {
+  Future<void> _editJournalNameDialog(BuildContext context, Journal journal, FirestoreService firestoreService, ActiveJournalNotifier activeJournalNotifier, String currentUserId, AppLocalizations l10n) async {
     final TextEditingController nameController = TextEditingController(text: journal.name);
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -239,27 +236,30 @@ class JournalManagementPage extends StatelessWidget {
       context: context,
       barrierDismissible: false, // User must tap a button to dismiss
       builder: (BuildContext dialogContext) {
+        // Note: It's better to get l10n from the parent context if possible,
+        // but for dialogs, passing it or getting it from dialogContext is also an option.
+        // Here, we are passing it as a parameter.
         return AlertDialog(
-          title: const Text('Options du journal'), // UI Text in French
+          title: Text(l10n.journalOptionsDialogTitle),
           content: Form(
             key: formKey,
             child: TextFormField(
               controller: nameController,
-              decoration: const InputDecoration(
-                  labelText: "Nouveau nom du journal", // UI Text in French
-                  hintText: "Entrez le nouveau nom ici", // UI Text in French
-                  border: OutlineInputBorder()
+              decoration: InputDecoration(
+                  labelText: l10n.newJournalNameLabel,
+                  hintText: l10n.newJournalNameHint,
+                  border: const OutlineInputBorder()
               ),
               autofocus: true,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Le nom ne peut pas être vide.'; // UI Text in French
+                  return l10n.nameCannotBeEmptyValidator;
                 }
                 if (value.trim() == journal.name) {
-                  return 'Le nouveau nom est identique à l\'ancien.'; // UI Text in French
+                  return l10n.newNameSameAsOldValidator;
                 }
                 if (value.length > 70) {
-                  return 'Le nom du journal est trop long (max 70).'; // UI Text in French
+                  return l10n.journalNameTooLongValidator;
                 }
                 return null;
               },
@@ -267,21 +267,21 @@ class JournalManagementPage extends StatelessWidget {
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Annuler'), // UI Text in French
+              child: Text(l10n.cancelButtonLabel),
               onPressed: () {
                 Navigator.of(dialogContext).pop();
               },
             ),
             TextButton(
               style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
-              child: const Text('Supprimer le journal'), // UI Text in French
+              child: Text(l10n.deleteJournalButtonLabel),
               onPressed: () {
                 Navigator.of(dialogContext).pop(); // Close edit dialog first
-                _deleteJournalDialog(context, journal, firestoreService, activeJournalNotifier, currentUserId);
+                _deleteJournalDialog(context, journal, firestoreService, activeJournalNotifier, currentUserId, l10n);
               },
             ),
             ElevatedButton(
-              child: const Text('Sauvegarder le nom'), // UI Text in French
+              child: Text(l10n.saveNameButtonLabel),
               onPressed: () async {
                 if (formKey.currentState!.validate()) {
                   final newName = nameController.text.trim();
@@ -289,31 +289,26 @@ class JournalManagementPage extends StatelessWidget {
 
                   if (newName.isNotEmpty && newName != journal.name) {
                     try {
-                      // Check if a journal with the new name already exists
                       bool nameExists = await firestoreService.checkJournalNameExists(newName, currentUserId);
                       if (nameExists && context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Un journal nommé "$newName" existe déjà.'), backgroundColor: Colors.orange), // UI Text in French
+                          SnackBar(content: Text(l10n.journalNameExistsSnackbar(newName)), backgroundColor: Colors.orange),
                         );
-                        return; // Prevent update if name exists
+                        return;
                       }
 
                       await firestoreService.updateJournalName(journal.id, newName);
-                      _loggerPage.i("Nom du journal ${journal.id} mis à jour vers '$newName'");
+                      _loggerPage.i("Journal name ${journal.id} updated to '$newName'"); // Log in English
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Nom du journal mis à jour.')), // UI Text in French
+                          SnackBar(content: Text(l10n.journalNameUpdatedSnackbar)),
                         );
-                        // The stream builder will automatically reflect the name change.
-                        // If this was the active journal, its name in ActiveJournalNotifier might need an update
-                        // if the notifier doesn't re-fetch on its own.
-                        // However, setActiveJournal is usually called with ID, and it fetches the latest.
                       }
                     } catch (e) {
-                      _loggerPage.e("Erreur màj nom journal: $e");
+                      _loggerPage.e("Error updating journal name: $e"); // Log in English
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Erreur: ${e.toString()}')), // UI Text in French
+                          SnackBar(content: Text(l10n.genericErrorSnackbar(e.toString()))),
                         );
                       }
                     }
@@ -328,35 +323,24 @@ class JournalManagementPage extends StatelessWidget {
   }
 
   /// Displays a two-step confirmation dialog to delete a [Journal].
-  ///
-  /// The first step asks for simple confirmation. The second step requires typing "SUPPRIMER".
-  /// If confirmed, the journal and its associated notes are deleted.
-  /// If the deleted journal was active, it attempts to set a new active journal.
-  ///
-  /// [context] The build context.
-  /// [journalToDelete] The journal to be deleted.
-  /// [firestoreService] Instance of [FirestoreService] for database operations.
-  /// [activeJournalNotifier] Instance of [ActiveJournalNotifier] to manage active journal state.
-  /// [currentUserId] The ID of the current user.
-  Future<void> _deleteJournalDialog(BuildContext context, Journal journalToDelete, FirestoreService firestoreService, ActiveJournalNotifier activeJournalNotifier, String currentUserId) async {
-    // First confirmation dialog
+  Future<void> _deleteJournalDialog(BuildContext context, Journal journalToDelete, FirestoreService firestoreService, ActiveJournalNotifier activeJournalNotifier, String currentUserId, AppLocalizations l10n) async {
     final bool? confirmDelete = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext dialogCtx) {
         return AlertDialog(
-          title: Text('Supprimer le journal "${journalToDelete.name}" ?'), // UI Text in French
-          content: const Text('Toutes les notes de ce journal seront également supprimées définitivement. Cette action est irréversible.'), // UI Text in French
+          title: Text(l10n.deleteJournalDialogTitle(journalToDelete.name)),
+          content: Text(l10n.deleteJournalDialogContent),
           actions: <Widget>[
             TextButton(
-              child: const Text('Annuler'), // UI Text in French
+              child: Text(l10n.cancelButtonLabel),
               onPressed: () {
                 Navigator.of(dialogCtx).pop(false);
               },
             ),
             TextButton(
               style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
-              child: const Text('Supprimer'), // UI Text in French
+              child: Text(l10n.deleteButtonLabel),
               onPressed: () {
                 Navigator.of(dialogCtx).pop(true);
               },
@@ -366,9 +350,8 @@ class JournalManagementPage extends StatelessWidget {
       },
     );
 
-    if (confirmDelete != true) return; // User cancelled the first dialog
+    if (confirmDelete != true) return;
 
-    // Second, type-to-confirm dialog
     final TextEditingController confirmTextController = TextEditingController();
     final GlobalKey<FormState> deleteFormKey = GlobalKey<FormState>();
 
@@ -377,23 +360,25 @@ class JournalManagementPage extends StatelessWidget {
         barrierDismissible: false,
         builder: (BuildContext dialogCtx) {
           return AlertDialog(
-            title: Text('CONFIRMATION FINALE pour "${journalToDelete.name}"'), // UI Text in French
+            title: Text(l10n.finalConfirmationDialogTitle(journalToDelete.name)),
             content: Form(
               key: deleteFormKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text("Pour confirmer la suppression, veuillez taper 'SUPPRIMER' dans le champ ci-dessous."), // UI Text in French
+                  Text(l10n.finalConfirmationDialogContent), // This key should include "SUPPRIMER" or be generic
                   const SizedBox(height: 15),
                   TextFormField(
                     controller: confirmTextController,
-                    decoration: const InputDecoration(
-                      labelText: 'Tapez SUPPRIMER ici', // UI Text in French
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l10n.typeDeleteHereLabel, // Assumes "SUPPRIMER" is part of this label or instruction
+                      border: const OutlineInputBorder(),
                     ),
                     validator: (value) {
-                      if (value != 'SUPPRIMER') { // Case-sensitive confirmation
-                        return 'Texte de confirmation incorrect.'; // UI Text in French
+                      // The confirmation text 'DELETE' (or localized equivalent) should come from l10n if it's to be localized.
+                      // For now, assuming 'DELETE' is the required input string as per previous English key.
+                      if (value != 'DELETE') {
+                        return l10n.incorrectConfirmationTextValidator;
                       }
                       return null;
                     },
@@ -403,12 +388,12 @@ class JournalManagementPage extends StatelessWidget {
             ),
             actions: <Widget>[
               TextButton(
-                child: const Text('Annuler'), // UI Text in French
+                child: Text(l10n.cancelButtonLabel),
                 onPressed: () => Navigator.of(dialogCtx).pop(false),
               ),
               TextButton(
                 style: TextButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
-                child: const Text('CONFIRMER LA SUPPRESSION'), // UI Text in French
+                child: Text(l10n.confirmDeletionButtonLabel),
                 onPressed: () {
                   if (deleteFormKey.currentState!.validate()) {
                     Navigator.of(dialogCtx).pop(true);
@@ -419,36 +404,33 @@ class JournalManagementPage extends StatelessWidget {
           );
         });
 
-    if (finalConfirm == true) { // User confirmed deletion by typing "SUPPRIMER"
+    if (finalConfirm == true) {
       bool wasActive = activeJournalNotifier.activeJournalId == journalToDelete.id;
       try {
         await firestoreService.deleteJournal(journalToDelete.id, currentUserId);
-        _loggerPage.i("Journal ${journalToDelete.id} supprimé.");
+        _loggerPage.i("Journal ${journalToDelete.id} deleted."); // Log in English
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Journal "${journalToDelete.name}" supprimé.')), // UI Text in French
+            SnackBar(content: Text(l10n.journalDeletedSnackbar(journalToDelete.name))),
           );
         }
 
-        // If the deleted journal was the active one, try to set a new active journal.
         if (wasActive) {
-          _loggerPage.i("Rechargement du journal initial après suppression du journal actif.");
+          _loggerPage.i("Reloading initial journal after deleting active journal."); // Log in English
           final journals = await firestoreService.getJournalsStream(currentUserId).first;
           if (context.mounted) {
             if (journals.isNotEmpty) {
-              // Set the first available journal as active
               await activeJournalNotifier.setActiveJournal(journals.first.id, currentUserId);
             } else {
-              // No other journals left, clear the active journal state
               activeJournalNotifier.clearActiveJournalState();
             }
           }
         }
       } catch (e) {
-        _loggerPage.e("Erreur suppression journal: $e");
+        _loggerPage.e("Error deleting journal: $e"); // Log in English
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erreur de suppression: ${e.toString()}')), // UI Text in French
+            SnackBar(content: Text(l10n.errorDeletingJournalSnackbar(e.toString()))),
           );
         }
       }

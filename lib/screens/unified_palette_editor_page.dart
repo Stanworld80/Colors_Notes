@@ -1,6 +1,7 @@
+import 'package:colors_notes/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
+import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../core/app_constants.dart';
@@ -88,27 +89,34 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
   void initState() {
     super.initState();
     _userId = Provider.of<AuthService>(context, listen: false).currentUser?.uid;
+    // Page title will be set in didChangeDependencies or build, as l10n is not available yet.
+  }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final l10n = AppLocalizations.of(context)!;
+
+    // Initialize states that depend on l10n or widget properties
     if (widget.journalToUpdatePaletteFor != null) {
-      _isEditingModel = false; // Editing a journal's palette instance
+      _isEditingModel = false;
       final palette = widget.journalToUpdatePaletteFor!.palette;
       _currentPaletteName = palette.name;
-      _currentColors = palette.colors.map((c) => c.copyWith()).toList(); // Deep copy for editing
-      _pageTitle = "Palette: ${widget.journalToUpdatePaletteFor!.name}";
+      _currentColors = palette.colors.map((c) => c.copyWith()).toList();
+      _pageTitle = l10n.pageTitlePalettePrefix + widget.journalToUpdatePaletteFor!.name;
     } else if (widget.paletteModelToEdit != null) {
-      _isEditingModel = true; // Editing an existing PaletteModel
+      _isEditingModel = true;
       final model = widget.paletteModelToEdit!;
       _currentPaletteName = model.name;
-      _currentColors = model.colors.map((c) => c.copyWith()).toList(); // Deep copy
-      _pageTitle = "Modèle: ${model.name}";
+      _currentColors = model.colors.map((c) => c.copyWith()).toList();
+      _pageTitle = l10n.pageTitleModelPrefix + model.name;
     } else {
-      _isEditingModel = true; // Creating a new PaletteModel
-      _currentPaletteName = "Nouveau Modèle de Palette";
+      _isEditingModel = true;
+      _currentPaletteName = l10n.newPaletteDefaultName; // Default name for a new model
       _currentColors = [];
-      _pageTitle = "Nouveau Modèle de Palette";
-      _hasMadeChangesSinceLastSave = true; // Mark as changed since it's a new entity
+      _pageTitle = l10n.pageTitleNewPaletteModel;
+      _hasMadeChangesSinceLastSave = true;
     }
-    // Store initial state for change detection
     _initialPaletteNameToCompare = _currentPaletteName;
     _initialColorsToCompare = _currentColors.map((c) => c.copyWith()).toList();
   }
@@ -142,9 +150,10 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
     if (widget.journalToUpdatePaletteFor == null || _userId == null) {
       // This should only be called when editing a journal palette.
       // As a safeguard, allow deletion if context is unexpected or not applicable.
-      _loggerPage.w("_canDeleteColor called in unexpected context or with null userId/journal.");
+      _loggerPage.w("_canDeleteColor called in unexpected context or with null userId/journal."); // Log in English
       return true;
     }
+    final l10n = AppLocalizations.of(context)!;
     final firestoreService = Provider.of<FirestoreService>(context, listen: false);
     if (mounted) setState(() { _isLoading = true; });
     try {
@@ -154,10 +163,10 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
       );
       return !isUsed;
     } catch (e) {
-      _loggerPage.e("Erreur vérification utilisation couleur: $e");
+      _loggerPage.e("Error checking color usage: $e"); // Log in English
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur vérification utilisation couleur: ${e.toString()}'), backgroundColor: Colors.red),
+          SnackBar(content: Text(l10n.errorCheckingColorUsageSnackbar(e.toString())), backgroundColor: Colors.red),
         );
       }
       return false; // Disallow deletion on error to be safe
@@ -173,32 +182,33 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
   /// It validates the palette name (if applicable) and color counts, then proceeds
   /// to either create/update a [PaletteModel] or update a [Journal]'s palette instance.
   Future<void> _triggerAutomaticSave() async {
+    final l10n = AppLocalizations.of(context)!;
     if (!_checkForActualChanges() && !_hasMadeChangesSinceLastSave) {
-      _loggerPage.i("Aucun changement réel détecté, sauvegarde automatique annulée.");
+      _loggerPage.i("No real changes detected, automatic save cancelled."); // Log in English
       return;
     }
 
     // Validate the form, which includes the palette name editor if visible (i.e., when _isEditingModel is true)
     if (_formKey.currentState?.validate() == false) {
-      _loggerPage.w("Validation du formulaire (nom palette) échouée lors de la sauvegarde auto.");
+      _loggerPage.w("Form validation (palette name) failed during auto-save."); // Log in English
       _hasMadeChangesSinceLastSave = true; // Keep flag true if validation fails, to retry save later
       return;
     }
 
     // Validate color counts (constants like MIN_COLORS_IN_PALETTE_EDITOR are from InlinePaletteEditorWidget or its imports)
     if (_currentColors.length < MIN_COLORS_IN_PALETTE_EDITOR && _isEditingModel) { // Min colors check only for models
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Un modèle doit avoir au moins $MIN_COLORS_IN_PALETTE_EDITOR couleurs."), backgroundColor: Colors.orange));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.modelMinColorsErrorSnackbar(MIN_COLORS_IN_PALETTE_EDITOR)), backgroundColor: Colors.orange));
       _hasMadeChangesSinceLastSave = true;
       return;
     }
     if (_currentColors.length > MAX_COLORS_IN_PALETTE_EDITOR) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Une palette ne peut pas avoir plus de $MAX_COLORS_IN_PALETTE_EDITOR couleurs."), backgroundColor: Colors.orange));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.paletteMaxColorsErrorSnackbar(MAX_COLORS_IN_PALETTE_EDITOR)), backgroundColor: Colors.orange));
       _hasMadeChangesSinceLastSave = true;
       return;
     }
 
     if (_userId == null) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Utilisateur non identifié."), backgroundColor: Colors.red));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.userNotIdentifiedSnackbar), backgroundColor: Colors.red));
       _hasMadeChangesSinceLastSave = true;
       return;
     }
@@ -213,7 +223,6 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
       if (widget.journalToUpdatePaletteFor != null && !_isEditingModel) {
         List<String> attemptedDeletionsFailedTitles = [];
         for (var initialColor in _initialColorsToCompare) {
-          // Check if an initial color is no longer in the current colors list
           if (!_currentColors.any((currentColor) => currentColor.paletteElementId == initialColor.paletteElementId)) {
             final bool canActuallyDelete = await _canDeleteColor(initialColor.paletteElementId);
             if (!canActuallyDelete) {
@@ -222,62 +231,57 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
           }
         }
         if (attemptedDeletionsFailedTitles.isNotEmpty) {
-          throw Exception("Sauvegarde bloquée : La/les couleur(s) '${attemptedDeletionsFailedTitles.join(', ')}' est/sont utilisée(s) et ne peuvent être supprimées.");
+          throw Exception(l10n.saveBlockedColorInUseError(attemptedDeletionsFailedTitles.join(', ')));
         }
       }
 
       if (_isEditingModel) { // Creating or Editing a PaletteModel
         if (widget.paletteModelToEdit == null) { // Creating a new model
-          // Check for duplicate model name for the current user
           bool nameExists = await firestoreService.checkPaletteModelNameExists(_currentPaletteName, _userId!);
-          if (nameExists) throw Exception("Un modèle de palette avec ce nom existe déjà.");
+          if (nameExists) throw Exception(l10n.paletteModelNameExistsError);
 
           createdModel = PaletteModel(
             id: _uuid.v4(),
             name: _currentPaletteName,
-            colors: _currentColors, // These colors already have unique paletteElementIds
+            colors: _currentColors,
             userId: _userId!,
-            isPredefined: false, // New user models are not predefined
+            isPredefined: false,
           );
           await firestoreService.createPaletteModel(createdModel);
-          _loggerPage.i("Nouveau modèle de palette créé: ${createdModel.name}");
-          if (mounted && _pageTitle == "Nouveau Modèle de Palette") { // Update title if it was the default "new model" title
+          _loggerPage.i("New palette model created: ${createdModel.name}"); // Log in English
+          if (mounted && _pageTitle == l10n.pageTitleNewPaletteModel) {
             setState(() {
-              _pageTitle = "Modèle: ${createdModel!.name}";
-              // Conceptually, widget.paletteModelToEdit becomes this new model for this page instance.
-              // This helps _checkForActualChanges and _initial states for subsequent saves.
+              _pageTitle = l10n.pageTitleModelPrefix + createdModel!.name;
             });
           }
         } else { // Editing an existing model
-          // Check for duplicate model name, excluding the current model being edited
           bool nameExists = await firestoreService.checkPaletteModelNameExists(_currentPaletteName, _userId!, excludeId: widget.paletteModelToEdit!.id);
-          if (nameExists) throw Exception("Un autre modèle de palette avec ce nom existe déjà.");
+          if (nameExists) throw Exception(l10n.paletteModelNameExistsError);
 
           final updatedModel = widget.paletteModelToEdit!.copyWith(
             name: _currentPaletteName,
             colors: _currentColors,
           );
           await firestoreService.updatePaletteModel(updatedModel);
-          _loggerPage.i("Modèle de palette mis à jour: ${updatedModel.name}");
+          _loggerPage.i("Palette model updated: ${updatedModel.name}"); // Log in English
         }
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Modèle de palette sauvegardé."), backgroundColor: Colors.green, duration: Duration(seconds: 2)));
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.paletteModelSavedSnackbar), backgroundColor: Colors.green, duration: const Duration(seconds: 2)));
         saveSucceeded = true;
 
       } else if (widget.journalToUpdatePaletteFor != null) { // Editing a Journal's Palette Instance
         final Journal currentJournal = widget.journalToUpdatePaletteFor!;
         final Palette updatedPaletteInstance = currentJournal.palette.copyWith(
-          name: _currentPaletteName, // Palette name is managed by _currentPaletteName
+          name: _currentPaletteName,
           colors: _currentColors,
         );
         await firestoreService.updateJournalPaletteInstance(currentJournal.id, updatedPaletteInstance);
-        _loggerPage.i("Palette du journal ${currentJournal.name} mise à jour.");
+        _loggerPage.i("Journal palette ${currentJournal.name} updated."); // Log in English
 
-        // If the active journal's palette was updated, refresh it in the provider
         final activeJournalNotifier = Provider.of<ActiveJournalNotifier>(context, listen: false);
         if (activeJournalNotifier.activeJournalId == currentJournal.id) {
           await activeJournalNotifier.setActiveJournal(currentJournal.id, _userId!);
         }
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Palette du journal sauvegardée."), backgroundColor: Colors.green, duration: Duration(seconds: 2)));
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.journalPaletteSavedSnackbar), backgroundColor: Colors.green, duration: const Duration(seconds: 2)));
         saveSucceeded = true;
       }
 
@@ -298,8 +302,8 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
       }
 
     } catch (e) {
-      _loggerPage.e("Erreur sauvegarde palette: $e");
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erreur de sauvegarde: ${e.toString()}"), backgroundColor: Colors.red));
+      _loggerPage.e("Error saving palette: $e"); // Log in English
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.errorSavingPaletteSnackbar(e.toString())), backgroundColor: Colors.red));
       _hasMadeChangesSinceLastSave = true; // Mark changes as pending if save failed
     } finally {
       if (mounted) setState(() { _isLoading = false; });
@@ -308,8 +312,9 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
 
 
   Future<bool> _handleDeleteAllColorsRequested() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_userId == null) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Utilisateur non identifié.")));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.userNotIdentifiedSnackbar)));
       return false;
     }
 
@@ -317,15 +322,15 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Supprimer toutes les couleurs ?'),
+          title: Text(l10n.deleteAllColorsDialogTitle),
           content: Text(
             !_isEditingModel && widget.journalToUpdatePaletteFor != null
-                ? 'Cela supprimera toutes les couleurs de la palette du journal "${widget.journalToUpdatePaletteFor!.name}". ATTENTION : Toutes les notes de ce journal seront également DÉFINITIVEMENT supprimées.'
-                : 'Voulez-vous vraiment supprimer toutes les couleurs de ce modèle de palette ?',
+                ? l10n.deleteAllColorsJournalWarning(widget.journalToUpdatePaletteFor!.name)
+                : l10n.deleteAllColorsModelWarning,
           ),
           actions: <Widget>[
-            TextButton(child: const Text('Annuler'), onPressed: () => Navigator.of(dialogContext).pop(false)),
-            TextButton(style: TextButton.styleFrom(foregroundColor: Colors.red), child: const Text('Supprimer Tout'), onPressed: () => Navigator.of(dialogContext).pop(true)),
+            TextButton(child: Text(l10n.cancelButtonLabel), onPressed: () => Navigator.of(dialogContext).pop(false)),
+            TextButton(style: TextButton.styleFrom(foregroundColor: Colors.red), child: Text(l10n.deleteAllButtonLabel), onPressed: () => Navigator.of(dialogContext).pop(true)),
           ],
         );
       },
@@ -337,17 +342,17 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: Text(!_isEditingModel ? 'CONFIRMATION FINALE' : 'Confirmer la suppression'),
+          title: Text(!_isEditingModel ? l10n.finalDeleteAllConfirmationDialogTitle : l10n.confirmDeletionDialogTitle),
           content: Text(
             !_isEditingModel
-                ? 'Êtes-vous absolument certain(e) ? La suppression des couleurs de cette palette entraînera la suppression IRRÉVERSIBLE de TOUTES les notes de ce journal.'
-                : 'Confirmez-vous la suppression de toutes les couleurs de ce modèle ?',
+                ? l10n.finalDeleteAllConfirmationJournalWarning
+                : l10n.finalDeleteAllConfirmationModelWarning,
           ),
           actions: <Widget>[
-            TextButton(child: const Text('NON, ANNULER'), onPressed: () => Navigator.of(dialogContext).pop(false)),
+            TextButton(child: Text(l10n.noCancelButtonLabel), onPressed: () => Navigator.of(dialogContext).pop(false)),
             TextButton(
               style: TextButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
-              child: const Text('OUI, TOUT SUPPRIMER'),
+              child: Text(l10n.yesDeleteAllButtonLabel),
               onPressed: () => Navigator.of(dialogContext).pop(true),
             ),
           ],
@@ -365,34 +370,31 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
       if (!_isEditingModel && widget.journalToUpdatePaletteFor != null) {
         final firestoreService = Provider.of<FirestoreService>(context, listen: false);
         await firestoreService.deleteAllNotesInJournal(widget.journalToUpdatePaletteFor!.id, _userId!);
-        _loggerPage.i("Toutes les notes du journal ${widget.journalToUpdatePaletteFor!.id} ont été supprimées avant de vider la palette.");
+        _loggerPage.i("All notes in journal ${widget.journalToUpdatePaletteFor!.id} were deleted before emptying the palette."); // Log in English
       }
       return true;
     } catch (e) {
-      _loggerPage.e("Erreur lors de la suppression de toutes les couleurs/notes: $e");
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erreur: ${e.toString()}"), backgroundColor: Colors.red));
+      _loggerPage.e("Error deleting all colors/notes: $e"); // Log in English
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.genericErrorSnackbar(e.toString())), backgroundColor: Colors.red));
       return false;
     } finally {
       if (mounted)
         setState(() {
           _isLoading = false;
         });
-      if (mounted) setState(() { _isLoading = false; });
     }
   }
   /// Handles the `onWillPop` event to prevent navigation while saving.
   ///
   /// Returns `false` to block navigation if [_isLoading] is true, otherwise `true`.
   Future<bool> _onWillPop() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_isLoading) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Sauvegarde en cours, veuillez patienter..."), duration: Duration(seconds: 1)),
+        SnackBar(content: Text(l10n.savingInProgressSnackbar), duration: const Duration(seconds: 1)),
       );
       return false; // Prevent popping
     }
-    // Note: Could add a check here for _hasMadeChangesSinceLastSave or _checkForActualChanges
-    // to warn the user about unsaved changes if they try to pop.
-    // For now, it allows popping if not actively loading.
     return true; // Allow popping
   }
 

@@ -12,7 +12,6 @@ import '../screens/palette_model_management_page.dart';
 import '../screens/unified_palette_editor_page.dart';
 import '../screens/about_page.dart';
 import '../screens/colors_notes_license_page.dart';
-import '../screens/settings_page.dart';
 import 'package:colors_notes/l10n/app_localizations.dart';
 
 /// Logger instance for this AppBar widget.

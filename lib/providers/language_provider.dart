@@ -1,4 +1,6 @@
 // lib/providers/language_provider.dart
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logger/logger.dart';
@@ -76,17 +78,10 @@ class LanguageProvider with ChangeNotifier {
         return 'English';
       case 'fr':
         return 'Français';
-        case 'es':
-        return 'Español';
-      case 'de':
-        return 'Deutsch';
       case 'it':
-        return 'Italiano';
+        return 'Italien';
       case 'pt':
-        if (locale.countryCode == "BR")
-          return 'Portugais (Brésil)';
-        else
-          return 'Portugais';
+        return (locale.countryCode == "BR") ? 'Portugais (Brésil)' : 'Portugais';
 
       // Ajoutez d'autres langues ici si nécessaire
       default:
