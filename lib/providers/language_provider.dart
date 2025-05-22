@@ -76,6 +76,12 @@ class LanguageProvider with ChangeNotifier {
         return 'English';
       case 'fr':
         return 'Français';
+        case 'es':
+        return 'Español';
+      case 'de':
+        return 'Deutsch';
+      case 'it':
+        return 'Italiano';
       case 'pt':
         if (locale.countryCode == "BR")
           return 'Portuguais (Brésil)';
