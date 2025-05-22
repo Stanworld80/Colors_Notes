@@ -1,19 +1,24 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:colors_notes/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../core/app_constants.dart';
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
 import '../models/journal.dart';
 import '../models/palette.dart';
-import '../models/palette_model.dart';
 import '../models/color_data.dart';
+import '../models/journal.dart';
+import '../models/palette.dart';
+import '../models/palette_model.dart';
 import '../providers/active_journal_provider.dart';
-import '../core/predefined_templates.dart';
+import '../services/auth_service.dart';
+import '../services/firestore_service.dart';
 import '../widgets/inline_palette_editor.dart';
-import 'package:logger/logger.dart';
+import '../core/predefined_templates.dart';
 
 /// Logger instance for this page.
 final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0, printTime: true));
@@ -121,9 +126,19 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
       _isLoading = true;
     });
 
+    if (!mounted) return;
+    // It's safer to get l10n here if needed for initial error messages,
+    // or pass it down if _loadInitialData itself might show UI before build context is fully available for it.
+    // For now, assuming l10n will be available in build or passed to methods that show UI.
+    setState(() {
+      _isLoading = true;
+    });
+
     if (_userId == null) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Erreur: Utilisateur non identifié.")));
+        // Assuming l10n is accessible here or using a predefined error string if not.
+        // For simplicity, direct string usage here, will be replaced by l10n in build context dependent parts.
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Error: User not identified."))); // Placeholder, to be localized
         setState(() {
           _isLoading = false;
         });
@@ -134,16 +149,19 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
     try {
       final FirestoreService firestoreService = Provider.of<FirestoreService>(context, listen: false);
 
-      final List<PaletteModel> predefinedPalettesList = predefinedPalettes; // From core/predefined_templates.dart
+      final List<PaletteModel> predefinedPalettesList = predefinedPalettes;
       final List<PaletteModel> userModels = await firestoreService.getUserPaletteModelsStream(_userId!).first;
       _availablePaletteModels = [...predefinedPalettesList, ...userModels];
       _availableUserJournals = await firestoreService.getJournalsStream(_userId!).first;
 
-      _updatePaletteBasedOnMode(); // Initialize palette based on default mode
+      // Initial call to _updatePaletteBasedOnMode might need l10n if it sets text directly
+      // For now, assuming it prepares data and text is set in build or later method calls with context
+      _updatePaletteBasedOnMode();
     } catch (e) {
-      _loggerPage.e("Erreur chargement données initiales: $e");
+      _loggerPage.e("Error loading initial data: $e"); // Placeholder
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erreur chargement des options: ${e.toString()}")));
+        // Placeholder, to be localized
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error loading options: ${e.toString()}")));
       }
     } finally {
       if (mounted) {
@@ -158,9 +176,10 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
   ///
   /// This method is called when the creation mode changes or when initial data is loaded.
   /// It sets up the palette editor with the appropriate colors and name.
-  void _updatePaletteBasedOnMode() {
+  void _updatePaletteBasedOnMode([AppLocalizations? l10nInstance]) {
+    final l10n = l10nInstance ?? AppLocalizations.of(context)!;
     final journalName = _journalNameController.text.trim();
-    String defaultPaletteName = journalName.isNotEmpty ? "Palette de '$journalName'" : "Nouvelle Palette";
+    String defaultPaletteName = journalName.isNotEmpty ? l10n.paletteOfJournalName(journalName) : l10n.newPaletteDefaultName;
 
     // Reset selections if mode changes away from them
     if (_creationMode != JournalCreationMode.fromPaletteModel) {
@@ -176,35 +195,37 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
       case JournalCreationMode.fromPaletteModel:
         if (_availablePaletteModels.isNotEmpty) {
           _selectedPaletteModel ??= _availablePaletteModels.first; // Default to first model if none selected
-          _preparedPaletteName = journalName.isNotEmpty ? "Palette de '$journalName' (Modèle: ${_selectedPaletteModel!.name})" : "Palette (Modèle: ${_selectedPaletteModel!.name})";
+          _preparedPaletteName = journalName.isNotEmpty
+              ? l10n.paletteFromModelName(journalName, _selectedPaletteModel!.name)
+              : l10n.paletteFromModelNameNoJournal(_selectedPaletteModel!.name);
           _preparedColors = _selectedPaletteModel!.colors.map((c) => c.copyWith(paletteElementId: _uuid.v4())).toList();
         } else {
           // If no models available, switch to empty palette mode
           _selectedSourceType = PaletteSourceType.empty;
           _creationMode = JournalCreationMode.emptyPalette;
-          _updatePaletteBasedOnMode(); // Recurse to update based on new mode
+          _updatePaletteBasedOnMode(l10n); // Recurse to update based on new mode
           return;
         }
         break;
       case JournalCreationMode.fromExistingJournal:
         if (_availableUserJournals.isNotEmpty) {
           _selectedExistingJournal ??= _availableUserJournals.first; // Default to first journal
-          _preparedPaletteName = journalName.isNotEmpty ? "Palette de '$journalName' (Copiée de ${_selectedExistingJournal!.name})" : "Palette (Copiée de ${_selectedExistingJournal!.name})";
+          _preparedPaletteName = journalName.isNotEmpty
+              ? l10n.paletteCopiedFromName(journalName, _selectedExistingJournal!.name)
+              : l10n.paletteCopiedFromNameNoJournal(_selectedExistingJournal!.name);
           _preparedColors = _selectedExistingJournal!.palette.colors.map((c) => c.copyWith(paletteElementId: _uuid.v4())).toList();
         } else {
           // If no journals available to copy, switch to empty palette mode
           _selectedSourceType = PaletteSourceType.empty;
           _creationMode = JournalCreationMode.emptyPalette;
-          _updatePaletteBasedOnMode(); // Recurse to update based on new mode
+          _updatePaletteBasedOnMode(l10n); // Recurse to update based on new mode
           return;
         }
         break;
       case JournalCreationMode.emptyPalette:
-      // CORRECTION: La clause `default` a été supprimée car elle était redondante et couverte par ce cas.
         _preparedPaletteName = defaultPaletteName;
         _preparedColors = []; // Start with an empty list for the user to add colors
         break;
-    // No default needed as all enum values are covered.
     }
     _paletteEditorKey = UniqueKey(); // Re-key the editor to force rebuild with new initial values
     if (mounted) setState(() {});
@@ -222,15 +243,16 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
   /// Shows a confirmation dialog to the user.
   /// Returns `true` if the user confirms deletion, `false` otherwise.
   Future<bool> _handleDeleteAllColorsInCreation() async {
+    final l10n = AppLocalizations.of(context)!;
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Vider la palette ?'),
-          content: const Text('Voulez-vous vraiment supprimer toutes les couleurs de cette nouvelle palette ?'),
+          title: Text(l10n.emptyPaletteDialogTitle),
+          content: Text(l10n.emptyPaletteDialogContent),
           actions: <Widget>[
-            TextButton(child: const Text('Annuler'), onPressed: () => Navigator.of(dialogContext).pop(false)),
-            TextButton(style: TextButton.styleFrom(foregroundColor: Colors.red), child: const Text('Vider'), onPressed: () => Navigator.of(dialogContext).pop(true)),
+            TextButton(child: Text(l10n.cancelButtonLabel), onPressed: () => Navigator.of(dialogContext).pop(false)),
+            TextButton(style: TextButton.styleFrom(foregroundColor: Colors.red), child: Text(l10n.emptyButtonLabel), onPressed: () => Navigator.of(dialogContext).pop(true)),
           ],
         );
       },
@@ -244,8 +266,9 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
   /// meets size constraints. On success, it saves the journal to Firestore,
   /// sets it as the active journal, and navigates back.
   Future<void> _createJournal() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_userId == null) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Utilisateur non identifié.")));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.userNotIdentifiedSnackbar)));
       return;
     }
     if (!_formKey.currentState!.validate()) return;
@@ -257,7 +280,7 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
     bool nameExists = await firestoreService.checkJournalNameExists(journalName, _userId!);
     if (nameExists) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Un journal nommé "$journalName" existe déjà.'), backgroundColor: Colors.orange));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.journalNameExistsSnackbar(journalName)), backgroundColor: Colors.orange));
       }
       return;
     }
@@ -265,20 +288,20 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
     // Validate palette color count
     if (_preparedColors.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("La palette doit contenir au moins 1 couleur.")));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.paletteMinColorError)));
       }
       return;
     }
 
     if (_preparedColors.length < MIN_COLORS_IN_PALETTE_EDITOR) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("La palette doit contenir au moins $MIN_COLORS_IN_PALETTE_EDITOR couleur(s).")));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.paletteMinColorsError(MIN_COLORS_IN_PALETTE_EDITOR))));
       }
       return;
     }
     if (_preparedColors.length > MAX_COLORS_IN_PALETTE_EDITOR) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("La palette ne peut pas avoir plus de $MAX_COLORS_IN_PALETTE_EDITOR couleurs.")));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.paletteMaxColorsError(MAX_COLORS_IN_PALETTE_EDITOR))));
       }
       return;
     }
@@ -291,7 +314,7 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
 
     try {
       final activeJournalNotifier = Provider.of<ActiveJournalNotifier>(context, listen: false);
-      final String finalPaletteName = _preparedPaletteName.isNotEmpty ? _preparedPaletteName : "Palette de $journalName";
+      final String finalPaletteName = _preparedPaletteName.isNotEmpty ? _preparedPaletteName : l10n.paletteOfJournalName(journalName);
 
       final Palette newPaletteInstance = Palette(
           id: _uuid.v4(), // Generate new ID for the palette instance
@@ -311,19 +334,19 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
       );
 
       await firestoreService.createJournal(newJournal);
-      _loggerPage.i('Journal créé: ${newJournal.name} avec palette: ${newPaletteInstance.name}');
+      _loggerPage.i('Journal created: ${newJournal.name} with palette: ${newPaletteInstance.name}');
 
       // Set the newly created journal as active
       await activeJournalNotifier.setActiveJournal(newJournal.id, _userId!);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Journal "${newJournal.name}" créé avec succès!')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.journalCreatedSuccess(newJournal.name))));
         Navigator.of(context).pop(); // Go back to the previous screen
       }
     } catch (e) {
-      _loggerPage.e('Erreur création journal: ${e.toString()}');
+      _loggerPage.e('Error creating journal: ${e.toString()}');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: ${e.toString()}')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageGenericSaveError(e.toString()))));
       }
     } finally {
       if (mounted) {
@@ -338,10 +361,11 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
   ///
   /// Displays a message if no models are available.
   Widget _buildPaletteModelSelector() {
+    final l10n = AppLocalizations.of(context)!;
     if (_availablePaletteModels.isEmpty) {
       return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Text("Aucun modèle de palette disponible.", style: TextStyle(color: Colors.orange.shade700))
+          child: Text(l10n.noPaletteModelsAvailableMessage, style: TextStyle(color: Colors.orange.shade700))
       );
     }
     return DropdownButtonFormField<PaletteModel>(
@@ -349,7 +373,7 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
       items: _availablePaletteModels.map((PaletteModel model) {
         return DropdownMenuItem<PaletteModel>(
           value: model,
-          child: Text(model.name + (model.isPredefined ? " (Prédéfini)" : " (Personnel)")),
+          child: Text(model.name + (model.isPredefined ? l10n.paletteModelSuffixPredefined : l10n.paletteModelSuffixPersonal)),
         );
       }).toList(),
       onChanged: (PaletteModel? newValue) {
@@ -360,8 +384,8 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
           });
         }
       },
-      decoration: const InputDecoration(labelText: 'Choisir un modèle de palette'),
-      validator: (value) => _creationMode == JournalCreationMode.fromPaletteModel && value == null ? 'Veuillez choisir un modèle' : null,
+      decoration: InputDecoration(labelText: l10n.choosePaletteModelDropdownLabel),
+      validator: (value) => _creationMode == JournalCreationMode.fromPaletteModel && value == null ? l10n.pleaseChooseModelValidator : null,
     );
   }
 
@@ -369,10 +393,11 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
   ///
   /// Displays a message if no user journals are available.
   Widget _buildExistingJournalSelector() {
+    final l10n = AppLocalizations.of(context)!;
     if (_availableUserJournals.isEmpty) {
       return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Text("Aucun journal existant à copier.", style: TextStyle(color: Colors.orange.shade700))
+          child: Text(l10n.noExistingJournalsToCopy, style: TextStyle(color: Colors.orange.shade700))
       );
     }
     return DropdownButtonFormField<Journal>(
@@ -391,8 +416,8 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
           });
         }
       },
-      decoration: const InputDecoration(labelText: 'Copier la palette d\'un journal existant'),
-      validator: (value) => _creationMode == JournalCreationMode.fromExistingJournal && value == null ? 'Veuillez choisir un journal' : null,
+      decoration: InputDecoration(labelText: l10n.copyPaletteFromJournalDropdownLabel),
+      validator: (value) => _creationMode == JournalCreationMode.fromExistingJournal && value == null ? l10n.pleaseChooseJournalValidator : null,
     );
   }
 
@@ -419,6 +444,7 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     // Determine if the create button should be enabled based on selections.
     bool canAttemptCreation = true;
     if (_creationMode == JournalCreationMode.fromPaletteModel && _selectedPaletteModel == null && _availablePaletteModels.isNotEmpty) {
@@ -428,8 +454,26 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
       canAttemptCreation = false; // Must select a journal if mode is fromExistingJournal and journals are available
     }
 
+    // Update snackbar texts in _loadInitialData if context is available, or use a more generic approach.
+    // For this iteration, _loadInitialData was modified to not directly use l10n for snackbars shown before build.
+    // Those snackbars will use generic English text or be updated if context can be passed/made available.
+
+    if (_userId == null && !_isLoading) { // Handle user not identified after initial load attempt
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if(mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.userNotIdentifiedSnackbar)));
+          }
+        });
+    }
+    
+    // Update palette names in _updatePaletteBasedOnMode if it hasn't run with l10n yet
+    // This is tricky if _updatePaletteBasedOnMode is called from initState.
+    // A common pattern is to call it again in didChangeDependencies or ensure l10n is passed.
+    // The current _updatePaletteBasedOnMode takes an optional l10n instance.
+    // We ensure it's called with l10n from build context if needed, or from _loadInitialData with l10n.
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Créer un nouveau journal')),
+      appBar: AppBar(title: Text(l10n.createJournalPageTitle)),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -447,22 +491,22 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildStepIndicator("1", "Nom du Journal"),
+                      _buildStepIndicator("1", l10n.step1JournalName),
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _journalNameController,
                         decoration: InputDecoration(
-                          labelText: 'Choisissez un nom pour votre journal...',
-                          hintText: 'Ex: Journal de gratitude, Projets 2025...',
+                          labelText: l10n.journalNameTextFieldLabel,
+                          hintText: l10n.journalNameTextFieldHint,
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
                           prefixIcon: const Icon(Icons.drive_file_rename_outline),
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Veuillez entrer un nom pour le journal.';
+                            return l10n.journalNameValidatorEmpty;
                           }
                           if (value.length > 70) {
-                            return 'Le nom du journal est trop long (max 70).';
+                            return l10n.journalNameValidatorTooLong;
                           }
                           return null;
                         },
@@ -480,18 +524,18 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildStepIndicator("2", "Configuration de la Palette"),
+                      _buildStepIndicator("2", l10n.step2PaletteConfiguration),
                       const SizedBox(height: 16),
                       DropdownButtonFormField<PaletteSourceType>(
                         value: _selectedSourceType,
-                        decoration: const InputDecoration(
-                            labelText: 'Choisir la source de la palette',
-                            border: OutlineInputBorder()
+                        decoration: InputDecoration(
+                            labelText: l10n.paletteSourceDropdownLabel,
+                            border: const OutlineInputBorder()
                         ),
-                        items: const [
-                          DropdownMenuItem(value: PaletteSourceType.empty, child: Text('Palette Vierge (à composer)')),
-                          DropdownMenuItem(value: PaletteSourceType.model, child: Text('À partir d\'un modèle de palette')),
-                          DropdownMenuItem(value: PaletteSourceType.existingJournal, child: Text('En copiant la palette d\'un journal existant')),
+                        items: [
+                          DropdownMenuItem(value: PaletteSourceType.empty, child: Text(l10n.paletteSourceEmptyOption)),
+                          DropdownMenuItem(value: PaletteSourceType.model, child: Text(l10n.paletteSourceModelOption)),
+                          DropdownMenuItem(value: PaletteSourceType.existingJournal, child: Text(l10n.paletteSourceExistingJournalOption)),
                         ],
                         onChanged: (PaletteSourceType? newValue) {
                           if (newValue != null && mounted) {
@@ -504,7 +548,7 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
                               } else if (newValue == PaletteSourceType.existingJournal) {
                                 _creationMode = JournalCreationMode.fromExistingJournal;
                               }
-                              _updatePaletteBasedOnMode();
+                              _updatePaletteBasedOnMode(); // Will use context from build
                             });
                           }
                         },
@@ -516,28 +560,19 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
                         _buildExistingJournalSelector(),
 
                       const SizedBox(height: 10),
-                      // Show palette editor once initial data is loaded and relevant mode is selected
-                      if (!_isLoading) // Ensures editor doesn't try to build with potentially null/empty initial values during load
+                      if (!_isLoading)
                         InlinePaletteEditorWidget(
-                          key: _paletteEditorKey, // Used to re-initialize the editor
+                          key: _paletteEditorKey,
                           initialPaletteName: _preparedPaletteName,
                           initialColors: _preparedColors,
                           onPaletteNameChanged: (newName) {
-                            if (mounted) {
-                              setState(() {
-                                _preparedPaletteName = newName;
-                              });
-                            }
+                            if (mounted) setState(() => _preparedPaletteName = newName);
                           },
                           onColorsChanged: (newColors) {
-                            if (mounted) {
-                              setState(() {
-                                _preparedColors = newColors;
-                              });
-                            }
+                            if (mounted) setState(() => _preparedColors = newColors);
                           },
-                          showNameEditor: false, // Palette name is derived or fixed for new journals
-                          isEditingJournalPalette: false, // This is for creating a new palette for a new journal
+                          showNameEditor: false,
+                          isEditingJournalPalette: false,
                           onDeleteAllColorsRequested: _handleDeleteAllColorsInCreation,
                         ),
                     ],
@@ -548,7 +583,7 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
               Center(
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.add_circle_outline),
-                  label: const Text('Créer le journal'),
+                  label: Text(l10n.createJournalButtonLabel),
                   onPressed: (_isLoading || !canAttemptCreation) ? null : _createJournal,
                   style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
@@ -556,7 +591,7 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20), // For some bottom spacing
+              const SizedBox(height: 20), 
             ],
           ),
         ),

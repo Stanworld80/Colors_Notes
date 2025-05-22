@@ -1,7 +1,8 @@
+import 'package:colors_notes/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart'; // For date formatting.
 import 'package:logger/logger.dart';
+import 'package:provider/provider.dart';
 
 import '../services/firestore_service.dart';
 import '../models/note.dart';
@@ -74,9 +75,13 @@ class _NoteListPageState extends State<NoteListPage> {
   /// [sortType] The string identifier for this sort type (e.g., 'eventTimestamp').
   /// [mainIcon] The main icon for the sort button.
   /// [tooltip] The tooltip text for the button.
-  Widget _buildSortButton(String sortType, IconData mainIcon, String tooltip) {
+  Widget _buildSortButton(BuildContext context, String sortType, IconData mainIcon, String tooltip) {
+    final l10n = AppLocalizations.of(context)!;
     bool isActive = _sortBy == sortType;
     const double directionIconSize = 16.0; // Size for the up/down arrow icon.
+    String currentSortDirectionTooltip = isActive
+        ? (_sortDescending ? l10n.sortDirectionDescending : l10n.sortDirectionAscending)
+        : "";
 
     return IconButton(
       icon: Row(
@@ -90,7 +95,7 @@ class _NoteListPageState extends State<NoteListPage> {
             ),
         ],
       ),
-      tooltip: tooltip + (isActive ? (_sortDescending ? " (Décroissant)" : " (Croissant)") : ""), // UI Text in French for tooltip
+      tooltip: tooltip + currentSortDirectionTooltip,
       color: isActive ? Theme.of(context).colorScheme.primary : Theme.of(context).iconTheme.color,
       onPressed: () {
         if (mounted) {
@@ -120,15 +125,16 @@ class _NoteListPageState extends State<NoteListPage> {
   /// [firestoreService] The service to handle Firestore operations.
   /// [noteId] The ID of the note to be deleted.
   Future<void> _confirmDeleteNote(BuildContext context, FirestoreService firestoreService, String noteId) async {
+    final l10n = AppLocalizations.of(context)!;
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Confirmer la suppression'), // UI Text in French
-          content: const Text('Voulez-vous vraiment supprimer cette note ?'), // UI Text in French
+          title: Text(l10n.confirmDeleteDialogTitle),
+          content: Text(l10n.confirmDeleteNoteDialogContent),
           actions: <Widget>[
-            TextButton(child: const Text('Annuler'), onPressed: () => Navigator.of(dialogContext).pop(false)), // UI Text in French
-            TextButton(style: TextButton.styleFrom(foregroundColor: Colors.red), child: const Text('Supprimer'), onPressed: () => Navigator.of(dialogContext).pop(true)), // UI Text in French
+            TextButton(child: Text(l10n.cancelButtonLabel), onPressed: () => Navigator.of(dialogContext).pop(false)),
+            TextButton(style: TextButton.styleFrom(foregroundColor: Colors.red), child: Text(l10n.deleteButtonLabel), onPressed: () => Navigator.of(dialogContext).pop(true)),
           ],
         );
       },
@@ -138,12 +144,12 @@ class _NoteListPageState extends State<NoteListPage> {
       try {
         await firestoreService.deleteNote(noteId);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Note supprimée avec succès.'))); // UI Text in French
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.noteDeletedSuccessSnackbar)));
         }
       } catch (e) {
-        _loggerPage.e("Erreur suppression note: $e");
+        _loggerPage.e("Error deleting note: $e"); // Log in English
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur lors de la suppression: ${e.toString()}'))); // UI Text in French
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.errorDeletingNoteSnackbar(e.toString()))));
         }
       }
     }
@@ -156,6 +162,7 @@ class _NoteListPageState extends State<NoteListPage> {
   /// [journalId] The ID of the journal whose notes are to be deleted.
   /// [userId] The ID of the current user, for permission validation by Firestore rules (implicitly).
   Future<void> _confirmDeleteAllNotes(BuildContext context, FirestoreService firestoreService, String journalId, String userId) async {
+    final l10n = AppLocalizations.of(context)!;
     if (_isDeletingAllNotes) return; // Prevent multiple simultaneous delete operations.
 
     // First confirmation dialog.
@@ -163,11 +170,11 @@ class _NoteListPageState extends State<NoteListPage> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Supprimer toutes les notes ?'), // UI Text in French
-          content: const Text('Cette action supprimera DÉFINITIVEMENT toutes les notes de ce journal. Voulez-vous continuer ?'), // UI Text in French
+          title: Text(l10n.deleteAllNotesDialogTitle),
+          content: Text(l10n.deleteAllNotesDialogContent),
           actions: <Widget>[
-            TextButton(child: const Text('Annuler'), onPressed: () => Navigator.of(dialogContext).pop(false)), // UI Text in French
-            TextButton(style: TextButton.styleFrom(foregroundColor: Colors.red), child: const Text('Supprimer Tout'), onPressed: () => Navigator.of(dialogContext).pop(true)), // UI Text in French
+            TextButton(child: Text(l10n.cancelButtonLabel), onPressed: () => Navigator.of(dialogContext).pop(false)),
+            TextButton(style: TextButton.styleFrom(foregroundColor: Colors.red), child: Text(l10n.deleteAllButtonLabel), onPressed: () => Navigator.of(dialogContext).pop(true)),
           ],
         );
       },
@@ -180,13 +187,13 @@ class _NoteListPageState extends State<NoteListPage> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('CONFIRMATION FINALE'), // UI Text in French
-          content: const Text('Êtes-vous absolument certain(e) ? Cette action est IRRÉVERSIBLE.'), // UI Text in French
+          title: Text(l10n.finalDeleteAllConfirmationDialogTitle),
+          content: Text(l10n.finalDeleteAllConfirmationDialogContent),
           actions: <Widget>[
-            TextButton(child: const Text('NON, ANNULER'), onPressed: () => Navigator.of(dialogContext).pop(false)), // UI Text in French
+            TextButton(child: Text(l10n.noCancelButtonLabel), onPressed: () => Navigator.of(dialogContext).pop(false)),
             TextButton(
               style: TextButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
-              child: const Text('OUI, SUPPRIMER TOUTES LES NOTES'), // UI Text in French
+              child: Text(l10n.yesDeleteAllNotesButtonLabel),
               onPressed: () => Navigator.of(dialogContext).pop(true),
             ),
           ],
@@ -203,12 +210,12 @@ class _NoteListPageState extends State<NoteListPage> {
       try {
         await firestoreService.deleteAllNotesInJournal(journalId, userId);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Toutes les notes ont été supprimées.'), backgroundColor: Colors.green)); // UI Text in French
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.allNotesDeletedSnackbar), backgroundColor: Colors.green));
         }
       } catch (e) {
-        _loggerPage.e("Erreur suppression de toutes les notes: $e");
+        _loggerPage.e("Error deleting all notes: $e"); // Log in English
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur lors de la suppression de toutes les notes: ${e.toString()}'), backgroundColor: Colors.red)); // UI Text in French
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.errorDeletingAllNotesSnackbar(e.toString())), backgroundColor: Colors.red));
         }
       } finally {
         if (mounted) {
@@ -228,7 +235,8 @@ class _NoteListPageState extends State<NoteListPage> {
   /// [firestoreService] Service for Firestore operations (e.g., deleting the note).
   /// [journal] The current [Journal], used to get color data (though colorData is passed directly).
   Widget _buildNoteGridItem(BuildContext context, Note note, ColorData? colorData, FirestoreService firestoreService, Journal? journal) {
-    final DateFormat dateFormat = DateFormat('dd/MM/yy HH:mm', 'fr_FR'); // Date format in French
+    final l10n = AppLocalizations.of(context)!;
+    final DateFormat dateFormat = DateFormat('dd/MM/yy HH:mm', l10n.localeName);
     final Color cardColor = colorData?.color ?? Colors.grey.shade100; // Default color if colorData is null
     // Determine text color based on card color's luminance for readability.
     final Color textColor = cardColor.computeLuminance() > 0.5 ? Colors.black87 : Colors.white;
@@ -271,7 +279,7 @@ class _NoteListPageState extends State<NoteListPage> {
                 children: [
                   Expanded(
                     child: Text(
-                      colorData?.title ?? "Couleur", // UI Text in French (default color title)
+                      colorData?.title ?? l10n.defaultColorTitle,
                       style: TextStyle(fontSize: titleFontSize, color: subtleTextColor, fontWeight: FontWeight.bold),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -282,7 +290,7 @@ class _NoteListPageState extends State<NoteListPage> {
                     icon: Icon(Icons.delete_outline, color: textColor.withOpacity(0.7), size: 16),
                     padding: EdgeInsets.zero, // Compact padding
                     constraints: const BoxConstraints(minWidth: 24, minHeight: 24), // Smaller touch target
-                    tooltip: "Supprimer la note", // UI Text in French
+                    tooltip: l10n.deleteNoteTooltipGrid,
                     onPressed: () => _confirmDeleteNote(context, firestoreService, note.id),
                   ),
                 ],
@@ -307,6 +315,7 @@ class _NoteListPageState extends State<NoteListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final firestoreService = Provider.of<FirestoreService>(context, listen: false);
     // Listen to ActiveJournalNotifier to get the current journal's palette for color mapping.
     final activeJournalNotifier = Provider.of<ActiveJournalNotifier>(context);
@@ -341,8 +350,8 @@ class _NoteListPageState extends State<NoteListPage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            _loggerPage.e("Erreur chargement notes: ${snapshot.error}");
-            return Center(child: Text('Erreur de chargement des notes. ${snapshot.error}')); // UI Text in French
+            _loggerPage.e("Error loading notes: ${snapshot.error}"); // Log in English
+            return Center(child: Text(l10n.errorLoadingNotes(snapshot.error.toString())));
           }
 
           List<Note> notes = snapshot.data ?? [];
@@ -355,7 +364,7 @@ class _NoteListPageState extends State<NoteListPage> {
                 children: [
                   Icon(Icons.notes_outlined, size: 60, color: Theme.of(context).colorScheme.secondary),
                   const SizedBox(height: 16),
-                  Text('Aucune note dans ce journal.', style: Theme.of(context).textTheme.headlineSmall), // UI Text in French
+                  Text(l10n.noNotesInJournalMessage, style: Theme.of(context).textTheme.headlineSmall),
                 ],
               ),
             );
@@ -416,7 +425,7 @@ class _NoteListPageState extends State<NoteListPage> {
                     // "Delete All Notes" button, shown if user is logged in and notes exist.
                     if (currentUserId != null && notes.isNotEmpty)
                       Tooltip(
-                        message: "Supprimer toutes les notes de ce journal", // UI Text in French
+                        message: l10n.deleteAllNotesTooltip,
                         child: IconButton(
                           icon: Icon(Icons.delete_sweep_outlined, color: Theme.of(context).colorScheme.error),
                           onPressed: _isDeletingAllNotes ? null : () => _confirmDeleteAllNotes(context, firestoreService, widget.journalId, currentUserId),
@@ -427,7 +436,7 @@ class _NoteListPageState extends State<NoteListPage> {
                     // View toggle button (list/grid).
                     IconButton(
                       icon: Icon(_isGridView ? Icons.view_list_outlined : Icons.grid_view_outlined),
-                      tooltip: _isGridView ? "Afficher en liste" : "Afficher en grille", // UI Text in French
+                      tooltip: _isGridView ? l10n.viewAsListTooltip : l10n.viewAsGridTooltip,
                       onPressed: () {
                         if (mounted) {
                           setState(() {
@@ -442,11 +451,8 @@ class _NoteListPageState extends State<NoteListPage> {
                         spacing: 0, // No horizontal spacing between buttons in the wrap
                         runSpacing: 0, // No vertical spacing if they wrap to a new line
                         children: [
-                          _buildSortButton('eventTimestamp', Icons.event_note_outlined, "Trier par date d'événement"), // UI Text in French
-                          _buildSortButton('paletteOrder', Icons.palette_outlined, "Trier par couleur de palette"), // UI Text in French
-                          // Add more sort buttons here if needed, e.g., for 'createdAt' or 'content'
-                          // _buildSortButton('content', Icons.sort_by_alpha_outlined, "Trier par contenu"),
-                          // _buildSortButton('createdAt', Icons.history_toggle_off_outlined, "Trier par date de création"),
+                          _buildSortButton(context, 'eventTimestamp', Icons.event_note_outlined, l10n.sortByEventDateTooltip),
+                          _buildSortButton(context, 'paletteOrder', Icons.palette_outlined, l10n.sortByPaletteColorTooltip),
                         ],
                       ),
                     ),
@@ -478,7 +484,7 @@ class _NoteListPageState extends State<NoteListPage> {
                     final note = notes[index];
                     final colorData = _getColorDataById(journalForPalette, note.paletteElementId);
                     // Date formatter for list view items.
-                    final DateFormat dateFormat = DateFormat('EEEE d MMMM y HH:mm', 'fr_FR');
+                    final DateFormat dateFormat = DateFormat('EEEE d MMMM y HH:mm', l10n.localeName);
 
                     final Color cardColor = colorData?.color ?? Theme.of(context).cardColor; // Default if colorData is null
                     final Color textColor = cardColor.computeLuminance() > 0.5 ? Colors.black87 : Colors.white;
@@ -514,12 +520,12 @@ class _NoteListPageState extends State<NoteListPage> {
                                     style: TextStyle(fontSize: 12, color: subtleTextColor, fontWeight: FontWeight.bold)
                                 ),
                               Text(
-                                  'Date: ${dateFormat.format(note.eventTimestamp.toDate().toLocal())}', // UI Text in French
+                                  l10n.noteDateLabel(dateFormat.format(note.eventTimestamp.toDate().toLocal())),
                                   style: TextStyle(fontSize: 12, color: subtleTextColor)
                               ),
                               // Optionally display creation/update timestamps for more detail
                               Text(
-                                'Créé le: ${DateFormat('dd/MM/yy HH:mm', 'fr_FR').format(note.createdAt.toDate().toLocal())}', // UI Text in French
+                                l10n.noteCreatedOnLabel(DateFormat('dd/MM/yy HH:mm', l10n.localeName).format(note.createdAt.toDate().toLocal())),
                                 style: TextStyle(fontSize: 10, color: subtleTextColor.withOpacity(0.8)),
                               ),
                             ],
@@ -527,7 +533,7 @@ class _NoteListPageState extends State<NoteListPage> {
                         ),
                         trailing: IconButton( // Delete button for list items
                           icon: Icon(Icons.delete_forever_outlined, color: textColor.withOpacity(0.7)),
-                          tooltip: "Supprimer cette note", // UI Text in French
+                          tooltip: l10n.deleteThisNoteTooltipList,
                           onPressed: () => _confirmDeleteNote(context, firestoreService, note.id),
                         ),
                         onTap: () {

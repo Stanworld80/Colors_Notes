@@ -1,11 +1,12 @@
+import 'package:colors_notes/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // For FilteringTextInputFormatter
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
+
 import '../core/app_constants.dart';
 import '../models/color_data.dart'; // Defines the ColorData model.
-
 
 /// Logger instance for this page.
 final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 1, printTime: true));
@@ -152,39 +153,38 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
   /// [existingColorData] The [ColorData] to edit. If null, a new color is being added.
   /// [existingColorIndex] The index of the color being edited. Null if adding.
   void _showEditColorDialog({ColorData? existingColorData, int? existingColorIndex}) {
+    final l10n = AppLocalizations.of(context)!;
     final bool isAdding = existingColorData == null;
-    Color pickerColor = isAdding ? Colors.grey : existingColorData.color; // Initial color for the picker.
-    String initialTitle = isAdding ? '' : existingColorData.title; // Initial title. Note: `title` in ColorData is non-nullable.
+    Color pickerColor = isAdding ? Colors.grey : existingColorData.color;
+    String initialTitle = isAdding ? '' : existingColorData.title;
 
     final TextEditingController titleController = TextEditingController(text: initialTitle);
-    final TextEditingController gradientStepsController = TextEditingController(text: '1'); // For adding gradients.
-    final GlobalKey<FormState> dialogFormKey = GlobalKey<FormState>(); // For dialog form validation.
-    String addButtonText = isAdding ? 'Ajouter la couleur' : 'Sauvegarder'; // UI Text in French. Dynamic button text.
-    Widget? deleteButton; // Delete button, only shown when editing.
+    final TextEditingController gradientStepsController = TextEditingController(text: '1');
+    final GlobalKey<FormState> dialogFormKey = GlobalKey<FormState>();
+    String addButtonText = isAdding ? l10n.addColorButtonLabel : l10n.saveButtonLabel;
+    Widget? deleteButton;
 
-    // If editing an existing color, provide a delete button.
     if (!isAdding && existingColorIndex != null) {
       deleteButton = TextButton.icon(
         icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
-        label: Text('Supprimer cette couleur', style: TextStyle(color: Theme.of(context).colorScheme.error)), // UI Text in French
+        label: Text(l10n.deleteThisColorButtonLabel, style: TextStyle(color: Theme.of(context).colorScheme.error)),
         onPressed: () async {
-          Navigator.of(context).pop(); // Close the edit dialog first.
-          // Show a confirmation dialog for deletion.
+          Navigator.of(context).pop();
           final bool? confirmDelete = await showDialog<bool>(
             context: context,
             builder: (BuildContext confirmCtx) {
               return AlertDialog(
-                title: const Text('Confirmer la suppression'), // UI Text in French
-                content: Text('Voulez-vous vraiment supprimer la couleur "${existingColorData.title}" ?'), // UI Text in French
+                title: Text(l10n.confirmDeleteColorTitle),
+                content: Text(l10n.confirmDeleteColorContent(existingColorData.title)),
                 actions: <Widget>[
-                  TextButton(child: const Text('Annuler'), onPressed: () => Navigator.of(confirmCtx).pop(false)), // UI Text in French
-                  TextButton(child: Text('Supprimer', style: TextStyle(color: Theme.of(context).colorScheme.error)), onPressed: () => Navigator.of(confirmCtx).pop(true)), // UI Text in French
+                  TextButton(child: Text(l10n.cancelButtonLabel), onPressed: () => Navigator.of(confirmCtx).pop(false)),
+                  TextButton(child: Text(l10n.deleteButtonLabel, style: TextStyle(color: Theme.of(context).colorScheme.error)), onPressed: () => Navigator.of(confirmCtx).pop(true)),
                 ],
               );
             },
           );
           if (confirmDelete == true) {
-            await _removeColor(existingColorIndex); // Call method to remove the color.
+            await _removeColor(existingColorIndex);
           }
         },
       );
@@ -193,10 +193,10 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
-        return StatefulBuilder( // Use StatefulBuilder to update dialog content (e.g., addButtonText).
+        return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: Text(isAdding ? 'Ajouter une couleur/dégradé' : 'Modifier la couleur'), // UI Text in French
+              title: Text(isAdding ? l10n.addColorGradientDialogTitle : l10n.editColorDialogTitle),
               content: SingleChildScrollView(
                 child: Form(
                   key: dialogFormKey,
@@ -204,54 +204,51 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Title input field.
                       TextFormField(
                         controller: titleController,
-                        decoration: const InputDecoration(labelText: 'Nom de base pour la couleur/dégradé'), // UI Text in French
+                        decoration: InputDecoration(labelText: l10n.baseNameForColorGradientLabel),
                         autofocus: true,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Le titre de base ne peut pas être vide.'; // UI Text in French
+                            return l10n.baseNameCannotBeEmptyValidator;
                           }
                           return null;
                         },
                       ),
                       const SizedBox(height: 20),
-                      // Gradient steps input field (only for adding new colors).
                       if (isAdding)
                         TextFormField(
                           controller: gradientStepsController,
-                          decoration: const InputDecoration(labelText: 'Nombre de couleurs (1 pour simple, 2-$MAX_GRADIENT_STEPS pour dégradé)', hintText: '1'), // UI Text in French
+                          decoration: InputDecoration(labelText: l10n.numberOfColorsLabel(MAX_GRADIENT_STEPS), hintText: l10n.numberOfColorsHint),
                           keyboardType: TextInputType.number,
                           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                           onChanged: (value) {
                             int steps = int.tryParse(value) ?? 1;
-                            setDialogState(() { // Update button text based on number of steps.
-                              addButtonText = steps > 1 ? 'Ajouter le dégradé' : 'Ajouter la couleur'; // UI Text in French
+                            setDialogState(() {
+                              addButtonText = steps > 1 ? l10n.addGradientButtonLabel : l10n.addColorButtonLabel;
                             });
                           },
                           validator: (value) {
-                            if (value == null || value.isEmpty) return 'Entrez un nombre.'; // UI Text in French
+                            if (value == null || value.isEmpty) return l10n.enterNumberValidator;
                             int steps = int.tryParse(value) ?? 0;
                             if (steps < 1 || steps > MAX_GRADIENT_STEPS) {
-                              return 'Entre 1 et $MAX_GRADIENT_STEPS.'; // UI Text in French
+                              return l10n.numberBetweenValidator(MAX_GRADIENT_STEPS);
                             }
                             if (_editableColors.length + steps > MAX_COLORS_IN_PALETTE_EDITOR) {
-                              return 'Trop de couleurs (max ${MAX_COLORS_IN_PALETTE_EDITOR - _editableColors.length} permis).'; // UI Text in French
+                              return l10n.tooManyColorsValidator((MAX_COLORS_IN_PALETTE_EDITOR - _editableColors.length));
                             }
                             return null;
                           },
                         ),
                       if (isAdding) const SizedBox(height: 20),
-                      // Color picker widget.
                       ColorPicker(
                         pickerColor: pickerColor,
-                        onColorChanged: (color) => pickerColor = color, // Update pickerColor on change.
+                        onColorChanged: (color) => pickerColor = color,
                         colorPickerWidth: 300.0,
                         pickerAreaHeightPercent: 0.7,
-                        enableAlpha: false, // Alpha channel is not used.
+                        enableAlpha: false,
                         displayThumbColor: true,
-                        paletteType: PaletteType.hsvWithValue, // Color model for the picker.
+                        paletteType: PaletteType.hsvWithValue,
                         pickerAreaBorderRadius: const BorderRadius.all(Radius.circular(2.0)),
                       ),
                     ],
@@ -259,55 +256,51 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                 ),
               ),
               actions: <Widget>[
-                if (deleteButton != null) deleteButton, // Show delete button if editing.
-                TextButton(child: const Text('Annuler'), onPressed: () => Navigator.of(dialogContext).pop()), // UI Text in French
-                FilledButton( // Add/Save button.
+                if (deleteButton != null) deleteButton,
+                TextButton(child: Text(l10n.cancelButtonLabel), onPressed: () => Navigator.of(dialogContext).pop()),
+                FilledButton(
                   child: Text(addButtonText),
                   onPressed: () {
-                    if (!dialogFormKey.currentState!.validate()) return; // Validate the dialog form.
+                    if (!dialogFormKey.currentState!.validate()) return;
 
                     final String baseTitle = titleController.text.trim();
                     final int gradientSteps = isAdding ? (int.tryParse(gradientStepsController.text) ?? 1) : 1;
                     List<ColorData> colorsToAdd = [];
-                    List<String> tempGeneratedTitles = []; // For checking duplicate titles within the gradient.
-                    List<String> tempGeneratedHexCodes = []; // For checking duplicate hex codes within the gradient.
+                    List<String> tempGeneratedTitles = [];
+                    List<String> tempGeneratedHexCodes = [];
 
-                    if (gradientSteps == 1) { // Adding a single color or editing an existing one.
+                    if (gradientSteps == 1) {
                       final String newHexCode = '#${pickerColor.value.toRadixString(16).substring(2).toUpperCase()}';
-                      // Check for duplicate title.
                       if (_editableColors.any((c) => c.title.toLowerCase() == baseTitle.toLowerCase() && (isAdding || c.paletteElementId != existingColorData.paletteElementId))) {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ce titre de couleur existe déjà.'), backgroundColor: Colors.orange)); // UI Text in French
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.colorTitleExistsError), backgroundColor: Colors.orange));
                         return;
                       }
-                      // Check for duplicate hex code.
                       if (_editableColors.any((c) => c.hexCode.toUpperCase() == newHexCode.toUpperCase() && (isAdding || c.paletteElementId != existingColorData.paletteElementId))) {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cette couleur (hex) existe déjà.'), backgroundColor: Colors.orange)); // UI Text in French
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.colorHexExistsError), backgroundColor: Colors.orange));
                         return;
                       }
                       colorsToAdd.add(ColorData(paletteElementId: isAdding ? _uuid.v4() : existingColorData.paletteElementId, title: baseTitle, hexCode: newHexCode));
-                    } else { // Adding a gradient of colors.
+                    } else {
                       if (_editableColors.length + gradientSteps > MAX_COLORS_IN_PALETTE_EDITOR) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Impossible d\'ajouter $gradientSteps couleurs, maximum de la palette atteint.'), backgroundColor: Colors.orange)); // UI Text in French
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.cannotAddGradientMaxReachedError(gradientSteps)), backgroundColor: Colors.orange));
                         return;
                       }
                       HSLColor hslPickerColor = HSLColor.fromColor(pickerColor);
                       double centerLightness = hslPickerColor.lightness;
-                      double maxLightnessDeviation = 0.3; // Max deviation for lightness in gradient.
+                      double maxLightnessDeviation = 0.3;
                       for (int i = 0; i < gradientSteps; i++) {
-                        // Calculate lightness for the current step in the gradient.
                         double stepFactor = (gradientSteps == 1) ? 0 : (i / (gradientSteps - 1) * 2.0) - 1.0;
                         double currentLightness = (centerLightness + stepFactor * maxLightnessDeviation).clamp(0.0, 1.0);
                         Color newColor = hslPickerColor.withLightness(currentLightness).toColor();
                         String newHex = '#${newColor.value.toRadixString(16).substring(2).toUpperCase()}';
-                        String newTitle = "$baseTitle ${i + 1}"; // Append step number to base title.
+                        String newTitle = "$baseTitle ${i + 1}";
 
-                        // Check for duplicate titles/hex codes within the generated gradient and existing colors.
                         if (tempGeneratedTitles.contains(newTitle.toLowerCase()) || _editableColors.any((c) => c.title.toLowerCase() == newTitle.toLowerCase())) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Titre généré "$newTitle" existe déjà.'), backgroundColor: Colors.orange)); // UI Text in French
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.generatedTitleExistsError(newTitle)), backgroundColor: Colors.orange));
                           return;
                         }
                         if (tempGeneratedHexCodes.contains(newHex.toUpperCase()) || _editableColors.any((c) => c.hexCode.toUpperCase() == newHex.toUpperCase())) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Couleur générée $newHex existe déjà.'), backgroundColor: Colors.orange)); // UI Text in French
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.generatedColorExistsError(newHex)), backgroundColor: Colors.orange));
                           return;
                         }
                         tempGeneratedTitles.add(newTitle.toLowerCase());
@@ -316,20 +309,18 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                       }
                     }
 
-                    // Update the state with the new/modified colors.
                     if (mounted) {
                       setState(() {
                         if (isAdding) {
                           _editableColors.addAll(colorsToAdd);
                         } else if (existingColorIndex != null && colorsToAdd.isNotEmpty) {
-                          // Replace the existing color with the (first) modified color.
                           _editableColors[existingColorIndex] = colorsToAdd.first;
                         }
-                        widget.onColorsChanged(List.from(_editableColors)); // Notify parent of changes.
-                        widget.onPaletteNeedsSave?.call(); // Trigger save.
+                        widget.onColorsChanged(List.from(_editableColors));
+                        widget.onPaletteNeedsSave?.call();
                       });
                     }
-                    Navigator.of(dialogContext).pop(); // Close the dialog.
+                    Navigator.of(dialogContext).pop();
                   },
                 ),
               ],
@@ -355,48 +346,41 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
             widget.onColorsChanged(List.from(_editableColors));
             widget.onPaletteNeedsSave?.call();
           });
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Toutes les couleurs ont été supprimées de la palette en cours d\'édition.'), backgroundColor: Colors.green)); // UI Text in French
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.allColorsDeletedFromEditorSnackbar), backgroundColor: Colors.green));
         }
       }
     }
   }
 
   /// Removes a color from the `_editableColors` list at the given [indexToRemove].
-  ///
-  /// Before removal, it checks constraints:
-  /// - For palette models, ensures the minimum number of colors is maintained.
-  /// - For journal palettes, if `widget.canDeleteColorCallback` is provided,
-  ///   it calls this callback to check if the color is in use and can be deleted.
   Future<void> _removeColor(int indexToRemove) async {
+    final l10n = AppLocalizations.of(context)!;
     final String colorTitle = _editableColors[indexToRemove].title;
 
-    // Prevent deletion if it violates minimum color count for palette models.
     if (!widget.isEditingJournalPalette && _editableColors.length <= MIN_COLORS_IN_PALETTE_EDITOR) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Un modèle de palette doit contenir au moins $MIN_COLORS_IN_PALETTE_EDITOR couleur(s). Impossible de supprimer "$colorTitle".'))); // UI Text in French
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.modelMinColorsDeleteError(MIN_COLORS_IN_PALETTE_EDITOR, colorTitle))));
       }
       return;
     }
 
-    // If editing a journal palette and a callback is provided, check if the color can be deleted.
     if (widget.isEditingJournalPalette && widget.canDeleteColorCallback != null) {
       final colorToDelete = _editableColors[indexToRemove];
       final bool canDelete = await widget.canDeleteColorCallback!(colorToDelete.paletteElementId);
       if (!canDelete) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('La couleur "${colorToDelete.title}" est utilisée et ne peut être supprimée.'), backgroundColor: Colors.orange)); // UI Text in French
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.colorInUseDeleteError(colorToDelete.title)), backgroundColor: Colors.orange));
         }
         return;
       }
     }
 
-    // Proceed with removal if all checks pass.
     if (mounted) {
       setState(() {
         _editableColors.removeAt(indexToRemove);
-        widget.onColorsChanged(List.from(_editableColors)); // Notify parent.
-        widget.onPaletteNeedsSave?.call(); // Trigger save.
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Couleur "$colorTitle" supprimée.'), duration: const Duration(seconds: 1))); // UI Text in French
+        widget.onColorsChanged(List.from(_editableColors));
+        widget.onPaletteNeedsSave?.call();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.colorDeletedSnackbar(colorTitle)), duration: const Duration(seconds: 1)));
       });
     }
   }
@@ -432,44 +416,40 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // Determine if the "Add" button should be shown (i.e., if max color limit not reached).
+    final l10n = AppLocalizations.of(context)!;
     bool canShowAddButtonInListOrGrid = _editableColors.length < MAX_COLORS_IN_PALETTE_EDITOR;
     _loggerPage.d("DEBUG DELETE ALL : widget.onDeleteAllColorsRequested :${widget.onDeleteAllColorsRequested} \n _editableColors.isNotEmpty:${_editableColors.isNotEmpty}");
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Palette name editor (optional).
         if (widget.showNameEditor)
           TextFormField(
             controller: _paletteNameController,
-            decoration: const InputDecoration(labelText: 'Nom de la palette', hintText: 'Ex: Ma palette de travail', border: OutlineInputBorder()), // UI Text in French
+            decoration: InputDecoration(labelText: l10n.paletteNameLabel, hintText: l10n.paletteNameHint, border: const OutlineInputBorder()),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Le nom de la palette ne peut pas être vide.'; // UI Text in French
+                return l10n.paletteNameEmptyValidator;
               }
-              if (value.length > 50) return 'Le nom ne doit pas dépasser 50 caractères.'; // UI Text in French
+              if (value.length > 50) return l10n.paletteNameTooLongValidator;
               return null;
             },
           ),
         if (widget.showNameEditor) const SizedBox(height: 16),
 
-        // Header for the colors section with count and view toggle.
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Couleurs (${_editableColors.length} / $MAX_COLORS_IN_PALETTE_EDITOR) :', style: Theme.of(context).textTheme.titleMedium), // UI Text in French
+            Text(l10n.colorsSectionHeader(_editableColors.length, MAX_COLORS_IN_PALETTE_EDITOR), style: Theme.of(context).textTheme.titleMedium),
             Row(
               children: [
-                // "Delete All Colors" button, if callback is provided and colors exist.
                 if (widget.onDeleteAllColorsRequested != null && _editableColors.isNotEmpty)
                   Tooltip(
-                    message: "Supprimer toutes les couleurs", // UI Text in French
+                    message: l10n.deleteAllColorsTooltip,
                     child: IconButton(icon: Icon(Icons.delete_sweep_outlined, color: Theme.of(context).colorScheme.error), onPressed: _handleDeleteAllColors),
                   ),
-                // Grid/List view toggle button.
                 IconButton(
                   icon: Icon(_isGridView ? Icons.view_list_outlined : Icons.grid_view_outlined),
-                  tooltip: _isGridView ? "Afficher en liste" : "Afficher en grille", // UI Text in French
+                  tooltip: _isGridView ? l10n.viewAsListTooltip : l10n.viewAsGridTooltip,
                   onPressed: () => { if (mounted) setState(() => _isGridView = !_isGridView) },
                 ),
               ],
@@ -477,14 +457,12 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
           ],
         ),
         const SizedBox(height: 8),
-        // Display message if palette is empty and cannot add more, or display the color editor.
         if (_editableColors.isEmpty && !canShowAddButtonInListOrGrid)
-          const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.0),
-              child: Center(child: Text("La palette est vide et a atteint le nombre maximum de couleurs.", textAlign: TextAlign.center)) // UI Text in French
+          Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: Center(child: Text(l10n.paletteEmptyMaxReachedMessage, textAlign: TextAlign.center))
           )
         else if (_editableColors.isEmpty && canShowAddButtonInListOrGrid)
-        // If empty but can add, show the appropriate view (grid or list) which will include an add button.
           _isGridView ? _buildGridView() : _buildListView()
         else
         // If not empty, show the appropriate view.
@@ -524,8 +502,8 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
       ),
       child: ListTile(
         leading: Icon(Icons.add_circle_outline, color: Theme.of(context).colorScheme.primary, size: 28),
-        title: Text("Ajouter une nouvelle couleur/dégradé", style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w500)), // UI Text in French
-        onTap: () => _showEditColorDialog(), // Open dialog to add color.
+        title: Text(l10n.addNewColorGradientListTile, style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w500)),
+        onTap: () => _showEditColorDialog(),
         contentPadding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 16.0),
       ),
     );

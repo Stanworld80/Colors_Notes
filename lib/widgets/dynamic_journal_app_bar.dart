@@ -19,9 +19,9 @@ import 'package:colors_notes/l10n/app_localizations.dart';
 final _loggerAppBar = Logger(printer: PrettyPrinter(methodCount: 0));
 
 class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String defaultTitleText;
+  final String? defaultTitleText; // Made nullable
 
-  const DynamicJournalAppBar({super.key, this.defaultTitleText = "Colors & Notes"});
+  const DynamicJournalAppBar({super.key, this.defaultTitleText}); // Updated constructor
 
   @override
   Widget build(BuildContext context) {
@@ -32,41 +32,51 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
     final Journal? activeJournal = activeJournalNotifier.activeJournal;
     final l10n = AppLocalizations.of(context)!;
 
-    String displayTitle = l10n.appName;
-    if (activeJournalNotifier.isLoading) {
-      displayTitle = l10n.loadingTitle; // Utilisation de la nouvelle clé
-    } else if (activeJournal != null) {
-      displayTitle = activeJournal.name;
-    } else if (activeJournalNotifier.errorMessage != null) {
-      displayTitle = l10n.errorTitle; // Utilisation de la nouvelle clé
-    } else if (currentUserId != null && activeJournalNotifier.activeJournalId == null) {
-      displayTitle = l10n.chooseJournalTitle; // Utilisation de la nouvelle clé
-    }
-
-    return AppBar(
-      title: currentUserId == null
-          ? Text(displayTitle)
-          : StreamBuilder<List<Journal>>(
+    // Title logic wrapped in StreamBuilder to correctly use journalsSnapshot.data
+    Widget titleWidget;
+    if (currentUserId == null) {
+      // If no user, display default or app name
+      titleWidget = Text(widget.defaultTitleText ?? l10n.appName, style: const TextStyle(fontSize: 18), overflow: TextOverflow.ellipsis);
+    } else {
+      titleWidget = StreamBuilder<List<Journal>>(
         stream: firestoreService.getJournalsStream(currentUserId),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData || snapshot.data == null || snapshot.data!.isEmpty) {
+        builder: (context, journalsSnapshot) {
+          String displayTitle = widget.defaultTitleText ?? l10n.appName;
+
+          if (activeJournalNotifier.isLoading) {
+            displayTitle = l10n.loadingTitle;
+          } else if (activeJournal != null) {
+            displayTitle = activeJournal.name;
+          } else if (activeJournalNotifier.errorMessage != null) {
+            displayTitle = l10n.errorTitle;
+          } else if (activeJournalNotifier.activeJournalId == null &&
+                     journalsSnapshot.hasData &&
+                     journalsSnapshot.data != null &&
+                     journalsSnapshot.data!.isNotEmpty) {
+            // Show "Choose a journal" only if there are journals and none is active
+            displayTitle = l10n.chooseJournalTitle;
+          }
+          // Otherwise, it remains defaultTitleText or l10n.appName
+
+          if (!journalsSnapshot.hasData || journalsSnapshot.data == null || journalsSnapshot.data!.isEmpty) {
+            // If no journals, display the title without dropdown
             return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(Icons.book_outlined, size: 20),
                 const SizedBox(width: 8),
-                Text(displayTitle, style: const TextStyle(fontSize: 18)),
+                Flexible(child: Text(displayTitle, style: const TextStyle(fontSize: 18), overflow: TextOverflow.ellipsis)),
               ],
             );
           }
 
-          final journals = snapshot.data!;
+          final journals = journalsSnapshot.data!;
           return PopupMenuButton<String>(
-            tooltip: l10n.changeJournalTooltip, // Utilisation de la nouvelle clé
+            tooltip: l10n.changeJournalTooltip,
             onSelected: (String journalId) {
               if (journalId.isNotEmpty) {
                 activeJournalNotifier.setActiveJournal(journalId, currentUserId);
-                _loggerAppBar.i("Journal actif changé via Titre AppBar: $journalId");
+                _loggerAppBar.i("Active journal changed via AppBar Title: $journalId"); // Log in English
               }
             },
             itemBuilder: (BuildContext context) {
@@ -101,13 +111,17 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
             ),
           );
         },
-      ),
+      );
+    }
+
+    return AppBar(
+      title: titleWidget,
       centerTitle: true,
       actions: <Widget>[
         if (activeJournal != null)
           IconButton(
             icon: const Icon(Icons.palette_rounded),
-            tooltip: l10n.editPaletteTooltip(activeJournal.name), // Utilisation de la nouvelle clé
+            tooltip: l10n.editPaletteTooltip(activeJournal.name),
             onPressed: () {
               Navigator.push(
                 context,
@@ -120,83 +134,85 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
             },
           ),
 
-        if (currentUserId != null)
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert_outlined),
-            tooltip: l10n.optionsTooltip, // MODIFIÉ ICI pour utiliser la nouvelle clé
-            onSelected: (value) {
-              if (value == 'settings') {
-                Navigator.pushNamed(context, '/settings');
-              } else if (value == 'manage_journals') {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const JournalManagementPage()));
-              } else if (value == 'manage_palette_models') {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const PaletteModelManagementPage()));
-              } else if (value == 'about') {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutPage()));
-              } else if (value == 'license') {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const ColorsNotesLicensePage()));
-              } else if (value == 'sign_out') {
-                authService.signOut().then((_) {
-                  _loggerAppBar.i("Déconnexion demandée.");
-                }).catchError((e) {
-                  _loggerAppBar.e("Erreur déconnexion: $e");
-                  if(context.mounted){
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("${l10n.signOutErrorPrefix}$e")) // Utilisation de la nouvelle clé
-                    );
+            if (currentUserId != null)
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert_outlined),
+                tooltip: l10n.optionsAppBarTooltip, // Changed to optionsAppBarTooltip
+                onSelected: (value) {
+                  if (value == 'settings') {
+                    Navigator.pushNamed(context, '/settings');
+                  } else if (value == 'manage_journals') {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const JournalManagementPage()));
+                  } else if (value == 'manage_palette_models') {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const PaletteModelManagementPage()));
+                  } else if (value == 'about') {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutPage()));
+                  } else if (value == 'license') {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const ColorsNotesLicensePage()));
+                  } else if (value == 'sign_out') {
+                    authService.signOut().then((_) {
+                      _loggerAppBar.i("Sign out requested."); // Log in English
+                    }).catchError((e) {
+                      _loggerAppBar.e("Sign out error: $e"); // Log in English
+                      if(context.mounted){
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(l10n.signOutErrorSnackbar(e.toString()))) // Used signOutErrorSnackbar
+                        );
+                      }
+                    });
                   }
-                });
-              }
-            },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              PopupMenuItem<String>(
-                value: 'settings',
-                child: ListTile(
-                  leading: const Icon(Icons.settings_outlined),
-                  title: Text(l10n.settings),
-                ),
+                },
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  PopupMenuItem<String>(
+                    value: 'settings',
+                    child: ListTile(
+                      leading: const Icon(Icons.settings_outlined),
+                      title: Text(l10n.settings),
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem<String>(
+                    value: 'manage_journals',
+                    child: ListTile(
+                      leading: const Icon(Icons.collections_bookmark_outlined),
+                      title: Text(l10n.manageJournals),
+                    ),
+                  ),
+                  PopupMenuItem<String>(
+                    value: 'manage_palette_models',
+                    child: ListTile(
+                      leading: const Icon(Icons.palette_outlined),
+                      title: Text(l10n.managePaletteModels),
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem<String>(
+                    value: 'about',
+                    child: ListTile(
+                      leading: const Icon(Icons.info_outline),
+                      title: Text(l10n.about),
+                    ),
+                  ),
+                  PopupMenuItem<String>(
+                    value: 'license',
+                    child: ListTile(
+                      leading: const Icon(Icons.description_outlined),
+                      title: Text(l10n.licenseLink),
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem<String>(
+                    value: 'sign_out',
+                    child: ListTile(
+                      leading: const Icon(Icons.logout_outlined),
+                      title: Text(l10n.logout),
+                    ),
+                  ),
+                ],
               ),
-              const PopupMenuDivider(),
-              PopupMenuItem<String>(
-                value: 'manage_journals',
-                child: ListTile(
-                  leading: const Icon(Icons.collections_bookmark_outlined),
-                  title: Text(l10n.manageJournals),
-                ),
-              ),
-              PopupMenuItem<String>(
-                value: 'manage_palette_models',
-                child: ListTile(
-                  leading: const Icon(Icons.palette_outlined),
-                  title: Text(l10n.managePaletteModels),
-                ),
-              ),
-              const PopupMenuDivider(),
-              PopupMenuItem<String>(
-                value: 'about',
-                child: ListTile(
-                  leading: const Icon(Icons.info_outline),
-                  title: Text(l10n.about),
-                ),
-              ),
-              PopupMenuItem<String>(
-                value: 'license',
-                child: ListTile(
-                  leading: const Icon(Icons.description_outlined),
-                  title: Text(l10n.licenseLink),
-                ),
-              ),
-              const PopupMenuDivider(),
-              PopupMenuItem<String>(
-                value: 'sign_out',
-                child: ListTile(
-                  leading: const Icon(Icons.logout_outlined),
-                  title: Text(l10n.logout),
-                ),
-              ),
-            ],
-          ),
-      ],
+          ],
+        );
+      },
     );
   }
 

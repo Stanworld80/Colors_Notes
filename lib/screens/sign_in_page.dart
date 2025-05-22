@@ -56,6 +56,7 @@ class _SignInPageState extends State<SignInPage> {
   /// Navigation upon successful sign-in is handled by [AuthGate].
   /// Displays an error message on failure.
   Future<void> _signInWithEmail() async {
+    final l10n = AppLocalizations.of(context)!; // Get l10n instance
     if (_formKey.currentState!.validate()) {
       if (mounted) {
         setState(() {
@@ -68,13 +69,13 @@ class _SignInPageState extends State<SignInPage> {
             _emailController.text.trim(),
             _passwordController.text.trim()
         );
-        _loggerPage.i("Tentative de connexion réussie pour ${_emailController.text.trim()}"); // Log message in French
+        _loggerPage.i("Sign-in attempt successful for ${_emailController.text.trim()}"); // Log message in English
         // Navigation is handled by AuthGate after a successful authentication state change.
       } catch (e) {
-        _loggerPage.e("Erreur connexion email: ${e.toString()}"); // Log message in French
+        _loggerPage.e("Email sign-in error: ${e.toString()}"); // Log message in English
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent)
+              SnackBar(content: Text(l10n.genericAuthErrorSnackbar), backgroundColor: Colors.redAccent) // MODIFIED
           );
         }
       } finally {
@@ -93,6 +94,7 @@ class _SignInPageState extends State<SignInPage> {
   /// Navigation upon successful sign-in is handled by [AuthGate].
   /// Displays an error message on failure.
   Future<void> _signInWithGoogle() async {
+    final l10n = AppLocalizations.of(context)!; // Get l10n instance
     if (mounted) {
       setState(() {
         _isLoadingGoogle = true;
@@ -101,13 +103,13 @@ class _SignInPageState extends State<SignInPage> {
     try {
       final authService = Provider.of<AuthService>(context, listen: false);
       await authService.signInWithGoogle();
-      _loggerPage.i("Tentative de connexion Google réussie."); // Log message in French
+      _loggerPage.i("Google sign-in attempt successful."); // Log message in English
       // Navigation is handled by AuthGate after a successful authentication state change.
     } catch (e) {
-      _loggerPage.e("Erreur connexion Google: ${e.toString()}"); // Log message in French
+      _loggerPage.e("Google sign-in error: ${e.toString()}"); // Log message in English
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent)
+            SnackBar(content: Text(l10n.genericAuthErrorSnackbar), backgroundColor: Colors.redAccent) // MODIFIED
         );
       }
     } finally {

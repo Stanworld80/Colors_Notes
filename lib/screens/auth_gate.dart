@@ -1,3 +1,4 @@
+import 'package:colors_notes/l10n/app_localizations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -29,6 +30,7 @@ class AuthGate extends StatelessWidget {
       // Listen to the user authentication state stream from AuthService.
       stream: authService.userStream,
       builder: (context, snapshot) {
+        final l10n = AppLocalizations.of(context)!;
         // Display a loading indicator while waiting for the connection state.
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
@@ -38,7 +40,7 @@ class AuthGate extends StatelessWidget {
         // Display an error message if the stream encounters an error.
         if (snapshot.hasError) {
           return Scaffold(
-            body: Center(child: Text('Erreur: ${snapshot.error}')), // Error message in French
+            body: Center(child: Text(l10n.authErrorPrefix(snapshot.error.toString()))),
           );
         }
 
