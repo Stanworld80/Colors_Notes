@@ -84,9 +84,9 @@ class LanguageProvider with ChangeNotifier {
         return 'Italiano';
       case 'pt':
         if (locale.countryCode == "BR")
-          return 'Portuguais (Brésil)';
+          return 'Portugais (Brésil)';
         else
-          return 'Portuguais';
+          return 'Portugais';
 
       // Ajoutez d'autres langues ici si nécessaire
       default:
