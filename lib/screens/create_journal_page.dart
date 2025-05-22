@@ -11,12 +11,8 @@ import '../services/firestore_service.dart';
 import '../models/journal.dart';
 import '../models/palette.dart';
 import '../models/color_data.dart';
-import '../models/journal.dart';
-import '../models/palette.dart';
 import '../models/palette_model.dart';
 import '../providers/active_journal_provider.dart';
-import '../services/auth_service.dart';
-import '../services/firestore_service.dart';
 import '../widgets/inline_palette_editor.dart';
 import '../core/predefined_templates.dart';
 

@@ -491,6 +491,7 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
 
   /// Builds the "Add New Color/Gradient" list tile for the list view.
   Widget _buildAddButtonListTile() {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       key: const ValueKey('add_new_color_list_card'), // For testing/identification.
       elevation: 1.0,
