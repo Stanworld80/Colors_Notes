@@ -23,7 +23,7 @@ class SettingsPage extends StatelessWidget {
         children: <Widget>[
           ListTile(
             title: Text(l10n.language), // "Langue"
-            subtitle: Text(languageProvider.getLanguageName(languageProvider.appLocale)),
+            subtitle: Text(languageProvider.getLanguageName(languageProvider.appLocale,context)),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
               _showLanguageSelectionDialog(context, languageProvider);
@@ -71,7 +71,7 @@ class SettingsPage extends StatelessWidget {
                 final locale = AppLocalizations.supportedLocales[index];
                 final bool isSelected = locale == provider.appLocale;
                 return RadioListTile<Locale>(
-                  title: Text(provider.getLanguageName(locale)),
+                  title: Text(provider.getLanguageName(locale,context)),
                   value: locale,
                   groupValue: provider.appLocale,
                   onChanged: (Locale? newLocale) {

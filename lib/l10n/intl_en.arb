@@ -1393,5 +1393,7 @@
   "@yesDeleteAllNotesButtonLabel": {
     "description": "Label for the button that confirms deleting all notes, typically in a final confirmation dialog."
   },
-  "help" : "help"
+  "help" : "help",
+  "spain" : "spain",
+  "german" : "german"
 }

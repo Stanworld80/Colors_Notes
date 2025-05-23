@@ -70,20 +70,21 @@ class LanguageProvider with ChangeNotifier {
   }
 
   // Helper pour obtenir le nom de la langue de manière lisible
-  String getLanguageName(Locale locale) {
+  String getLanguageName(Locale locale,BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     switch (locale.languageCode) {
-      case 'en':
-        return 'English';
       case 'fr':
-        return 'Français';
+        return l10n!.french;
+      case 'en':
+        return l10n!.english;
       case 'es':
-        return 'Espagnol';
+        return  l10n!.spain;
       case 'de':
-        return 'Allemand';
+        return l10n!.german;
       case 'it':
-        return 'Italien';
+        return l10n!.italian;
       case 'pt':
-        return (locale.countryCode == "BR") ? 'Portugais (Brésil)' : 'Portugais';
+        return (locale.countryCode == "BR") ? l10n!.portugueseBrazilian : l10n!.portuguese;
 
       // Ajoutez d'autres langues ici si nécessaire
       default:
