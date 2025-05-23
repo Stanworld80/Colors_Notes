@@ -78,6 +78,10 @@ class LanguageProvider with ChangeNotifier {
         return 'English';
       case 'fr':
         return 'Français';
+      case 'es':
+        return 'Espagnol';
+      case 'de':
+        return 'Allemand';
       case 'it':
         return 'Italien';
       case 'pt':
