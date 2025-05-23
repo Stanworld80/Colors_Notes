@@ -26,6 +26,7 @@ import 'screens/sign_in_page.dart';
 import 'screens/register_page.dart';
 import 'screens/main_screen.dart';
 import 'screens/settings_page.dart';
+import 'screens/help_page.dart'; // Added import for HelpPage
 
 final _logger = Logger(printer: PrettyPrinter(methodCount: 1, dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart, printEmojis: true, colors: true));
 
@@ -142,6 +143,7 @@ class _MyAppState extends State<MyApp> {
         '/register': (context) => const RegisterPage(),
         '/main': (context) => const MainScreen(),
         '/settings': (context) => const SettingsPage(), // AJOUTÉ
+        '/help': (context) => HelpPage(), // Added route for HelpPage
         // Ajoutez d'autres routes ici
       },
     );

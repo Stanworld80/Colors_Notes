@@ -185,6 +185,13 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
                   title: Text(l10n.licenseLink),
                 ),
               ),
+              PopupMenuItem<String>(
+                value: 'help',
+                child: ListTile(
+                  leading: const Icon(Icons.help_outline),
+                  title: Text(l10n.help),
+                ),
+              ),
               const PopupMenuDivider(),
               PopupMenuItem<String>(
                 value: 'sign_out',
