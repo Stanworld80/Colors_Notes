@@ -1392,5 +1392,6 @@
   "yesDeleteAllNotesButtonLabel": "OUI, SUPPRIMER TOUTES LES NOTES",
   "@yesDeleteAllNotesButtonLabel": {
     "description": "Étiquette du bouton qui confirme la suppression de toutes les notes, typiquement dans un dialogue de confirmation finale."
-  }
+  },
+  "help" : "aide"
 }

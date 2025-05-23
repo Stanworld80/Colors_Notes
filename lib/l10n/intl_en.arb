@@ -1392,5 +1392,6 @@
   "yesDeleteAllNotesButtonLabel": "YES, DELETE ALL NOTES",
   "@yesDeleteAllNotesButtonLabel": {
     "description": "Label for the button that confirms deleting all notes, typically in a final confirmation dialog."
-  }
+  },
+  "help" : "help"
 }
