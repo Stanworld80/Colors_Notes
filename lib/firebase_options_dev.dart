@@ -64,24 +64,25 @@ class DefaultFirebaseOptions {
     }
   }
 
-  /// Firebase options for the web platform.
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyByKR0NTLjEd-4BHaYeh3pDoq1RtSg4WRg',
     appId: '1:523869870608:web:9a3da9909e4b36afbbc895',
     messagingSenderId: '523869870608',
     projectId: 'colorsnotes-e9142',
     authDomain: 'colorsnotes-e9142.firebaseapp.com',
-    storageBucket: 'colorsnotes-e9142.appspot.com',
-
+    storageBucket: 'colorsnotes-e9142.firebasestorage.app',
     measurementId: 'G-EDQE6FKNRL',
   );
 
-  /// Firebase options for the Android platform.
+  /// Firebase options for the web platform.
+
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyB8e2IdFFWKKyLdwQGf-bvxhRKZmWzxdKI',
     appId: '1:523869870608:android:db8da6bae0f7d968bbc895',
     messagingSenderId: '523869870608',
     projectId: 'colorsnotes-e9142',
-    storageBucket: 'colorsnotes-e9142.appspot.com',
+    storageBucket: 'colorsnotes-e9142.firebasestorage.app',
   );
+
+  /// Firebase options for the Android platform.
 }
