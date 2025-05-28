@@ -1393,5 +1393,10 @@
   "@yesDeleteAllNotesButtonLabel": {
     "description": "Étiquette du bouton qui confirme la suppression de toutes les notes, typiquement dans un dialogue de confirmation finale."
   },
-  "help" : "aide"
+  "help" : "aide",
+  "cookieConsentTitle": "Gestion des Cookies"  ,
+  "cookieConsentMessage": "Nous utilisons des cookies pour améliorer votre expérience. Les cookies essentiels sont nécessaires au fonctionnement du site. Acceptez-vous l'utilisation de cookies analytiques pour nous aider à améliorer nos services ?"  ,
+  "cookieConsentAcceptAll" :  "Accepter",
+  "cookieConsentDecline" : "Refuser",
+  "cookieConsentSettings" : "Paramétres"
 }

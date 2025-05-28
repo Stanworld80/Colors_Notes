@@ -1395,5 +1395,11 @@
   },
   "help" : "help",
   "spain" : "spain",
-  "german" : "german"
+  "german" : "german",
+  "cookieConsentTitle": "Gestion des Cookies"  ,
+  "cookieConsentMessage": "We use cookies to enhance your experience. Essential cookies are necessary for the website to function. Do you accept the use of analytical cookies to help us improve our services?",
+  "cookieConsentAcceptAll" :  "Accept All",
+  "cookieConsentDecline" : "Decline",
+  "cookieConsentSettings" : "Settings"
+
 }
