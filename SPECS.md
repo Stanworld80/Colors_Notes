@@ -1,14 +1,14 @@
-# Colors & Notes \- Spécifications Détaillées
+# Colors & Notes - Spécifications Détaillées
 
-**Version du Document :** 1.1 **Date :** 8 mai 2025 **Application Version :** MVP \~1.3
+**Version du Document :** 1.2 **Date :** 28 mai 2025 **Application Version :** MVP ~1.3
 
-## **1\. Introduction**
+## **1. Introduction**
 
-Ce document fournit une description technique détaillée de l'application "Colors & Notes" dans sa version MVP actuelle (\~1.3). Il est destiné à servir de référence principale pour les développeurs chargés de la maintenance, de l'évolution et de la mise en production de l'application. Il couvre l'architecture générale, les fonctionnalités implémentées, les modèles de données, la logique métier clé, une description des interfaces utilisateur principales, ainsi qu'une proposition pour la mise en production et l'industrialisation des déploiements Web et Android.
+Ce document fournit une description technique détaillée de l'application "Colors & Notes" dans sa version MVP actuelle (~1.3). Il est destiné à servir de référence principale pour les développeurs chargés de la maintenance, de l'évolution et de la mise en production de l'application. Il couvre l'architecture générale, les fonctionnalités implémentées, les modèles de données, la logique métier clé, une description des interfaces utilisateur principales, ainsi qu'une proposition pour la mise en production et l'industrialisation des déploiements Web et Android.
 
 L'objectif de "Colors & Notes" est de permettre aux utilisateurs d'organiser des notes en les associant à des couleurs personnalisées, regroupées dans des palettes. Chaque journal possède sa propre instance de palette, indépendante des modèles.
 
-## **2\. Architecture Générale**
+## **2. Architecture Générale**
 
 * **Framework :** Flutter
 * **Langage :** Dart
@@ -20,13 +20,13 @@ L'objectif de "Colors & Notes" est de permettre aux utilisateurs d'organiser des
 * **Gestion de Code Source :** GitHub
 * **CI/CD :** GitHub Actions
 
-## **3\. MVP Actuel (Version \~1.3)**
+## **3. MVP Actuel (Version ~1.3)**
 
-La version actuelle de l'application (branche `experimental`, en date du 8 mai 2025\) intègre les fonctionnalités suivantes :
+La version actuelle de l'application (branche `experimental`, en date du 8 mai 2025) intègre les fonctionnalités suivantes :
 
 ### **3.1. Fonctionnalités Principales**
 
-* **Authentification Utilisateur (SF-AUTH-01 à 05\)**
+* **Authentification Utilisateur (SF-AUTH-01 à 05)**
     * Inscription et connexion par email et mot de passe.
     * Inscription et connexion via Google Sign-In (fonctionnel sur Web après configuration de `index.html`).
     * Persistance de la session utilisateur.
@@ -97,12 +97,12 @@ Les données sont structurées dans les collections Firestore suivantes :
         * `lastModifiedDate` (Timestamp) : Date de dernière modification.
         * `palette` (Map) : Instance de la palette du journal.
             * `id` (String) : ID unique de la palette (peut être le même que le journalId ou un uuid).
-            * `name` (String) : Nom de la palette (e.g., "Palette de \[Nom du Journal\]").
-            * `colors` (List) : Liste des couleurs de la palette. Chaque élément est un \`ColorData\`.
+            * `name` (String) : Nom de la palette (e.g., "Palette de [Nom du Journal]").
+            * `colors` (List) : Liste des couleurs de la palette. Chaque élément est un `ColorData`.
                 * `id` (String) : ID unique de la couleur au sein de la palette (e.g., `uuid`). *Note : Ce champ est présent dans le modèle Dart `ColorData`, sa persistance exacte en tant que `id` distinct du `paletteElementId` dans Firestore est à confirmer. Le `paletteElementId` est crucial.*
                 * `paletteElementId` (String) : **Identifiant fonctionnel unique** d'un élément de couleur au sein de cette instance de palette (généré via `uuid`). Utilisé pour lier les notes.
                 * `title` (String) : Nom/label de la couleur (e.g., "Joyeux", "Travail").
-                * `hexColor` (String) : Valeur hexadécimale de la couleur (e.g., "\#FF0000").
+                * `hexColor` (String) : Valeur hexadécimale de la couleur (e.g., "#FF0000").
 
 
 * **`notes`**
@@ -128,7 +128,7 @@ Les données sont structurées dans les collections Firestore suivantes :
         * `userId` (String, optionnel) : ID de l'utilisateur créateur si c'est un modèle personnel. `null` ou une valeur spéciale pour les modèles prédéfinis.
         * `name` (String) : Nom du modèle de palette.
         * `isPredefined` (bool) : `true` si c'est un modèle fourni par l'application, `false` sinon.
-        * `colors` (List) : Liste des \`ColorData\` du modèle.
+        * `colors` (List) : Liste des `ColorData` du modèle.
             * `id` (String) : ID unique de la couleur au sein du modèle (e.g., `uuid`).
             * `title` (String) : Nom/label de la couleur.
             * `hexColor` (String) : Valeur hexadécimale de la couleur.
@@ -150,7 +150,7 @@ Les classes Dart correspondantes se trouvent dans `lib/models/` :
 * **Création de Journal :**
     * **Vierge :** Un nouveau `Journal` est créé avec une palette par défaut (e.g., quelques couleurs basiques) ou une palette entièrement nouvelle définie par l'utilisateur. Chaque `ColorData` dans la nouvelle palette d'instance reçoit un `paletteElementId` unique.
     * **Depuis Modèle (`PaletteModel`) :** Le `Journal` est créé, et sa `palette` est initialisée en copiant les `ColorData` du `PaletteModel` sélectionné. Chaque `ColorData` copié dans l'instance de palette du journal reçoit un nouveau `paletteElementId` unique.
-    * **Depuis Journal Existant :** Le `Journal` est créé, son nom est initialisé (e.g., "Copie de \[Nom Ancien Journal\]"). Sa `palette` est une copie profonde de la palette du journal source. Chaque `ColorData` copié dans la nouvelle instance de palette reçoit un nouveau `paletteElementId` unique. Les notes ne sont PAS copiées.
+    * **Depuis Journal Existant :** Le `Journal` est créé, son nom est initialisé (e.g., "Copie de [Nom Ancien Journal]"). Sa `palette` est une copie profonde de la palette du journal source. Chaque `ColorData` copié dans la nouvelle instance de palette reçoit un nouveau `paletteElementId` unique. Les notes ne sont PAS copiées.
 * **Liaison Note-Couleur et Mise à Jour "Gratuite" :**
     * Lors de la création d'une note, le `paletteElementId` de la `ColorData` sélectionnée dans la palette du journal actif est stocké dans le document `Note`.
     * Lors de l'affichage d'une note, sa couleur est récupérée en recherchant la `ColorData` avec le `paletteElementId` correspondant dans la `palette` du `Journal` courant.
@@ -198,7 +198,7 @@ Les classes Dart correspondantes se trouvent dans `lib/models/` :
         * Bouton "Enregistrer" (pour le mode modèle, ou si la sauvegarde n'est pas automatique en mode instance).
         * Validation en temps réel ou à la sauvegarde pour l'unicité des `hexColor`.
 
-## **4\. Proposition de Mise en Production et Industrialisation**
+## **4. Proposition de Mise en Production et Industrialisation**
 
 ### **4.1. Infrastructure (Firebase)**
 
@@ -256,13 +256,19 @@ Cette section détaille le plan d'action pour mettre en place une ingénierie lo
 #### 4.4.1. Gestion de Versions (Git et GitHub)
 
 * **Stratégie de Branches :**
-    * `main` : Code de production, stable et testé. Ne jamais pusher directement.
-    * `develop` : Branche d'intégration continue. Sert de base pour les builds de test/staging. Les fonctionnalités fusionnées ici doivent être complètes et testées.
-    * `feature/<nom-feature>` : Branches pour le développement de nouvelles fonctionnalités. Créées à partir de `develop`.
-    * `fix/<nom-bug>` : Branches pour les corrections de bugs. Créées à partir de `develop` (ou `main` pour les hotfixes urgents).
-    * `release/vX.Y.Z` (Optionnel) : Utilisée pour préparer une nouvelle version de production (tests finaux, ajustements de version). Créée à partir de `develop`, puis fusionnée dans `main` et `develop`.
+    * `main` : Code de production, stable et testé. Les releases sont créées en taguant cette branche (ex: `vX.Y.Z` ou `vX.Y.Z+buildNumber`). Ne jamais pusher directement sur `main` sauf pour les fusions validées depuis `develop` ou les `hotfix`.
+    * `develop` : Branche d'intégration continue. Sert de base pour les builds de test/staging. Les fonctionnalités y sont fusionnées après avoir été complétées et testées sur leurs propres branches. `develop` doit être maintenue dans un état stable, prête à être fusionnée dans `main` pour une release.
+    * `feature/<nom-feature>` : Branches pour le développement de nouvelles fonctionnalités. Créées à partir de `develop` et fusionnées dans `develop` via une Pull Request.
+    * `fix/<nom-bug>` : Branches pour les corrections de bugs.
+        * Pour les bugs non urgents : Créées à partir de `develop`, testées, puis fusionnées dans `develop` via une Pull Request.
+        * Pour les **hotfixes** (bugs critiques en production) : Créées à partir du tag de la version concernée sur `main`. Une fois le hotfix testé, il est fusionné dans `main` et un nouveau tag de patch (ex: `vX.Y.Z+1`) est appliqué. Le hotfix doit ensuite être impérativement fusionné dans `develop` pour s'assurer que la correction est incluse dans les futures releases.
+* **Processus de Release :**
+    * Lorsque la branche `develop` a atteint un état stable et que toutes les fonctionnalités prévues pour la release sont intégrées et testées, elle est fusionnée dans la branche `main`.
+    * Un tag Git (ex: `v1.3.0+buildNumber`) est appliqué au commit de fusion sur `main`. Ce tag identifie de manière unique la version de production.
+    * Le workflow de CI/CD pour la production est déclenché par ce tag (ou par le push sur `main` si configuré ainsi).
+    * Le numéro de build (`versionCode` pour Android, `build_name` pour iOS) est typiquement incrémenté automatiquement par le système de CI/CD lors du build de production.
 * **Pull Requests (PR) :**
-    * Toute fusion vers `develop` et `main` (ou `release`) doit passer par une PR.
+    * Toute fusion vers `develop` et `main` doit passer par une PR.
     * Revue de code obligatoire par au moins un autre développeur.
     * Lier les PRs aux issues GitHub correspondantes.
     * S'assurer que les tests CI passent avant la fusion.
@@ -277,23 +283,22 @@ Cette section détaille le plan d'action pour mettre en place une ingénierie lo
     * Configuration : Utiliser `flutterfire configure` pour générer les `firebase_options.dart` pour chaque projet. Gérer la sélection du bon fichier de configuration au moment du build (voir section CI/CD).
 * **Déploiement Web (Firebase Hosting) :**
     * **Staging/Test :** `dev.colorsandnotes.com` (ou un canal de prévisualisation Firebase Hosting) pointant vers le projet `colors-notes-dev`. Déployé depuis la branche `develop`.
-    * **Production :** `app.colorsandnotes.com` pointant vers le projet `colors-notes-prod`. Déployé depuis la branche `main` (ou `release`).
+    * **Production :** `app.colorsandnotes.com` pointant vers le projet `colors-notes-prod`. Déployé depuis la branche `main` (typiquement via un tag).
 * **Déploiement Android (Google Play Console) :**
     * **Pistes de Test :**
         * Test Interne : Builds de la branche `develop` pour tests QA internes.
-        * Alpha/Beta : Builds de la branche `release` (ou `develop` stabilisée) pour des testeurs externes.
-    * **Production :** Builds de la branche `main` (après promotion depuis une piste de test).
+        * Alpha/Beta : Builds de la branche `main` (avant tag de release finale) ou de `develop` stabilisée pour des testeurs externes.
+    * **Production :** Builds de la branche `main` (tagués `vX.Y.Z+buildnumber`).
 
 #### 4.4.3. Intégration Continue et Déploiement Continu (CI/CD) avec GitHub Actions
 
 * **Principes :** Automatiser les étapes de build, test, et déploiement pour améliorer la fiabilité et la fréquence des livraisons.
 
 * **Workflows GitHub Actions (fichiers YAML dans `.github/workflows/`) :**
-
-    * **1\. Workflow de Test (`test-flutter-app.yml`) :**
-
+  
+    * **1. Workflow de Test (`test-flutter-app.yml`) :**
         * **Déclencheurs :**
-            * `on: push` (sur toutes les branches sauf `main` et `develop` pour éviter redondance si PR ouverte).
+            * `on: push` (sur toutes les branches sauf `main`).
             * `on: pull_request` (vers `develop` et `main`).
         * **Jobs :**
             * `setup-flutter` : Met en place la version correcte de Flutter.
@@ -301,78 +306,62 @@ Cette section détaille le plan d'action pour mettre en place une ingénierie lo
             * `unit-widget-tests` : Exécute `flutter test` pour les tests unitaires et de widgets.
             * `coverage` (Optionnel) : Calcule la couverture de code et la publie (e.g., Codecov).
 
+    * **2. Workflow de Build et Déploiement Staging/Test (`deploy-staging.yml`) :**
+        * **Déclencheurs :**
+            * `on: push` (sur la branche `develop`).
+            * `on: workflow_dispatch` (pour déploiement manuel).
+        * **Jobs :**
+            * Dépend du succès du workflow `test-flutter-app.yml` sur le même commit.
+            * `configure-firebase-dev` : Sélectionne/configure les `firebase_options_dev.dart`.
+            * `build-web-dev` : `flutter build web --release --dart-define=APP_ENV=dev` (ou méthode de configuration équivalente).
+            * `deploy-web-dev` : Déploie sur Firebase Hosting (site de staging du projet `colors-notes-dev`).
+            * `build-android-dev` : `flutter build appbundle --release --dart-define=APP_ENV=dev`.
+            * `deploy-android-internal-dev` (Optionnel) : Déploie l'AAB sur la piste de Test Interne de Google Play (projet dev).
 
-
-* **2\. Workflow de Build et Déploiement Staging/Test (`deploy-staging.yml`) :**
-
-    * **Déclencheurs :**
-        * `on: push` (sur la branche `develop`).
-        * `on: workflow_dispatch` (pour déploiement manuel).
-    * **Jobs :**
-        * Dépend du succès du workflow `test-flutter-app.yml` sur le même commit.
-        * `configure-firebase-dev` : Sélectionne/configure les `firebase_options_dev.dart`.
-        * `build-web-dev` : `flutter build web --release --dart-define=APP_ENV=dev` (ou méthode de configuration équivalente).
-        * `deploy-web-dev` : Déploie sur Firebase Hosting (site de staging du projet `colors-notes-dev`).
-        * `build-android-dev` : `flutter build appbundle --release --dart-define=APP_ENV=dev`.
-        * `deploy-android-internal-dev` (Optionnel) : Déploie l'AAB sur la piste de Test Interne de Google Play (projet dev).
-
-
-
-* **3\. Workflow de Build et Déploiement Production (`deploy-production.yml`) :**
-
-    * **Déclencheurs :**
-        * `on: push` (sur la branche `main` ou sur création de tag `v*.*.*`).
-        * `on: workflow_dispatch` (pour déploiement manuel).
-    * **Jobs :**
-        * Dépend du succès du workflow `test-flutter-app.yml` sur le même commit.
-        * `configure-firebase-prod` : Sélectionne/configure les `firebase_options_prod.dart`.
-        * `build-web-prod` : `flutter build web --release --dart-define=APP_ENV=prod`.
-        * `deploy-web-prod` : Déploie sur Firebase Hosting (site de production du projet `colors-notes-prod`).
-        * `build-android-prod` : `flutter build appbundle --release --dart-define=APP_ENV=prod`.
-        * `deploy-android-prod` : Déploie l'AAB sur une piste Google Play (e.g., Beta, puis promotion manuelle ou automatique vers Production).
-
+    * **3. Workflow de Build et Déploiement Production (`deploy-production.yml`) :**
+        * **Déclencheurs :**
+            * `on: push` (sur la branche `main` **ET/OU** sur création de tag `v*.*.*`). Il est recommandé de se baser sur les tags pour les releases de production pour un meilleur contrôle.
+            * `on: workflow_dispatch` (pour déploiement manuel d'un commit spécifique de `main` ou d'un tag).
+        * **Jobs :**
+            * Dépend du succès du workflow `test-flutter-app.yml` sur le commit concerné.
+            * `configure-firebase-prod` : Sélectionne/configure les `firebase_options_prod.dart`.
+            * `build-web-prod` : `flutter build web --release --dart-define=APP_ENV=prod`.
+            * `deploy-web-prod` : Déploie sur Firebase Hosting (site de production du projet `colors-notes-prod`).
+            * `build-android-prod` : `flutter build appbundle --release --dart-define=APP_ENV=prod`. Le `versionName` (ex: `1.3.0`) et `versionCode` (ex: `14`) doivent être correctement définis, potentiellement via des variables d'environnement ou des scripts dans la CI basés sur le tag.
+            * `deploy-android-prod` : Déploie l'AAB sur une piste Google Play (e.g., Beta, puis promotion manuelle ou automatique vers Production).
 
 * **Gestion des Secrets :**
-
     * Utiliser les "Secrets" de GitHub Actions pour stocker :
         * Tokens d'accès Firebase (`FIREBASE_TOKEN`).
         * Clés de service Firebase (encodées en base64, si nécessaire pour certaines actions `FIREBASE_SERVICE_ACCOUNT_DEV`, `FIREBASE_SERVICE_ACCOUNT_PROD`).
         * Keystore Android (encodé en base64) et ses mots de passe (`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`).
         * Clé JSON pour l'API Google Play Developer (pour les déploiements Android).
 
-
 * **Configuration par Environnement dans Flutter :**
-
     * Utiliser `--dart-define=APP_ENV=dev` (ou `prod`) lors du build.
     * Dans `main.dart` ou un fichier de configuration, lire cette variable pour initialiser Firebase avec les bonnes options :
-
+      ```dart
       // main.dart
-
-      const appEnv \= String.fromEnvironment('APP\_ENV', defaultValue: 'dev');
+      const appEnv = String.fromEnvironment('APP_ENV', defaultValue: 'dev');
 
       void main() async {
-
-      WidgetsFlutterBinding.ensureInitialized();
-
-      FirebaseOptions options;
-
-      if (appEnv \== 'prod') {
-
-          options \= DefaultFirebaseOptionsProd.currentPlatform; // Fichier généré pour prod  
-
-      } else {
-
-          options \= DefaultFirebaseOptionsDev.currentPlatform; // Fichier généré pour dev  
-
+        WidgetsFlutterBinding.ensureInitialized();
+        FirebaseOptions options;
+        if (appEnv == 'prod') {
+            // Assurez-vous d'avoir un fichier firebase_options_prod.dart distinct ou une logique pour le charger
+            // options = DefaultFirebaseOptionsProd.currentPlatform; 
+            options = DefaultFirebaseOptions.currentPlatform; // Ajuster si vous avez des fichiers séparés
+        } else {
+            // Assurez-vous d'avoir un fichier firebase_options_dev.dart distinct ou une logique pour le charger
+            // options = DefaultFirebaseOptionsDev.currentPlatform; 
+            options = DefaultFirebaseOptions.currentPlatform; // Ajuster si vous avez des fichiers séparés
+        }
+        await Firebase.initializeApp(options: options);
+        // ... reste du code de main()
+        runApp(MyApp());
       }
-
-      await Firebase.initializeApp(options: options);
-
-      runApp(MyApp());
-
-      }
-
-    * Générer `firebase_options_dev.dart` et `firebase_options_prod.dart` en utilisant `flutterfire configure` avec les projets Firebase respectifs et les renommer/gérer en conséquence.
+      ```
+    * Générer `firebase_options_dev.dart` et `firebase_options_prod.dart` en utilisant `flutterfire configure` avec les projets Firebase respectifs et les renommer/gérer en conséquence, ou utiliser une logique de sélection de configuration au runtime basée sur `APP_ENV` si FlutterFire ne supporte pas nativement plusieurs fichiers d'options facilement interchangeables au build. Une approche alternative est d'avoir des points d'entrée `main_dev.dart` et `main_prod.dart`.
 
 #### 4.4.4. Stratégie de Tests Automatisés
 
@@ -390,7 +379,7 @@ Cette section détaille le plan d'action pour mettre en place une ingénierie lo
     * **Localisation :** Répertoire `integration_test/`.
     * **Cibles :** Tester des flux utilisateurs complets à travers plusieurs écrans et services, y compris les interactions réelles avec Firebase (en utilisant l'émulateur Firebase ou un projet de test dédié configuré dans la CI).
     * **Outils :** `package:integration_test` (à exécuter sur un émulateur/appareil).
-    * **Exemple :** Scénario complet : Inscription \-\> Création d'un journal \-\> Ajout d'une note \-\> Vérification de l'affichage de la note.
+    * **Exemple :** Scénario complet : Inscription -> Création d'un journal -> Ajout d'une note -> Vérification de l'affichage de la note.
 * **Tests de Non-Régression :**
     * Consiste à exécuter l'ensemble des suites de tests (unitaires, widgets, intégration) automatiquement via la CI à chaque commit et avant chaque fusion de PR.
     * Si un test échoue, la build est marquée comme échouée, empêchant la régression.
@@ -405,9 +394,9 @@ Cette section détaille le plan d'action pour mettre en place une ingénierie lo
     * Adopter le **Versionnage Sémantique (SemVer : `MAJOR.MINOR.PATCH`)** :
         * `MAJOR` : Changements non rétrocompatibles (nécessitant potentiellement une migration de données complexe ou une rupture d'API).
         * `MINOR` : Ajout de nouvelles fonctionnalités rétrocompatibles.
-        * `PATCH` : Corrections de bugs rétrocompatibles.
-    * Mettre à jour la version dans `pubspec.yaml` : `version: X.Y.Z+B` (où `B` est le `build_number` pour Android / `build_name` pour iOS, incrémenté à chaque build).
-    * **CI :** Automatiser l'incrémentation du `build_number`. Les versions `X.Y.Z` sont gérées manuellement ou via des scripts lors de la création de branches/tags de `release`.
+        * `PATCH` : Corrections de bugs rétrocompatibles (y compris hotfixes).
+    * Mettre à jour la version dans `pubspec.yaml` : `version: X.Y.Z+B` (où `B` est le `build_number` pour Android / `build_name` pour iOS). Le `X.Y.Z` est mis à jour manuellement lors de la préparation d'une release (avant de taguer `main`). Le `+B` (numéro de build) est incrémenté automatiquement par la CI/CD à chaque build de production.
+    * **CI :** Le workflow de déploiement en production (déclenché par un tag `vX.Y.Z`) peut extraire `X.Y.Z` du tag pour `versionName` et utiliser un compteur de build GitHub Actions (ou une autre méthode) pour `versionCode`.
 * **Migration de Schéma et de Données Firestore :**
     * **Principe :** Firestore étant NoSQL schemaless, les migrations sont gérées au niveau applicatif ou via des scripts/Cloud Functions.
     * **Stratégies Clés :**
@@ -434,7 +423,7 @@ Cette section détaille le plan d'action pour mettre en place une ingénierie lo
                 * Gérer les erreurs et la reprise partielle.
     * **Exemple de Scénario de Migration (Ajout d'un champ `category` (String, optionnel) à `Note`) :**
         * **Version Actuelle (v1.0.0) :** `Note` sans `category`.
-        * **Prochaine Version (v1.1.0) \- Phase d'Expansion :**
+        * **Prochaine Version (v1.1.0) - Phase d'Expansion :**
             * Mettre à jour le modèle `Note` en Dart pour inclure `String? category;`.
             * Dans `Note.fromMap`, gérer le cas où `category` est absent (initialiser à `null`).
             * Dans `Note.toMap`, inclure `category` si présent.
@@ -476,7 +465,7 @@ Cette section détaille le plan d'action pour mettre en place une ingénierie lo
 * **Feedback Utilisateur :**
     * Mettre en place un canal pour recueillir les retours des utilisateurs (e.g., email de support, formulaire de feedback dans l'application, commentaires sur le Play Store).
 
-## **5\. Points d'Attention Particuliers**
+## **5. Points d'Attention Particuliers**
 
 * **Performance :**
     * Surveiller les performances de Firestore, en particulier avec l'augmentation du nombre de notes et de journaux. Optimiser les requêtes et la structure des données si nécessaire.
