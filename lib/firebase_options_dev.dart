@@ -74,8 +74,6 @@ class DefaultFirebaseOptions {
     measurementId: 'G-EDQE6FKNRL',
   );
 
-  /// Firebase options for the web platform.
-
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyB8e2IdFFWKKyLdwQGf-bvxhRKZmWzxdKI',
     appId: '1:523869870608:android:db8da6bae0f7d968bbc895',
@@ -84,5 +82,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'colorsnotes-e9142.firebasestorage.app',
   );
 
-  /// Firebase options for the Android platform.
 }
