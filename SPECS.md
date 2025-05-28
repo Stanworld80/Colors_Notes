@@ -1,6 +1,6 @@
 # Colors & Notes - Spécifications Détaillées
 
-**Version du Document :** 1.2 **Date :** 28 mai 2025 **Application Version :** MVP ~1.3
+**Version du Document :** 1.3 **Date :** 28 mai 2025 **Application Version :** MVP ~1.3
 
 ## **1. Introduction**
 
@@ -224,7 +224,7 @@ Les classes Dart correspondantes se trouvent dans `lib/models/` :
 * **Firebase Hosting :**
     * Continuer à utiliser Firebase Hosting pour sa simplicité et son intégration.
 * **Nom de Domaine Personnalisé :**
-    * Configurer un nom de domaine personnalisé pour l'application web (e.g., `app.colorsandnotes.com`).
+    * Configurer des noms de domaine personnalisés pour chaque environnement (e.g., `dev.colorsandnotes.com`, `staging.colorsandnotes.com`, `app.colorsandnotes.com`).
 * **Optimisations de Performance :**
     * **Build de Production Flutter :** Toujours utiliser `flutter build web --release`.
     * **Renderer :** Tester et choisir le renderer web optimal (HTML ou Canvaskit) en fonction des performances et de la compatibilité visuelle souhaitée. Canvaskit offre une meilleure fidélité mais un bundle plus gros.
@@ -251,24 +251,30 @@ Les classes Dart correspondantes se trouvent dans `lib/models/` :
 
 ### **4.4. Industrialisation du Développement (Révisé et Détaillé)**
 
-Cette section détaille le plan d'action pour mettre en place une ingénierie logicielle robuste.
+Cette section détaille le plan d'action pour mettre en place une ingénierie logicielle robuste avec trois environnements.
 
 #### 4.4.1. Gestion de Versions (Git et GitHub)
 
 * **Stratégie de Branches :**
-    * `main` : Code de production, stable et testé. Les releases sont créées en taguant cette branche (ex: `vX.Y.Z` ou `vX.Y.Z+buildNumber`). Ne jamais pusher directement sur `main` sauf pour les fusions validées depuis `develop` ou les `hotfix`.
-    * `develop` : Branche d'intégration continue. Sert de base pour les builds de test/staging. Les fonctionnalités y sont fusionnées après avoir été complétées et testées sur leurs propres branches. `develop` doit être maintenue dans un état stable, prête à être fusionnée dans `main` pour une release.
+    * `main` : Code de production, stable et testé. Les releases sont créées en taguant cette branche (ex: `vX.Y.Z`). Ne jamais pusher directement sur `main` sauf pour les fusions validées.
+    * `develop` : Branche d'intégration continue pour les nouvelles fonctionnalités et corrections. Sert de base pour les déploiements sur l'environnement **`dev`**.
+    * `release-candidate/vX.Y.Z` (ou `staging-branch`): Créée à partir de `develop` lorsque `develop` est prête pour une phase de recette plus formelle. Sert de base pour les déploiements sur l'environnement **`staging`**. Peut recevoir des corrections de bugs spécifiques à cette release candidate (qui doivent ensuite être reportées sur `develop`).
     * `feature/<nom-feature>` : Branches pour le développement de nouvelles fonctionnalités. Créées à partir de `develop` et fusionnées dans `develop` via une Pull Request.
     * `fix/<nom-bug>` : Branches pour les corrections de bugs.
         * Pour les bugs non urgents : Créées à partir de `develop`, testées, puis fusionnées dans `develop` via une Pull Request.
-        * Pour les **hotfixes** (bugs critiques en production) : Créées à partir du tag de la version concernée sur `main`. Une fois le hotfix testé, il est fusionné dans `main` et un nouveau tag de patch (ex: `vX.Y.Z+1`) est appliqué. Le hotfix doit ensuite être impérativement fusionné dans `develop` pour s'assurer que la correction est incluse dans les futures releases.
+        * Pour les **hotfixes** (bugs critiques en production) : Créées à partir du tag de la version concernée sur `main`. Une fois le hotfix testé, il est fusionné dans `main` et un nouveau tag de patch (ex: `vX.Y.Z+1`) est appliqué. Le hotfix doit ensuite être impérativement fusionné dans `develop` et dans toute branche `release-candidate` active.
 * **Processus de Release :**
-    * Lorsque la branche `develop` a atteint un état stable et que toutes les fonctionnalités prévues pour la release sont intégrées et testées, elle est fusionnée dans la branche `main`.
-    * Un tag Git (ex: `v1.3.0+buildNumber`) est appliqué au commit de fusion sur `main`. Ce tag identifie de manière unique la version de production.
-    * Le workflow de CI/CD pour la production est déclenché par ce tag (ou par le push sur `main` si configuré ainsi).
-    * Le numéro de build (`versionCode` pour Android, `build_name` pour iOS) est typiquement incrémenté automatiquement par le système de CI/CD lors du build de production.
+    1.  `develop` est stabilisée (contient les fonctionnalités de la future release).
+    2.  Une branche `release-candidate/vX.Y.Z` est créée à partir de `develop`.
+    3.  La branche `release-candidate` est déployée sur l'environnement **`staging`** (`colors-notes-staging`).
+    4.  Tests de recette et validation par les testeurs externes sur l'environnement `staging`. Les corrections de bugs critiques trouvées sont faites sur `release-candidate` et reportées sur `develop`.
+    5.  Une fois la recette validée sur `staging`, la branche `release-candidate/vX.Y.Z` est fusionnée dans `main`.
+    6.  La branche `release-candidate/vX.Y.Z` est également fusionnée dans `develop` (pour s'assurer que `develop` contient les dernières corrections de la RC).
+    7.  Un tag Git (ex: `v1.3.0`) est appliqué au commit de fusion sur `main`. Ce tag identifie de manière unique la version de production.
+    8.  Le workflow de CI/CD pour la production est déclenché par ce tag, déployant sur l'environnement **`prod`** (`colors-notes-prod`).
+    9.  Le numéro de build (`versionCode` pour Android, `build_name` pour iOS) est typiquement incrémenté automatiquement par le système de CI/CD lors du build de production.
 * **Pull Requests (PR) :**
-    * Toute fusion vers `develop` et `main` doit passer par une PR.
+    * Toute fusion vers `develop`, `release-candidate/*`, et `main` doit passer par une PR.
     * Revue de code obligatoire par au moins un autre développeur.
     * Lier les PRs aux issues GitHub correspondantes.
     * S'assurer que les tests CI passent avant la fusion.
@@ -278,67 +284,74 @@ Cette section détaille le plan d'action pour mettre en place une ingénierie lo
 #### 4.4.2. Environnements Multiples
 
 * **Projets Firebase :**
-    * **`colors-notes-dev` (ou similaire) :** Pour le développement, les tests CI, et l'environnement de staging/test. Base de données Firestore, Authentication, Hosting séparés.
-    * **`colors-notes-prod` (ou similaire) :** Uniquement pour l'application en production.
-    * Configuration : Utiliser `flutterfire configure` pour générer les `firebase_options.dart` pour chaque projet. Gérer la sélection du bon fichier de configuration au moment du build (voir section CI/CD).
+    * **`colors-notes-dev`**: Pour le développement quotidien et les tests internes de l'équipe.
+        * Services Firebase dédiés (Firestore, Auth, Hosting).
+        * Règles de sécurité potentiellement plus permissives pour faciliter les tests.
+    * **`colors-notes-staging`**: Pour la préproduction, la recette et les tests par des testeurs externes.
+        * Services Firebase dédiés, configurés aussi proche que possible de la production.
+        * Règles de sécurité identiques à la production.
+        * Peut contenir des données de test représentatives ou une copie anonymisée des données de production (si la politique le permet).
+    * **`colors-notes-prod`**: Uniquement pour l'application en production, accessible aux utilisateurs finaux.
+        * Services Firebase dédiés avec quotas et configurations de production.
+        * Règles de sécurité strictes.
+* **Configuration Flutter (`firebase_options.dart`) :**
+    * Utiliser `flutterfire configure` pour générer des fichiers d'options distincts pour chaque projet Firebase (ex: `firebase_options_dev.dart`, `firebase_options_staging.dart`, `firebase_options_prod.dart`).
+    * La sélection du bon fichier se fera au moment du build via la variable d'environnement `APP_ENV`.
 * **Déploiement Web (Firebase Hosting) :**
-    * **Staging/Test :** `dev.colorsandnotes.com` (ou un canal de prévisualisation Firebase Hosting) pointant vers le projet `colors-notes-dev`. Déployé depuis la branche `develop`.
-    * **Production :** `app.colorsandnotes.com` pointant vers le projet `colors-notes-prod`. Déployé depuis la branche `main` (typiquement via un tag).
+    * **Dev :** `dev.colorsandnotes.com` (ou similaire) pointant vers le projet `colors-notes-dev`. Déployé depuis la branche `develop`.
+    * **Staging :** `staging.colorsandnotes.com` (ou similaire) pointant vers le projet `colors-notes-staging`. Déployé depuis la branche `release-candidate/*`.
+    * **Production :** `app.colorsandnotes.com` pointant vers le projet `colors-notes-prod`. Déployé depuis la branche `main` (via un tag `vX.Y.Z`).
 * **Déploiement Android (Google Play Console) :**
-    * **Pistes de Test :**
-        * Test Interne : Builds de la branche `develop` pour tests QA internes.
-        * Alpha/Beta : Builds de la branche `main` (avant tag de release finale) ou de `develop` stabilisée pour des testeurs externes.
-    * **Production :** Builds de la branche `main` (tagués `vX.Y.Z+buildnumber`).
+    * **Test Interne :** Builds de la branche `develop` (utilisant la configuration `colors-notes-dev`).
+    * **Alpha/Beta (Recette) :** Builds de la branche `release-candidate/*` (utilisant la configuration `colors-notes-staging`).
+    * **Production :** Builds de la branche `main` (tagués `vX.Y.Z`, utilisant la configuration `colors-notes-prod`).
 
 #### 4.4.3. Intégration Continue et Déploiement Continu (CI/CD) avec GitHub Actions
 
-* **Principes :** Automatiser les étapes de build, test, et déploiement pour améliorer la fiabilité et la fréquence des livraisons.
+* **Principes :** Automatiser les étapes de build, test, et déploiement pour chaque environnement.
 
 * **Workflows GitHub Actions (fichiers YAML dans `.github/workflows/`) :**
-  
+
     * **1. Workflow de Test (`test-flutter-app.yml`) :**
-        * **Déclencheurs :**
-            * `on: push` (sur toutes les branches sauf `main`).
-            * `on: pull_request` (vers `develop` et `main`).
-        * **Jobs :**
-            * `setup-flutter` : Met en place la version correcte de Flutter.
-            * `analyze` : Exécute `flutter analyze` pour vérifier la qualité du code.
-            * `unit-widget-tests` : Exécute `flutter test` pour les tests unitaires et de widgets.
-            * `coverage` (Optionnel) : Calcule la couverture de code et la publie (e.g., Codecov).
+        * **Déclencheurs :** `push` (sur toutes les branches sauf `main`), `pull_request` (vers `develop`, `release-candidate/*`, `main`).
+        * **Jobs :** `setup-flutter`, `analyze`, `unit-widget-tests`, `coverage` (Optionnel).
 
-    * **2. Workflow de Build et Déploiement Staging/Test (`deploy-staging.yml`) :**
-        * **Déclencheurs :**
-            * `on: push` (sur la branche `develop`).
-            * `on: workflow_dispatch` (pour déploiement manuel).
+    * **2. Workflow de Déploiement Dev (`deploy-dev.yml`) :**
+        * **Déclencheurs :** `push` (sur la branche `develop`).
         * **Jobs :**
-            * Dépend du succès du workflow `test-flutter-app.yml` sur le même commit.
-            * `configure-firebase-dev` : Sélectionne/configure les `firebase_options_dev.dart`.
-            * `build-web-dev` : `flutter build web --release --dart-define=APP_ENV=dev` (ou méthode de configuration équivalente).
-            * `deploy-web-dev` : Déploie sur Firebase Hosting (site de staging du projet `colors-notes-dev`).
+            * Dépend du succès du workflow `test-flutter-app.yml`.
+            * `configure-firebase-dev` : Sélectionne/configure `firebase_options_dev.dart`.
+            * `build-web-dev` : `flutter build web --release --dart-define=APP_ENV=dev`.
+            * `deploy-web-dev` : Déploie sur Firebase Hosting (projet `colors-notes-dev`).
             * `build-android-dev` : `flutter build appbundle --release --dart-define=APP_ENV=dev`.
-            * `deploy-android-internal-dev` (Optionnel) : Déploie l'AAB sur la piste de Test Interne de Google Play (projet dev).
+            * `deploy-android-internal-dev` : Déploie l'AAB sur la piste de Test Interne de Google Play (projet `colors-notes-dev`).
 
-    * **3. Workflow de Build et Déploiement Production (`deploy-production.yml`) :**
-        * **Déclencheurs :**
-            * `on: push` (sur la branche `main` **ET/OU** sur création de tag `v*.*.*`). Il est recommandé de se baser sur les tags pour les releases de production pour un meilleur contrôle.
-            * `on: workflow_dispatch` (pour déploiement manuel d'un commit spécifique de `main` ou d'un tag).
+    * **3. Workflow de Déploiement Staging (`deploy-staging.yml`) :**
+        * **Déclencheurs :** `push` (sur les branches `release-candidate/*`) ou `workflow_dispatch` pour un déclenchement manuel.
         * **Jobs :**
-            * Dépend du succès du workflow `test-flutter-app.yml` sur le commit concerné.
-            * `configure-firebase-prod` : Sélectionne/configure les `firebase_options_prod.dart`.
+            * Dépend du succès du workflow `test-flutter-app.yml`.
+            * `configure-firebase-staging` : Sélectionne/configure `firebase_options_staging.dart`.
+            * `build-web-staging` : `flutter build web --release --dart-define=APP_ENV=staging`.
+            * `deploy-web-staging` : Déploie sur Firebase Hosting (projet `colors-notes-staging`).
+            * `build-android-staging` : `flutter build appbundle --release --dart-define=APP_ENV=staging`.
+            * `deploy-android-alpha-beta-staging` : Déploie l'AAB sur une piste Alpha/Beta de Google Play (projet `colors-notes-staging`).
+
+    * **4. Workflow de Déploiement Production (`deploy-production.yml`) :**
+        * **Déclencheurs :** Création de tag `v*.*.*` (sur la branche `main`).
+        * **Jobs :**
+            * Dépend du succès du workflow `test-flutter-app.yml`.
+            * `configure-firebase-prod` : Sélectionne/configure `firebase_options_prod.dart`.
             * `build-web-prod` : `flutter build web --release --dart-define=APP_ENV=prod`.
-            * `deploy-web-prod` : Déploie sur Firebase Hosting (site de production du projet `colors-notes-prod`).
-            * `build-android-prod` : `flutter build appbundle --release --dart-define=APP_ENV=prod`. Le `versionName` (ex: `1.3.0`) et `versionCode` (ex: `14`) doivent être correctement définis, potentiellement via des variables d'environnement ou des scripts dans la CI basés sur le tag.
-            * `deploy-android-prod` : Déploie l'AAB sur une piste Google Play (e.g., Beta, puis promotion manuelle ou automatique vers Production).
+            * `deploy-web-prod` : Déploie sur Firebase Hosting (projet `colors-notes-prod`).
+            * `build-android-prod` : `flutter build appbundle --release --dart-define=APP_ENV=prod`.
+            * `deploy-android-prod` : Déploie l'AAB sur la piste de Production de Google Play (projet `colors-notes-prod`).
 
 * **Gestion des Secrets :**
-    * Utiliser les "Secrets" de GitHub Actions pour stocker :
-        * Tokens d'accès Firebase (`FIREBASE_TOKEN`).
-        * Clés de service Firebase (encodées en base64, si nécessaire pour certaines actions `FIREBASE_SERVICE_ACCOUNT_DEV`, `FIREBASE_SERVICE_ACCOUNT_PROD`).
-        * Keystore Android (encodé en base64) et ses mots de passe (`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`).
-        * Clé JSON pour l'API Google Play Developer (pour les déploiements Android).
+    * Utiliser les "Secrets" de GitHub Actions pour stocker les tokens et clés pour les trois projets Firebase, le keystore Android, et la clé API Google Play.
+    * Exemples de secrets : `FIREBASE_TOKEN_DEV`, `FIREBASE_TOKEN_STAGING`, `FIREBASE_TOKEN_PROD`, `FIREBASE_SERVICE_ACCOUNT_DEV`, `FIREBASE_SERVICE_ACCOUNT_STAGING`, `FIREBASE_SERVICE_ACCOUNT_PROD`, `ANDROID_KEYSTORE_BASE64`, etc.
 
 * **Configuration par Environnement dans Flutter :**
-    * Utiliser `--dart-define=APP_ENV=dev` (ou `prod`) lors du build.
+    * Utiliser `--dart-define=APP_ENV=dev`, `--dart-define=APP_ENV=staging`, ou `--dart-define=APP_ENV=prod` lors du build.
     * Dans `main.dart` ou un fichier de configuration, lire cette variable pour initialiser Firebase avec les bonnes options :
       ```dart
       // main.dart
@@ -348,20 +361,21 @@ Cette section détaille le plan d'action pour mettre en place une ingénierie lo
         WidgetsFlutterBinding.ensureInitialized();
         FirebaseOptions options;
         if (appEnv == 'prod') {
-            // Assurez-vous d'avoir un fichier firebase_options_prod.dart distinct ou une logique pour le charger
-            // options = DefaultFirebaseOptionsProd.currentPlatform; 
-            options = DefaultFirebaseOptions.currentPlatform; // Ajuster si vous avez des fichiers séparés
-        } else {
-            // Assurez-vous d'avoir un fichier firebase_options_dev.dart distinct ou une logique pour le charger
-            // options = DefaultFirebaseOptionsDev.currentPlatform; 
-            options = DefaultFirebaseOptions.currentPlatform; // Ajuster si vous avez des fichiers séparés
+            // Assurez-vous d'avoir un fichier firebase_options_prod.dart
+            options = DefaultFirebaseOptionsProd.currentPlatform; 
+        } else if (appEnv == 'staging') {
+            // Assurez-vous d'avoir un fichier firebase_options_staging.dart
+            options = DefaultFirebaseOptionsStaging.currentPlatform; 
+        } else { // dev
+            // Assurez-vous d'avoir un fichier firebase_options_dev.dart
+            options = DefaultFirebaseOptionsDev.currentPlatform; 
         }
         await Firebase.initializeApp(options: options);
         // ... reste du code de main()
         runApp(MyApp());
       }
       ```
-    * Générer `firebase_options_dev.dart` et `firebase_options_prod.dart` en utilisant `flutterfire configure` avec les projets Firebase respectifs et les renommer/gérer en conséquence, ou utiliser une logique de sélection de configuration au runtime basée sur `APP_ENV` si FlutterFire ne supporte pas nativement plusieurs fichiers d'options facilement interchangeables au build. Une approche alternative est d'avoir des points d'entrée `main_dev.dart` et `main_prod.dart`.
+    * Il faudra générer et nommer correctement ces fichiers (`firebase_options_dev.dart`, `firebase_options_staging.dart`, `firebase_options_prod.dart`) en utilisant `flutterfire configure` pour chaque projet Firebase respectif.
 
 #### 4.4.4. Stratégie de Tests Automatisés
 
@@ -377,7 +391,7 @@ Cette section détaille le plan d'action pour mettre en place une ingénierie lo
     * **Exemple :** Tester que la page `SignInPage` affiche les champs email/mot de passe et qu'un appui sur le bouton "Connexion" déclenche l'appel au `AuthService`.
 * **Tests d'Intégration (Flutter) :**
     * **Localisation :** Répertoire `integration_test/`.
-    * **Cibles :** Tester des flux utilisateurs complets à travers plusieurs écrans et services, y compris les interactions réelles avec Firebase (en utilisant l'émulateur Firebase ou un projet de test dédié configuré dans la CI).
+    * **Cibles :** Tester des flux utilisateurs complets à travers plusieurs écrans et services, y compris les interactions réelles avec Firebase (en utilisant l'émulateur Firebase ou un projet de test dédié configuré dans la CI, typiquement sur l'environnement `dev`).
     * **Outils :** `package:integration_test` (à exécuter sur un émulateur/appareil).
     * **Exemple :** Scénario complet : Inscription -> Création d'un journal -> Ajout d'une note -> Vérification de l'affichage de la note.
 * **Tests de Non-Régression :**
@@ -392,11 +406,11 @@ Cette section détaille le plan d'action pour mettre en place une ingénierie lo
 
 * **Versionnement de l'Application :**
     * Adopter le **Versionnage Sémantique (SemVer : `MAJOR.MINOR.PATCH`)** :
-        * `MAJOR` : Changements non rétrocompatibles (nécessitant potentiellement une migration de données complexe ou une rupture d'API).
+        * `MAJOR` : Changements non rétrocompatibles.
         * `MINOR` : Ajout de nouvelles fonctionnalités rétrocompatibles.
         * `PATCH` : Corrections de bugs rétrocompatibles (y compris hotfixes).
-    * Mettre à jour la version dans `pubspec.yaml` : `version: X.Y.Z+B` (où `B` est le `build_number` pour Android / `build_name` pour iOS). Le `X.Y.Z` est mis à jour manuellement lors de la préparation d'une release (avant de taguer `main`). Le `+B` (numéro de build) est incrémenté automatiquement par la CI/CD à chaque build de production.
-    * **CI :** Le workflow de déploiement en production (déclenché par un tag `vX.Y.Z`) peut extraire `X.Y.Z` du tag pour `versionName` et utiliser un compteur de build GitHub Actions (ou une autre méthode) pour `versionCode`.
+    * Mettre à jour la version (`X.Y.Z`) dans `pubspec.yaml` sur la branche `develop` avant de créer une `release-candidate`. Le numéro de build (`+B`) est incrémenté automatiquement par la CI/CD lors de chaque build de `staging` et `prod`.
+    * **CI :** Le workflow de déploiement en production (déclenché par un tag `vX.Y.Z`) utilise `X.Y.Z` du tag pour `versionName` et un compteur de build GitHub Actions pour `versionCode`.
 * **Migration de Schéma et de Données Firestore :**
     * **Principe :** Firestore étant NoSQL schemaless, les migrations sont gérées au niveau applicatif ou via des scripts/Cloud Functions.
     * **Stratégies Clés :**
@@ -407,78 +421,46 @@ Cette section détaille le plan d'action pour mettre en place une ingénierie lo
                 * Les nouveaux documents sont créés directement au nouveau format.
                 * Optionnel : Ajouter un champ `schemaVersion: <number>` dans les documents.
             * **Phase de Migration des Données (si nécessaire) :**
-                * Exécuter un script ou une Cloud Function pour migrer en arrière-plan les documents restants à l'ancien format vers le nouveau.
+                * Exécuter un script ou une Cloud Function (sur l'environnement `staging` d'abord, puis `prod`) pour migrer en arrière-plan les documents restants.
             * **Phase de Contraction (optionnelle, dans une version ultérieure) :**
                 * Une fois toutes les données migrées, le code de lecture de l'ancien format peut être supprimé.
         2. **Migration par Lots (Cloud Functions ou Scripts) :**
-            * Pour des changements de structure importants ou pour assurer la cohérence immédiate.
-            * Développer une Cloud Function (déclenchable par HTTP ou manuellement) ou un script Dart/Node.js qui :
-                * Lit les documents concernés.
-                * Les transforme vers le nouveau schéma.
-                * Les réécrit dans Firestore.
-            * **Important :**
-                * Tester intensivement sur l'environnement de staging avec une copie des données de production.
-                * Effectuer des sauvegardes Firestore avant toute migration majeure.
-                * Exécuter pendant les heures creuses si possible.
-                * Gérer les erreurs et la reprise partielle.
-    * **Exemple de Scénario de Migration (Ajout d'un champ `category` (String, optionnel) à `Note`) :**
-        * **Version Actuelle (v1.0.0) :** `Note` sans `category`.
-        * **Prochaine Version (v1.1.0) - Phase d'Expansion :**
-            * Mettre à jour le modèle `Note` en Dart pour inclure `String? category;`.
-            * Dans `Note.fromMap`, gérer le cas où `category` est absent (initialiser à `null`).
-            * Dans `Note.toMap`, inclure `category` si présent.
-            * L'UI permet d'ajouter/modifier la catégorie pour les nouvelles notes ou les notes éditées.
-        * **Migration des Données (Optionnel, si on veut backfiller) :**
-            * Une Cloud Function pourrait parcourir les notes sans `category` et leur assigner une catégorie par défaut ou les laisser `null`.
+            * Pour des changements de structure importants.
+            * Développer une Cloud Function ou un script.
+            * **Important :** Tester sur `staging`, sauvegardes avant migration sur `prod`, exécuter pendant heures creuses, gérer erreurs.
     * **Outillage et Précautions :**
-        * **Scripts de Migration :** Peuvent être écrits en Dart (avec `package:cloud_firestore`) et exécutés localement (avec prudence et les bons identifiants) ou en tant que Cloud Functions.
-        * **Idempotence :** Concevoir les scripts de migration pour qu'ils puissent être exécutés plusieurs fois sans effets secondaires négatifs.
-        * **Sauvegardes :** Toujours sauvegarder Firestore avant d'exécuter des migrations de données.
-        * **Déploiement progressif :** Pour les changements majeurs, envisager des déploiements progressifs (Canary) de la nouvelle version de l'application.
+        * **Scripts de Migration :** Dart ou Node.js.
+        * **Idempotence.**
+        * **Sauvegardes.**
+        * **Déploiement progressif.**
 
 #### 4.4.6. Monitoring et Logging
 
-* **Firebase Crashlytics :** Intégrer pour le rapport d'erreurs et de crashs en temps réel en production et staging. Analyser régulièrement les rapports pour identifier et prioriser les corrections.
-* **Firebase Performance Monitoring :** Pour identifier les goulots d'étranglement de performance dans l'application (temps de démarrage, requêtes réseau lentes, traces personnalisées pour des opérations spécifiques).
+* **Firebase Crashlytics :** Intégrer pour les trois environnements (avec des configurations distinctes si possible pour le filtrage).
+* **Firebase Performance Monitoring :** Pour les trois environnements.
 * **Logger (Package `logger` en place) :**
-    * Configurer les niveaux de log par environnement (e.g., `Level.debug` ou `Level.verbose` en `dev`, `Level.info` en `staging`, `Level.warning` ou `Level.error` en `prod`).
-    * Envoyer les logs importants (erreurs, avertissements critiques) vers un service de logging centralisé (e.g., Google Cloud Logging, intégré avec Firebase) pour une meilleure analyse en production.
+    * Configurer les niveaux de log par environnement (`Level.debug` en `dev`, `Level.info` en `staging`, `Level.warning` en `prod`).
+    * Envoyer les logs vers Google Cloud Logging pour `staging` et `prod`.
 
 #### 4.4.7. Documentation Technique
 
-* **Ce Document :** Maintenir ce document "Spécifications Détaillées" à jour avec chaque évolution majeure.
-* **Commentaires dans le Code :** Commenter de manière exhaustive les fonctions, classes, et logiques métier complexes. Utiliser Dart Doc pour générer de la documentation.
-* **Documentation CI/CD :** Documenter les workflows CI/CD, la gestion des secrets, et les procédures de déploiement.
-* **Décisions d'Architecture :** Conserver une trace des décisions d'architecture importantes et de leurs justifications.
+* **Ce Document :** Maintenir à jour.
+* **Commentaires dans le Code :** Dart Doc.
+* **Documentation CI/CD :** Workflows, secrets, procédures.
+* **Décisions d'Architecture.**
 
 ### **4.5. Maintenance et Évolutions Futures**
 
-* **Gestion des Bugs :**
-    * Mettre en place un outil de suivi des problèmes (GitHub Issues est bien intégré avec les PRs).
-    * Prioriser les bugs en fonction de leur sévérité et de leur impact.
-* **Planification des Nouvelles Fonctionnalités :**
-    * Maintenir un backlog de fonctionnalités (e.g., via GitHub Issues avec des labels `enhancement` ou `feature`).
-    * Planifier les sprints ou cycles de développement.
-* **Mises à Jour des Dépendances :**
-    * Vérifier et mettre à jour régulièrement les dépendances Flutter et Dart (`flutter pub outdated`, `flutter pub upgrade`).
-    * Tester l'application après chaque mise à jour majeure de dépendance (les tests automatisés sont cruciaux ici).
-* **Feedback Utilisateur :**
-    * Mettre en place un canal pour recueillir les retours des utilisateurs (e.g., email de support, formulaire de feedback dans l'application, commentaires sur le Play Store).
+* **Gestion des Bugs :** GitHub Issues.
+* **Planification des Nouvelles Fonctionnalités :** GitHub Issues.
+* **Mises à Jour des Dépendances.**
+* **Feedback Utilisateur.**
 
 ## **5. Points d'Attention Particuliers**
 
-* **Performance :**
-    * Surveiller les performances de Firestore, en particulier avec l'augmentation du nombre de notes et de journaux. Optimiser les requêtes et la structure des données si nécessaire.
-    * Optimiser les performances de rendu de Flutter, surtout sur le web et les appareils Android moins puissants.
-* **Sécurité :**
-    * La sécurité des données utilisateur est primordiale. S'assurer que les règles Firestore sont robustes et que les informations sensibles sont traitées correctement. Revoir régulièrement les règles.
-* **Scalabilité :**
-    * Concevoir l'architecture (en particulier Firestore) pour qu'elle puisse évoluer avec le nombre d'utilisateurs et de données. Tenir compte des limites de Firestore et des coûts.
-* **Expérience Utilisateur (UX) :**
-    * Continuer à affiner l'UX en fonction des retours et des tests.
-    * Assurer la cohérence et l'intuitivité de l'interface.
-* **Problèmes Connus/Potentiels :**
-    * **Navigateur Opera :** Des bugs potentiels ont été signalés sur Opera concernant les fonctionnalités de "modification". Une investigation et des tests spécifiques sont nécessaires.
-    * **Gestion des `paletteElementId` :** Bien que la logique actuelle semble robuste, une vigilance continue est nécessaire pour s'assurer de leur unicité et de leur intégrité lors des opérations de copie de journaux ou de modification de palettes.
+* **Performance.**
+* **Sécurité.**
+* **Scalabilité.**
+* **Expérience Utilisateur (UX).**
 
 Ce document servira de base pour les développements futurs. Il devra être mis à jour au fur et à mesure de l'évolution de l'application.
