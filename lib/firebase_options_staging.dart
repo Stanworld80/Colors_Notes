@@ -50,21 +50,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyByKR0NTLjEd-4BHaYeh3pDoq1RtSg4WRg',
-    appId: '1:523869870608:web:9a3da9909e4b36afbbc895',
-    messagingSenderId: '523869870608',
-    projectId: 'colorsnotes-e9142',
-    authDomain: 'colorsnotes-e9142.firebaseapp.com',
-    storageBucket: 'colorsnotes-e9142.firebasestorage.app',
-    measurementId: 'G-EDQE6FKNRL',
+    apiKey: 'AIzaSyAntVC99HD_XpyXm2W6I56V2k6IRuTEOd0',
+    appId: '1:344541548510:web:e89b22d9170899677d174f',
+    messagingSenderId: '344541548510',
+    projectId: 'colors-notes-staging',
+    authDomain: 'colors-notes-staging.firebaseapp.com',
+    storageBucket: 'colors-notes-staging.firebasestorage.app',
+    measurementId: 'G-67Y85S536V',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyB8e2IdFFWKKyLdwQGf-bvxhRKZmWzxdKI',
-    appId: '1:523869870608:android:db8da6bae0f7d968bbc895',
-    messagingSenderId: '523869870608',
-    projectId: 'colorsnotes-e9142',
-    storageBucket: 'colorsnotes-e9142.firebasestorage.app',
+    apiKey: 'AIzaSyCM4qYI0VtSAHTeorJzNMEwFHXAjEAMKbA',
+    appId: '1:344541548510:android:631fa078fb9926677d174f',
+    messagingSenderId: '344541548510',
+    projectId: 'colors-notes-staging',
+    storageBucket: 'colors-notes-staging.firebasestorage.app',
   );
-
 }
