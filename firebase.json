@@ -3,17 +3,17 @@
     "platforms": {
       "android": {
         "default": {
-          "projectId": "colorsnotes-e9142",
-          "appId": "1:523869870608:android:db8da6bae0f7d968bbc895",
+          "projectId": "colors-notes-dev",
+          "appId": "1:83241971458:android:dde10259edb60d45711c1b",
           "fileOutput": "android/app/google-services.json"
         }
       },
       "dart": {
         "lib/firebase_options.dart": {
-          "projectId": "colorsnotes-e9142",
+          "projectId": "colors-notes-dev",
           "configurations": {
-            "android": "1:523869870608:android:db8da6bae0f7d968bbc895",
-            "web": "1:523869870608:web:9a3da9909e4b36afbbc895"
+            "android": "1:83241971458:android:dde10259edb60d45711c1b",
+            "web": "1:83241971458:web:5245c68a2a7c5324711c1b"
           }
         }
       }

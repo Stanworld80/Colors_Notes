@@ -1382,6 +1382,13 @@
       }
     }
   },
+  "languageEnglish" : "",
+  "languageSpanish" : "",
+  "languageGerman" : "",
+  "languageItalian" : "Italiano",
+  "languageFrench" : "",
+  "languagePortuguese" : "",
+  "languagePortugueseBrazil" : "",
   "yesDeleteAllButtonLabel": "SÌ, ELIMINA TUTTO",
   "@yesDeleteAllButtonLabel": {
     "description": "Etichetta del pulsante che conferma l'eliminazione di tutti gli elementi, tipicamente in una conferma ad alto rischio."
@@ -1389,5 +1396,7 @@
   "yesDeleteAllNotesButtonLabel": "SÌ, ELIMINA TUTTE LE NOTE",
   "@yesDeleteAllNotesButtonLabel": {
     "description": "Etichetta del pulsante che conferma l'eliminazione di tutte le note, tipicamente in una finestra di dialogo di conferma finale."
-  }
+  },
+  "help": "Aiuto"
 }
+

@@ -1389,5 +1389,13 @@
   "yesDeleteAllNotesButtonLabel": "SIM, ELIMINAR TODAS AS NOTAS",
   "@yesDeleteAllNotesButtonLabel": {
     "description": "Rótulo do botão que confirma a eliminação de todas as notas, tipicamente num diálogo de confirmação final."
-  }
+  },
+  "cookieConsentTitle": "Consentement aux Cookies",
+  "cookieConsentMessage": "Nous utilisons des cookies pour améliorer votre expérience. Les cookies essentiels sont nécessaires au fonctionnement du site. Acceptez-vous les cookies analytiques pour nous aider à améliorer nos services ?",
+  "cookieConsentAcceptAll": "Tout Accepter",
+  "cookieConsentDecline": "Refuser les Cookies d'Analyse",
+  "cookieConsentSettings": "Paramètres",
+  "help" : "Ajuda"
+
 }
+

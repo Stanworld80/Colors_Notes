@@ -398,7 +398,14 @@
   "@emptyPaletteDialogTitle": {
     "description": "Title for the dialog confirming whether to empty a new palette."
   },
-  "english": "English",
+  "languageEnglish": "English",
+  "languageSpanish": "Spanish",
+  "languageGerman": "German",
+  "languageItalian": "Italian",
+  "languageFrench": "French",
+  "languagePortuguese": "Portuguese",
+  "languagePortugueseBrazil": "Portuguese (Brazil)",
+
   "enterNumberValidator": "Enter a number.",
   "@enterNumberValidator": {
     "description": "Validation error message when a number input is expected but not provided correctly."
@@ -506,7 +513,7 @@
       }
     }
   },
-  "errorLaunchingUrl" : "loading error",
+  "errorLaunchingUrl": "loading error",
   "errorLoadingInitialData": "Error loading initial data: {errorDetails}",
   "@errorLoadingInitialData": {
     "description": "Error message displayed when initial data loading fails.",
@@ -618,7 +625,6 @@
   "@formValidationFailedLog": {
     "description": "Log message when form validation for palette name fails during an auto-save attempt."
   },
-  "french": "French",
   "generatedColorExistsError": "Generated color {hexCode} already exists.",
   "@generatedColorExistsError": {
     "description": "Error message when a generated gradient color's hex code already exists.",
@@ -1146,8 +1152,6 @@
   "@pleaseChooseModelValidator": {
     "description": "Validation error when no palette model is selected from a required dropdown."
   },
-  "portuguese": "Portuguese",
-  "portugueseBrazilian": "Portuguese (Brazil)",
   "predefinedModelsCannotBeDeletedSnackbar": "Predefined models cannot be deleted.",
   "@predefinedModelsCannotBeDeletedSnackbar": {
     "description": "Snackbar message shown when attempting to delete a predefined palette model."
@@ -1197,7 +1201,7 @@
   "@savingInProgressSnackbar": {
     "description": "Snackbar message indicating that a save operation is currently in progress."
   },
-  "selectLanguage" : "Select Language",
+  "selectLanguage": "Select Language",
   "settings": "Settings",
   "signInButton": "Sign In",
   "signInEmailErrorLog": "Email sign-in error: {errorDetails}",
@@ -1393,13 +1397,26 @@
   "@yesDeleteAllNotesButtonLabel": {
     "description": "Label for the button that confirms deleting all notes, typically in a final confirmation dialog."
   },
-  "help" : "help",
-  "spain" : "spain",
-  "german" : "german",
-  "cookieConsentTitle": "Gestion des Cookies"  ,
-  "cookieConsentMessage": "We use cookies to enhance your experience. Essential cookies are necessary for the website to function. Do you accept the use of analytical cookies to help us improve our services?",
-  "cookieConsentAcceptAll" :  "Accept All",
-  "cookieConsentDecline" : "Decline",
-  "cookieConsentSettings" : "Settings"
-
+  "help": "help",
+  "cookieConsentTitle": "Cookie Consent",
+  "@cookieConsentTitle": {
+    "description": "Title for the cookie consent banner."
+  },
+  "cookieConsentMessage": "We use cookies to improve your experience. Essential cookies are necessary for site operation. Do you accept analytics cookies to help us improve our services?",
+  "@cookieConsentMessage": {
+    "description": "Main message for the cookie consent banner."
+  },
+  "cookieConsentAcceptAll": "Accept All",
+  "@cookieConsentAcceptAll": {
+    "description": "Button text to accept all cookies."
+  },
+  "cookieConsentDecline": "Decline Analytics",
+  "@cookieConsentDecline": {
+    "description": "Button text to decline non-essential cookies."
+  },
+  "cookieConsentSettings": "Settings",
+  "@cookieConsentSettings": {
+    "description": "Button text to open cookie settings."
+  }
 }
+
