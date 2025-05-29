@@ -74,17 +74,17 @@ class LanguageProvider with ChangeNotifier {
     final l10n = AppLocalizations.of(context);
     switch (locale.languageCode) {
       case 'fr':
-        return l10n!.french;
+        return l10n!.languageFrench;
       case 'en':
-        return l10n!.english;
+        return l10n!.languageEnglish;
       case 'es':
-        return  l10n!.spain;
+        return  l10n!.languageSpanish;
       case 'de':
-        return l10n!.german;
+        return l10n!.languageGerman;
       case 'it':
-        return l10n!.italian;
+        return l10n!.languageItalian;
       case 'pt':
-        return (locale.countryCode == "BR") ? l10n!.portugueseBrazilian : l10n!.portuguese;
+        return (locale.countryCode == "BR") ? l10n!.languagePortugueseBrazil : l10n!.languagePortuguese;
 
       // Ajoutez d'autres langues ici si nécessaire
       default:

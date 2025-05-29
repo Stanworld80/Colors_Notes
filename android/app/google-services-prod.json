@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "48301164525",
+    "project_id": "colors-notes-prod",
+    "storage_bucket": "colors-notes-prod.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:48301164525:android:c3713960cdefdbb28589e4",
+        "android_client_info": {
+          "package_name": "org.stanworld.colorsnotes"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMxY6XbVmvo3uDQdcxCgPi2RKuJeRXBRE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

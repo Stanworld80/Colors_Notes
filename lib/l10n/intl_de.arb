@@ -1394,5 +1394,18 @@
     "description": "Label for the button that confirms deleting all notes, typically in a final confirmation dialog."
   },
   "help" : "Hilfe",
-  "german": "Deutsch"
+
+  "languageEnglish" : "Englisch",
+  "languageSpanish" :  "Spanisch",
+  "languageGerman" :  "Deutsch",
+  "languageFrench" :  "Französisch",
+  "languageItalian" : "Italienisch",
+  "languagePortuguese" : "Portugiesisch",
+  "languagePortugueseBrazil" : "Portugiesisch (Brasilien)",
+
+  "cookieConsentTitle": "Cookie-Einstellungen",
+  "cookieConsentMessage": "Wir verwenden Cookies, um Ihre Erfahrung zu verbessern. Essenzielle Cookies sind für den Betrieb der Website notwendig. Akzeptieren Sie Analyse-Cookies, um uns bei der Verbesserung unserer Dienste zu helfen?",
+  "cookieConsentAcceptAll": "Alle akzeptieren",
+  "cookieConsentDecline": "Abbrechen",
+  "cookieConsentSettings": "Einstellungen"
 }

@@ -1389,5 +1389,11 @@
   "yesDeleteAllNotesButtonLabel": "SIM, EXCLUIR TODAS AS NOTAS",
   "@yesDeleteAllNotesButtonLabel": {
     "description": "Rótulo do botão que confirma a exclusão de todas as notas, tipicamente em uma caixa de diálogo de confirmação final."
-  }
+  },
+  "cookieConsentTitle": "Consentimento de Cookies",
+  "cookieConsentMessage": "Utilizamos cookies para melhorar a sua experiência. Os cookies essenciais são necessários para o funcionamento do site. Aceita cookies analíticos para nos ajudar a melhorar os nossos serviços?",
+  "cookieConsentAcceptAll": "Aceitar Todos",
+  "cookieConsentDecline": "Recusar Cookies de Análise",
+  "cookieConsentSettings": "Configurações",
+  "help" : "Ajuda"
 }

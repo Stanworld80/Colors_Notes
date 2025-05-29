@@ -1,0 +1,29 @@
+{
+  "it": [
+    "cookieConsentTitle",
+    "cookieConsentMessage",
+    "cookieConsentAcceptAll",
+    "cookieConsentDecline",
+    "cookieConsentSettings"
+  ],
+
+  "pt": [
+    "languageEnglish",
+    "languageSpanish",
+    "languageGerman",
+    "languageItalian",
+    "languageFrench",
+    "languagePortuguese",
+    "languagePortugueseBrazil"
+  ],
+
+  "pt_BR": [
+    "languageEnglish",
+    "languageSpanish",
+    "languageGerman",
+    "languageItalian",
+    "languageFrench",
+    "languagePortuguese",
+    "languagePortugueseBrazil"
+  ]
+}

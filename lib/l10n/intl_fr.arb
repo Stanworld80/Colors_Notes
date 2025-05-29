@@ -1393,5 +1393,33 @@
   "@yesDeleteAllNotesButtonLabel": {
     "description": "Étiquette du bouton qui confirme la suppression de toutes les notes, typiquement dans un dialogue de confirmation finale."
   },
+  "cookieConsentTitle": "Consentement aux Cookies",
+  "@cookieConsentTitle": {
+    "description": "Titre pour le bandeau de consentement aux cookies."
+  },
+  "cookieConsentMessage": "Nous utilisons des cookies pour améliorer votre expérience. Les cookies essentiels sont nécessaires au fonctionnement du site. Acceptez-vous les cookies analytiques pour nous aider à améliorer nos services ?",
+  "@cookieConsentMessage": {
+    "description": "Message principal pour le bandeau de consentement aux cookies."
+  },
+  "cookieConsentAcceptAll": "Tout Accepter",
+  "@cookieConsentAcceptAll": {
+    "description": "Texte du bouton pour accepter tous les cookies."
+  },
+  "cookieConsentDecline": "Refuser les Cookies d'Analyse",
+  "@cookieConsentDecline": {
+    "description": "Texte du bouton pour refuser les cookies non essentiels."
+  },
+  "cookieConsentSettings": "Paramètres",
+  "@cookieConsentSettings": {
+    "description": "Texte du bouton pour ouvrir les paramètres des cookies."
+  },
+  "languageEnglish": "Anglais",
+  "languageSpanish": "Espagnol",
+  "languageGerman": "Allemand",
+  "languageItalian": "Italien",
+  "languageFrench": "Français",
+  "languagePortuguese": "Portugais",
+  "languagePortugueseBrazil": "Portugais (Brésil)",
   "help" : "aide"
 }
+
