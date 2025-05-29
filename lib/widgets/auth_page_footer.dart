@@ -65,8 +65,8 @@ class AuthPageFooter extends StatelessWidget {
         // A Wrap widget to display links in a row, wrapping if necessary.
         Wrap(
           alignment: WrapAlignment.center,
-          spacing: 2.0, // Reduced horizontal spacing between items.
-          runSpacing: 0.0, // No vertical spacing if items wrap to the next line.
+          spacing: 2.0,
+          runSpacing: 0.0,
           children: <Widget>[
             TextButton(
               onPressed: () {
