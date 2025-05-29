@@ -212,6 +212,11 @@
   "@copyrightText": {
     "description": "Avviso di copyright per l'applicazione."
   },
+  "cookieConsentAcceptAll": "Accetta Tutto",
+  "cookieConsentDecline": "Rifiuta",
+  "cookieConsentMessage": "Messaggio Consenso Cookie",
+  "cookieConsentSettings": "Impostazioni",
+  "cookieConsentTitle": "Titolo Consenso Cookie",
   "createFirstModelMessage": "Crea il tuo primo modello personale premendo il pulsante \"+\" in alto.",
   "@createFirstModelMessage": {
     "description": "Messaggio visualizzato quando non esistono modelli di tavolozza personali, che chiede all'utente di crearne uno."

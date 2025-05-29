@@ -759,6 +759,13 @@
     }
   },
   "language": "Idioma",
+  "languageEnglish": "Inglês",
+  "languageFrench": "Francês",
+  "languageGerman": "Alemão",
+  "languageItalian": "Italiano",
+  "languagePortuguese": "Português",
+  "languagePortugueseBrazil": "Português (Brasil)",
+  "languageSpanish": "Espanhol",
   "licenseLink": "Licença",
   "licensePageTitle": "Contrato de Licença",
   "@licensePageTitle": {
