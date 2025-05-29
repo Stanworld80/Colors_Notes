@@ -5,7 +5,7 @@ import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:colors_notes/l10n/app_localizations.dart'; // AJOUTÉ
+import 'package:colors_notes/l10n/app_localizations.dart';
 
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
@@ -53,15 +53,18 @@ class _EntryPageState extends State<EntryPage> {
     } else {
       _selectedPaletteElementId = widget.initialPaletteElementId;
     }
+    // Call _loadJournalDetails without passing context or l10n directly from initState
     _loadJournalDetails();
   }
 
   Future<void> _loadJournalDetails() async {
-    final l10n = AppLocalizations.of(context)!; // AJOUTÉ pour les messages d'erreur
+    // final l10n = AppLocalizations.of(context)!; // REMOVED: Do not call this here
+
     if (!mounted) return;
     setState(() {
       _isLoadingJournalDetails = true;
     });
+
     try {
       final activeJournalNotifier = Provider.of<ActiveJournalNotifier>(context, listen: false);
       if (activeJournalNotifier.activeJournalId == widget.journalId && activeJournalNotifier.activeJournal != null) {
@@ -72,7 +75,8 @@ class _EntryPageState extends State<EntryPage> {
         if (journalDoc.exists && journalDoc.data() != null) {
           _currentJournalDetails = Journal.fromMap(journalDoc.data() as Map<String, dynamic>, journalDoc.id);
         } else {
-          throw Exception(l10n.entryPageJournalDetailsLoadError); // MODIFIÉ
+          // Use a non-localized string or a specific error type
+          throw Exception("Journal details could not be loaded.");
         }
       }
 
@@ -84,23 +88,44 @@ class _EntryPageState extends State<EntryPage> {
         if (!currentPaletteElementExists && _currentJournalDetails!.palette.colors.isNotEmpty) {
           _selectedPaletteElementId = _currentJournalDetails!.palette.colors.first.paletteElementId;
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.entryPageOriginalColorMissingSnackbar), backgroundColor: Colors.orange), // MODIFIÉ
-            );
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) { // Check again as it's async
+                final l10nCallback = AppLocalizations.of(context);
+                if (l10nCallback != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10nCallback.entryPageOriginalColorMissingSnackbar), backgroundColor: Colors.orange),
+                  );
+                }
+              }
+            });
           }
         } else if (!currentPaletteElementExists && _currentJournalDetails!.palette.colors.isEmpty) {
           _selectedPaletteElementId = null;
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.entryPagePaletteEmptySnackbar), backgroundColor: Colors.red), // MODIFIÉ
-            );
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                final l10nCallback = AppLocalizations.of(context);
+                if (l10nCallback != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10nCallback.entryPagePaletteEmptySnackbar), backgroundColor: Colors.red),
+                  );
+                }
+              }
+            });
           }
         }
       }
     } catch (e) {
       _loggerPage.e("Erreur chargement détails journal: $e");
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${l10n.entryPageJournalDetailsLoadError} ${e.toString()}"))); // MODIFIÉ
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            final l10nCallback = AppLocalizations.of(context);
+            // Use a generic message or a specific key if l10nCallback is null
+            final errorMessage = l10nCallback?.entryPageJournalDetailsLoadError ?? "Error loading journal details";
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("$errorMessage: ${e.toString()}")));
+          }
+        });
       }
     } finally {
       if (mounted) {
@@ -123,7 +148,7 @@ class _EntryPageState extends State<EntryPage> {
       initialDate: _selectedEventDate,
       firstDate: DateTime(DateTime.now().year - 50),
       lastDate: DateTime(DateTime.now().year + 50),
-      locale: Localizations.localeOf(context), // Utilise la locale actuelle de l'app
+      locale: Localizations.localeOf(context),
     );
     if (picked != null && picked != _selectedEventDate) {
       if (mounted) {
@@ -152,28 +177,28 @@ class _EntryPageState extends State<EntryPage> {
   }
 
   void _setDateTimeToNow() {
-    final l10n = AppLocalizations.of(context)!; // AJOUTÉ
+    final l10n = AppLocalizations.of(context)!;
     if (mounted) {
       final now = DateTime.now();
       setState(() {
         _selectedEventDate = now;
         _selectedEventTime = TimeOfDay.fromDateTime(now);
       });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageDateTimeSetToNowSnackbar), duration: const Duration(seconds: 2))); // MODIFIÉ
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageDateTimeSetToNowSnackbar), duration: const Duration(seconds: 2)));
     }
   }
 
   Future<void> _saveNote() async {
-    final l10n = AppLocalizations.of(context)!; // AJOUTÉ
+    final l10n = AppLocalizations.of(context)!;
     if (_userId == null) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageUserNotIdentifiedError))); // MODIFIÉ
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageUserNotIdentifiedError)));
       return;
     }
     if (!_formKey.currentState!.validate()) {
       return;
     }
     if (_selectedPaletteElementId == null) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageNoColorSelectedError))); // MODIFIÉ
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageNoColorSelectedError)));
       return;
     }
 
@@ -200,7 +225,7 @@ class _EntryPageState extends State<EntryPage> {
         );
         await firestoreService.createNote(newNote);
         _loggerPage.i("Note créée: ${newNote.id}");
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageNoteSavedSuccess))); // MODIFIÉ
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageNoteSavedSuccess)));
       } else {
         final updatedNote = widget.noteToEdit!.copyWith(
           content: _contentController.text.trim(),
@@ -210,13 +235,13 @@ class _EntryPageState extends State<EntryPage> {
         );
         await firestoreService.updateNote(updatedNote);
         _loggerPage.i("Note mise à jour: ${updatedNote.id}");
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageNoteUpdatedSuccess))); // MODIFIÉ
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageNoteUpdatedSuccess)));
       }
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       _loggerPage.e("Erreur sauvegarde note: $e");
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageGenericSaveError(e.toString())))); // MODIFIÉ
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageGenericSaveError(e.toString()))));
       }
     } finally {
       if (mounted) {
@@ -228,16 +253,16 @@ class _EntryPageState extends State<EntryPage> {
   }
 
   Future<void> _saveAsNewNote() async {
-    final l10n = AppLocalizations.of(context)!; // AJOUTÉ
+    final l10n = AppLocalizations.of(context)!;
     if (_userId == null) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageUserNotIdentifiedError))); // MODIFIÉ
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageUserNotIdentifiedError)));
       return;
     }
     if (!_formKey.currentState!.validate()) {
       return;
     }
     if (_selectedPaletteElementId == null) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageNoColorSelectedError))); // MODIFIÉ
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageNoColorSelectedError)));
       return;
     }
 
@@ -263,12 +288,12 @@ class _EntryPageState extends State<EntryPage> {
       );
       await firestoreService.createNote(newNote);
       _loggerPage.i("Note sauvegardée comme nouvelle: ${newNote.id}");
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageNoteSavedAsNewSuccess))); // MODIFIÉ
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageNoteSavedAsNewSuccess)));
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       _loggerPage.e("Erreur sauvegarde comme nouvelle note: $e");
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageGenericSaveError(e.toString())))); // MODIFIÉ
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageGenericSaveError(e.toString()))));
       }
     } finally {
       if (mounted) {
@@ -281,23 +306,13 @@ class _EntryPageState extends State<EntryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!; // AJOUTÉ
-    final DateFormat dateFormat = DateFormat('EEEE dd MMMM yyyy', l10n.localeName); // Utilise la locale actuelle pour le formatage
+    final l10n = AppLocalizations.of(context)!;
+    final DateFormat dateFormat = DateFormat('EEEE dd MMMM yyyy', l10n.localeName);
     final bool isEditing = widget.noteToEdit != null;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? l10n.entryPageEditTitle : l10n.entryPageNewTitle), // MODIFIÉ
-        actions: [
-          if (_isSaving || _isSavingAsNew)
-            const Padding(padding: EdgeInsets.all(16.0), child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.0)))
-          else
-            IconButton(
-                icon: const Icon(Icons.save_alt_outlined),
-                onPressed: _saveNote,
-                tooltip: isEditing ? l10n.entryPageUpdateTooltip : l10n.entryPageSaveTooltip // MODIFIÉ
-            ),
-        ],
+        title: Text(isEditing ? l10n.entryPageEditTitle : l10n.entryPageNewTitle),
       ),
       body: _isLoadingJournalDetails
           ? const Center(child: CircularProgressIndicator())
@@ -308,9 +323,9 @@ class _EntryPageState extends State<EntryPage> {
           children: [
             const Icon(Icons.error_outline, color: Colors.red, size: 40),
             const SizedBox(height: 8),
-            Text(l10n.entryPageJournalDetailsLoadError), // MODIFIÉ
+            Text(l10n.entryPageJournalDetailsLoadError),
             const SizedBox(height: 8),
-            ElevatedButton(onPressed: _loadJournalDetails, child: Text(l10n.entryPageJournalDetailsRetryButton)), // MODIFIÉ
+            ElevatedButton(onPressed: _loadJournalDetails, child: Text(l10n.entryPageJournalDetailsRetryButton)),
           ],
         ),
       )
@@ -324,7 +339,7 @@ class _EntryPageState extends State<EntryPage> {
               if (_currentJournalDetails!.palette.colors.isNotEmpty)
                 DropdownButtonFormField<String>(
                   value: _selectedPaletteElementId,
-                  decoration: InputDecoration(labelText: l10n.entryPageAssociatedColorLabel, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))), // MODIFIÉ
+                  decoration: InputDecoration(labelText: l10n.entryPageAssociatedColorLabel, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
                   items: _currentJournalDetails!.palette.colors.map((ColorData colorData) {
                     return DropdownMenuItem<String>(
                       value: colorData.paletteElementId,
@@ -344,13 +359,13 @@ class _EntryPageState extends State<EntryPage> {
                       });
                     }
                   },
-                  validator: (value) => value == null ? l10n.entryPageSelectColorValidator : null, // MODIFIÉ
+                  validator: (value) => value == null ? l10n.entryPageSelectColorValidator : null,
                 )
               else
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: Text(
-                    l10n.entryPagePaletteEmptySnackbar, // MODIFIÉ (réutilisation d'une clé existante)
+                    l10n.entryPagePaletteEmptySnackbar,
                     style: TextStyle(color: Theme.of(context).colorScheme.error),
                   ),
                 ),
@@ -358,19 +373,19 @@ class _EntryPageState extends State<EntryPage> {
               TextFormField(
                 controller: _contentController,
                 decoration: InputDecoration(
-                  labelText: l10n.entryPageContentLabel, // MODIFIÉ
-                  hintText: l10n.entryPageContentHint, // MODIFIÉ
+                  labelText: l10n.entryPageContentLabel,
+                  hintText: l10n.entryPageContentHint,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                   alignLabelWithHint: true,
                 ),
                 maxLines: 8,
                 textCapitalization: TextCapitalization.sentences,
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) { // MODIFIÉ pour trim()
-                    return l10n.entryPageContentValidatorEmpty; // MODIFIÉ
+                  if (value == null || value.trim().isEmpty) {
+                    return l10n.entryPageContentValidatorEmpty;
                   }
                   if (value.length > 1024) {
-                    return l10n.entryPageContentValidatorTooLong; // MODIFIÉ
+                    return l10n.entryPageContentValidatorTooLong;
                   }
                   return null;
                 },
@@ -405,7 +420,7 @@ class _EntryPageState extends State<EntryPage> {
                   ),
                   const SizedBox(width: 8),
                   Tooltip(
-                    message: l10n.entryPageDateTimeSetToNowSnackbar, // MODIFIÉ (réutilisation)
+                    message: l10n.entryPageDateTimeSetToNowSnackbar,
                     child: IconButton(
                       icon: const Icon(Icons.arrow_circle_left_outlined),
                       onPressed: _setDateTimeToNow,
@@ -421,7 +436,7 @@ class _EntryPageState extends State<EntryPage> {
               const SizedBox(height: 30),
               ElevatedButton.icon(
                 icon: Icon(_isSaving ? Icons.hourglass_empty_outlined : (isEditing ? Icons.sync_alt_outlined : Icons.save_outlined)),
-                label: Text(_isSaving ? l10n.entryPageSavingButton : (isEditing ? l10n.entryPageSaveButtonUpdate : l10n.entryPageSaveButtonCreate)), // MODIFIÉ
+                label: Text(_isSaving ? l10n.entryPageSavingButton : (isEditing ? l10n.entryPageSaveButtonUpdate : l10n.entryPageSaveButtonCreate)),
                 onPressed: (_isSaving || _isSavingAsNew || _selectedPaletteElementId == null) ? null : _saveNote,
                 style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 15), textStyle: const TextStyle(fontSize: 16)),
               ),
@@ -429,7 +444,7 @@ class _EntryPageState extends State<EntryPage> {
                 const SizedBox(height: 15),
                 OutlinedButton.icon(
                   icon: Icon(_isSavingAsNew ? Icons.hourglass_empty_outlined : Icons.add_circle_outline),
-                  label: Text(_isSavingAsNew ? l10n.entryPageSavingButton : l10n.entryPageSaveAsNewButton), // MODIFIÉ
+                  label: Text(_isSavingAsNew ? l10n.entryPageSavingButton : l10n.entryPageSaveAsNewButton),
                   onPressed: (_isSaving || _isSavingAsNew || _selectedPaletteElementId == null) ? null : _saveAsNewNote,
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 15),
