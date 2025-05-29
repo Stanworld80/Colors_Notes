@@ -1382,13 +1382,13 @@
       }
     }
   },
-  "languageEnglish" : "",
-  "languageSpanish" : "",
-  "languageGerman" : "",
+  "languageEnglish" : "Inglese",
+  "languageSpanish" : "Spagnolo",
+  "languageGerman" : "Tedesco",
   "languageItalian" : "Italiano",
-  "languageFrench" : "",
-  "languagePortuguese" : "",
-  "languagePortugueseBrazil" : "",
+  "languageFrench" : "Francese",
+  "languagePortuguese" : "Portoghese",
+  "languagePortugueseBrazil" : "Portoghese (Brasile)",
   "yesDeleteAllButtonLabel": "SÌ, ELIMINA TUTTO",
   "@yesDeleteAllButtonLabel": {
     "description": "Etichetta del pulsante che conferma l'eliminazione di tutti gli elementi, tipicamente in una conferma ad alto rischio."

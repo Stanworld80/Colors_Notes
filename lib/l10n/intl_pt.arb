@@ -1390,11 +1390,11 @@
   "@yesDeleteAllNotesButtonLabel": {
     "description": "Rótulo do botão que confirma a eliminação de todas as notas, tipicamente num diálogo de confirmação final."
   },
-  "cookieConsentTitle": "Consentement aux Cookies",
-  "cookieConsentMessage": "Nous utilisons des cookies pour améliorer votre expérience. Les cookies essentiels sont nécessaires au fonctionnement du site. Acceptez-vous les cookies analytiques pour nous aider à améliorer nos services ?",
-  "cookieConsentAcceptAll": "Tout Accepter",
-  "cookieConsentDecline": "Refuser les Cookies d'Analyse",
-  "cookieConsentSettings": "Paramètres",
+  "cookieConsentTitle": "Consentimento de Cookies",
+  "cookieConsentMessage": "Utilizamos cookies para melhorar a sua experiência. Os cookies essenciais são necessários para o funcionamento do site. Aceita cookies analíticos para nos ajudar a melhorar os nossos serviços?",
+  "cookieConsentAcceptAll": "Aceitar Todos",
+  "cookieConsentDecline": "Recusar Cookies de Análise",
+  "cookieConsentSettings": "Configurações",
   "help" : "Ajuda"
 
 }

@@ -1401,9 +1401,9 @@
   "languageFrench" : "Francés",
   "languagePortuguese" : "Portugués",
   "languagePortugueseBrazil" : "Portugués (Brasil)",
-  "cookieConsentTitle": "Consentement aux Cookies",
-  "cookieConsentMessage": "Nous utilisons des cookies pour améliorer votre expérience. Les cookies essentiels sont nécessaires au fonctionnement du site. Acceptez-vous les cookies analytiques pour nous aider à améliorer nos services ?",
-  "cookieConsentAcceptAll": "Tout Accepter",
-  "cookieConsentDecline": "Refuser les Cookies d'Analyse",
-  "cookieConsentSettings": "Paramètres"
+  "cookieConsentTitle": "Consentimiento de Cookies",
+  "cookieConsentMessage": "Utilizamos cookies para mejorar su experiencia. Las cookies esenciales son necesarias para el funcionamiento del sitio. ¿Acepta las cookies analíticas para ayudarnos a mejorar nuestros servicios?",
+  "cookieConsentAcceptAll": "Aceptar Todo",
+  "cookieConsentDecline": "Rechazar Cookies de Análisis",
+  "cookieConsentSettings": "Configuración"
 }
