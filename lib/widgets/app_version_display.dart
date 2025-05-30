@@ -17,11 +17,7 @@ class AppVersionDisplay extends StatefulWidget {
   final TextAlign textAlign;
 
   /// Creates an [AppVersionDisplay] widget.
-  const AppVersionDisplay({
-    super.key,
-    this.style,
-    this.textAlign = TextAlign.center,
-  });
+  const AppVersionDisplay({super.key, this.style, this.textAlign = TextAlign.center});
 
   @override
   State<AppVersionDisplay> createState() => _AppVersionDisplayState();
@@ -69,23 +65,28 @@ class _AppVersionDisplayState extends State<AppVersionDisplay> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    const env = String.fromEnvironment('APP_ENV', defaultValue: '???');
+    String appEnv = "";
+    if (appEnv != "prod") {
+      appEnv = " ($env)";
+    }
+
     String displayText;
 
     if (_isLoading) {
-      displayText = l10n.versionLoading;
+      displayText = "${l10n.versionLoading}$appEnv";
     } else if (_hasError) {
-      displayText = l10n.versionUnavailable;
+      displayText = "${l10n.versionUnavailable}$appEnv";
     } else {
-      displayText = l10n.versionBuildFormat(_version, _buildNumber);
+      displayText = "${l10n.versionBuildFormat(_version, _buildNumber)}$appEnv";
     }
 
-    final textStyle = widget.style ??
-        Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600]);
+    final textStyle = widget.style ?? Theme
+        .of(context)
+        .textTheme
+        .bodySmall
+        ?.copyWith(color: Colors.grey[600]);
 
-    return Text(
-      displayText,
-      style: textStyle,
-      textAlign: widget.textAlign,
-    );
+    return Text(displayText, style: textStyle, textAlign: widget.textAlign);
   }
 }

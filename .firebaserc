@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "colors-notes-dev",
+    "dev": "colors-notes-dev",
+    "staging": "colors-notes-staging",
+    "prod": "colors-notes-prod"
+  }
+}

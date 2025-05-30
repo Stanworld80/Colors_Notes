@@ -3,17 +3,17 @@
     "platforms": {
       "android": {
         "default": {
-          "projectId": "colors-notes-dev",
-          "appId": "1:83241971458:android:dde10259edb60d45711c1b",
+          "projectId": "colors-notes-staging",
+          "appId": "1:344541548510:android:631fa078fb9926677d174f",
           "fileOutput": "android/app/google-services.json"
         }
       },
       "dart": {
         "lib/firebase_options.dart": {
-          "projectId": "colors-notes-dev",
+          "projectId": "colors-notes-staging",
           "configurations": {
-            "android": "1:83241971458:android:dde10259edb60d45711c1b",
-            "web": "1:83241971458:web:5245c68a2a7c5324711c1b"
+            "android": "1:344541548510:android:631fa078fb9926677d174f",
+            "web": "1:344541548510:web:e89b22d9170899677d174f"
           }
         }
       }
@@ -23,6 +23,7 @@
     "public": "build/web",
     "ignore": [
       "firebase.json",
+      "firebase.*.json",
       "**/.*",
       "**/node_modules/**"
     ],

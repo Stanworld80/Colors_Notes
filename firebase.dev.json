@@ -1,0 +1,36 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "colors-notes-dev",
+          "appId": "1:83241971458:android:dde10259edb60d45711c1b",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options_dev.dart": {
+          "projectId": "colors-notes-dev",
+          "configurations": {
+            "android": "1:83241971458:android:dde10259edb60d45711c1b",
+            "web": "1:83241971458:web:5245c68a2a7c5324711c1b"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
