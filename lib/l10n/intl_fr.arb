@@ -585,9 +585,9 @@
   "@fieldCannotBeEmpty": {
     "description": "Erreur de validation générique pour un champ obligatoire qui est vide."
   },
-  "finalConfirmationDialogContent": "Pour confirmer la suppression, veuillez taper 'SUPPRIMER' dans le champ ci-dessous.",
+  "finalConfirmationDialogContent": "Pour confirmer la suppression, veuillez taper 'DELETE' dans le champ ci-dessous.",
   "@finalConfirmationDialogContent": {
-    "description": "Contenu d'un dialogue de confirmation finale demandant à l'utilisateur de taper 'SUPPRIMER'."
+    "description": "Contenu d'un dialogue de confirmation finale demandant à l'utilisateur de taper 'DELETE'."
   },
   "finalConfirmationDialogTitle": "CONFIRMATION FINALE pour \"{journalName}\"",
   "@finalConfirmationDialogTitle": {
@@ -1307,9 +1307,9 @@
       }
     }
   },
-  "typeDeleteHereLabel": "Tapez SUPPRIMER ici",
+  "typeDeleteHereLabel": "Tapez DELETE ici",
   "@typeDeleteHereLabel": {
-    "description": "Étiquette du champ de saisie où l'utilisateur doit taper 'SUPPRIMER' pour confirmer la suppression."
+    "description": "Étiquette du champ de saisie où l'utilisateur doit taper 'DELETE' pour confirmer la suppression."
   },
   "userNotConnectedError": "Utilisateur non connecté.",
   "@userNotConnectedError": {

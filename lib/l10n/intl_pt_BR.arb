@@ -585,9 +585,9 @@
   "@fieldCannotBeEmpty": {
     "description": "Erro de validação genérico para um campo obrigatório que está vazio."
   },
-  "finalConfirmationDialogContent": "Para confirmar a exclusão, por favor digite 'EXCLUIR' no campo abaixo.",
+  "finalConfirmationDialogContent": "Para confirmar a exclusão, por favor digite 'DELETE' no campo abaixo.",
   "@finalConfirmationDialogContent": {
-    "description": "Conteúdo de uma caixa de diálogo de confirmação final que requer que o usuário digite 'EXCLUIR'."
+    "description": "Conteúdo de uma caixa de diálogo de confirmação final que requer que o usuário digite 'DELETE'."
   },
   "finalConfirmationDialogTitle": "CONFIRMAÇÃO FINAL para \"{journalName}\"",
   "@finalConfirmationDialogTitle": {
@@ -1304,9 +1304,9 @@
       }
     }
   },
-  "typeDeleteHereLabel": "Digite EXCLUIR aqui",
+  "typeDeleteHereLabel": "Digite DELETE aqui",
   "@typeDeleteHereLabel": {
-    "description": "Rótulo para o campo de entrada onde o usuário deve digitar 'EXCLUIR' para confirmar a exclusão."
+    "description": "Rótulo para o campo de entrada onde o usuário deve digitar 'DELETE' para confirmar a exclusão."
   },
   "userNotConnectedError": "Usuário não conectado.",
   "@userNotConnectedError": {
