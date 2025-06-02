@@ -585,7 +585,7 @@
   "@fieldCannotBeEmpty": {
     "description": "Generic validation error for a required field that is empty."
   },
-  "finalConfirmationDialogContent": "Zur Bestätigung der Löschung geben Sie bitte 'LÖSCHEN' in das Feld unten ein.",
+  "finalConfirmationDialogContent": "Zur Bestätigung der Löschung geben Sie bitte 'DELETE' in das Feld unten ein.",
   "@finalConfirmationDialogContent": {
     "description": "Content for a final confirmation dialog requiring user to type 'DELETE'."
   },
@@ -1307,7 +1307,7 @@
       }
     }
   },
-  "typeDeleteHereLabel": "Geben Sie hier LÖSCHEN ein",
+  "typeDeleteHereLabel": "Geben Sie hier DELETE ein",
   "@typeDeleteHereLabel": {
     "description": "Label for the input field where user must type 'DELETE' to confirm deletion."
   },

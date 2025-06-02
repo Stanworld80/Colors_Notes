@@ -585,9 +585,9 @@
   "@fieldCannotBeEmpty": {
     "description": "Errore di convalida generico per un campo obbligatorio vuoto."
   },
-  "finalConfirmationDialogContent": "Per confermare l'eliminazione, digita 'ELIMINA' nel campo sottostante.",
+  "finalConfirmationDialogContent": "Per confermare l'eliminazione, digita 'DELETE' nel campo sottostante.",
   "@finalConfirmationDialogContent": {
-    "description": "Contenuto di una finestra di dialogo di conferma finale che richiede all'utente di digitare 'ELIMINA'."
+    "description": "Contenuto di una finestra di dialogo di conferma finale che richiede all'utente di digitare 'DELETE'."
   },
   "finalConfirmationDialogTitle": "CONFERMA FINALE per \"{journalName}\"",
   "@finalConfirmationDialogTitle": {
@@ -1304,9 +1304,9 @@
       }
     }
   },
-  "typeDeleteHereLabel": "Digita ELIMINA qui",
+  "typeDeleteHereLabel": "Digita DELETE qui",
   "@typeDeleteHereLabel": {
-    "description": "Etichetta per il campo di input in cui l'utente deve digitare 'ELIMINA' per confermare l'eliminazione."
+    "description": "Etichetta per il campo di input in cui l'utente deve digitare 'DELETE' per confermare l'eliminazione."
   },
   "userNotConnectedError": "Utente non connesso.",
   "@userNotConnectedError": {
