@@ -20,8 +20,8 @@ GOOGLE_SERVICES_JSON_PROD_PATH="android/app/google-services.prod.json"
 ANDROID_TARGET_GOOGLE_SERVICES_PATH="android/app/google-services.json"
 
 FIREBASE_ANDROID_APP_ID_DEV="1:83241971458:android:dde10259edb60d45711c1b"
-FIREBASE_ANDROID_APP_ID_STAGING="1:344541548510:android:631fa078fb9926677d174f"
-FIREBASE_ANDROID_APP_ID_PROD="1:48301164525:android:c3713960cdefdbb28589e4"
+FIREBASE_ANDROID_APP_ID_STAGING="1:344541548510:android:631fa078fb9926677d174f" # Assurez-vous que cette valeur est correcte
+FIREBASE_ANDROID_APP_ID_PROD="1:48301164525:android:c3713960cdefdbb28589e4"     # Assurez-vous que cette valeur est correcte
 
 TESTER_GROUPS_DEV="dev-testers"
 TESTER_GROUPS_STAGING="uat-testers"
@@ -34,6 +34,7 @@ WEB_INDEX_PLACEHOLDER="##GOOGLE_SIGNIN_CLIENT_ID_PLACEHOLDER##"
 
 ENVIRONMENT="dev"
 PLATFORM="web"
+ARTIFACT_TYPE="aab" # Nouveau: aab ou apk, par défaut aab
 ACTION_BUILD=false
 ACTION_DEPLOY=false
 USER_SPECIFIED_BUILD_MODE=""
@@ -50,11 +51,12 @@ ANDROID_ARTIFACT_PATH=""
 BUILD_MODE=""
 
 usage() {
-    echo "Usage: $0 -e <dev|staging|prod> --platform <web|android> [-m <debug|release>] [--build] [--deploy] [--verbose]"
+    echo "Usage: $0 -e <dev|staging|prod> --platform <web|android> [-a <aab|apk>] [-m <debug|release>] [--build] [--deploy] [--verbose]"
     echo ""
     echo "Options:"
     echo "  -e <environnement>     Spécifie l'environnement. Défaut: dev."
     echo "  --platform <web|android> Spécifie la plateforme. Défaut: web."
+    echo "  -a <aab|apk>           Spécifie le type d'artefact Android (aab ou apk). Défaut: aab."
     echo "  -m <mode>              Spécifie le mode de build (debug|release)."
     echo "                         Par défaut: 'debug' pour 'dev', 'release' pour les autres."
     echo "  --build                Exécute l'étape de build."
@@ -69,11 +71,13 @@ usage() {
 
 TEMP_ENV=""
 TEMP_PLATFORM=""
+TEMP_ARTIFACT_TYPE=""
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         -e) TEMP_ENV="$2"; shift ;;
         --platform) TEMP_PLATFORM="$2"; shift ;;
+        -a|--artifact-type) TEMP_ARTIFACT_TYPE="$2"; shift ;;
         -m|--mode) USER_SPECIFIED_BUILD_MODE="$2"; shift ;;
         --build) ACTION_BUILD=true ;;
         --deploy) ACTION_DEPLOY=true ;;
@@ -86,6 +90,14 @@ done
 
 if [ -n "$TEMP_ENV" ]; then ENVIRONMENT="$TEMP_ENV"; fi
 if [ -n "$TEMP_PLATFORM" ]; then PLATFORM="$TEMP_PLATFORM"; fi
+if [ -n "$TEMP_ARTIFACT_TYPE" ]; then ARTIFACT_TYPE="$TEMP_ARTIFACT_TYPE"; fi
+
+if [ "$PLATFORM" == "android" ]; then
+    case "$ARTIFACT_TYPE" in
+        aab|apk) ;;
+        *) echo "Erreur : Type d'artefact invalide '$ARTIFACT_TYPE' pour Android. Doit être aab ou apk."; usage ;;
+    esac
+fi
 
 if [ -n "$USER_SPECIFIED_BUILD_MODE" ]; then
     BUILD_MODE="$USER_SPECIFIED_BUILD_MODE"
@@ -121,6 +133,9 @@ esac
 echo "--------------------------------------------------"
 echo "Environnement Sélectionné : $ENVIRONMENT"
 echo "Plateforme Sélectionnée  : $PLATFORM"
+if [ "$PLATFORM" == "android" ]; then
+    echo "Type d'Artefact Android : $ARTIFACT_TYPE"
+fi
 echo "Mode de Build           : $BUILD_MODE (Flag: $FLUTTER_BUILD_MODE_FLAG)"
 echo "Action Build            : $ACTION_BUILD"
 echo "Action Déploiement      : $ACTION_DEPLOY"
@@ -221,14 +236,27 @@ if $ACTION_BUILD; then
         echo "Préparation de $ANDROID_TARGET_GOOGLE_SERVICES_PATH pour $ENVIRONMENT..."
         execute_verbose "Copie google-services.json" cp "$CURRENT_GOOGLE_SERVICES_JSON_SOURCE_PATH" "$ANDROID_TARGET_GOOGLE_SERVICES_PATH"
         echo "$ANDROID_TARGET_GOOGLE_SERVICES_PATH configuré."
-        echo "Build App Bundle Android pour $ENVIRONMENT en mode $BUILD_MODE..."
-        execute_verbose "Build Flutter Android" flutter build appbundle "$FLUTTER_BUILD_MODE_FLAG" "--dart-define=APP_ENV=$ENVIRONMENT"
-        if [ $? -ne 0 ]; then echo "Erreur : Build Flutter Android échoué !"; exit 1; fi
-        echo "Build Flutter Android terminé."
-        if [ "$BUILD_MODE" == "release" ]; then
-            ANDROID_ARTIFACT_PATH="build/app/outputs/bundle/release/app-release.aab"
-        else
-            ANDROID_ARTIFACT_PATH="build/app/outputs/bundle/debug/app-debug.aab"
+
+        if [ "$ARTIFACT_TYPE" == "apk" ]; then
+            echo "Build de l'APK Flutter Android pour $ENVIRONMENT en mode $BUILD_MODE..."
+            execute_verbose "Build Flutter APK" flutter build apk "$FLUTTER_BUILD_MODE_FLAG" "--dart-define=APP_ENV=$ENVIRONMENT"
+            if [ $? -ne 0 ]; then echo "Erreur : Le build Flutter APK a échoué !"; exit 1; fi
+            echo "Build Flutter APK terminé."
+            if [ "$BUILD_MODE" == "release" ]; then
+                ANDROID_ARTIFACT_PATH="build/app/outputs/flutter-apk/app-release.apk"
+            else # debug
+                ANDROID_ARTIFACT_PATH="build/app/outputs/flutter-apk/app-debug.apk"
+            fi
+        else # appbundle
+            echo "Build de l'App Bundle Flutter Android pour $ENVIRONMENT en mode $BUILD_MODE..."
+            execute_verbose "Build Flutter App Bundle" flutter build appbundle "$FLUTTER_BUILD_MODE_FLAG" "--dart-define=APP_ENV=$ENVIRONMENT"
+            if [ $? -ne 0 ]; then echo "Erreur : Le build Flutter App Bundle a échoué !"; exit 1; fi
+            echo "Build Flutter App Bundle terminé."
+            if [ "$BUILD_MODE" == "release" ]; then
+                ANDROID_ARTIFACT_PATH="build/app/outputs/bundle/release/app-release.aab"
+            else # debug
+                ANDROID_ARTIFACT_PATH="build/app/outputs/bundle/debug/app-debug.aab"
+            fi
         fi
         echo "Artefact disponible : $ANDROID_ARTIFACT_PATH"
     fi
@@ -273,21 +301,28 @@ if $ACTION_DEPLOY; then
         echo "Déploiement Firebase Web terminé."
     elif [ "$PLATFORM" == "android" ]; then
         if [ -z "$ANDROID_ARTIFACT_PATH" ]; then # Si --build n'a pas été exécuté dans ce run
-            if [ "$BUILD_MODE" == "release" ]; then
-                ANDROID_ARTIFACT_PATH="build/app/outputs/bundle/release/app-release.aab"
-            else
-                ANDROID_ARTIFACT_PATH="build/app/outputs/bundle/debug/app-debug.aab"
+            if [ "$ARTIFACT_TYPE" == "apk" ]; then
+                if [ "$BUILD_MODE" == "release" ]; then
+                    ANDROID_ARTIFACT_PATH="build/app/outputs/flutter-apk/app-release.apk"
+                else
+                    ANDROID_ARTIFACT_PATH="build/app/outputs/flutter-apk/app-debug.apk"
+                fi
+            else # aab
+                if [ "$BUILD_MODE" == "release" ]; then
+                    ANDROID_ARTIFACT_PATH="build/app/outputs/bundle/release/app-release.aab"
+                else
+                    ANDROID_ARTIFACT_PATH="build/app/outputs/bundle/debug/app-debug.aab"
+                fi
             fi
         fi
         if [ ! -f "$ANDROID_ARTIFACT_PATH" ]; then
-            echo "Erreur : Artefact Android '$ANDROID_ARTIFACT_PATH' introuvable. Exécutez --build avec mode (-m $BUILD_MODE) ?"
+            echo "Erreur : Artefact Android '$ANDROID_ARTIFACT_PATH' introuvable. Exécutez --build avec mode (-m $BUILD_MODE) et type (-a $ARTIFACT_TYPE) ?"
             execute_verbose "Nettoyage $TARGET_FIREBASE_JSON_PATH" rm -f "$TARGET_FIREBASE_JSON_PATH"; exit 1
         fi
 
         if [ "$ENVIRONMENT" == "prod" ]; then
-            echo "L'App Bundle de Production est prêt : $ANDROID_ARTIFACT_PATH"
-            echo "Veuillez le téléverser manuellement sur la Google Play Console ou utiliser votre pipeline CI/CD dédié."
-            echo "Le déploiement via Firebase App Distribution pour 'prod' est destiné aux testeurs finaux si configuré."
+            echo "L'artefact Android de Production ($ARTIFACT_TYPE) est prêt : $ANDROID_ARTIFACT_PATH"
+            echo "Pour Google Play Store: Téléversez-le manuellement ou utilisez votre pipeline CI/CD dédié."
             if [ -n "$TESTER_GROUPS_PROD" ]; then
                  echo "Distribution vers les testeurs de production ($TESTER_GROUPS_PROD) via App Distribution..."
             else
@@ -296,7 +331,7 @@ if $ACTION_DEPLOY; then
                 echo ">>> FIN - Déploiement <<<"; echo ""; exit 0
             fi
         else
-            echo "Déploiement App Bundle Android vers Firebase App Distribution..."
+            echo "Déploiement $ARTIFACT_TYPE Android vers Firebase App Distribution..."
         fi
 
         echo "Projet Firebase      : $CURRENT_FIREBASE_PROJECT_ID"
@@ -307,7 +342,7 @@ if $ACTION_DEPLOY; then
         FIREBASE_APP_DIST_CMD="firebase appdistribution:distribute \"$ANDROID_ARTIFACT_PATH\" \
             --app \"$CURRENT_FIREBASE_ANDROID_APP_ID\" \
             --project \"$CURRENT_FIREBASE_PROJECT_ID\" \
-            --release-notes \"Build $BUILD_MODE pour $ENVIRONMENT ($PLATFORM) - $(date +'%Y-%m-%d %H:%M')\" \
+            --release-notes \"Build $BUILD_MODE ($ARTIFACT_TYPE) pour $ENVIRONMENT ($PLATFORM) - $(date +'%Y-%m-%d %H:%M')\" \
             --groups \"$CURRENT_TESTER_GROUPS\""
 
         if [ "$VERBOSE_MODE" = true ]; then echo ">>> Commande (Distribution App Android): $FIREBASE_APP_DIST_CMD"; fi
@@ -315,6 +350,7 @@ if $ACTION_DEPLOY; then
         DIST_RESULT=$?
         if [ $DIST_RESULT -ne 0 ]; then
             echo "Erreur : Distribution Firebase App Android échouée !"
+            echo "Si c'est un AAB, assurez-vous que le projet Firebase est lié à Google Play."
             execute_verbose "Nettoyage $TARGET_FIREBASE_JSON_PATH après échec" rm -f "$TARGET_FIREBASE_JSON_PATH"; exit 1
         fi
         echo "Distribution Firebase App Android terminée."
