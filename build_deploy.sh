@@ -20,8 +20,8 @@ GOOGLE_SERVICES_JSON_PROD_PATH="android/app/google-services.prod.json"
 ANDROID_TARGET_GOOGLE_SERVICES_PATH="android/app/google-services.json"
 
 FIREBASE_ANDROID_APP_ID_DEV="1:83241971458:android:dde10259edb60d45711c1b"
-FIREBASE_ANDROID_APP_ID_STAGING="1:344541548510:android:631fa078fb9926677d174f" # Assurez-vous que cette valeur est correcte
-FIREBASE_ANDROID_APP_ID_PROD="1:48301164525:android:c3713960cdefdbb28589e4"     # Assurez-vous que cette valeur est correcte
+FIREBASE_ANDROID_APP_ID_STAGING="1:344541548510:android:631fa078fb9926677d174f"
+FIREBASE_ANDROID_APP_ID_PROD="1:48301164525:android:c3713960cdefdbb28589e4"
 
 TESTER_GROUPS_DEV="dev-testers"
 TESTER_GROUPS_STAGING="uat-testers"
@@ -30,11 +30,12 @@ TESTER_GROUPS_PROD="prod-final-checkers"
 WEB_INDEX_TEMPLATE_PATH="web/index-template.html"
 WEB_INDEX_PATH="web/index.html"
 WEB_INDEX_PLACEHOLDER="##GOOGLE_SIGNIN_CLIENT_ID_PLACEHOLDER##"
+PUBSPEC_FILE="pubspec.yaml"
 # --- Fin de la Configuration ---
 
 ENVIRONMENT="dev"
 PLATFORM="web"
-ARTIFACT_TYPE="aab" # Nouveau: aab ou apk, par défaut aab
+ARTIFACT_TYPE="aab"
 ACTION_BUILD=false
 ACTION_DEPLOY=false
 USER_SPECIFIED_BUILD_MODE=""
@@ -59,7 +60,7 @@ usage() {
     echo "  -a <aab|apk>           Spécifie le type d'artefact Android (aab ou apk). Défaut: aab."
     echo "  -m <mode>              Spécifie le mode de build (debug|release)."
     echo "                         Par défaut: 'debug' pour 'dev', 'release' pour les autres."
-    echo "  --build                Exécute l'étape de build."
+    echo "  --build                Exécute l'étape de build (incrémente le build number dans pubspec.yaml)."
     echo "  --deploy               Exécute l'étape de déploiement."
     echo "  --verbose, -v          Affiche les commandes exécutées."
     echo ""
@@ -155,6 +156,45 @@ execute_verbose() {
     return $?
 }
 
+increment_pubspec_build_number() {
+    if [ ! -f "$PUBSPEC_FILE" ]; then
+        echo "Erreur : Fichier '$PUBSPEC_FILE' introuvable pour l'incrémentation du build number."
+        return 1
+    fi
+
+    current_version_line=$(grep '^version:' "$PUBSPEC_FILE")
+    if [ -z "$current_version_line" ]; then
+        echo "Erreur : Ligne 'version:' introuvable dans '$PUBSPEC_FILE'."
+        return 1
+    fi
+
+    current_version_string=$(echo "$current_version_line" | awk '{print $2}') # Prend la valeur après "version: "
+
+    base_version=$(echo "$current_version_string" | cut -d+ -f1)
+    current_build_number_str=$(echo "$current_version_string" | cut -d+ -s -f2) # -s pour ne rien afficher si + n'existe pas
+
+    if [ -z "$current_build_number_str" ]; then # Si pas de +B, on l'initialise à 0 pour l'incrémenter à 1
+        current_build_number=0
+    else
+        current_build_number=$((current_build_number_str))
+    fi
+
+    new_build_number=$((current_build_number + 1))
+    new_version_string="${base_version}+${new_build_number}"
+
+    # Remplacer l'ancienne ligne de version par la nouvelle
+    # Utilisation de "" pour sed -i sur MINGW64 (GNU sed) pour une modification sur place sans backup explicite.
+    # Pour macOS (BSD sed), il faudrait sed -i '.bak' ...
+    execute_verbose "Mise à jour de la version dans $PUBSPEC_FILE" sed -i "s/^version: .*/version: $new_version_string/" "$PUBSPEC_FILE"
+    if [ $? -ne 0 ]; then
+        echo "Erreur : Échec de la mise à jour de la version dans '$PUBSPEC_FILE'."
+        return 1
+    fi
+    echo "Numéro de build mis à jour dans '$PUBSPEC_FILE' de '$current_version_string' vers '$new_version_string'."
+    return 0
+}
+
+
 case "$ENVIRONMENT" in
     dev)
         CURRENT_FIREBASE_PROJECT_ID="$FIREBASE_PROJECT_ID_DEV"
@@ -198,6 +238,15 @@ if [[ ! -f "$CURRENT_FIREBASE_CONFIG_FILE_SOURCE_PATH" ]] && $ACTION_DEPLOY; the
     echo "ERREUR : Fichier de configuration Firebase '$CURRENT_FIREBASE_CONFIG_FILE_SOURCE_PATH' pour '$ENVIRONMENT' introuvable."
     exit 1
 fi
+
+if $ACTION_BUILD; then
+    echo ""
+    echo ">>> Incrémentation du numéro de build dans $PUBSPEC_FILE <<<"
+    increment_pubspec_build_number
+    if [ $? -ne 0 ]; then exit 1; fi # Arrêter si l'incrémentation échoue
+    echo ""
+fi
+
 
 if $ACTION_BUILD && ( [ "$ENVIRONMENT" == "staging" ] || [ "$ENVIRONMENT" == "prod" ] ); then
     echo ""
@@ -300,14 +349,14 @@ if $ACTION_DEPLOY; then
         fi
         echo "Déploiement Firebase Web terminé."
     elif [ "$PLATFORM" == "android" ]; then
-        if [ -z "$ANDROID_ARTIFACT_PATH" ]; then # Si --build n'a pas été exécuté dans ce run
+        if [ -z "$ANDROID_ARTIFACT_PATH" ]; then
             if [ "$ARTIFACT_TYPE" == "apk" ]; then
                 if [ "$BUILD_MODE" == "release" ]; then
                     ANDROID_ARTIFACT_PATH="build/app/outputs/flutter-apk/app-release.apk"
                 else
                     ANDROID_ARTIFACT_PATH="build/app/outputs/flutter-apk/app-debug.apk"
                 fi
-            else # aab
+            else
                 if [ "$BUILD_MODE" == "release" ]; then
                     ANDROID_ARTIFACT_PATH="build/app/outputs/bundle/release/app-release.aab"
                 else
