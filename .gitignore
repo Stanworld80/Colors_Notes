@@ -54,7 +54,7 @@ build/036592f0c6014b40cf5d6d3d85082f2c/gen_localizations.stamp
 
 *.mocks.dart
 /chromedriver/
-/android/key.properties
+/android/*.properties
 *.jks
 /doc/
 /lib/l10n/app_localizations*.dart
