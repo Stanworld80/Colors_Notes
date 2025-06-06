@@ -1,7 +1,7 @@
 import java.util.Properties // Import nécessaire pour Properties
 
 // Configuration pour lire les propriétés de signature depuis key.properties
-val keyPropertiesFile = rootProject.file("android/key.properties") // Chemin ajusté
+val keyPropertiesFile = rootProject.file("../android/key.properties")
 val keyProperties = Properties()
 if (keyPropertiesFile.exists()) {
     keyPropertiesFile.inputStream().use { input ->
