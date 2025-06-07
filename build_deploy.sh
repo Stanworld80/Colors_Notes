@@ -1,159 +1,125 @@
 #!/bin/bash
 
-# --- Configuration ---
+# ==============================================================================
+# build_deploy.sh - Script de Build et Déploiement pour ColorsNotes
+#
+# Ce script gère la compilation, les tests et le déploiement de l'application
+# sur différents environnements (dev, staging, prod) et plateformes (web, android).
+# ==============================================================================
+
+# --- Configuration des Environnements ---
+# IDs de projet Firebase
 FIREBASE_PROJECT_ID_DEV="colors-notes-dev"
 FIREBASE_PROJECT_ID_STAGING="colors-notes-staging"
 FIREBASE_PROJECT_ID_PROD="colors-notes-prod"
 
+# Fichiers de configuration Firebase pour le déploiement Hosting/Functions
 FIREBASE_CONFIG_FILE_DEV="firebase.dev.json"
 FIREBASE_CONFIG_FILE_STAGING="firebase.staging.json"
 FIREBASE_CONFIG_FILE_PROD="firebase.prod.json"
 TARGET_FIREBASE_JSON_PATH="firebase.json"
 
+# IDs Client Web Google Sign-In par environnement
 GOOGLE_SIGNIN_CLIENT_ID_WEB_DEV="83241971458-14tiragdibb39tnm9op5nd6fqnm4ct53.apps.googleusercontent.com"
 GOOGLE_SIGNIN_CLIENT_ID_WEB_STAGING="344541548510-k1vncr9ufjii7r3k4425p8sqgq5p47r6.apps.googleusercontent.com"
 GOOGLE_SIGNIN_CLIENT_ID_WEB_PROD="48301164525-6lqqh5tc0m0jpsm4ovdpgalosve17a1m.apps.googleusercontent.com"
 
+# Fichiers google-services.json pour Android par environnement
 GOOGLE_SERVICES_JSON_DEV_PATH="android/app/google-services.dev.json"
 GOOGLE_SERVICES_JSON_STAGING_PATH="android/app/google-services.staging.json"
 GOOGLE_SERVICES_JSON_PROD_PATH="android/app/google-services.prod.json"
 ANDROID_TARGET_GOOGLE_SERVICES_PATH="android/app/google-services.json"
 
+# IDs d'application Android Firebase par environnement
 FIREBASE_ANDROID_APP_ID_DEV="1:83241971458:android:dde10259edb60d45711c1b"
 FIREBASE_ANDROID_APP_ID_STAGING="1:344541548510:android:631fa078fb9926677d174f"
 FIREBASE_ANDROID_APP_ID_PROD="1:48301164525:android:c3713960cdefdbb28589e4"
 
+# Groupes de testeurs pour Firebase App Distribution
 TESTER_GROUPS_DEV="dev-testers"
 TESTER_GROUPS_STAGING="uat-testers"
 TESTER_GROUPS_PROD="prod-final-checkers"
 
+# Fichiers de configuration et templates
 WEB_INDEX_TEMPLATE_PATH="web/index-template.html"
 WEB_INDEX_PATH="web/index.html"
 WEB_INDEX_PLACEHOLDER="##GOOGLE_SIGNIN_CLIENT_ID_PLACEHOLDER##"
 PUBSPEC_FILE="pubspec.yaml"
 # --- Fin de la Configuration ---
 
+
+# --- Variables de Script ---
 ENVIRONMENT="dev"
-PLATFORM="web"
-ARTIFACT_TYPE="aab"
-ACTION_BUILD=false
-ACTION_DEPLOY=false
-USER_SPECIFIED_BUILD_MODE=""
+PLATFORMS=()
+BUILD_ONLY=false
+CLEAN_BUILD=true
+BYPASS_TESTS=false
+SPECIFIC_ANDROID_BUILD=""
 VERBOSE_MODE=false
-BYPASS_TESTS=false # NOUVEAU: Option pour éviter les tests
 
-CURRENT_FIREBASE_PROJECT_ID=""
-CURRENT_GOOGLE_SIGNIN_CLIENT_ID_WEB=""
-CURRENT_GOOGLE_SERVICES_JSON_SOURCE_PATH=""
-CURRENT_FIREBASE_ANDROID_APP_ID=""
-CURRENT_TESTER_GROUPS=""
-CURRENT_FIREBASE_CONFIG_FILE_SOURCE_PATH=""
-FLUTTER_BUILD_MODE_FLAG=""
-ANDROID_ARTIFACT_PATH=""
-BUILD_MODE=""
 
-usage() {
-    echo "Usage: $0 -e <dev|staging|prod> --platform <web|android> [-a <aab|apk>] [-m <debug|release>] [--build] [--deploy] [--bypasstest] [--verbose]"
+# --- Fonctions ---
+print_usage() {
+    echo "Usage: ./build_deploy.sh [-e <ENV>] [-p <PLATFORM>] [-a <ANDROID_TYPE>] [--buildonly] [--noclean] [--bypasstest] [-v] [-h]"
     echo ""
     echo "Options:"
-    echo "  -e <environnement>     Spécifie l'environnement. Défaut: dev."
-    echo "  --platform <web|android> Spécifie la plateforme. Défaut: web."
-    echo "  -a <aab|apk>           Spécifie le type d'artefact Android (aab ou apk). Défaut: aab."
-    echo "  -m <mode>              Spécifie le mode de build (debug|release)."
-    echo "                         Par défaut: 'debug' pour 'dev', 'release' pour les autres."
-    echo "  --build                Exécute l'étape de build (incrémente le build number dans pubspec.yaml)."
-    echo "  --deploy               Exécute l'étape de déploiement."
-    echo "  --bypasstest           Évite l'exécution de 'flutter test' pour les environnements staging et prod." # NOUVEAU
-    echo "  --verbose, -v          Affiche les commandes exécutées."
-    echo ""
-    echo "Si ni --build ni --deploy n'est spécifié, le script affichera cet usage."
-    echo "Pour 'prod', --deploy requiert la branche 'main' et la réussite de 'flutter test' (sauf si --bypasstest)."
-    echo "Pour 'staging', --deploy autorise 'main', 'staging-branch' ou 'release-candidate/*' et 'flutter test' est exécuté (échec non bloquant, sauf si --bypasstest)."
-    exit 1
+    echo "  -e <ENV>                Spécifie l'environnement : 'dev' (défaut), 'staging', ou 'prod'."
+    echo "  -p <PLATFORM>           Spécifie une plateforme : 'web' ou 'android'. Peut être utilisé plusieurs fois."
+    echo "                          Par défaut, compile pour web ET android."
+    echo "  -a <ANDROID_TYPE>       Pour Android (prod uniquement) : 'apk' ou 'aab'. Si omis, construit les deux."
+    echo "                          Pour dev/staging, seul l'APK est construit."
+    echo "  --buildonly             Compile uniquement, sans déploiement ni opérations Git."
+    echo "  --noclean               Désactive 'flutter clean' avant la compilation."
+    echo "  --bypasstest            Évite l'exécution des tests unitaires pour 'dev' et 'staging'. Les tests sont obligatoires pour 'prod'."
+    echo "  -v, --verbose           Active le mode verbeux pour afficher les détails des commandes exécutées."
+    echo "  -h, --help              Affiche ce message d'aide."
 }
 
-TEMP_ENV=""
-TEMP_PLATFORM=""
-TEMP_ARTIFACT_TYPE=""
+execute_verbose() {
+    local cmd_description="$1"; shift
+    if [ "$VERBOSE_MODE" = true ]; then
+        echo "  - Commande ($cmd_description): $@"
+    fi
+    "$@"
+    return $?
+}
 
+# --- Analyse des Arguments ---
 while [[ "$#" -gt 0 ]]; do
     case $1 in
-        -e) TEMP_ENV="$2"; shift ;;
-        --platform) TEMP_PLATFORM="$2"; shift ;;
-        -a|--artifact-type) TEMP_ARTIFACT_TYPE="$2"; shift ;;
-        -m|--mode) USER_SPECIFIED_BUILD_MODE="$2"; shift ;;
-        --build) ACTION_BUILD=true ;;
-        --deploy) ACTION_DEPLOY=true ;;
-        --bypasstest) BYPASS_TESTS=true ;; # NOUVEAU
+        -e) ENVIRONMENT="$2"; shift ;;
+        -p) PLATFORMS+=("$2"); shift ;;
+        -a) SPECIFIC_ANDROID_BUILD="$2"; shift ;;
+        --buildonly) BUILD_ONLY=true ;;
+        --noclean) CLEAN_BUILD=false ;;
+        --bypasstest) BYPASS_TESTS=true ;;
         -v|--verbose) VERBOSE_MODE=true ;;
-        -h|--help) usage ;;
-        *) echo "Paramètre inconnu: $1"; usage ;;
+        -h|--help) print_usage; exit 0 ;;
+        *) echo "Erreur : Paramètre inconnu '$1'"; print_usage; exit 1 ;;
     esac
     shift
 done
 
-if [ -n "$TEMP_ENV" ]; then ENVIRONMENT="$TEMP_ENV"; fi
-if [ -n "$TEMP_PLATFORM" ]; then PLATFORM="$TEMP_PLATFORM"; fi
-if [ -n "$TEMP_ARTIFACT_TYPE" ]; then ARTIFACT_TYPE="$TEMP_ARTIFACT_TYPE"; fi
-
-if [ "$PLATFORM" == "android" ]; then
-    case "$ARTIFACT_TYPE" in
-        aab|apk) ;;
-        *) echo "Erreur: Type d'artefact Android '$ARTIFACT_TYPE' invalide. Choisir 'aab' ou 'apk'."; usage ;;
-    esac
+if [ ${#PLATFORMS[@]} -eq 0 ]; then
+    PLATFORMS=("web" "android")
 fi
 
-if [ -n "$USER_SPECIFIED_BUILD_MODE" ]; then
-    BUILD_MODE="$USER_SPECIFIED_BUILD_MODE"
-else
-    if [ "$ENVIRONMENT" == "dev" ]; then BUILD_MODE="debug"; else BUILD_MODE="release"; fi
+# --- Configuration de l'Environnement de Build ---
+BUILD_TYPE="debug"
+if [ "$ENVIRONMENT" == "prod" ]; then
+    BUILD_TYPE="release"
 fi
 
-case "$BUILD_MODE" in
-    debug) FLUTTER_BUILD_MODE_FLAG="--debug" ;;
-    release) FLUTTER_BUILD_MODE_FLAG="--release" ;;
-    *) echo "Erreur: Mode de build '$BUILD_MODE' invalide. Choisir 'debug' ou 'release'."; usage ;;
-esac
-
-if ! $ACTION_BUILD && ! $ACTION_DEPLOY; then echo "Erreur: --build ou --deploy doit être spécifié."; usage; fi
-case "$ENVIRONMENT" in dev|staging|prod) ;; *) echo "Erreur: Environnement '$ENVIRONMENT' invalide."; usage ;; esac
-case "$PLATFORM" in web|android) ;; *) echo "Erreur: Plateforme '$PLATFORM' invalide."; usage ;; esac
-
-echo "--- Configuration Sélectionnée ---"
-echo "Environnement : $ENVIRONMENT"
-echo "Plateforme    : $PLATFORM"
-if [ "$PLATFORM" == "android" ]; then echo "Artefact Android: $ARTIFACT_TYPE"; fi
-echo "Mode Build    : $BUILD_MODE (Flag: $FLUTTER_BUILD_MODE_FLAG)"
-echo "Action Build  : $ACTION_BUILD"
-echo "Action Deploy : $ACTION_DEPLOY"
-echo "Bypass Tests  : $BYPASS_TESTS" # NOUVEAU
-echo "Verbose       : $VERBOSE_MODE"
-echo "---------------------------------"
-echo ""
-
-execute_verbose() {
-    local cmd_description="$1"; shift; local cmd_to_execute=("$@")
-    if [ "$VERBOSE_MODE" = true ]; then
-        printf ">>> Exécution (%s):" "$cmd_description"; for arg in "${cmd_to_execute[@]}"; do printf " %q" "$arg"; done; printf "\n"
+# Ajustement pour le build Android
+if [[ "$ENVIRONMENT" == "dev" || "$ENVIRONMENT" == "staging" ]]; then
+    if [ "$SPECIFIC_ANDROID_BUILD" == "aab" ]; then
+        echo "AVERTISSEMENT : La construction d'AAB est ignorée pour l'environnement '$ENVIRONMENT'. Seul l'APK sera construit."
     fi
-    "${cmd_to_execute[@]}"; return $?
-}
+    # Pour dev et staging, on ne construit que l'apk
+    SPECIFIC_ANDROID_BUILD="apk"
+fi
 
-increment_pubspec_build_number() {
-    if [ ! -f "$PUBSPEC_FILE" ]; then echo "Erreur: Fichier '$PUBSPEC_FILE' introuvable."; return 1; fi
-    current_version_line=$(grep '^version:' "$PUBSPEC_FILE")
-    if [ -z "$current_version_line" ]; then echo "Erreur: Ligne 'version:' introuvable dans '$PUBSPEC_FILE'."; return 1; fi
-    current_version_string=$(echo "$current_version_line" | awk '{print $2}')
-    base_version=$(echo "$current_version_string" | cut -d+ -f1)
-    current_build_number_str=$(echo "$current_version_string" | cut -d+ -s -f2)
-    if [ -z "$current_build_number_str" ]; then current_build_number=0; else current_build_number=$((current_build_number_str)); fi
-    new_build_number=$((current_build_number + 1)); new_version_string="${base_version}+${new_build_number}"
-    execute_verbose "Mise à jour version pubspec.yaml" sed -i "s/^version: .*/version: $new_version_string/" "$PUBSPEC_FILE"
-    if [ $? -ne 0 ]; then echo "Erreur: Échec mise à jour version dans '$PUBSPEC_FILE'."; return 1; fi
-    echo "Numéro de build dans '$PUBSPEC_FILE' mis à jour: '$current_version_string' -> '$new_version_string'."
-    return 0
-}
-
+# Sélection des variables de configuration en fonction de l'environnement
 case "$ENVIRONMENT" in
     dev)
         CURRENT_FIREBASE_PROJECT_ID="$FIREBASE_PROJECT_ID_DEV"; CURRENT_GOOGLE_SIGNIN_CLIENT_ID_WEB="$GOOGLE_SIGNIN_CLIENT_ID_WEB_DEV"
@@ -169,151 +135,195 @@ case "$ENVIRONMENT" in
         CURRENT_TESTER_GROUPS="$TESTER_GROUPS_PROD"; CURRENT_FIREBASE_CONFIG_FILE_SOURCE_PATH="$FIREBASE_CONFIG_FILE_PROD" ;;
 esac
 
-if [[ "$CURRENT_GOOGLE_SIGNIN_CLIENT_ID_WEB" == YOUR_* || "$CURRENT_GOOGLE_SERVICES_JSON_SOURCE_PATH" == YOUR_* || "$CURRENT_FIREBASE_ANDROID_APP_ID" == YOUR_* ]]; then
-    echo "ERREUR: Vérifiez les placeholders 'YOUR_*' dans la configuration du script pour '$ENVIRONMENT'."
-    if [[ ( ! -f "$CURRENT_GOOGLE_SERVICES_JSON_SOURCE_PATH" && "$PLATFORM" == "android" && $ACTION_BUILD ) || \
-          ( ! -f "$CURRENT_FIREBASE_CONFIG_FILE_SOURCE_PATH" && $ACTION_DEPLOY ) ]]; then
-        echo "ERREUR: Fichiers de configuration manquants pour '$ENVIRONMENT'."
-    fi
-    exit 1
-fi
-
-if $ACTION_BUILD; then
-    echo ""; echo ">>> Incrémentation du numéro de build dans $PUBSPEC_FILE <<<"
-    increment_pubspec_build_number; if [ $? -ne 0 ]; then exit 1; fi; echo ""
-fi
-
-if $ACTION_BUILD && [ "$PLATFORM" == "android" ]; then
-    echo ">>> Préparation config signature pour '$ENVIRONMENT' ($BUILD_MODE) <<<"
-    KEY_PROPERTIES_SOURCE_FILE=""
-    if [ "$BUILD_MODE" == "release" ]; then
-        if [ "$ENVIRONMENT" == "dev" ]; then KEY_PROPERTIES_SOURCE_FILE="android/key.dev.properties";
-        elif [ "$ENVIRONMENT" == "staging" ]; then KEY_PROPERTIES_SOURCE_FILE="android/key.staging.properties";
-        elif [ "$ENVIRONMENT" == "prod" ]; then KEY_PROPERTIES_SOURCE_FILE="android/key.prod.properties"; fi
-    fi
-
-    if [ -n "$KEY_PROPERTIES_SOURCE_FILE" ]; then
-        if [ ! -f "$KEY_PROPERTIES_SOURCE_FILE" ]; then echo "ERREUR: Fichier propriétés de clé '$KEY_PROPERTIES_SOURCE_FILE' introuvable !"; exit 1; fi
-        execute_verbose "Copie config de clé" cp "$KEY_PROPERTIES_SOURCE_FILE" "android/key.properties"
-        echo "Config signature pour '$ENVIRONMENT' ($BUILD_MODE) prête."
-    elif [ "$BUILD_MODE" == "release" ]; then
-        echo "AVERTISSEMENT: Pas de fichier de propriétés de clé spécifique pour un build 'release' de '$ENVIRONMENT'."
-    else
-        echo "Build 'debug', utilisera le debug.keystore standard d'Android."
-    fi
-    echo ""
-fi
-
-# MODIFICATION ICI: Ajout de la condition ! $BYPASS_TESTS
-if ( $ACTION_BUILD && ( [ "$ENVIRONMENT" == "staging" ] && ! $BYPASS_TESTS ) || [ "$ENVIRONMENT" == "prod" ] ); then
-    echo ""; echo ">>> Exécution 'flutter test' pour $ENVIRONMENT <<<"
-    execute_verbose "Tests Flutter" flutter test; TEST_RESULT=$?
-    if [ $TEST_RESULT -ne 0 ]; then
-        if [ "$ENVIRONMENT" == "prod" ]; then echo "ERREUR: 'flutter test' échoué pour 'prod'. Stop."; exit 1;
-        else echo "AVERTISSEMENT: 'flutter test' échoué pour 'staging'. Continuation..."; fi
-    else echo "'flutter test' réussi pour $ENVIRONMENT."; fi
-    echo ""
-elif $ACTION_BUILD && $BYPASS_TESTS && [ "$ENVIRONMENT" == "staging" ]; then
-    echo ""; echo ">>> AVERTISSEMENT: 'flutter test' évité pour $ENVIRONMENT via --bypasstest <<<"; echo ""
-fi
-
-if $ACTION_BUILD; then
-    echo ">>> DÉBUT - Build pour $PLATFORM ($ENVIRONMENT) en mode $BUILD_MODE <<<"
-        execute_verbose "Flutter Clean" flutter clean
-    if [ "$PLATFORM" == "web" ]; then
-        echo "Préparation $WEB_INDEX_PATH pour $ENVIRONMENT..."
-        if [ ! -f "$WEB_INDEX_TEMPLATE_PATH" ]; then echo "Erreur: Template '$WEB_INDEX_TEMPLATE_PATH' introuvable."; exit 1; fi
-        execute_verbose "Copie template index.html" cp "$WEB_INDEX_TEMPLATE_PATH" "$WEB_INDEX_PATH"
-        SED_CMD="sed -i.bak \"s|$WEB_INDEX_PLACEHOLDER|$CURRENT_GOOGLE_SIGNIN_CLIENT_ID_WEB|g\" \"$WEB_INDEX_PATH\""
-        if [ "$VERBOSE_MODE" = true ]; then echo ">>> Exécution (Remplacement placeholder Google Sign-In): $SED_CMD"; fi
-        eval "$SED_CMD"; if [ -f "$WEB_INDEX_PATH.bak" ]; then rm -f "$WEB_INDEX_PATH.bak"; fi
-        echo "$WEB_INDEX_PATH configuré."
-        echo "Build Flutter Web ($FLUTTER_BUILD_MODE_FLAG)..."
-        execute_verbose "Build Flutter Web" flutter build web "$FLUTTER_BUILD_MODE_FLAG" "--dart-define=APP_ENV=$ENVIRONMENT"
-        if [ $? -ne 0 ]; then echo "Erreur: Build Flutter Web échoué !"; exit 1; fi
-        echo "Build Flutter Web terminé."
-    elif [ "$PLATFORM" == "android" ]; then
-        echo "Préparation $ANDROID_TARGET_GOOGLE_SERVICES_PATH pour $ENVIRONMENT..."
-        execute_verbose "Copie google-services.json" cp "$CURRENT_GOOGLE_SERVICES_JSON_SOURCE_PATH" "$ANDROID_TARGET_GOOGLE_SERVICES_PATH"
-        echo "$ANDROID_TARGET_GOOGLE_SERVICES_PATH configuré."
-        if [ "$ARTIFACT_TYPE" == "apk" ]; then
-            echo "Build APK Android ($FLUTTER_BUILD_MODE_FLAG)..."
-            execute_verbose "Build Flutter APK" flutter build apk "$FLUTTER_BUILD_MODE_FLAG" "--dart-define=APP_ENV=$ENVIRONMENT"
-            if [ $? -ne 0 ]; then echo "Erreur: Build Flutter APK échoué !"; exit 1; fi
-            echo "Build Flutter APK terminé."
-            if [ "$BUILD_MODE" == "release" ]; then ANDROID_ARTIFACT_PATH="build/app/outputs/flutter-apk/app-release.apk"; else ANDROID_ARTIFACT_PATH="build/app/outputs/flutter-apk/app-debug.apk"; fi
+# --- Affichage de la Configuration ---
+echo "=================================================="
+echo " Démarrage du processus de Build & Déploiement"
+echo "=================================================="
+echo "  Environnement : $ENVIRONMENT"
+echo "  Mode de Build   : $BUILD_TYPE"
+echo "  Plateformes     : ${PLATFORMS[*]}"
+if [[ " ${PLATFORMS[*]} " =~ " android " ]]; then
+    if [ "$ENVIRONMENT" == "prod" ]; then
+        if [ -z "$SPECIFIC_ANDROID_BUILD" ]; then
+            echo "  Artefacts Android : apk et aab"
         else
-            echo "Build App Bundle Android ($FLUTTER_BUILD_MODE_FLAG)..."
-            execute_verbose "Build Flutter App Bundle" flutter build appbundle "$FLUTTER_BUILD_MODE_FLAG" "--dart-define=APP_ENV=$ENVIRONMENT"
-            if [ $? -ne 0 ]; then echo "Erreur: Build Flutter App Bundle échoué !"; exit 1; fi
-            echo "Build Flutter App Bundle terminé."
-            if [ "$BUILD_MODE" == "release" ]; then ANDROID_ARTIFACT_PATH="build/app/outputs/bundle/release/app-release.aab"; else ANDROID_ARTIFACT_PATH="build/app/outputs/bundle/debug/app-debug.aab"; fi
+            echo "  Artefact Android  : $SPECIFIC_ANDROID_BUILD"
         fi
-        echo "Artefact: $ANDROID_ARTIFACT_PATH"
+    else
+        echo "  Artefact Android  : apk"
     fi
-    echo ">>> FIN - Build <<<"; echo ""
+fi
+echo "  Déploiement     : $(if $BUILD_ONLY; then echo "Non (buildonly)"; else echo "Oui"; fi)"
+echo "  Nettoyage       : $(if $CLEAN_BUILD; then echo "Oui"; else echo "Non"; fi)"
+if [ "$ENVIRONMENT" == "prod" ]; then
+    echo "  Tests unitaires : Activés (obligatoire pour prod)"
+else
+    echo "  Tests unitaires : $(if $BYPASS_TESTS; then echo "Désactivés (bypass)"; else echo "Activés"; fi)"
+fi
+echo "  Mode Verbeux    : $VERBOSE_MODE"
+echo "--------------------------------------------------"
+
+# --- Logique de Build ---
+# 1. Nettoyage (si activé)
+if [ "$CLEAN_BUILD" = true ]; then
+    echo "-> Étape 1/6 : Nettoyage du projet..."
+    execute_verbose "Nettoyage Flutter" flutter clean
+    if [ $? -ne 0 ]; then echo "Erreur lors de 'flutter clean'."; exit 1; fi
+    echo "Nettoyage terminé."
 fi
 
-if $ACTION_DEPLOY; then
-    echo ">>> DEBUT - Déploiement pour $PLATFORM ($ENVIRONMENT) en mode $BUILD_MODE <<<"
-    echo "Configuration $TARGET_FIREBASE_JSON_PATH pour $ENVIRONMENT..."
-    execute_verbose "Copie config Firebase" cp "$CURRENT_FIREBASE_CONFIG_FILE_SOURCE_PATH" "$TARGET_FIREBASE_JSON_PATH"
-    if [ $? -ne 0 ]; then echo "Erreur: Copie de '$CURRENT_FIREBASE_CONFIG_FILE_SOURCE_PATH' vers '$TARGET_FIREBASE_JSON_PATH' échouée."; exit 1; fi
-    echo "$TARGET_FIREBASE_JSON_PATH configuré."
+# 2. Mise à jour de la version
+echo "-> Étape 2/6 : Mise à jour de la version..."
+VERSION_LINE=$(grep 'version:' pubspec.yaml)
+VERSION_NUMBER=$(echo "$VERSION_LINE" | cut -d' ' -f2)
+VERSION_NAME=$(echo "$VERSION_NUMBER" | cut -d'+' -f1)
+BUILD_NUMBER=$(echo "$VERSION_NUMBER" | cut -d'+' -f2)
+NEW_BUILD_NUMBER=$((BUILD_NUMBER + 1))
+NEW_VERSION="$VERSION_NAME+$NEW_BUILD_NUMBER"
+execute_verbose "Mise à jour de pubspec.yaml" sed -i.bak "s/version: $VERSION_NUMBER/version: $NEW_VERSION/" pubspec.yaml && rm pubspec.yaml.bak
+echo "Version mise à jour dans pubspec.yaml : $NEW_VERSION"
+TAG_NAME="$NEW_VERSION"
 
-    CURRENT_GIT_BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --abbrev-ref HEAD 2>/dev/null)
-    echo "Branche Git actuelle: '$CURRENT_GIT_BRANCH'"
-    if [ "$ENVIRONMENT" == "prod" ] && [ "$CURRENT_GIT_BRANCH" != "main" ]; then
-        echo "ERREUR: Déploiement 'prod' depuis la branche 'main' uniquement.";
-        execute_verbose "Nettoyage $TARGET_FIREBASE_JSON_PATH" rm -f "$TARGET_FIREBASE_JSON_PATH";
-        exit 1
-    elif [ "$ENVIRONMENT" == "staging" ] && ! [[ "$CURRENT_GIT_BRANCH" == "main" || "$CURRENT_GIT_BRANCH" == "staging-branch" || "$CURRENT_GIT_BRANCH" == release-candidate/* ]]; then
-        echo "ERREUR: Déploiement 'staging' depuis 'main', 'staging-branch' ou 'release-candidate/*'.";
-        execute_verbose "Nettoyage $TARGET_FIREBASE_JSON_PATH" rm -f "$TARGET_FIREBASE_JSON_PATH";
-        exit 1
+# 3. Préparation des fichiers de configuration par environnement
+echo "-> Étape 3/6 : Préparation des fichiers de configuration..."
+if [[ " ${PLATFORMS[*]} " =~ " web " ]]; then
+    echo "   - Configuration de 'index.html' pour le web..."
+    execute_verbose "Copie du template index.html" cp "$WEB_INDEX_TEMPLATE_PATH" "$WEB_INDEX_PATH"
+    execute_verbose "Remplacement du placeholder Google Client ID" sed -i.bak "s|$WEB_INDEX_PLACEHOLDER|$CURRENT_GOOGLE_SIGNIN_CLIENT_ID_WEB|g" "$WEB_INDEX_PATH" && rm "$WEB_INDEX_PATH.bak"
+fi
+if [[ " ${PLATFORMS[*]} " =~ " android " ]]; then
+    echo "   - Configuration de 'google-services.json' pour Android..."
+    execute_verbose "Copie de google-services.json" cp "$CURRENT_GOOGLE_SERVICES_JSON_SOURCE_PATH" "$ANDROID_TARGET_GOOGLE_SERVICES_PATH"
+fi
+echo "Fichiers de configuration prêts."
+
+# 4. Préparation de la signature Android (pour les builds 'release')
+if [[ " ${PLATFORMS[*]} " =~ " android " ]] && [ "$BUILD_TYPE" == "release" ]; then
+    echo "-> Étape 4/6 : Préparation de la signature Android..."
+    KEY_PROPERTIES_SOURCE_FILE="android/key.${ENVIRONMENT}.properties"
+    if [ -f "$KEY_PROPERTIES_SOURCE_FILE" ]; then
+        execute_verbose "Copie de la configuration de signature" cp "$KEY_PROPERTIES_SOURCE_FILE" "android/key.properties"
+        echo "   Configuration de signature pour '$ENVIRONMENT' prête."
+    else
+        echo "   AVERTISSEMENT : Fichier '$KEY_PROPERTIES_SOURCE_FILE' introuvable. La compilation 'release' pourrait échouer."
     fi
-    echo "Vérification branche OK pour '$ENVIRONMENT' ('$CURRENT_GIT_BRANCH')."
+else
+     echo "-> Étape 4/6 : Préparation de la signature Android ignorée (non applicable)."
+fi
 
+# 5. Exécution des tests unitaires (si nécessaire)
+RUN_TESTS=true
+if [[ "$ENVIRONMENT" != "prod" && "$BYPASS_TESTS" == true ]]; then
+    RUN_TESTS=false
+fi
+
+if [ "$RUN_TESTS" = true ]; then
+    echo "-> Étape 5/6 : Exécution des tests unitaires..."
+    FLUTTER_TEST_CMD=("flutter" "test")
+    if [ "$VERBOSE_MODE" = true ]; then
+        FLUTTER_TEST_CMD+=("--reporter" "expanded")
+    fi
+    execute_verbose "Exécution des tests" "${FLUTTER_TEST_CMD[@]}"
+    if [ $? -ne 0 ]; then echo "ERREUR : Les tests unitaires ont échoué. Arrêt du script."; exit 1; fi
+    echo "Tests unitaires réussis."
+else
+    echo "-> Étape 5/6 : Tests unitaires ignorés (via --bypasstest)."
+fi
+
+# 6. Compilation pour chaque plateforme
+echo "-> Étape 6/6 : Compilation des plateformes..."
+for PLATFORM in "${PLATFORMS[@]}"; do
+    echo "   -> Lancement de la compilation pour : $PLATFORM"
     if [ "$PLATFORM" == "web" ]; then
-        echo "Déploiement Web vers Firebase Hosting projet: $CURRENT_FIREBASE_PROJECT_ID..."
-        execute_verbose "Déploiement Firebase Web" firebase deploy --only hosting --project "$CURRENT_FIREBASE_PROJECT_ID"
-        if [ $? -ne 0 ]; then echo "Erreur: Déploiement Firebase Web échoué !"; execute_verbose "Nettoyage $TARGET_FIREBASE_JSON_PATH" rm -f "$TARGET_FIREBASE_JSON_PATH"; exit 1; fi
-        echo "Déploiement Firebase Web terminé."
+        execute_verbose "Build Web" flutter build web --"$BUILD_TYPE" --dart-define=APP_ENV="$ENVIRONMENT"
+        if [ $? -ne 0 ]; then echo "ERREUR : La compilation web a échoué."; exit 1; fi
+        echo "   Compilation web terminée avec succès."
     elif [ "$PLATFORM" == "android" ]; then
-        if [ -z "$ANDROID_ARTIFACT_PATH" ]; then
-            if [ "$ARTIFACT_TYPE" == "apk" ]; then
-                if [ "$BUILD_MODE" == "release" ]; then ANDROID_ARTIFACT_PATH="build/app/outputs/flutter-apk/app-release.apk"; else ANDROID_ARTIFACT_PATH="build/app/outputs/flutter-apk/app-debug.apk"; fi
-            else
-                if [ "$BUILD_MODE" == "release" ]; then ANDROID_ARTIFACT_PATH="build/app/outputs/bundle/release/app-release.aab"; else ANDROID_ARTIFACT_PATH="build/app/outputs/bundle/debug/app-debug.aab"; fi
-            fi
+        if [ -z "$SPECIFIC_ANDROID_BUILD" ] || [ "$SPECIFIC_ANDROID_BUILD" == "apk" ]; then
+            echo "      -> Construction de l'APK Android..."
+            execute_verbose "Build APK" flutter build apk --"$BUILD_TYPE" --dart-define=APP_ENV="$ENVIRONMENT" --build-name "$VERSION_NAME" --build-number "$NEW_BUILD_NUMBER"
+            if [ $? -ne 0 ]; then echo "ERREUR : La compilation APK a échoué."; exit 1; fi
+            execute_verbose "Renommage APK" mv "build/app/outputs/flutter-apk/app-$BUILD_TYPE.apk" "build/app/outputs/flutter-apk/ColorsNotes-$TAG_NAME.apk"
+            echo "      APK construit : build/app/outputs/flutter-apk/ColorsNotes-$TAG_NAME.apk"
         fi
-        if [ ! -f "$ANDROID_ARTIFACT_PATH" ]; then echo "Erreur: Artefact Android '$ANDROID_ARTIFACT_PATH' introuvable."; execute_verbose "Nettoyage $TARGET_FIREBASE_JSON_PATH" rm -f "$TARGET_FIREBASE_JSON_PATH"; exit 1; fi
-
-        if [ "$ENVIRONMENT" == "prod" ]; then
-            echo "Artefact Android Prod ($ARTIFACT_TYPE) prêt: $ANDROID_ARTIFACT_PATH"
-            echo "Pour Google Play Store: Téléversement manuel ou via CI/CD dédié."
-            if [ -n "$TESTER_GROUPS_PROD" ]; then echo "Distribution vers testeurs prod ($TESTER_GROUPS_PROD) via App Distribution..."; else
-                echo "Aucun groupe testeur prod spécifié pour App Distribution. Fin déploiement Android 'prod'."
-                execute_verbose "Nettoyage $TARGET_FIREBASE_JSON_PATH" rm -f "$TARGET_FIREBASE_JSON_PATH"; echo ">>> FIN - Déploiement <<<"; echo ""; exit 0
-            fi
-        else echo "Déploiement $ARTIFACT_TYPE Android vers Firebase App Distribution..."; fi
-
-        echo "Projet Firebase  : $CURRENT_FIREBASE_PROJECT_ID"; echo "ID App Android   : $CURRENT_FIREBASE_ANDROID_APP_ID"
-        echo "Groupes Testeurs : $CURRENT_TESTER_GROUPS"; echo "Artefact         : $ANDROID_ARTIFACT_PATH"
-        FIREBASE_APP_DIST_CMD="firebase appdistribution:distribute \"$ANDROID_ARTIFACT_PATH\" --app \"$CURRENT_FIREBASE_ANDROID_APP_ID\" --project \"$CURRENT_FIREBASE_PROJECT_ID\" --release-notes \"Build $BUILD_MODE ($ARTIFACT_TYPE) pour $ENVIRONMENT ($PLATFORM) - $(date +'%Y-%m-%d %H:%M')\" --groups \"$CURRENT_TESTER_GROUPS\""
-        if [ "$VERBOSE_MODE" = true ]; then echo ">>> Commande (Distribution App Android): $FIREBASE_APP_DIST_CMD"; fi; eval "$FIREBASE_APP_DIST_CMD"
-        if [ $? -ne 0 ]; then echo "Erreur: Distribution Firebase App Android échouée ! (Si AAB, vérifiez liaison Google Play)"; execute_verbose "Nettoyage $TARGET_FIREBASE_JSON_PATH" rm -f "$TARGET_FIREBASE_JSON_PATH"; exit 1; fi
-        echo "Distribution Firebase App Android terminée."
+        if [[ "$ENVIRONMENT" == "prod" && (-z "$SPECIFIC_ANDROID_BUILD" || "$SPECIFIC_ANDROID_BUILD" == "aab") ]]; then
+            echo "      -> Construction de l'Android App Bundle (AAB)..."
+            execute_verbose "Build AAB" flutter build appbundle --"$BUILD_TYPE" --dart-define=APP_ENV="$ENVIRONMENT" --build-name "$VERSION_NAME" --build-number "$NEW_BUILD_NUMBER"
+            if [ $? -ne 0 ]; then echo "ERREUR : La compilation AAB a échoué."; exit 1; fi
+            execute_verbose "Renommage AAB" mv "build/app/outputs/bundle/$BUILD_TYPE/app-$BUILD_TYPE.aab" "build/app/outputs/bundle/$BUILD_TYPE/ColorsNotes-$TAG_NAME.aab"
+            echo "      AAB construit : build/app/outputs/bundle/$BUILD_TYPE/ColorsNotes-$TAG_NAME.aab"
+        fi
+    else
+        echo "AVERTISSEMENT : Plateforme non supportée '$PLATFORM'."
     fi
-    execute_verbose "Nettoyage $TARGET_FIREBASE_JSON_PATH" rm -f "$TARGET_FIREBASE_JSON_PATH"; echo "$TARGET_FIREBASE_JSON_PATH nettoyé."
-    echo ">>> FIN - Déploiement <<<"; echo ""
+done
+
+echo ""
+echo "Compilation terminée avec succès pour toutes les plateformes."
+echo "=================================================="
+
+# --- Opérations Git et Déploiement ---
+if $BUILD_ONLY; then
+    echo "Mode 'buildonly' activé. Le script s'arrête ici."
+    exit 0
 fi
 
-if [ "$PLATFORM" == "android" ] && $ACTION_BUILD && [ "$BUILD_MODE" == "release" ] && [ -f "android/key.properties" ]; then
-    echo ""; echo ">>> Nettoyage du fichier de configuration de clé temporaire <<<"
+echo ""
+echo ">>> Démarrage des opérations Git et du Déploiement <<<"
+echo "--------------------------------------------------"
+
+# 1. Configuration du fichier firebase.json pour le déploiement
+echo "-> Étape 1/3 : Configuration de Firebase pour le déploiement..."
+execute_verbose "Copie de la configuration Firebase" cp "$CURRENT_FIREBASE_CONFIG_FILE_SOURCE_PATH" "$TARGET_FIREBASE_JSON_PATH"
+if [ $? -ne 0 ]; then echo "Erreur: Copie de '$CURRENT_FIREBASE_CONFIG_FILE_SOURCE_PATH' vers '$TARGET_FIREBASE_JSON_PATH' échouée."; exit 1; fi
+echo "   '$TARGET_FIREBASE_JSON_PATH' configuré pour l'environnement '$ENVIRONMENT'."
+
+# 2. Opérations Git
+echo "-> Étape 2/3 : Opérations Git (commit et tag)..."
+execute_verbose "Ajout pubspec.yaml" git add pubspec.yaml
+execute_verbose "Commit version" git commit -m "chore: Incrémentation de la version à $TAG_NAME"
+execute_verbose "Push commit" git push
+if [ $? -ne 0 ]; then echo "ERREUR : 'git push' a échoué."; exit 1; fi
+execute_verbose "Création du tag" git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
+execute_verbose "Push du tag" git push origin "$TAG_NAME"
+if [ $? -ne 0 ]; then echo "ERREUR : 'git push origin $TAG_NAME' a échoué."; exit 1; fi
+echo "   pubspec.yaml poussé et tag '$TAG_NAME' créé avec succès."
+
+# 3. Logique de déploiement
+echo "-> Étape 3/3 : Déploiement..."
+if [[ " ${PLATFORMS[*]} " =~ " web " ]]; then
+    echo "   - Déploiement Web vers Firebase Hosting (Projet: $CURRENT_FIREBASE_PROJECT_ID)..."
+    execute_verbose "Déploiement Firebase Web" firebase deploy --only hosting -P "$CURRENT_FIREBASE_PROJECT_ID"
+    if [ $? -ne 0 ]; then echo "ERREUR : Le déploiement web a échoué."; else echo "   Déploiement web réussi."; fi
+fi
+
+if [[ " ${PLATFORMS[*]} " =~ " android " ]]; then
+    if [[ "$ENVIRONMENT" == "dev" || "$ENVIRONMENT" == "staging" ]]; then
+        ANDROID_ARTIFACT_PATH_FOR_DEPLOY="build/app/outputs/flutter-apk/ColorsNotes-$TAG_NAME.apk"
+        if [ -f "$ANDROID_ARTIFACT_PATH_FOR_DEPLOY" ]; then
+            echo "   - Déploiement Android APK vers Firebase App Distribution (Projet: $CURRENT_FIREBASE_PROJECT_ID)..."
+            execute_verbose "Distribution App Android" firebase appdistribution:distribute "$ANDROID_ARTIFACT_PATH_FOR_DEPLOY" --app "$CURRENT_FIREBASE_ANDROID_APP_ID" --project "$CURRENT_FIREBASE_PROJECT_ID" --release-notes "Build $TAG_NAME pour $ENVIRONMENT" --groups "$CURRENT_TESTER_GROUPS"
+            if [ $? -ne 0 ]; then echo "ERREUR : La distribution Android a échoué."; else echo "   Distribution Android réussie."; fi
+        else
+            echo "   AVERTISSEMENT : Fichier APK non trouvé pour la distribution. Build non effectué pour l'APK ?"
+        fi
+    elif [ "$ENVIRONMENT" == "prod" ]; then
+        echo "   - Déploiement Android pour 'prod' : l'artefact AAB est prêt pour une publication manuelle."
+        echo "     Chemin de l'AAB : build/app/outputs/bundle/release/ColorsNotes-$TAG_NAME.aab"
+    fi
+fi
+
+# --- Nettoyage Final ---
+echo ""
+echo ">>> Nettoyage Final <<<"
+execute_verbose "Nettoyage de firebase.json" rm -f "$TARGET_FIREBASE_JSON_PATH"
+echo " - Fichier temporaire 'firebase.json' nettoyé."
+if [[ " ${PLATFORMS[*]} " =~ " android " ]] && [ "$BUILD_TYPE" == "release" ] && [ -f "android/key.properties" ]; then
     execute_verbose "Suppression de key.properties" rm "android/key.properties"
-    echo "Fichier 'android/key.properties' nettoyé."
+    echo " - Fichier temporaire 'android/key.properties' nettoyé."
 fi
 
-echo "Script terminé avec succès."
-exit 0
+echo ""
+echo "=================================================="
+echo "Script terminé."
+echo "=================================================="
