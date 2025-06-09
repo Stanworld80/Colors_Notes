@@ -14,6 +14,7 @@ import '../screens/unified_palette_editor_page.dart';
 import '../screens/about_page.dart';
 import '../screens/colors_notes_license_page.dart';
 import 'package:colors_notes/l10n/app_localizations.dart';
+import '../screens/privacy_policy_page.dart';
 
 /// Logger instance for this AppBar widget.
 final _loggerAppBar = Logger(printer: PrettyPrinter(methodCount: 0));
@@ -45,55 +46,58 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
 
     return AppBar(
       title:
-          currentUserId == null
-              ? Text(displayTitle)
-              : StreamBuilder<List<Journal>>(
-                stream: firestoreService.getJournalsStream(currentUserId),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData || snapshot.data == null || snapshot.data!.isEmpty) {
-                    return Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [const Icon(Icons.book_outlined, size: 20), const SizedBox(width: 8), Text(displayTitle, style: const TextStyle(fontSize: 18))],
-                    );
-                  }
+      currentUserId == null
+          ? Text(displayTitle)
+          : StreamBuilder<List<Journal>>(
+        stream: firestoreService.getJournalsStream(currentUserId),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData || snapshot.data == null || snapshot.data!.isEmpty) {
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [const Icon(Icons.book_outlined, size: 20), const SizedBox(width: 8), Text(displayTitle, style: const TextStyle(fontSize: 18))],
+            );
+          }
 
-                  final journals = snapshot.data!;
-                  return PopupMenuButton<String>(
-                    tooltip: l10n.changeJournalTooltip, // Utilisation de la nouvelle clé
-                    onSelected: (String journalId) {
-                      if (journalId.isNotEmpty) {
-                        activeJournalNotifier.setActiveJournal(journalId, currentUserId);
-                        _loggerAppBar.i("Journal actif changé via Titre AppBar: $journalId");
-                      }
-                    },
-                    itemBuilder: (BuildContext context) {
-                      List<PopupMenuItem<String>> journalItems =
-                          journals.map((Journal journal) {
-                            return PopupMenuItem<String>(
-                              value: journal.id,
-                              child: Text(
-                                journal.name,
-                                style: TextStyle(
-                                  fontWeight: activeJournalNotifier.activeJournalId == journal.id ? FontWeight.bold : FontWeight.normal,
-                                  color: activeJournalNotifier.activeJournalId == journal.id ? Theme.of(context).colorScheme.primary : null,
-                                ),
-                              ),
-                            );
-                          }).toList();
-                      return journalItems;
-                    },
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.book_outlined, size: 20),
-                        const SizedBox(width: 8),
-                        Flexible(child: Text(displayTitle, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 18))),
-                        const Icon(Icons.arrow_drop_down, size: 24),
-                      ],
+          final journals = snapshot.data!;
+          return PopupMenuButton<String>(
+            tooltip: l10n.changeJournalTooltip, // Utilisation de la nouvelle clé
+            onSelected: (String journalId) {
+              if (journalId.isNotEmpty) {
+                activeJournalNotifier.setActiveJournal(journalId, currentUserId);
+                _loggerAppBar.i("Journal actif changé via Titre AppBar: $journalId");
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              List<PopupMenuItem<String>> journalItems =
+              journals.map((Journal journal) {
+                return PopupMenuItem<String>(
+                  value: journal.id,
+                  child: Text(
+                    journal.name,
+                    style: TextStyle(
+                      fontWeight: activeJournalNotifier.activeJournalId == journal.id ? FontWeight.bold : FontWeight.normal,
+                      color: activeJournalNotifier.activeJournalId == journal.id ? Theme
+                          .of(context)
+                          .colorScheme
+                          .primary : null,
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              }).toList();
+              return journalItems;
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.book_outlined, size: 20),
+                const SizedBox(width: 8),
+                Flexible(child: Text(displayTitle, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 18))),
+                const Icon(Icons.arrow_drop_down, size: 24),
+              ],
+            ),
+          );
+        },
+      ),
       centerTitle: true,
       actions: <Widget>[
         if (activeJournal != null)
@@ -103,7 +107,8 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => UnifiedPaletteEditorPage(journalToUpdatePaletteFor: activeJournal)));
             },
-          ),
+          )
+        ,
 
         if (currentUserId != null)
           PopupMenuButton<String>(
@@ -122,40 +127,49 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const HelpPage()));
               } else if (value == 'license') {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const ColorsNotesLicensePage()));
+              } else if (value == 'privacy_policy') {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacyPolicyPage()));
               } else if (value == 'sign_out') {
                 authService
                     .signOut()
                     .then((_) {
-                      _loggerAppBar.i("Déconnexion demandée.");
-                    })
+                  _loggerAppBar.i("Déconnexion demandée.");
+                })
                     .catchError((e) {
-                      _loggerAppBar.e("Erreur déconnexion: $e");
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("${l10n.signOutErrorPrefix}$e")), // Utilisation de la nouvelle clé
-                        );
-                      }
-                    });
+                  _loggerAppBar.e("Erreur déconnexion: $e");
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("${l10n.signOutErrorPrefix}$e")), // Utilisation de la nouvelle clé
+                    );
+                  }
+                });
               }
             },
             itemBuilder:
-                (BuildContext context) => <PopupMenuEntry<String>>[
-                  PopupMenuItem<String>(value: 'settings', child: ListTile(leading: const Icon(Icons.settings_outlined), title: Text(l10n.settings))),
-                  const PopupMenuDivider(),
-                  PopupMenuItem<String>(value: 'manage_journals', child: ListTile(leading: const Icon(Icons.collections_bookmark_outlined), title: Text(l10n.manageJournals))),
-                  PopupMenuItem<String>(value: 'manage_palette_models', child: ListTile(leading: const Icon(Icons.palette_outlined), title: Text(l10n.managePaletteModels))),
-                  const PopupMenuDivider(),
-                  PopupMenuItem<String>(value: 'about', child: ListTile(leading: const Icon(Icons.info_outline), title: Text(l10n.about))),
-                  PopupMenuItem<String>(value: 'license', child: ListTile(leading: const Icon(Icons.description_outlined), title: Text(l10n.licenseLink))),
-                  PopupMenuItem<String>(value: 'help', child: ListTile(leading: const Icon(Icons.help_outline), title: Text(l10n.help))),
-                  const PopupMenuDivider(),
-                  PopupMenuItem<String>(value: 'sign_out', child: ListTile(leading: const Icon(Icons.logout_outlined), title: Text(l10n.logout))),
-                ],
+                (BuildContext context) =>
+            <PopupMenuEntry<String>>[
+              PopupMenuItem<String>(value: 'settings', child: ListTile(leading: const Icon(Icons.settings_outlined), title: Text(l10n.settings))),
+              const PopupMenuDivider(),
+              PopupMenuItem<String>(value: 'manage_journals', child: ListTile(leading: const Icon(Icons.collections_bookmark_outlined), title: Text(l10n.manageJournals))),
+              PopupMenuItem<String>(value: 'manage_palette_models', child: ListTile(leading: const Icon(Icons.palette_outlined), title: Text(l10n.managePaletteModels))),
+              const PopupMenuDivider(),
+              PopupMenuItem<String>(value: 'about', child: ListTile(leading: const Icon(Icons.info_outline), title: Text(l10n.about))),
+              PopupMenuItem<String>(value: 'license', child: ListTile(leading: const Icon(Icons.description_outlined), title: Text(l10n.licenseLink))),
+              PopupMenuItem<String>(value: 'help', child: ListTile(leading: const Icon(Icons.help_outline), title: Text(l10n.help))),
+              PopupMenuItem<String>(value: 'privacy_policy', child: ListTile(leading: const Icon(Icons.privacy_tip_outlined), title: Text(l10n.privacyPolicy),
+              ),
+              ),
+              const PopupMenuDivider(),
+              PopupMenuItem<String>(value: 'sign_out', child: ListTile(leading: const Icon(Icons.logout_outlined), title: Text(l10n.logout))),
+            ],
           ),
       ],
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize =>
+      const Size.fromHeight(
+          kToolbarHeight
+      );
 }

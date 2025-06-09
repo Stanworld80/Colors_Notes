@@ -146,6 +146,14 @@ class _MyAppState extends State<MyApp> {
       supportedLocales: AppLocalizations.supportedLocales,
       locale: currentLocale,
       home: homeWidget,
+      onGenerateRoute: (settings) {
+        if (settings.name == '/privacy') {
+          return MaterialPageRoute(
+            builder: (context) => const PrivacyPolicyPage(),
+          );
+        }
+        return null;
+      },
       routes: {
         '/signin': (context) => const SignInPage(),
         '/register': (context) => const RegisterPage(),
