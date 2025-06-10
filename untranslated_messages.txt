@@ -1,10 +1,19 @@
 {
+  "de": [
+    "privacyPolicy"
+  ],
+
+  "es": [
+    "privacyPolicy"
+  ],
+
   "it": [
     "cookieConsentTitle",
     "cookieConsentMessage",
     "cookieConsentAcceptAll",
     "cookieConsentDecline",
-    "cookieConsentSettings"
+    "cookieConsentSettings",
+    "privacyPolicy"
   ],
 
   "pt": [
@@ -14,7 +23,8 @@
     "languageItalian",
     "languageFrench",
     "languagePortuguese",
-    "languagePortugueseBrazil"
+    "languagePortugueseBrazil",
+    "privacyPolicy"
   ],
 
   "pt_BR": [
@@ -24,6 +34,7 @@
     "languageItalian",
     "languageFrench",
     "languagePortuguese",
-    "languagePortugueseBrazil"
+    "languagePortugueseBrazil",
+    "privacyPolicy"
   ]
 }

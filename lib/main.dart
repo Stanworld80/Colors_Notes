@@ -31,6 +31,7 @@ import 'screens/register_page.dart';
 import 'screens/main_screen.dart';
 import 'screens/settings_page.dart';
 import 'screens/help_page.dart';
+import 'screens/privacy_policy_page.dart';
 
 final _logger = Logger(printer: PrettyPrinter(methodCount: 1, dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart, printEmojis: true, colors: true));
 

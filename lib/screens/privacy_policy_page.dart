@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:colors_notes/l10n/app_localizations.dart';
 import 'package:colors_notes/providers/language_provider.dart'; // Importer LanguageProvider
@@ -18,8 +18,8 @@ class PrivacyPolicyPage extends StatelessWidget {
     final languageCode = locale.languageCode;
 
     // Construit le chemin du fichier pour la langue actuelle.
-    final localizedAssetPath = 'assets/legal/privacy_policy_$languageCode.md';
-    final defaultAssetPath = 'assets/legal/privacy_policy_en.md';
+    final localizedAssetPath = 'assets/privacy_policy_$languageCode.md';
+    final defaultAssetPath = 'assets/privacy_policy_en.md';
 
     try {
       // Tente de charger le fichier de la langue spécifique.

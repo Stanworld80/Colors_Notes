@@ -63,7 +63,7 @@ dependencies:
   shared_preferences: ^2.2.3
   firebase_analytics: ^11.4.5
 
-  flutter_markdown: ^0.7.1
+  flutter_markdown_plus: ^1.0.3
 
   flutter_localizations:
     sdk: flutter
@@ -92,6 +92,11 @@ flutter:
   assets:
     - assets/privacy_policy_fr.md
     - assets/privacy_policy_en.md
+    - assets/privacy_policy_de.md
+    - assets/privacy_policy_es.md
+    - assets/privacy_policy_it.md
+    - assets/privacy_policy_pt.md
+    - assets/privacy_policy_pt_BR.md
     - LICENSE
     - assets/signin-assets/Web/svg/light/web_light_sq_na.svg
   # To add assets to your application, add an assets section, like this:
