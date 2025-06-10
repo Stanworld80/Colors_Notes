@@ -1,92 +1,92 @@
 // fichier: lib/main.dart
 
-import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:colors_notes/l10n/app_localizations.dart';
+import 'package:colors_notes/providers/active_journal_provider.dart';
+import 'package:colors_notes/providers/language_provider.dart';
+import 'package:colors_notes/screens/auth_gate.dart';
+import 'package:colors_notes/screens/help_page.dart';
+import 'package:colors_notes/screens/main_screen.dart';
+import 'package:colors_notes/screens/privacy_policy_page.dart';
+import 'package:colors_notes/screens/register_page.dart';
+import 'package:colors_notes/screens/settings_page.dart';
+import 'package:colors_notes/screens/sign_in_page.dart';
+import 'package:colors_notes/services/auth_service.dart';
+import 'package:colors_notes/services/cookie_consent_service.dart';
+import 'package:colors_notes/services/firestore_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:provider/provider.dart';
-import 'package:logger/logger.dart';
-import 'package:intl/date_symbol_data_local.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:logger/logger.dart';
+import 'package:provider/provider.dart';
 
 // Imports pour les configurations Firebase par environnement
 import 'firebase_options_dev.dart' as dev_options;
-import 'firebase_options_staging.dart' as staging_options;
 import 'firebase_options_prod.dart' as prod_options;
+import 'firebase_options_staging.dart' as staging_options;
 
-import 'package:colors_notes/l10n/app_localizations.dart';
-import 'providers/language_provider.dart';
+final _logger = Logger(printer: PrettyPrinter(methodCount: 1, printEmojis: true));
 
-import 'services/auth_service.dart';
-import 'services/firestore_service.dart';
-import 'services/cookie_consent_service.dart';
-import 'providers/active_journal_provider.dart';
-
-import 'screens/auth_gate.dart';
-import 'screens/sign_in_page.dart';
-import 'screens/register_page.dart';
-import 'screens/main_screen.dart';
-import 'screens/settings_page.dart';
-import 'screens/help_page.dart';
-import 'screens/privacy_policy_page.dart';
-
-final _logger = Logger(printer: PrettyPrinter(methodCount: 1, dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart, printEmojis: true, colors: true));
-
+// Détermine l'environnement de build (dev, staging, prod)
 const String appEnv = String.fromEnvironment('APP_ENV', defaultValue: 'dev');
 
+// POINT D'ENTRÉE DE L'APPLICATION
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting('fr_FR', null);
-  await initializeDateFormatting('en_US', null);
+  await _initializeServices();
 
-  FirebaseOptions options;
-  _logger.i('Environnement APP_ENV détecté : $appEnv');
-  switch (appEnv) {
-    case 'prod':
-      options = prod_options.DefaultFirebaseOptions.currentPlatform;
-      _logger.i('Initialisation de Firebase avec les options PROD.');
-      break;
-    case 'staging':
-      options = staging_options.DefaultFirebaseOptions.currentPlatform;
-      _logger.i('Initialisation de Firebase avec les options STAGING.');
-      break;
-    case 'dev':
-    default:
-      options = dev_options.DefaultFirebaseOptions.currentPlatform;
-      _logger.i('Initialisation de Firebase avec les options DEV (ou par défaut).');
-      break;
-  }
-
-  try {
-    await Firebase.initializeApp(options: options);
-    _logger.i('Firebase initialisé avec succès pour l\'environnement : $appEnv');
-  } catch (e, stackTrace) {
-    _logger.e('Erreur lors de l\'initialisation de Firebase pour l\'environnement : $appEnv', error: e, stackTrace: stackTrace);
-  }
-
-  final firebaseAuthInstance = FirebaseAuth.instance;
-  final googleSignInInstance = GoogleSignIn();
-  final firestoreInstance = FirebaseFirestore.instance;
-  final firestoreService = FirestoreService(firestoreInstance);
-  final authService = AuthService(firebaseAuthInstance, googleSignInInstance, firestoreService);
-  final languageProvider = LanguageProvider();
+  final firestoreService = FirestoreService(FirebaseFirestore.instance);
+  final authService = AuthService(
+    FirebaseAuth.instance,
+    GoogleSignIn(),
+    firestoreService,
+  );
 
   runApp(
     MultiProvider(
       providers: [
-        Provider<AuthService>.value(value: authService),
-        Provider<FirestoreService>.value(value: firestoreService),
-        ChangeNotifierProvider<ActiveJournalNotifier>(create: (context) => ActiveJournalNotifier(authService, firestoreService)),
-        ChangeNotifierProvider<LanguageProvider>.value(value: languageProvider),
+        Provider.value(value: authService),
+        Provider.value(value: firestoreService),
+        ChangeNotifierProvider(create: (_) => LanguageProvider()),
+        ChangeNotifierProvider(
+          create: (_) => ActiveJournalNotifier(authService, firestoreService),
+        ),
       ],
       child: const MyApp(),
     ),
   );
 }
 
+/// Initialise les services essentiels comme Firebase et la localisation.
+Future<void> _initializeServices() async {
+  await initializeDateFormatting('fr_FR', null);
+  await initializeDateFormatting('en_US', null);
+
+  FirebaseOptions options;
+  switch (appEnv) {
+    case 'prod':
+      options = prod_options.DefaultFirebaseOptions.currentPlatform;
+      break;
+    case 'staging':
+      options = staging_options.DefaultFirebaseOptions.currentPlatform;
+      break;
+    default: // dev
+      options = dev_options.DefaultFirebaseOptions.currentPlatform;
+  }
+
+  try {
+    await Firebase.initializeApp(options: options);
+    _logger.i('Firebase initialisé pour l\'environnement : $appEnv');
+  } catch (e) {
+    _logger.e('Erreur d\'initialisation de Firebase', error: e);
+  }
+}
+
+// WIDGET RACINE DE L'APPLICATION
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -96,65 +96,82 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final CookieConsentService _cookieConsentService = CookieConsentService();
-  late final Future<void> _initConsentFuture;
+  late final Future<void> _initAppFuture;
 
   @override
   void initState() {
     super.initState();
-    _initConsentFuture = _cookieConsentService.initialize().then((_) {
-      if (mounted) {
-        _updateAnalyticsConsentFromPreferences();
-      }
-    });
+    _initAppFuture = _initializeAsyncDependencies();
+  }
 
-    if (!kIsWeb) {
-      _applyAnalyticsConsent(true);
-      _logger.i("Plateforme non-web, consentement analytique activé par défaut (hors service cookie).");
+  Future<void> _initializeAsyncDependencies() async {
+    await _cookieConsentService.initialize();
+    if (mounted) {
+      await _updateAnalyticsConsentFromPreferences();
     }
   }
 
   Future<void> _updateAnalyticsConsentFromPreferences() async {
-    bool analyticsEnabledTarget = !kIsWeb;
+    bool isAnalyticsEnabled = !kIsWeb;
     if (kIsWeb) {
       final preferences = _cookieConsentService.preferences;
-      analyticsEnabledTarget = preferences['analytics'] ?? false;
-      _logger.d("Préférences de consentement web lues : $preferences, analyticsEnabledTarget: $analyticsEnabledTarget");
+      isAnalyticsEnabled = preferences['analytics'] ?? false;
     }
-    await _applyAnalyticsConsent(analyticsEnabledTarget);
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  Future<void> _applyAnalyticsConsent(bool consented) async {
     try {
-      await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(consented);
-      _logger.i("Collecte Firebase Analytics ${consented ? 'activée' : 'désactivée'}.");
+      await FirebaseAnalytics.instance
+          .setAnalyticsCollectionEnabled(isAnalyticsEnabled);
+      _logger.i('Collecte Firebase Analytics ${isAnalyticsEnabled ? 'activée' : 'désactivée'}.');
     } catch (e) {
-      _logger.e("Erreur lors de la configuration de Firebase Analytics: $e");
+      _logger.e("Erreur de configuration Firebase Analytics", error: e);
     }
+    if (mounted) setState(() {});
   }
 
-  Widget _buildAppShell({required Widget homeWidget, required Locale currentLocale}) {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<LanguageProvider>(
+      builder: (context, languageProvider, child) {
+        if (languageProvider.isLoading) {
+          return const MaterialApp(
+              home: Scaffold(body: Center(child: CircularProgressIndicator())));
+        }
+
+        return FutureBuilder<void>(
+          future: _initAppFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const MaterialApp(
+                  home: Scaffold(body: Center(child: CircularProgressIndicator())));
+            }
+            if (snapshot.hasError) {
+              return MaterialApp(
+                  home: Scaffold(
+                      body: Center(
+                          child: Text(
+                              "Erreur d'initialisation : ${snapshot.error}"))));
+            }
+            return _buildMaterialApp(languageProvider.appLocale);
+          },
+        );
+      },
+    );
+  }
+
+  /// Construit le widget MaterialApp principal.
+  Widget _buildMaterialApp(Locale currentLocale) {
     return MaterialApp(
       title: 'Colors & Notes',
       theme: ThemeData(
         primarySwatch: Colors.teal,
         visualDensity: VisualDensity.adaptivePlatformDensity,
-        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal).copyWith(secondary: Colors.amberAccent),
+        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal)
+            .copyWith(secondary: Colors.amberAccent),
       ),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       locale: currentLocale,
-      home: homeWidget,
-      onGenerateRoute: (settings) {
-        if (settings.name == '/privacy') {
-          return MaterialPageRoute(
-            builder: (context) => const PrivacyPolicyPage(),
-          );
-        }
-        return null;
-      },
+      home :  AuthGate(),
+      initialRoute: '/',
       routes: {
         '/signin': (context) => const SignInPage(),
         '/register': (context) => const RegisterPage(),
@@ -162,122 +179,95 @@ class _MyAppState extends State<MyApp> {
         '/settings': (context) => const SettingsPage(),
         '/help': (context) => const HelpPage(),
       },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final languageProvider = Provider.of<LanguageProvider>(context);
-
-    if (languageProvider.isLoading) {
-      _logger.i("LanguageProvider est en cours de chargement...");
-      return const MaterialApp(home: Scaffold(body: Center(child: CircularProgressIndicator())));
-    }
-    _logger.i("LanguageProvider chargé, locale : ${languageProvider.appLocale}.");
-
-    return FutureBuilder<void>(
-      future: _initConsentFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          _logger.i("FutureBuilder pour CookieConsent en attente...");
-          return MaterialApp(
-            locale: languageProvider.appLocale,
-            supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            home: const Scaffold(body: Center(child: CircularProgressIndicator())),
-          );
+      onGenerateRoute: (settings) {
+        if (settings.name == '/privacy') {
+          return MaterialPageRoute(builder: (context) => const PrivacyPolicyPage());
         }
-
-        if (snapshot.hasError) {
-          _logger.e("Erreur initialisation CookieConsentService: ${snapshot.error}");
-          return MaterialApp(
-            locale: languageProvider.appLocale,
-            supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            home: Scaffold(body: Center(child: Text("Erreur module consentement: ${snapshot.error}"))),
-          );
-        }
-        _logger.i("FutureBuilder pour CookieConsent terminé.");
-
-        Widget mainAppContent = const AuthGate();
-
+        return MaterialPageRoute(builder: (context) => const AuthGate());
+      },
+      builder: (context, child) {
         if (kIsWeb && _cookieConsentService.shouldShowBanner) {
-          mainAppContent = Stack(
+          return Stack(
             children: [
-              const AuthGate(),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Builder(
-                    builder: (BuildContext bannerBuildContext) {
-                      final l10n = AppLocalizations.of(bannerBuildContext);
-
-                      // Fallbacks pour les chaînes si l10n est null ou si les clés spécifiques sont nulles.
-                      // La VRAIE solution est de s'assurer que les traductions existent.
-                      String cookieTitle = "Consentement aux Cookies"; // Fallback
-                      String cookieMessage = "Nous utilisons des cookies..."; // Fallback
-                      String cookieAccept = "Tout Accepter"; // Fallback
-                      String cookieDecline = "Refuser"; // Fallback
-                      String cookieSettings = "Paramètres"; // Fallback
-
-                      if (l10n != null) {
-                        try {
-                          cookieTitle = l10n.cookieConsentTitle;
-                          cookieMessage = l10n.cookieConsentMessage;
-                          cookieAccept = l10n.cookieConsentAcceptAll;
-                          cookieDecline = l10n.cookieConsentDecline;
-                          cookieSettings = l10n.cookieConsentSettings;
-                          _logger.i("Affichage du bandeau de consentement aux cookies avec textes localisés.");
-                        } catch (e) {
-                          _logger.e("Erreur lors de l'accès aux clés de localisation pour le bandeau de cookies. Utilisation des fallbacks. Erreur: $e");
-                          // Les fallbacks définis ci-dessus seront utilisés.
-                        }
-                      } else {
-                        _logger.w("AppLocalizations.of(bannerBuildContext) est null. Utilisation des fallbacks pour le bandeau de cookies.");
-                      }
-
-                      return _cookieConsentService.createBanner(
-                        context: bannerBuildContext,
-                        title: cookieTitle,
-                        message: cookieMessage,
-                        acceptButtonText: cookieAccept,
-                        declineButtonText: cookieDecline,
-                        settingsButtonText: cookieSettings,
-                        showSettings: true,
-                        position: 'bottom',
-                        onAccept: (bool accepted) async {
-                          _logger.i('Service: Bouton "Tout Accepter" cliqué. Valeur booléenne reçue: $accepted');
-                          var currentPrefs = _cookieConsentService.preferences;
-                          currentPrefs['analytics'] = true;
-                          await _cookieConsentService.savePreferences(currentPrefs);
-                          await _updateAnalyticsConsentFromPreferences();
-                        },
-                        onDecline: (bool declined) async {
-                          _logger.i('Service: Bouton "Refuser Analytiques" cliqué. Valeur booléenne reçue: $declined');
-                          var currentPrefs = _cookieConsentService.preferences;
-                          currentPrefs['analytics'] = false;
-                          await _cookieConsentService.savePreferences(currentPrefs);
-                          await _updateAnalyticsConsentFromPreferences();
-                        },
-                        onSettings: () {
-                          _logger.i('Service: Ouverture des paramètres de cookies.');
-                          Future.delayed(const Duration(milliseconds: 500), () {
-                            if (mounted) {
-                              _updateAnalyticsConsentFromPreferences();
-                            }
-                          });
-                        },
-                      );
-                    }
-                ),
+              child ?? const SizedBox.shrink(),
+              // Utilisation du widget de bandeau personnalisé et isolé
+              _CustomCookieBanner(
+                onAccept: () async {
+                  await _cookieConsentService
+                      .savePreferences({'analytics': true});
+                  _updateAnalyticsConsentFromPreferences();
+                },
+                onDecline: () async {
+                  await _cookieConsentService
+                      .savePreferences({'analytics': false});
+                  _updateAnalyticsConsentFromPreferences();
+                },
               ),
             ],
           );
-        } else {
-          _logger.i("Le bandeau de consentement aux cookies ne sera pas affiché.");
         }
-
-        return _buildAppShell(homeWidget: mainAppContent, currentLocale: languageProvider.appLocale);
+        return child ?? const SizedBox.shrink();
       },
+    );
+  }
+}
+
+/// **NOUVEAU** : Un widget stateless dédié uniquement à l'affichage du bandeau.
+/// Cela garantit qu'il est construit avec un contexte valide.
+class _CustomCookieBanner extends StatelessWidget {
+  final VoidCallback onAccept;
+  final VoidCallback onDecline;
+
+  const _CustomCookieBanner({required this.onAccept, required this.onDecline});
+
+  @override
+  Widget build(BuildContext context) {
+    // Ce contexte est maintenant garanti d'être un descendant de MaterialApp
+    // et peut donc accéder aux localisations en toute sécurité.
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return const SizedBox.shrink(); // Ne rien afficher si les traductions ne sont pas prêtes.
+    }
+
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Material(
+        elevation: 8,
+        child: Container(
+          color: const Color(0xFF37474F), // Equivalent de Colors.blueGrey[800]
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.cookieConsentMessage,
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                ),
+              ),
+              const SizedBox(width: 24),
+              TextButton(
+                onPressed: onDecline,
+                child: Text(
+                  l10n.cookieConsentDecline,
+                  style: TextStyle(color: Colors.grey[300]),
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: onAccept,
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    )
+                ),
+                child: Text(l10n.cookieConsentAcceptAll),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
