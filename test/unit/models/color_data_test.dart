@@ -65,6 +65,8 @@ void main() {
       expect(copiedIdentical.title, original.title);
       expect(copiedIdentical.hexCode, original.hexCode);
       expect(copiedIdentical.isDefault, original.isDefault);
+      // S'assurer que c'est une nouvelle instance
+      expect(identical(copiedIdentical, original), isFalse);
 
       final copiedModified = original.copyWith(title: 'Modifié', hexCode: '#BBBBBB', isDefault: false, paletteElementId: 'new-id-for-copy');
       expect(copiedModified.paletteElementId, 'new-id-for-copy');
@@ -83,13 +85,16 @@ void main() {
       final colorDataAlpha = ColorData(title: 'Bleu Alpha', hexCode: '#800000FF');
       expect(colorDataAlpha.color, const Color(0x800000FF));
 
+      final colorDataAlphaNoHash = ColorData(title: 'Bleu Alpha sans hash', hexCode: '800000FF');
+      expect(colorDataAlphaNoHash.color, const Color(0x800000FF));
+
       final colorDataInvalidHex = ColorData(title: 'Invalide', hexCode: 'XYZ123');
       expect(colorDataInvalidHex.color, defaultGreyColor);
 
       final colorDataEmptyHex = ColorData(title: 'Vide', hexCode: '');
       expect(colorDataEmptyHex.color, defaultGreyColor);
 
-      final colorDataShortHex = ColorData(title: 'Court', hexCode: '#123'); // Format court non géré par la logique actuelle
+      final colorDataShortHex = ColorData(title: 'Court', hexCode: '#123');
       expect(colorDataShortHex.color, defaultGreyColor);
 
       final colorDataTooLong = ColorData(title: 'Trop Long', hexCode: '#123456789');
