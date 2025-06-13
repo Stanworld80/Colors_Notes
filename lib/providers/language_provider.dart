@@ -3,28 +3,31 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logger/logger.dart';
 
-import '../l10n/app_localizations.dart'; // Pour accéder à AppLocalizations.supportedLocales
+import '../l10n/app_localizations.dart';
 
 final _logger = Logger();
 
 class LanguageProvider with ChangeNotifier {
   Locale? _appLocale;
   bool _isLoading = true;
+  bool _isInitialized = false; // Drapeau pour éviter les initialisations multiples
 
   Locale get appLocale {
-    // Retourne la locale chargée, ou la première locale supportée (par exemple 'fr') par défaut.
     return _appLocale ?? AppLocalizations.supportedLocales.firstWhere((l) => l.languageCode == 'fr', orElse: () => AppLocalizations.supportedLocales.first);
   }
 
   bool get isLoading => _isLoading;
 
-  LanguageProvider() {
-    loadLocale();
-  }
+  // CONSTRUCTEUR MODIFIÉ : Ne fait plus rien, rendant le provider "passif".
+  LanguageProvider();
 
+  // La méthode loadLocale est maintenant appelée manuellement depuis l'interface.
   Future<void> loadLocale() async {
+    // Si déjà initialisé, on ne fait rien.
+    if (_isInitialized) return;
+
     _isLoading = true;
-    notifyListeners(); // Notifie le début du chargement
+    notifyListeners();
 
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -35,20 +38,16 @@ class LanguageProvider with ChangeNotifier {
         _appLocale = Locale(languageCode, countryCode);
         _logger.i('Locale chargée: $_appLocale');
       } else {
-        // Si aucune préférence n'est sauvegardée, utiliser la locale par défaut de l'appareil
-        // ou une locale par défaut codée en dur (ex: français).
-        // Ici, nous allons utiliser la première locale supportée comme fallback,
-        // en privilégiant le français si disponible.
         _appLocale = AppLocalizations.supportedLocales.firstWhere((l) => l.languageCode == 'fr', orElse: () => AppLocalizations.supportedLocales.first);
         _logger.i('Aucune locale sauvegardée, utilisation de la locale par défaut: $_appLocale');
       }
     } catch (e) {
       _logger.e('Erreur lors du chargement de la locale: $e');
-      // En cas d'erreur, fallback sur une locale par défaut
       _appLocale = AppLocalizations.supportedLocales.firstWhere((l) => l.languageCode == 'fr', orElse: () => AppLocalizations.supportedLocales.first);
     } finally {
       _isLoading = false;
-      notifyListeners(); // Notifie la fin du chargement et la mise à jour de la locale
+      _isInitialized = true; // Marquer comme initialisé
+      notifyListeners();
     }
   }
 
@@ -69,26 +68,19 @@ class LanguageProvider with ChangeNotifier {
     }
   }
 
-  // Helper pour obtenir le nom de la langue de manière lisible
-  String getLanguageName(Locale locale,BuildContext context) {
+  String getLanguageName(Locale locale, BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    switch (locale.languageCode) {
-      case 'fr':
-        return l10n!.languageFrench;
-      case 'en':
-        return l10n!.languageEnglish;
-      case 'es':
-        return  l10n!.languageSpanish;
-      case 'de':
-        return l10n!.languageGerman;
-      case 'it':
-        return l10n!.languageItalian;
-      case 'pt':
-        return (locale.countryCode == "BR") ? l10n!.languagePortugueseBrazil : l10n!.languagePortuguese;
+    if (l10n == null) return locale.languageCode.toUpperCase();
 
-      // Ajoutez d'autres langues ici si nécessaire
-      default:
-        return locale.languageCode.toUpperCase();
+    switch (locale.languageCode) {
+      case 'fr': return l10n.languageFrench;
+      case 'en': return l10n.languageEnglish;
+      case 'es': return l10n.languageSpanish;
+      case 'de': return l10n.languageGerman;
+      case 'it': return l10n.languageItalian;
+      case 'pt':
+        return (locale.countryCode == "BR") ? l10n.languagePortugueseBrazil : l10n.languagePortuguese;
+      default: return locale.languageCode.toUpperCase();
     }
   }
 }

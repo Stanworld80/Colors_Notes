@@ -23,28 +23,22 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 
-// Imports pour les configurations Firebase par environnement
 import 'firebase_options_dev.dart' as dev_options;
 import 'firebase_options_prod.dart' as prod_options;
 import 'firebase_options_staging.dart' as staging_options;
 
 final _logger = Logger(printer: PrettyPrinter(methodCount: 1, printEmojis: true));
-
-// Détermine l'environnement de build (dev, staging, prod)
 const String appEnv = String.fromEnvironment('APP_ENV', defaultValue: 'dev');
 
-// POINT D'ENTRÉE DE L'APPLICATION
 Future<void> main() async {
+  usePathUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
   await _initializeServices();
 
   final firestoreService = FirestoreService(FirebaseFirestore.instance);
-  final authService = AuthService(
-    FirebaseAuth.instance,
-    GoogleSignIn(),
-    firestoreService,
-  );
+  final authService = AuthService(FirebaseAuth.instance, GoogleSignIn(), firestoreService);
 
   runApp(
     MultiProvider(
@@ -52,32 +46,17 @@ Future<void> main() async {
         Provider.value(value: authService),
         Provider.value(value: firestoreService),
         ChangeNotifierProvider(create: (_) => LanguageProvider()),
-        ChangeNotifierProvider(
-          create: (_) => ActiveJournalNotifier(authService, firestoreService),
-        ),
+        ChangeNotifierProvider(create: (_) => ActiveJournalNotifier(authService, firestoreService)),
       ],
-      child: const MyApp(),
+      child: const AppInitializer(), // On commence par un widget d'initialisation
     ),
   );
 }
 
-/// Initialise les services essentiels comme Firebase et la localisation.
 Future<void> _initializeServices() async {
   await initializeDateFormatting('fr_FR', null);
   await initializeDateFormatting('en_US', null);
-
-  FirebaseOptions options;
-  switch (appEnv) {
-    case 'prod':
-      options = prod_options.DefaultFirebaseOptions.currentPlatform;
-      break;
-    case 'staging':
-      options = staging_options.DefaultFirebaseOptions.currentPlatform;
-      break;
-    default: // dev
-      options = dev_options.DefaultFirebaseOptions.currentPlatform;
-  }
-
+  final options = _getFirebaseOptions();
   try {
     await Firebase.initializeApp(options: options);
     _logger.i('Firebase initialisé pour l\'environnement : $appEnv');
@@ -86,134 +65,164 @@ Future<void> _initializeServices() async {
   }
 }
 
-// WIDGET RACINE DE L'APPLICATION
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
+FirebaseOptions _getFirebaseOptions() {
+  switch (appEnv) {
+    case 'prod': return prod_options.DefaultFirebaseOptions.currentPlatform;
+    case 'staging': return staging_options.DefaultFirebaseOptions.currentPlatform;
+    default: return dev_options.DefaultFirebaseOptions.currentPlatform;
+  }
 }
 
-class _MyAppState extends State<MyApp> {
-  final CookieConsentService _cookieConsentService = CookieConsentService();
-  late final Future<void> _initAppFuture;
+/// Widget qui gère l'initialisation asynchrone des providers
+class AppInitializer extends StatefulWidget {
+  const AppInitializer({super.key});
+
+  @override
+  _AppInitializerState createState() => _AppInitializerState();
+}
+
+class _AppInitializerState extends State<AppInitializer> {
+  late final Future<void> _initFuture;
 
   @override
   void initState() {
     super.initState();
-    _initAppFuture = _initializeAsyncDependencies();
+    _initFuture = _loadAsyncData();
   }
 
-  Future<void> _initializeAsyncDependencies() async {
-    await _cookieConsentService.initialize();
-    if (mounted) {
-      await _updateAnalyticsConsentFromPreferences();
-    }
-  }
+  Future<void> _loadAsyncData() async {
+    // On récupère les providers et on appelle leurs méthodes d'initialisation.
+    // C'est sûr de le faire ici car ce widget est un enfant de MultiProvider.
+    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+    await languageProvider.loadLocale();
 
-  Future<void> _updateAnalyticsConsentFromPreferences() async {
-    bool isAnalyticsEnabled = !kIsWeb;
-    if (kIsWeb) {
-      final preferences = _cookieConsentService.preferences;
-      isAnalyticsEnabled = preferences['analytics'] ?? false;
-    }
-    try {
-      await FirebaseAnalytics.instance
-          .setAnalyticsCollectionEnabled(isAnalyticsEnabled);
-      _logger.i('Collecte Firebase Analytics ${isAnalyticsEnabled ? 'activée' : 'désactivée'}.');
-    } catch (e) {
-      _logger.e("Erreur de configuration Firebase Analytics", error: e);
-    }
-    if (mounted) setState(() {});
+    // Le ActiveJournalNotifier est maintenant initialisé depuis AuthGate,
+    // ce qui est une meilleure pratique car son état dépend de celui de l'authentification.
   }
 
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: _initFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const MaterialApp(home: Scaffold(body: Center(child: CircularProgressIndicator())));
+        }
+        if (snapshot.hasError) {
+          return MaterialApp(home: Scaffold(body: Center(child: Text('Erreur: ${snapshot.error}'))));
+        }
+        // Une fois l'initialisation terminée, on affiche l'application principale.
+        return const MyApp();
+      },
+    );
+  }
+}
+
+
+/// Le widget principal de l'application, maintenant plus simple.
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // On utilise Consumer pour réagir aux changements de langue.
     return Consumer<LanguageProvider>(
       builder: (context, languageProvider, child) {
-        if (languageProvider.isLoading) {
-          return const MaterialApp(
-              home: Scaffold(body: Center(child: CircularProgressIndicator())));
-        }
-
-        return FutureBuilder<void>(
-          future: _initAppFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const MaterialApp(
-                  home: Scaffold(body: Center(child: CircularProgressIndicator())));
+        return MaterialApp(
+          title: 'Colors & Notes',
+          theme: ThemeData(
+            primarySwatch: Colors.teal,
+            visualDensity: VisualDensity.adaptivePlatformDensity,
+            colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal).copyWith(secondary: Colors.amberAccent),
+          ),
+          locale: languageProvider.appLocale,
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          initialRoute: '/',
+          routes: {
+            '/': (context) => const AppShell(child: AuthGate()),
+            '/signin': (context) => const AppShell(child: SignInPage()),
+            '/register': (context) => const AppShell(child: RegisterPage()),
+            '/main': (context) => const AppShell(child: MainScreen()),
+            '/settings': (context) => const AppShell(child: SettingsPage()),
+            '/help': (context) => const AppShell(child: HelpPage()),
+            '/privacy': (context) => const AppShell(child: PrivacyPolicyPage()),
+          },
+          onGenerateRoute: (settings) {
+            if (settings.name == '/privacy/') {
+              return MaterialPageRoute(builder: (context) => const AppShell(child: PrivacyPolicyPage()));
             }
-            if (snapshot.hasError) {
-              return MaterialApp(
-                  home: Scaffold(
-                      body: Center(
-                          child: Text(
-                              "Erreur d'initialisation : ${snapshot.error}"))));
-            }
-            return _buildMaterialApp(languageProvider.appLocale);
+            return MaterialPageRoute(builder: (context) => const AppShell(child: AuthGate()));
           },
         );
       },
     );
   }
+}
 
-  /// Construit le widget MaterialApp principal.
-  Widget _buildMaterialApp(Locale currentLocale) {
-    return MaterialApp(
-      title: 'Colors & Notes',
-      theme: ThemeData(
-        primarySwatch: Colors.teal,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal)
-            .copyWith(secondary: Colors.amberAccent),
+/// Un widget "coquille" qui gère l'affichage du bandeau de cookies par-dessus le contenu principal.
+class AppShell extends StatefulWidget {
+  final Widget child;
+  const AppShell({super.key, required this.child});
+
+  @override
+  State<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends State<AppShell> {
+  final CookieConsentService _cookieConsentService = CookieConsentService();
+  bool _showBanner = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeConsent();
+  }
+
+  Future<void> _initializeConsent() async {
+    await _cookieConsentService.initialize();
+    if (mounted) {
+      setState(() {
+        _showBanner = _cookieConsentService.shouldShowBanner;
+      });
+      _updateAnalyticsConsent();
+    }
+  }
+
+  Future<void> _updateAnalyticsConsent() async {
+    final prefs = _cookieConsentService.preferences;
+    final isAnalyticsEnabled = prefs['analytics'] ?? false;
+    await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(isAnalyticsEnabled);
+    _logger.i('Collecte Firebase Analytics ${isAnalyticsEnabled ? 'activée' : 'désactivée'}.');
+  }
+
+  void _handleAccept() {
+    _cookieConsentService.savePreferences({'analytics': true});
+    setState(() => _showBanner = false);
+    _updateAnalyticsConsent();
+  }
+
+  void _handleDecline() {
+    _cookieConsentService.savePreferences({'analytics': false});
+    setState(() => _showBanner = false);
+    _updateAnalyticsConsent();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          widget.child,
+          if (kIsWeb && _showBanner)
+            _CustomCookieBanner(onAccept: _handleAccept, onDecline: _handleDecline),
+        ],
       ),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      locale: currentLocale,
-      home :  AuthGate(),
-      initialRoute: '/',
-      routes: {
-        '/signin': (context) => const SignInPage(),
-        '/register': (context) => const RegisterPage(),
-        '/main': (context) => const MainScreen(),
-        '/settings': (context) => const SettingsPage(),
-        '/help': (context) => const HelpPage(),
-      },
-      onGenerateRoute: (settings) {
-        if (settings.name == '/privacy') {
-          return MaterialPageRoute(builder: (context) => const PrivacyPolicyPage());
-        }
-        return MaterialPageRoute(builder: (context) => const AuthGate());
-      },
-      builder: (context, child) {
-        if (kIsWeb && _cookieConsentService.shouldShowBanner) {
-          return Stack(
-            children: [
-              child ?? const SizedBox.shrink(),
-              // Utilisation du widget de bandeau personnalisé et isolé
-              _CustomCookieBanner(
-                onAccept: () async {
-                  await _cookieConsentService
-                      .savePreferences({'analytics': true});
-                  _updateAnalyticsConsentFromPreferences();
-                },
-                onDecline: () async {
-                  await _cookieConsentService
-                      .savePreferences({'analytics': false});
-                  _updateAnalyticsConsentFromPreferences();
-                },
-              ),
-            ],
-          );
-        }
-        return child ?? const SizedBox.shrink();
-      },
     );
   }
 }
 
-/// **NOUVEAU** : Un widget stateless dédié uniquement à l'affichage du bandeau.
-/// Cela garantit qu'il est construit avec un contexte valide.
+// Widget pour le bandeau de cookies (inchangé)
 class _CustomCookieBanner extends StatelessWidget {
   final VoidCallback onAccept;
   final VoidCallback onDecline;
@@ -222,25 +231,23 @@ class _CustomCookieBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Ce contexte est maintenant garanti d'être un descendant de MaterialApp
-    // et peut donc accéder aux localisations en toute sécurité.
     final l10n = AppLocalizations.of(context);
-    if (l10n == null) {
-      return const SizedBox.shrink(); // Ne rien afficher si les traductions ne sont pas prêtes.
-    }
+    if (l10n == null) return const SizedBox.shrink();
 
     return Align(
       alignment: Alignment.bottomCenter,
       child: Material(
         elevation: 8,
         child: Container(
-          color: const Color(0xFF37474F), // Equivalent de Colors.blueGrey[800]
+          color: const Color(0xFF37474F),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: Text(
-                  l10n.cookieConsentMessage,
+                  l10n.cookieConsentMessage ?? 'We use cookies to enhance your experience.',
                   style: const TextStyle(color: Colors.white, fontSize: 14),
                 ),
               ),
@@ -248,7 +255,7 @@ class _CustomCookieBanner extends StatelessWidget {
               TextButton(
                 onPressed: onDecline,
                 child: Text(
-                  l10n.cookieConsentDecline,
+                  l10n.cookieConsentDecline ?? 'Decline',
                   style: TextStyle(color: Colors.grey[300]),
                 ),
               ),
@@ -260,9 +267,8 @@ class _CustomCookieBanner extends StatelessWidget {
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
-                    )
-                ),
-                child: Text(l10n.cookieConsentAcceptAll),
+                    )),
+                child: Text(l10n.cookieConsentAcceptAll ?? 'Accept All'),
               ),
             ],
           ),

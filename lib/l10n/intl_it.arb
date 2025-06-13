@@ -1397,6 +1397,27 @@
   "@yesDeleteAllNotesButtonLabel": {
     "description": "Etichetta del pulsante che conferma l'eliminazione di tutte le note, tipicamente in una finestra di dialogo di conferma finale."
   },
-  "help": "Aiuto"
+  "help": "Aiuto",
+  "cookieConsentTitle": "Cookie Consent",
+  "@cookieConsentTitle": {
+    "description": "Title for the cookie consent banner."
+  },
+  "cookieConsentMessage": "We use cookies to improve your experience. Essential cookies are necessary for site operation. Do you accept analytics cookies to help us improve our services?",
+  "@cookieConsentMessage": {
+    "description": "Main message for the cookie consent banner."
+  },
+  "cookieConsentAcceptAll": "Accept All",
+  "@cookieConsentAcceptAll": {
+    "description": "Button text to accept all cookies."
+  },
+  "cookieConsentDecline": "Decline Analytics",
+  "@cookieConsentDecline": {
+    "description": "Button text to decline non-essential cookies."
+  },
+  "cookieConsentSettings": "Settings",
+  "@cookieConsentSettings": {
+    "description": "Button text to open cookie settings."
+  },
+  "privacyPolicy" : "Privacy Policy"
 }
 

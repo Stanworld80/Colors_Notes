@@ -31,7 +31,9 @@ dependencies:
 
   flutter:
     sdk: flutter
+
   package_info_plus: ^8.0.0
+
   integration_test: # Ensure this line exists and is correctly indented
     sdk: flutter    # It should use the Flutter SDK
   mockito: ^5.4.4
@@ -59,9 +61,13 @@ dependencies:
   material_color_utilities: ^0.11.1
 
   flutter_colorpicker: ^1.1.0
+
   flutter_cookie_consent: ^1.0.2
   shared_preferences: ^2.2.3
   firebase_analytics: ^11.4.5
+
+  flutter_web_plugins:
+    sdk: flutter
 
   flutter_markdown_plus: ^1.0.3
 
