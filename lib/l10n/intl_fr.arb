@@ -1421,6 +1421,8 @@
   "languagePortuguese": "Portugais",
   "languagePortugueseBrazil": "Portugais (Brésil)",
   "help" : "aide",
-  "privacyPolicy" : "Règles de Confidentialité"
+  "privacyPolicy" : "Politique de confidentialité",
+  "@privacyPolicy": {
+    "description": "Lien vers la politique de confidentialité."
+  }
 }
-

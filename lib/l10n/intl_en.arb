@@ -1418,6 +1418,9 @@
   "@cookieConsentSettings": {
     "description": "Button text to open cookie settings."
   },
-  "privacyPolicy" : "Privacy Policy"
+  "privacyPolicy" : "Privacy Policy",
+  "@privacyPolicy": {
+    "description": "Privacy Policy Link"
+    }
 }
 
