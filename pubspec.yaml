@@ -2,7 +2,7 @@ name: colors_notes
 description: "Color your days"
 publish_to: 'none'
 
-version: 1.6.4+56
+version: 1.6.4+58
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
@@ -42,6 +42,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+
   # Dépendances de test (déplacées et ajoutées ici)
   build_runner: ^2.4.8
   mockito: ^5.4.4
@@ -52,6 +53,8 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^6.0.0
+
+  flutter_launcher_icons: "^0.14.4"
 
 
 flutter:
