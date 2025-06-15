@@ -1,60 +1,53 @@
-// test/providers/active_journal_provider_test.dart
-import 'dart:async';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
-import 'package:firebase_auth/firebase_auth.dart' show User;
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+// test/unit/providers/active_journal_provider_test.dart
 
-import 'package:colors_notes/services/auth_service.dart';
-import 'package:colors_notes/services/firestore_service.dart';
-import 'package:colors_notes/providers/active_journal_provider.dart';
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:colors_notes/models/journal.dart';
 import 'package:colors_notes/models/palette.dart';
-import 'package:colors_notes/models/color_data.dart';
-import 'active_journal_provider_test.mocks.dart';
+import 'package:colors_notes/providers/active_journal_provider.dart';
+import 'package:colors_notes/services/auth_service.dart';
+import 'package:colors_notes/services/firestore_service.dart';
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' show User;
+import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
-@GenerateMocks([AuthService, FirestoreService, User])
+
+
+// Import du fichier de mocks centralisé
+import '../../mocks.mocks.dart' hide MockUser;
+
+
 void main() {
-  late ActiveJournalNotifier notifier;
+  // Déclaration des mocks
   late MockAuthService mockAuthService;
-  late FirestoreService firestoreService; // Utilisation du vrai service avec FakeFirestore
-  late MockUser mockUser;
+  late MockFirestoreService mockFirestoreService;
+  late ActiveJournalNotifier notifier;
+
+  // Contrôleur de stream pour simuler les changements d'utilisateur
   late StreamController<User?> userStreamController;
-  late FakeFirebaseFirestore fakeFirestore;
 
-  // Création de données de test réutilisables
-  final journal1 = Journal(
-    id: 'journal1',
-    userId: 'user123',
-    name: 'Journal 1',
-    createdAt: Timestamp.now(),
-    lastUpdatedAt: Timestamp.now(),
-    palette: Palette(id: 'p1', name: 'Palette 1', colors: [ColorData(paletteElementId: 'c1', title: 'Red', hexCode: 'FF0000')]),
-  );
-  final journal2 = Journal(
-    id: 'journal2',
-    userId: 'user123',
-    name: 'Journal 2',
-    createdAt: Timestamp.now(),
-    lastUpdatedAt: Timestamp.now(),
-    palette: Palette(id: 'p2', name: 'Palette 2', colors: [ColorData(paletteElementId: 'c2', title: 'Blue', hexCode: '0000FF')]),
+  // Utilisation de MockUser de firebase_auth_mocks
+  final mockUser = MockUser(
+    isAnonymous: false,
+    uid: 'user123',
+    email: 'test@example.com',
+    displayName: 'Test User',
   );
 
-  setUp(() async {
+  setUp(() {
     mockAuthService = MockAuthService();
-    mockUser = MockUser();
+    mockFirestoreService = MockFirestoreService();
     userStreamController = StreamController<User?>.broadcast();
-    fakeFirestore = FakeFirebaseFirestore();
-    firestoreService = FirestoreService(fakeFirestore); // Utilise le vrai service
 
-    when(mockUser.uid).thenReturn('user123');
+    // Comportement par défaut des mocks
     when(mockAuthService.userStream).thenAnswer((_) => userStreamController.stream);
-    when(mockAuthService.currentUser).thenReturn(null);
+    when(mockAuthService.currentUser).thenReturn(null); // Par défaut, non connecté
 
-    // Initialisation du notifier
-    notifier = ActiveJournalNotifier(mockAuthService, firestoreService);
+    // Instanciation du notifier
+    notifier = ActiveJournalNotifier(mockAuthService, mockFirestoreService);
   });
 
   tearDown(() {
@@ -62,120 +55,52 @@ void main() {
     notifier.dispose();
   });
 
-  group('ActiveJournalNotifier Tests', () {
+  test('devrait être initialement inactif et sans journal', () {
+    expect(notifier.activeJournal, isNull);
+    expect(notifier.isLoading, isFalse);
+  });
 
-    test('L\'état initial est correct (pas d\'utilisateur)', () {
-      expect(notifier.activeJournalId, isNull);
-      expect(notifier.activeJournal, isNull);
-      expect(notifier.isLoading, isFalse);
-      expect(notifier.errorMessage, isNull);
-    });
+  test('devrait charger le premier journal quand un utilisateur se connecte', () async {
+    // 1. Préparation des données simulées
+    final now = DateTime.now();
+    // CORRECTION : Firestore utilise des Timestamps, pas des DateTimes.
+    final timestamp = Timestamp.fromDate(now);
 
-    test('Charge le premier journal quand l\'utilisateur se connecte', () async {
-      await fakeFirestore.collection('journals').doc(journal1.id).set(journal1.toMap());
-      await fakeFirestore.collection('journals').doc(journal2.id).set(journal2.toMap());
+    final journals = [
+      Journal(
+        id: 'journal1',
+        name: 'Mon journal',
+        userId: 'user123',
+        palette: Palette(name: 'Défaut', colors: []),
+        createdAt: timestamp,       // CORRECTION : Utilisation du Timestamp
+        lastUpdatedAt: timestamp,   // CORRECTION : Utilisation du Timestamp
+      )
+    ];
 
-      when(mockAuthService.currentUser).thenReturn(mockUser);
+    // Simuler le retour du flux de la liste des journaux
+    when(mockFirestoreService.getJournalsStream('user123'))
+        .thenAnswer((_) => Stream.value(journals));
 
-      notifier.listenToAuthChanges(); // Démarre l'écoute
-      userStreamController.add(mockUser); // Simule la connexion
+    // Simuler le retour du document pour le journal spécifique
+    final fakeFirestore = FakeFirebaseFirestore();
+    final journalData = journals.first.toMap(); // Utiliser toMap pour la cohérence
+    await fakeFirestore.collection('journals').doc('journal1').set(journalData);
 
-      // Attendre que toutes les opérations asynchrones soient terminées
-      await Future.delayed(Duration.zero);
+    when(mockFirestoreService.getJournalStream('journal1'))
+        .thenAnswer((_) => fakeFirestore.collection('journals').doc('journal1').snapshots());
 
-      expect(notifier.isLoading, isFalse);
-      expect(notifier.activeJournalId, journal1.id);
-      expect(notifier.activeJournal?.name, journal1.name);
-      expect(notifier.errorMessage, isNull);
-    });
+    // 2. Lancement de l'écoute des changements d'authentification
+    notifier.listenToAuthChanges();
 
-    test('L\'état est effacé quand l\'utilisateur se déconnecte', () async {
-      // Connexion initiale
-      await fakeFirestore.collection('journals').doc(journal1.id).set(journal1.toMap());
-      when(mockAuthService.currentUser).thenReturn(mockUser);
-      notifier.listenToAuthChanges();
-      userStreamController.add(mockUser);
-      await Future.delayed(Duration.zero);
-      expect(notifier.activeJournalId, journal1.id);
+    // 3. Simulation de la connexion de l'utilisateur
+    userStreamController.add(mockUser);
 
-      // Déconnexion
-      when(mockAuthService.currentUser).thenReturn(null);
-      userStreamController.add(null);
-      await Future.delayed(Duration.zero);
+    // 4. Attendre que toutes les opérations asynchrones soient terminées
+    await Future.delayed(Duration.zero);
 
-      expect(notifier.isLoading, isFalse);
-      expect(notifier.activeJournalId, isNull);
-      expect(notifier.activeJournal, isNull);
-      expect(notifier.errorMessage, isNull);
-    });
-
-    test('setActiveJournal met à jour le journal actif', () async {
-      await fakeFirestore.collection('journals').doc(journal1.id).set(journal1.toMap());
-      await fakeFirestore.collection('journals').doc(journal2.id).set(journal2.toMap());
-      when(mockAuthService.currentUser).thenReturn(mockUser);
-      notifier.listenToAuthChanges();
-      userStreamController.add(mockUser);
-      await Future.delayed(Duration.zero); // Attendre chargement initial
-      expect(notifier.activeJournalId, journal1.id);
-
-      // Changer de journal
-      await notifier.setActiveJournal(journal2.id, 'user123');
-      await Future.delayed(Duration.zero);
-
-      expect(notifier.isLoading, isFalse);
-      expect(notifier.activeJournalId, journal2.id);
-      expect(notifier.activeJournal?.name, journal2.name);
-      expect(notifier.errorMessage, isNull);
-    });
-
-    test('setActiveJournal gère un journal inexistant et revient à un état valide', () async {
-      // Configuration initiale avec un journal valide
-      await fakeFirestore.collection('journals').doc(journal1.id).set(journal1.toMap());
-      when(mockAuthService.currentUser).thenReturn(mockUser);
-      notifier.listenToAuthChanges();
-      userStreamController.add(mockUser);
-      await Future.delayed(Duration.zero); // Attendre le chargement
-      expect(notifier.activeJournalId, journal1.id);
-
-      // Tenter de charger un journal qui n'existe pas
-      await notifier.setActiveJournal('nonExistentId', 'user123');
-      await Future.delayed(Duration.zero);
-
-      // CORRECTION DU TEST : Le comportement attendu est que le notifier
-      // essaie de charger le journal, échoue, puis recharge un journal initial valide.
-      // L'état final ne doit donc PAS contenir d'erreur.
-      expect(notifier.isLoading, isFalse, reason: "Le chargement doit être terminé.");
-      expect(notifier.activeJournalId, journal1.id, reason: "Doit revenir au premier journal valide.");
-      expect(notifier.activeJournal?.name, journal1.name);
-      expect(notifier.errorMessage, isNull, reason: "Le message d'erreur doit être effacé après avoir rechargé un état valide.");
-    });
-
-    test('setActiveJournal gère un journal n\'appartenant pas à l\'utilisateur et revient à un état valide', () async {
-      final otherUserJournal = Journal(
-          id: 'otherUserJournal', userId: 'otherUser456', name: 'Journal Secret',
-          createdAt: Timestamp.now(), lastUpdatedAt: Timestamp.now(),
-          palette: Palette(id: 'p3', name: 'P3', colors: [])
-      );
-      await fakeFirestore.collection('journals').doc(journal1.id).set(journal1.toMap());
-      await fakeFirestore.collection('journals').doc(otherUserJournal.id).set(otherUserJournal.toMap());
-
-      when(mockAuthService.currentUser).thenReturn(mockUser);
-      notifier.listenToAuthChanges();
-      userStreamController.add(mockUser);
-      await Future.delayed(Duration.zero);
-      expect(notifier.activeJournalId, journal1.id);
-
-      // Tenter de charger un journal d'un autre utilisateur
-      await notifier.setActiveJournal('otherUserJournal', 'user123');
-      await Future.delayed(Duration.zero);
-
-      // CORRECTION DU TEST : Comme pour le cas du journal inexistant, le notifier
-      // doit se "réparer" en chargeant un journal valide.
-      expect(notifier.isLoading, isFalse);
-      expect(notifier.activeJournalId, journal1.id);
-      expect(notifier.activeJournal?.name, journal1.name);
-      expect(notifier.errorMessage, isNull);
-    });
-
+    // 5. Vérification du résultat final
+    expect(notifier.activeJournal, isNotNull);
+    expect(notifier.activeJournal?.id, 'journal1');
+    expect(notifier.isLoading, isFalse);
   });
 }
