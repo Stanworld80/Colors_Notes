@@ -5,6 +5,8 @@
 #
 # Ce script gère la compilation, les tests et le déploiement de l'application
 # sur différents environnements (dev, staging, prod) et plateformes (web, android).
+# Auteur: Stanislas Selle
+# Version: 1.1.0
 # ==============================================================================
 
 # --- Configuration des Environnements ---
@@ -51,6 +53,7 @@ PUBSPEC_FILE="pubspec.yaml"
 # --- Variables de Script ---
 ENVIRONMENT="dev"
 PLATFORMS=()
+BUILD_MODE_STAGING="" # Variable pour le mode de build spécifique à 'staging'
 BUILD_ONLY=false
 CLEAN_BUILD=true
 BYPASS_TESTS=false
@@ -60,14 +63,15 @@ VERBOSE_MODE=false
 
 # --- Fonctions ---
 print_usage() {
-    echo "Usage: ./build_deploy.sh [-e <ENV>] [-p <PLATFORM>] [-a <ANDROID_TYPE>] [--buildonly] [--noclean] [--bypasstest] [-v] [-h]"
+    echo "Usage: ./build_deploy.sh [-e <ENV>] [-m <MODE>] [-p <PLATFORM>] [-a <ANDROID_TYPE>] [--buildonly] [--noclean] [--bypasstest] [-v] [-h]"
     echo ""
     echo "Options:"
     echo "  -e <ENV>                Spécifie l'environnement : 'dev' (défaut), 'staging', ou 'prod'."
+    echo "  -m <MODE>               Pour l'environnement 'staging' uniquement : 'debug' (défaut) ou 'release'."
     echo "  -p <PLATFORM>           Spécifie une plateforme : 'web' ou 'android'. Peut être utilisé plusieurs fois."
     echo "                          Par défaut, compile pour web ET android."
-    echo "  -a <ANDROID_TYPE>       Pour Android (prod uniquement) : 'apk' ou 'aab'. Si omis, construit les deux."
-    echo "                          Pour dev/staging, seul l'APK est construit."
+    echo "  -a <ANDROID_TYPE>       Pour Android (staging/release et prod uniquement) : 'apk' ou 'aab'. Si omis, construit les deux."
+    echo "                          Pour dev, seul l'APK est construit."
     echo "  --buildonly             Compile uniquement, sans déploiement ni opérations Git."
     echo "  --noclean               Désactive 'flutter clean' avant la compilation."
     echo "  --bypasstest            Évite l'exécution des tests unitaires pour 'dev' et 'staging'. Les tests sont obligatoires pour 'prod'."
@@ -78,6 +82,7 @@ print_usage() {
 execute_verbose() {
     local cmd_description="$1"; shift
     if [ "$VERBOSE_MODE" = true ]; then
+        # shellcheck disable=SC2145
         echo "  - Commande ($cmd_description): $@"
     fi
     "$@"
@@ -90,6 +95,7 @@ while [[ "$#" -gt 0 ]]; do
         -e) ENVIRONMENT="$2"; shift ;;
         -p) PLATFORMS+=("$2"); shift ;;
         -a) SPECIFIC_ANDROID_BUILD="$2"; shift ;;
+        -m|--mode) BUILD_MODE_STAGING="$2"; shift ;;
         --buildonly) BUILD_ONLY=true ;;
         --noclean) CLEAN_BUILD=false ;;
         --bypasstest) BYPASS_TESTS=true ;;
@@ -105,17 +111,27 @@ if [ ${#PLATFORMS[@]} -eq 0 ]; then
 fi
 
 # --- Configuration de l'Environnement de Build ---
-BUILD_TYPE="debug"
 if [ "$ENVIRONMENT" == "prod" ]; then
     BUILD_TYPE="release"
+elif [ "$ENVIRONMENT" == "staging" ]; then
+    if [ "$BUILD_MODE_STAGING" == "release" ]; then
+        BUILD_TYPE="release"
+    elif [ -z "$BUILD_MODE_STAGING" ] || [ "$BUILD_MODE_STAGING" == "debug" ]; then
+        BUILD_TYPE="debug"
+    else
+        echo "Erreur : Mode de build invalide '$BUILD_MODE_STAGING' pour l'environnement 'staging'. Utilisez 'debug' ou 'release'."
+        exit 1
+    fi
+else # dev
+    BUILD_TYPE="debug"
 fi
 
 # Ajustement pour le build Android
-if [[ "$ENVIRONMENT" == "dev" || "$ENVIRONMENT" == "staging" ]]; then
+if [[ "$ENVIRONMENT" == "dev" ]]; then
     if [ "$SPECIFIC_ANDROID_BUILD" == "aab" ]; then
-        echo "AVERTISSEMENT : La construction d'AAB est ignorée pour l'environnement '$ENVIRONMENT'. Seul l'APK sera construit."
+        echo "AVERTISSEMENT : La construction d'AAB est ignorée pour l'environnement 'dev'. Seul l'APK sera construit."
     fi
-    # Pour dev et staging, on ne construit que l'apk
+    # Pour dev, on ne construit que l'apk
     SPECIFIC_ANDROID_BUILD="apk"
 fi
 
@@ -143,14 +159,14 @@ echo "  Environnement : $ENVIRONMENT"
 echo "  Mode de Build   : $BUILD_TYPE"
 echo "  Plateformes     : ${PLATFORMS[*]}"
 if [[ " ${PLATFORMS[*]} " =~ " android " ]]; then
-    if [ "$ENVIRONMENT" == "prod" ]; then
+    if [ "$ENVIRONMENT" == "dev" ]; then
+        echo "  Artefact Android  : apk"
+    else # staging ou prod
         if [ -z "$SPECIFIC_ANDROID_BUILD" ]; then
             echo "  Artefacts Android : apk et aab"
         else
             echo "  Artefact Android  : $SPECIFIC_ANDROID_BUILD"
         fi
-    else
-        echo "  Artefact Android  : apk"
     fi
 fi
 echo "  Déploiement     : $(if $BUILD_ONLY; then echo "Non (buildonly)"; else echo "Oui"; fi)"
@@ -246,7 +262,7 @@ for PLATFORM in "${PLATFORMS[@]}"; do
             execute_verbose "Renommage APK" mv "build/app/outputs/flutter-apk/app-$BUILD_TYPE.apk" "build/app/outputs/flutter-apk/ColorsNotes-$TAG_NAME.apk"
             echo "      APK construit : build/app/outputs/flutter-apk/ColorsNotes-$TAG_NAME.apk"
         fi
-        if [[ "$ENVIRONMENT" == "prod" && (-z "$SPECIFIC_ANDROID_BUILD" || "$SPECIFIC_ANDROID_BUILD" == "aab") ]]; then
+        if [[ "$BUILD_TYPE" == "release" && (-z "$SPECIFIC_ANDROID_BUILD" || "$SPECIFIC_ANDROID_BUILD" == "aab") ]]; then
             echo "      -> Construction de l'Android App Bundle (AAB)..."
             execute_verbose "Build AAB" flutter build appbundle --"$BUILD_TYPE" --dart-define=APP_ENV="$ENVIRONMENT" --build-name "$VERSION_NAME" --build-number "$NEW_BUILD_NUMBER"
             if [ $? -ne 0 ]; then echo "ERREUR : La compilation AAB a échoué."; exit 1; fi
@@ -302,7 +318,7 @@ if [[ " ${PLATFORMS[*]} " =~ " android " ]]; then
         ANDROID_ARTIFACT_PATH_FOR_DEPLOY="build/app/outputs/flutter-apk/ColorsNotes-$TAG_NAME.apk"
         if [ -f "$ANDROID_ARTIFACT_PATH_FOR_DEPLOY" ]; then
             echo "   - Déploiement Android APK vers Firebase App Distribution (Projet: $CURRENT_FIREBASE_PROJECT_ID)..."
-            execute_verbose "Distribution App Android" firebase appdistribution:distribute "$ANDROID_ARTIFACT_PATH_FOR_DEPLOY" --app "$CURRENT_FIREBASE_ANDROID_APP_ID" --project "$CURRENT_FIREBASE_PROJECT_ID" --release-notes "Build $TAG_NAME pour $ENVIRONMENT" --groups "$CURRENT_TESTER_GROUPS"
+            execute_verbose "Distribution App Android" firebase appdistribution:distribute "$ANDROID_ARTIFACT_PATH_FOR_DEPLOY" --app "$CURRENT_FIREBASE_ANDROID_APP_ID" --project "$CURRENT_FIREBASE_PROJECT_ID" --release-notes "Build $TAG_NAME pour $ENVIRONMENT ($BUILD_TYPE)" --groups "$CURRENT_TESTER_GROUPS"
             if [ $? -ne 0 ]; then echo "ERREUR : La distribution Android a échoué."; else echo "   Distribution Android réussie."; fi
         else
             echo "   AVERTISSEMENT : Fichier APK non trouvé pour la distribution. Build non effectué pour l'APK ?"
@@ -327,3 +343,4 @@ echo ""
 echo "=================================================="
 echo "Script terminé."
 echo "=================================================="
+

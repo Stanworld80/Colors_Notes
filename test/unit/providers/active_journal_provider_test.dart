@@ -72,8 +72,8 @@ void main() {
         name: 'Mon journal',
         userId: 'user123',
         palette: Palette(name: 'Défaut', colors: []),
-        createdAt: timestamp,       // CORRECTION : Utilisation du Timestamp
-        lastUpdatedAt: timestamp,   // CORRECTION : Utilisation du Timestamp
+        createdAt: timestamp,
+        lastUpdatedAt: timestamp,
       )
     ];
 
