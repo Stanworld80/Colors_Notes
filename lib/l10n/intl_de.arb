@@ -1407,5 +1407,6 @@
   "cookieConsentMessage": "Wir verwenden Cookies, um Ihre Erfahrung zu verbessern. Essenzielle Cookies sind für den Betrieb der Website notwendig. Akzeptieren Sie Analyse-Cookies, um uns bei der Verbesserung unserer Dienste zu helfen?",
   "cookieConsentAcceptAll": "Alle akzeptieren",
   "cookieConsentDecline": "Abbrechen",
-  "cookieConsentSettings": "Einstellungen"
+  "cookieConsentSettings": "Einstellungen",
+  "privacyPolicy" : "Datenschutzerklärung"
 }

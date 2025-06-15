@@ -124,13 +124,9 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Access localized strings.
     final AppLocalizations l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.signInPageTitle), // Uses a localization key for "Se Connecter"
-      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20.0),

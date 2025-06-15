@@ -5,6 +5,7 @@ import 'package:logger/logger.dart';
 import 'package:colors_notes/l10n/app_localizations.dart'; // For localized strings.
 import '../screens/about_page.dart';
 import '../screens/colors_notes_license_page.dart'; // Assuming this is the correct name for your custom license page.
+import '../screens/privacy_policy_page.dart';
 import 'app_version_display.dart'; // The reusable widget to display app version.
 
 /// Logger instance for this footer widget.
@@ -74,6 +75,14 @@ class AuthPageFooter extends StatelessWidget {
               },
               style: textButtonStyle,
               child: Text(l10n.aboutLink, style: linkTextStyle), // Localized "About" link.
+            ),
+            Text('|', style: separatorTextStyle), // Separator.
+            TextButton(
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacyPolicyPage()));
+              },
+              style: textButtonStyle,
+              child: Text(l10n.privacyPolicy, style: linkTextStyle), // Localized "About" link.
             ),
             Text('|', style: separatorTextStyle), // Separator.
             TextButton(
