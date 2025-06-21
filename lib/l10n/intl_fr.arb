@@ -1425,6 +1425,8 @@
   "@privacyPolicy": {
     "description": "Lien vers la politique de confidentialité."
   },
-  "newJournalMenuItem": "Nouveau Journal"
+  "newJournalMenuItem": "Nouveau Journal",
+  "editJournalNameTooltip": "Modifier le nom du journal"
+
 
 }

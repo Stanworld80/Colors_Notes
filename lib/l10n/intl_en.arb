@@ -1422,7 +1422,9 @@
   "@privacyPolicy": {
     "description": "Privacy Policy Link"
     },
-  "newJournalMenuItem": "New Journal"
+  "newJournalMenuItem": "New Journal",
+  "editJournalNameTooltip": "Edit journal name"
+
 
 }
 

@@ -142,6 +142,19 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
       centerTitle: true,
       actions: <Widget>[
         if (activeJournal != null)
+          Tooltip(
+            message: l10n.editJournalNameTooltip, // Nouvelle clé de localisation pour l'infobulle
+            child: IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: () {
+                // Appel de la fonction de dialogue pour éditer le nom du journal
+                if (currentUserId != null && activeJournal != null) {
+                  _showEditActiveJournalNameDialog(context, activeJournal, currentUserId, firestoreService, l10n);
+                }
+              },
+            ),
+          ),
+        if (activeJournal != null)
           IconButton(
             icon: const Icon(Icons.palette_rounded),
             tooltip: l10n.editPaletteTooltip(activeJournal.name), // Utilisation de la nouvelle clé
@@ -205,6 +218,87 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
             ],
           ),
       ],
+    );
+  }
+
+  // Fonction pour afficher le dialogue d'édition du nom du journal actif
+  Future<void> _showEditActiveJournalNameDialog(BuildContext context, Journal journal, String userId, FirestoreService firestoreService, AppLocalizations l10n) async {
+    final TextEditingController nameController = TextEditingController(text: journal.name);
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // L'utilisateur doit appuyer sur un bouton pour fermer
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text(l10n.journalOptionsDialogTitle), // Réutilise cette clé pour le titre du dialogue
+          content: Form(
+            key: formKey,
+            child: TextFormField(
+              controller: nameController,
+              decoration: InputDecoration(
+                  labelText: l10n.newJournalNameLabel,
+                  hintText: l10n.newJournalNameHint,
+                  border: const OutlineInputBorder()
+              ),
+              autofocus: true,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return l10n.nameCannotBeEmptyValidator;
+                }
+                if (value.length > 70) {
+                  return l10n.journalNameTooLongValidator;
+                }
+                return null;
+              },
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(l10n.cancelButtonLabel),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text(l10n.saveNameButtonLabel),
+              onPressed: () async {
+                if (formKey.currentState!.validate()) {
+                  final newName = nameController.text.trim();
+                  Navigator.of(dialogContext).pop(); // Fermer le dialogue
+
+                  if (newName.isNotEmpty && newName != journal.name) {
+                    try {
+                      bool nameExists = await firestoreService.checkJournalNameExists(newName, userId);
+                      if (nameExists && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.journalNameExistsSnackbar(newName)), backgroundColor: Colors.orange),
+                        );
+                        return;
+                      }
+
+                      await firestoreService.updateJournalName(journal.id, newName);
+                      _loggerAppBar.i("Journal name ${journal.id} updated to '$newName'");
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.journalNameUpdatedSnackbar)),
+                        );
+                      }
+                    } catch (e) {
+                      _loggerAppBar.e("Error updating journal name: $e");
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.genericErrorSnackbar(e.toString()))),
+                        );
+                      }
+                    }
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
