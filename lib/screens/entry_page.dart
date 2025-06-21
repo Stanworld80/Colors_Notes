@@ -332,12 +332,12 @@ class _EntryPageState extends State<EntryPage> {
           ],
         ),
       )
-          : Column(
-        // Main Column to hold both form and notes display
-        children: [
-          Expanded(
-            // Make the form scrollable and take available space
-            child: SingleChildScrollView(
+          : SingleChildScrollView( // Outer SingleChildScrollView for the whole page
+        child: Column( // Main Column inside the outer scroll view
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // --- FORM SECTION (takes its intrinsic height) ---
+            Padding( // Padding applied here for the form content
               padding: const EdgeInsets.all(16.0),
               child: Form(
                 key: _formKey,
@@ -462,39 +462,37 @@ class _EntryPageState extends State<EntryPage> {
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 30), // Space between the form and the notes list
-          Divider(height: 20, thickness: 1, color: Theme.of(context).dividerColor),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10.0),
-            child: Text(
-              l10n.existingNotesTitle, // "Notes existantes" (Add to ARB files)
-              style: Theme.of(context).textTheme.headlineSmall,
-              textAlign: TextAlign.center,
+            // --- Separator and Title for Notes List ---
+            const SizedBox(height: 30), // Space between form and notes list header
+            Divider(height: 20, thickness: 1, color: Theme.of(context).dividerColor),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: Text(
+                l10n.existingNotesTitle, // "Notes existantes" (Add to ARB files)
+                style: Theme.of(context).textTheme.headlineSmall,
+                textAlign: TextAlign.center,
+              ),
             ),
-          ),
-          Expanded(
-            // The NotesDisplayWidget should be within an Expanded to take remaining space
-            child: NotesDisplayWidget(
-              journalId: widget.journalId,
-              userId: _userId!,
-              // Ensure userId is not null here, or handle it with a loader/error
-              journalForPalette: journalForPalette,
-              // Pass the journal for palette resolution
-              showSortingControls: true,
-              // Only chronological/anti-chronological
-              showViewToggle: true,
-              // Allow grid/list view
-              enableNoteTaps: true, // Notes are now tappable
-              showDeleteButtons: false, // No delete buttons here
-              filterByPaletteElementId: _selectedPaletteElementId, // Pass the selected color for filtering
-              onNoteTap: (note) {
-                // Navigate to a new EntryPage to edit the tapped note
-                Navigator.push(context, MaterialPageRoute(builder: (context) => EntryPage(journalId: widget.journalId, noteToEdit: note)));
-              },
+            // --- NOTES DISPLAY SECTION (given a fixed height, scrolls internally) ---
+            SizedBox( // Fixed height for the notes list
+              height: 300.0, // Adjust this height as needed
+              child: NotesDisplayWidget(
+                journalId: widget.journalId,
+                userId: _userId!,
+                journalForPalette: journalForPalette,
+                showSortingControls: true,
+                showViewToggle: true,
+                enableNoteTaps: true, // Notes are now tappable
+                showDeleteButtons: false, // No delete buttons here
+                filterByPaletteElementId: _selectedPaletteElementId, // Pass the selected color for filtering
+                onNoteTap: (note) {
+                  // Navigate to a new EntryPage to edit the tapped note
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => EntryPage(journalId: widget.journalId, noteToEdit: note)));
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
