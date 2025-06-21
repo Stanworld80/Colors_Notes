@@ -1,6 +1,27 @@
 {
+  "de": [
+    "newJournalMenuItem",
+    "editJournalNameTooltip",
+    "existingNotesTitle",
+    "sortByCreationDateTooltip",
+    "sortByContentTooltip"
+  ],
+
   "es": [
-    "cookieConsentTitle"
+    "cookieConsentTitle",
+    "newJournalMenuItem",
+    "editJournalNameTooltip",
+    "existingNotesTitle",
+    "sortByCreationDateTooltip",
+    "sortByContentTooltip"
+  ],
+
+  "it": [
+    "newJournalMenuItem",
+    "editJournalNameTooltip",
+    "existingNotesTitle",
+    "sortByCreationDateTooltip",
+    "sortByContentTooltip"
   ],
 
   "pt": [
@@ -10,7 +31,12 @@
     "languageItalian",
     "languageFrench",
     "languagePortuguese",
-    "languagePortugueseBrazil"
+    "languagePortugueseBrazil",
+    "newJournalMenuItem",
+    "editJournalNameTooltip",
+    "existingNotesTitle",
+    "sortByCreationDateTooltip",
+    "sortByContentTooltip"
   ],
 
   "pt_BR": [
@@ -20,6 +46,11 @@
     "languageItalian",
     "languageFrench",
     "languagePortuguese",
-    "languagePortugueseBrazil"
+    "languagePortugueseBrazil",
+    "newJournalMenuItem",
+    "editJournalNameTooltip",
+    "existingNotesTitle",
+    "sortByCreationDateTooltip",
+    "sortByContentTooltip"
   ]
 }

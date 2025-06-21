@@ -13,6 +13,7 @@ import '../models/note.dart';
 import '../models/journal.dart';
 import '../providers/active_journal_provider.dart';
 import '../models/color_data.dart';
+import '../widgets/notes_display_widget.dart'; // Import the new reusable widget
 
 final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0, printTime: true));
 const _uuid = Uuid();
@@ -53,13 +54,10 @@ class _EntryPageState extends State<EntryPage> {
     } else {
       _selectedPaletteElementId = widget.initialPaletteElementId;
     }
-    // Call _loadJournalDetails without passing context or l10n directly from initState
     _loadJournalDetails();
   }
 
   Future<void> _loadJournalDetails() async {
-    // final l10n = AppLocalizations.of(context)!; // REMOVED: Do not call this here
-
     if (!mounted) return;
     setState(() {
       _isLoadingJournalDetails = true;
@@ -75,7 +73,6 @@ class _EntryPageState extends State<EntryPage> {
         if (journalDoc.exists && journalDoc.data() != null) {
           _currentJournalDetails = Journal.fromMap(journalDoc.data() as Map<String, dynamic>, journalDoc.id);
         } else {
-          // Use a non-localized string or a specific error type
           throw Exception("Journal details could not be loaded.");
         }
       }
@@ -89,7 +86,7 @@ class _EntryPageState extends State<EntryPage> {
           _selectedPaletteElementId = _currentJournalDetails!.palette.colors.first.paletteElementId;
           if (mounted) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) { // Check again as it's async
+              if (mounted) {
                 final l10nCallback = AppLocalizations.of(context);
                 if (l10nCallback != null) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -121,7 +118,6 @@ class _EntryPageState extends State<EntryPage> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
             final l10nCallback = AppLocalizations.of(context);
-            // Use a generic message or a specific key if l10nCallback is null
             final errorMessage = l10nCallback?.entryPageJournalDetailsLoadError ?? "Error loading journal details";
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("$errorMessage: ${e.toString()}")));
           }
@@ -224,7 +220,7 @@ class _EntryPageState extends State<EntryPage> {
           lastUpdatedAt: Timestamp.now(),
         );
         await firestoreService.createNote(newNote);
-        _loggerPage.i("Note créée: ${newNote.id}");
+        _loggerPage.i("Note created: ${newNote.id}"); // Log in English
         if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageNoteSavedSuccess)));
       } else {
         final updatedNote = widget.noteToEdit!.copyWith(
@@ -234,12 +230,12 @@ class _EntryPageState extends State<EntryPage> {
           lastUpdatedAt: Timestamp.now(),
         );
         await firestoreService.updateNote(updatedNote);
-        _loggerPage.i("Note mise à jour: ${updatedNote.id}");
+        _loggerPage.i("Note updated: ${updatedNote.id}"); // Log in English
         if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageNoteUpdatedSuccess)));
       }
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
-      _loggerPage.e("Erreur sauvegarde note: $e");
+      _loggerPage.e("Error saving note: $e"); // Log in English
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageGenericSaveError(e.toString()))));
       }
@@ -287,11 +283,11 @@ class _EntryPageState extends State<EntryPage> {
         lastUpdatedAt: Timestamp.now(),
       );
       await firestoreService.createNote(newNote);
-      _loggerPage.i("Note sauvegardée comme nouvelle: ${newNote.id}");
+      _loggerPage.i("Note saved as new: ${newNote.id}"); // Log in English
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageNoteSavedAsNewSuccess)));
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
-      _loggerPage.e("Erreur sauvegarde comme nouvelle note: $e");
+      _loggerPage.e("Error saving as new note: $e"); // Log in English
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.entryPageGenericSaveError(e.toString()))));
       }
@@ -307,8 +303,15 @@ class _EntryPageState extends State<EntryPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final DateFormat dateFormat = DateFormat('EEEE dd MMMM yyyy', l10n.localeName);
+    final DateFormat dateFormat = DateFormat('EEEE dd MMMM y HH:mm', l10n.localeName);
     final bool isEditing = widget.noteToEdit != null;
+
+    final activeJournalNotifier = Provider.of<ActiveJournalNotifier>(context);
+    final Journal? journalForPalette = activeJournalNotifier.activeJournalId == widget.journalId ? activeJournalNotifier.activeJournal : null;
+
+    if (_userId == null) {
+      return Center(child: Text(l10n.userNotConnectedError));
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -329,130 +332,169 @@ class _EntryPageState extends State<EntryPage> {
           ],
         ),
       )
-          : SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              if (_currentJournalDetails!.palette.colors.isNotEmpty)
-                DropdownButtonFormField<String>(
-                  value: _selectedPaletteElementId,
-                  decoration: InputDecoration(labelText: l10n.entryPageAssociatedColorLabel, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
-                  items: _currentJournalDetails!.palette.colors.map((ColorData colorData) {
-                    return DropdownMenuItem<String>(
-                      value: colorData.paletteElementId,
-                      child: Row(
-                        children: [
-                          CircleAvatar(backgroundColor: colorData.color, radius: 10),
-                          const SizedBox(width: 10),
-                          Text(colorData.title),
-                        ],
+          : Column(
+        // Main Column to hold both form and notes display
+        children: [
+          Expanded(
+            // Make the form scrollable and take available space
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    if (_currentJournalDetails!.palette.colors.isNotEmpty)
+                      DropdownButtonFormField<String>(
+                        value: _selectedPaletteElementId,
+                        decoration: InputDecoration(labelText: l10n.entryPageAssociatedColorLabel, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                        items: _currentJournalDetails!.palette.colors.map((ColorData colorData) {
+                          return DropdownMenuItem<String>(
+                            value: colorData.paletteElementId,
+                            child: Row(
+                              children: [
+                                CircleAvatar(backgroundColor: colorData.color, radius: 10),
+                                const SizedBox(width: 10),
+                                Text(colorData.title),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          if (mounted) {
+                            setState(() {
+                              _selectedPaletteElementId = newValue;
+                            });
+                          }
+                        },
+                        validator: (value) => value == null ? l10n.entryPageSelectColorValidator : null,
+                      )
+                    else
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
+                          l10n.entryPagePaletteEmptySnackbar,
+                          style: TextStyle(color: Theme.of(context).colorScheme.error),
+                        ),
                       ),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    if (mounted) {
-                      setState(() {
-                        _selectedPaletteElementId = newValue;
-                      });
-                    }
-                  },
-                  validator: (value) => value == null ? l10n.entryPageSelectColorValidator : null,
-                )
-              else
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text(
-                    l10n.entryPagePaletteEmptySnackbar,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
-                  ),
-                ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _contentController,
-                decoration: InputDecoration(
-                  labelText: l10n.entryPageContentLabel,
-                  hintText: l10n.entryPageContentHint,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                  alignLabelWithHint: true,
-                ),
-                maxLines: 8,
-                textCapitalization: TextCapitalization.sentences,
-                validator: (value) {
-                  if (value!.length > 1024) {
-                    return l10n.entryPageContentValidatorTooLong;
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton.icon(
-                      icon: const Icon(Icons.calendar_today_outlined),
-                      label: Text(dateFormat.format(_selectedEventDate)),
-                      onPressed: () => _selectEventDate(context),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        side: BorderSide(color: Theme.of(context).dividerColor),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _contentController,
+                      decoration: InputDecoration(
+                        labelText: l10n.entryPageContentLabel,
+                        hintText: l10n.entryPageContentHint,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        alignLabelWithHint: true,
                       ),
+                      maxLines: 8,
+                      textCapitalization: TextCapitalization.sentences,
+                      validator: (value) {
+                        if (value != null && value.length > 1024) {
+                          return l10n.entryPageContentValidatorTooLong;
+                        }
+                        return null;
+                      },
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextButton.icon(
-                      icon: const Icon(Icons.access_time_outlined),
-                      label: Text(_selectedEventTime.format(context)),
-                      onPressed: () => _selectEventTime(context),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        side: BorderSide(color: Theme.of(context).dividerColor),
-                      ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextButton.icon(
+                            icon: const Icon(Icons.calendar_today_outlined),
+                            label: Text(dateFormat.format(_selectedEventDate)),
+                            onPressed: () => _selectEventDate(context),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              side: BorderSide(color: Theme.of(context).dividerColor),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextButton.icon(
+                            icon: const Icon(Icons.access_time_outlined),
+                            label: Text(_selectedEventTime.format(context)),
+                            onPressed: () => _selectEventTime(context),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              side: BorderSide(color: Theme.of(context).dividerColor),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Tooltip(
+                          message: l10n.entryPageDateTimeSetToNowSnackbar,
+                          child: IconButton(
+                            icon: const Icon(Icons.arrow_circle_left_outlined),
+                            onPressed: _setDateTimeToNow,
+                            style: IconButton.styleFrom(
+                              padding: const EdgeInsets.all(12),
+                              side: BorderSide(color: Theme.of(context).dividerColor),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Tooltip(
-                    message: l10n.entryPageDateTimeSetToNowSnackbar,
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_circle_left_outlined),
-                      onPressed: _setDateTimeToNow,
-                      style: IconButton.styleFrom(
-                        padding: const EdgeInsets.all(12),
-                        side: BorderSide(color: Theme.of(context).dividerColor),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
+                    const SizedBox(height: 30),
+                    ElevatedButton.icon(
+                      icon: Icon(_isSaving ? Icons.hourglass_empty_outlined : (isEditing ? Icons.sync_alt_outlined : Icons.save_outlined)),
+                      label: Text(_isSaving ? l10n.entryPageSavingButton : (isEditing ? l10n.entryPageSaveButtonUpdate : l10n.entryPageSaveButtonCreate)),
+                      onPressed: (_isSaving || _isSavingAsNew || _selectedPaletteElementId == null) ? null : _saveNote,
+                      style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 15), textStyle: const TextStyle(fontSize: 16)),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 30),
-              ElevatedButton.icon(
-                icon: Icon(_isSaving ? Icons.hourglass_empty_outlined : (isEditing ? Icons.sync_alt_outlined : Icons.save_outlined)),
-                label: Text(_isSaving ? l10n.entryPageSavingButton : (isEditing ? l10n.entryPageSaveButtonUpdate : l10n.entryPageSaveButtonCreate)),
-                onPressed: (_isSaving || _isSavingAsNew || _selectedPaletteElementId == null) ? null : _saveNote,
-                style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 15), textStyle: const TextStyle(fontSize: 16)),
-              ),
-              if (isEditing) ...[
-                const SizedBox(height: 15),
-                OutlinedButton.icon(
-                  icon: Icon(_isSavingAsNew ? Icons.hourglass_empty_outlined : Icons.add_circle_outline),
-                  label: Text(_isSavingAsNew ? l10n.entryPageSavingButton : l10n.entryPageSaveAsNewButton),
-                  onPressed: (_isSaving || _isSavingAsNew || _selectedPaletteElementId == null) ? null : _saveAsNewNote,
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    textStyle: const TextStyle(fontSize: 16),
-                    side: BorderSide(color: Theme.of(context).colorScheme.primary),
-                  ),
+                    if (isEditing) ...[
+                      const SizedBox(height: 15),
+                      OutlinedButton.icon(
+                        icon: Icon(_isSavingAsNew ? Icons.hourglass_empty_outlined : Icons.add_circle_outline),
+                        label: Text(_isSavingAsNew ? l10n.entryPageSavingButton : l10n.entryPageSaveAsNewButton),
+                        onPressed: (_isSaving || _isSavingAsNew || _selectedPaletteElementId == null) ? null : _saveAsNewNote,
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          textStyle: const TextStyle(fontSize: 16),
+                          side: BorderSide(color: Theme.of(context).colorScheme.primary),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-              ],
-            ],
+              ),
+            ),
           ),
-        ),
+          const SizedBox(height: 30), // Space between the form and the notes list
+          Divider(height: 20, thickness: 1, color: Theme.of(context).dividerColor),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
+            child: Text(
+              l10n.existingNotesTitle, // "Notes existantes" (Add to ARB files)
+              style: Theme.of(context).textTheme.headlineSmall,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          Expanded(
+            // The NotesDisplayWidget should be within an Expanded to take remaining space
+            child: NotesDisplayWidget(
+              journalId: widget.journalId,
+              userId: _userId!,
+              // Ensure userId is not null here, or handle it with a loader/error
+              journalForPalette: journalForPalette,
+              // Pass the journal for palette resolution
+              showSortingControls: true,
+              // Only chronological/anti-chronological
+              showViewToggle: true,
+              // Allow grid/list view
+              enableNoteTaps: true, // Notes are now tappable
+              showDeleteButtons: false, // No delete buttons here
+              filterByPaletteElementId: _selectedPaletteElementId, // Pass the selected color for filtering
+              onNoteTap: (note) {
+                // Navigate to a new EntryPage to edit the tapped note
+                Navigator.push(context, MaterialPageRoute(builder: (context) => EntryPage(journalId: widget.journalId, noteToEdit: note)));
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

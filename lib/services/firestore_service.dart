@@ -342,16 +342,21 @@ class FirestoreService {
   }
 
 
-  /// Returns a stream of the list of notes for a given journal, with optional sorting.
+  /// Returns a stream of the list of notes for a given journal, with optional sorting and filtering.
   ///
   /// [journalId] The ID of the journal whose notes are to be fetched.
   /// [sortBy] The field to sort by (e.g., 'eventTimestamp', 'createdAt'). Defaults to 'eventTimestamp'.
   /// [descending] Whether to sort in descending order. Defaults to `true` for 'eventTimestamp', `false` otherwise.
+  /// [filterByPaletteElementId] Optional: if provided, filters notes to only show those with this paletteElementId.
   /// Returns a [Stream] of a list of [Note] objects.
   /// Emits an empty list or an error if fetching fails.
-  Stream<List<Note>> getJournalNotesStream(String journalId, {String? sortBy, bool descending = false}) {
+  Stream<List<Note>> getJournalNotesStream(String journalId, {String? sortBy, bool descending = false, String? filterByPaletteElementId}) {
     try {
       Query query = _db.collection('notes').where('journalId', isEqualTo: journalId);
+
+      if (filterByPaletteElementId != null) {
+        query = query.where('paletteElementId', isEqualTo: filterByPaletteElementId);
+      }
 
       if (sortBy != null) {
         query = query.orderBy(sortBy, descending: descending);
