@@ -15,6 +15,7 @@ import '../screens/about_page.dart';
 import '../screens/colors_notes_license_page.dart';
 import 'package:colors_notes/l10n/app_localizations.dart';
 import '../screens/privacy_policy_page.dart';
+import '../screens/create_journal_page.dart'; // Importez la page de création de journal
 
 /// Logger instance for this AppBar widget.
 final _loggerAppBar = Logger(printer: PrettyPrinter(methodCount: 0));
@@ -52,19 +53,48 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
         stream: firestoreService.getJournalsStream(currentUserId),
         builder: (context, snapshot) {
           if (!snapshot.hasData || snapshot.data == null || snapshot.data!.isEmpty) {
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [const Icon(Icons.book_outlined, size: 20), const SizedBox(width: 8), Text(displayTitle, style: const TextStyle(fontSize: 18))],
+            // If no journals or loading, still show a dropdown that leads to 'New Journal'
+            return PopupMenuButton<String>(
+              tooltip: l10n.changeJournalTooltip,
+              onSelected: (String value) {
+                if (value == 'new_journal') {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateJournalPage()));
+                } else if (value.isNotEmpty) {
+                  activeJournalNotifier.setActiveJournal(value, currentUserId);
+                  _loggerAppBar.i("Journal actif changé via Titre AppBar: $value");
+                }
+              },
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuEntry<String>>[
+                  PopupMenuItem<String>(
+                    value: 'new_journal',
+                    child: ListTile(
+                      leading: const Icon(Icons.add_circle_outline),
+                      title: Text(l10n.newJournalMenuItem), // Nouvelle clé de localisation
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  // If no other journals, maybe show a disabled placeholder or just the 'new_journal' option.
+                  // For now, if snapshot.data is empty, only 'new_journal' and divider will be shown
+                  // by this specific builder path, as journalItems will be empty.
+                ];
+              },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [const Icon(Icons.book_outlined, size: 20), const SizedBox(width: 8), Flexible(child: Text(displayTitle, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 18)))],
+              ),
             );
           }
 
           final journals = snapshot.data!;
           return PopupMenuButton<String>(
             tooltip: l10n.changeJournalTooltip, // Utilisation de la nouvelle clé
-            onSelected: (String journalId) {
-              if (journalId.isNotEmpty) {
-                activeJournalNotifier.setActiveJournal(journalId, currentUserId);
-                _loggerAppBar.i("Journal actif changé via Titre AppBar: $journalId");
+            onSelected: (String value) {
+              if (value == 'new_journal') {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateJournalPage()));
+              } else if (value.isNotEmpty) {
+                activeJournalNotifier.setActiveJournal(value, currentUserId);
+                _loggerAppBar.i("Journal actif changé via Titre AppBar: $value");
               }
             },
             itemBuilder: (BuildContext context) {
@@ -84,7 +114,18 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
                   ),
                 );
               }).toList();
-              return journalItems;
+
+              return <PopupMenuEntry<String>>[
+                PopupMenuItem<String>(
+                  value: 'new_journal',
+                  child: ListTile(
+                    leading: const Icon(Icons.add_circle_outline),
+                    title: Text(l10n.newJournalMenuItem), // Nouvelle clé de localisation
+                  ),
+                ),
+                const PopupMenuDivider(),
+                ...journalItems, // Spread operator to add all journal items
+              ];
             },
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -173,3 +214,4 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
           kToolbarHeight
       );
 }
+

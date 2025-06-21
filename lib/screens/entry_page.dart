@@ -381,10 +381,7 @@ class _EntryPageState extends State<EntryPage> {
                 maxLines: 8,
                 textCapitalization: TextCapitalization.sentences,
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return l10n.entryPageContentValidatorEmpty;
-                  }
-                  if (value.length > 1024) {
+                  if (value!.length > 1024) {
                     return l10n.entryPageContentValidatorTooLong;
                   }
                   return null;
