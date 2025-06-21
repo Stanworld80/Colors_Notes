@@ -1424,5 +1424,7 @@
   "privacyPolicy" : "Politique de confidentialité",
   "@privacyPolicy": {
     "description": "Lien vers la politique de confidentialité."
-  }
+  },
+  "newJournalMenuItem": "Nouveau Journal"
+
 }

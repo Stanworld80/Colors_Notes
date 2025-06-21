@@ -1421,6 +1421,8 @@
   "privacyPolicy" : "Privacy Policy",
   "@privacyPolicy": {
     "description": "Privacy Policy Link"
-    }
+    },
+  "newJournalMenuItem": "New Journal"
+
 }
 
