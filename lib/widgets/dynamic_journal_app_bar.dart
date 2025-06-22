@@ -15,6 +15,7 @@ import '../screens/about_page.dart';
 import '../screens/colors_notes_license_page.dart';
 import 'package:colors_notes/l10n/app_localizations.dart';
 import '../screens/privacy_policy_page.dart';
+import '../screens/create_journal_page.dart'; // Importez la page de création de journal
 
 /// Logger instance for this AppBar widget.
 final _loggerAppBar = Logger(printer: PrettyPrinter(methodCount: 0));
@@ -52,19 +53,48 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
         stream: firestoreService.getJournalsStream(currentUserId),
         builder: (context, snapshot) {
           if (!snapshot.hasData || snapshot.data == null || snapshot.data!.isEmpty) {
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [const Icon(Icons.book_outlined, size: 20), const SizedBox(width: 8), Text(displayTitle, style: const TextStyle(fontSize: 18))],
+            // If no journals or loading, still show a dropdown that leads to 'New Journal'
+            return PopupMenuButton<String>(
+              tooltip: l10n.changeJournalTooltip,
+              onSelected: (String value) {
+                if (value == 'new_journal') {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateJournalPage()));
+                } else if (value.isNotEmpty) {
+                  activeJournalNotifier.setActiveJournal(value, currentUserId);
+                  _loggerAppBar.i("Journal actif changé via Titre AppBar: $value");
+                }
+              },
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuEntry<String>>[
+                  PopupMenuItem<String>(
+                    value: 'new_journal',
+                    child: ListTile(
+                      leading: const Icon(Icons.add_circle_outline),
+                      title: Text(l10n.newJournalMenuItem), // Nouvelle clé de localisation
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  // If no other journals, maybe show a disabled placeholder or just the 'new_journal' option.
+                  // For now, if snapshot.data is empty, only 'new_journal' and divider will be shown
+                  // by this specific builder path, as journalItems will be empty.
+                ];
+              },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [const Icon(Icons.book_outlined, size: 20), const SizedBox(width: 8), Flexible(child: Text(displayTitle, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 18)))],
+              ),
             );
           }
 
           final journals = snapshot.data!;
           return PopupMenuButton<String>(
             tooltip: l10n.changeJournalTooltip, // Utilisation de la nouvelle clé
-            onSelected: (String journalId) {
-              if (journalId.isNotEmpty) {
-                activeJournalNotifier.setActiveJournal(journalId, currentUserId);
-                _loggerAppBar.i("Journal actif changé via Titre AppBar: $journalId");
+            onSelected: (String value) {
+              if (value == 'new_journal') {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateJournalPage()));
+              } else if (value.isNotEmpty) {
+                activeJournalNotifier.setActiveJournal(value, currentUserId);
+                _loggerAppBar.i("Journal actif changé via Titre AppBar: $value");
               }
             },
             itemBuilder: (BuildContext context) {
@@ -84,7 +114,18 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
                   ),
                 );
               }).toList();
-              return journalItems;
+
+              return <PopupMenuEntry<String>>[
+                PopupMenuItem<String>(
+                  value: 'new_journal',
+                  child: ListTile(
+                    leading: const Icon(Icons.add_circle_outline),
+                    title: Text(l10n.newJournalMenuItem), // Nouvelle clé de localisation
+                  ),
+                ),
+                const PopupMenuDivider(),
+                ...journalItems, // Spread operator to add all journal items
+              ];
             },
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -100,6 +141,19 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
       ),
       centerTitle: true,
       actions: <Widget>[
+        if (activeJournal != null)
+          Tooltip(
+            message: l10n.editJournalNameTooltip, // Nouvelle clé de localisation pour l'infobulle
+            child: IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: () {
+                // Appel de la fonction de dialogue pour éditer le nom du journal
+                if (currentUserId != null && activeJournal != null) {
+                  _showEditActiveJournalNameDialog(context, activeJournal, currentUserId, firestoreService, l10n);
+                }
+              },
+            ),
+          ),
         if (activeJournal != null)
           IconButton(
             icon: const Icon(Icons.palette_rounded),
@@ -167,9 +221,91 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
     );
   }
 
+  // Fonction pour afficher le dialogue d'édition du nom du journal actif
+  Future<void> _showEditActiveJournalNameDialog(BuildContext context, Journal journal, String userId, FirestoreService firestoreService, AppLocalizations l10n) async {
+    final TextEditingController nameController = TextEditingController(text: journal.name);
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // L'utilisateur doit appuyer sur un bouton pour fermer
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text(l10n.journalOptionsDialogTitle), // Réutilise cette clé pour le titre du dialogue
+          content: Form(
+            key: formKey,
+            child: TextFormField(
+              controller: nameController,
+              decoration: InputDecoration(
+                  labelText: l10n.newJournalNameLabel,
+                  hintText: l10n.newJournalNameHint,
+                  border: const OutlineInputBorder()
+              ),
+              autofocus: true,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return l10n.nameCannotBeEmptyValidator;
+                }
+                if (value.length > 70) {
+                  return l10n.journalNameTooLongValidator;
+                }
+                return null;
+              },
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(l10n.cancelButtonLabel),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text(l10n.saveNameButtonLabel),
+              onPressed: () async {
+                if (formKey.currentState!.validate()) {
+                  final newName = nameController.text.trim();
+                  Navigator.of(dialogContext).pop(); // Fermer le dialogue
+
+                  if (newName.isNotEmpty && newName != journal.name) {
+                    try {
+                      bool nameExists = await firestoreService.checkJournalNameExists(newName, userId);
+                      if (nameExists && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.journalNameExistsSnackbar(newName)), backgroundColor: Colors.orange),
+                        );
+                        return;
+                      }
+
+                      await firestoreService.updateJournalName(journal.id, newName);
+                      _loggerAppBar.i("Journal name ${journal.id} updated to '$newName'");
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.journalNameUpdatedSnackbar)),
+                        );
+                      }
+                    } catch (e) {
+                      _loggerAppBar.e("Error updating journal name: $e");
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.genericErrorSnackbar(e.toString()))),
+                        );
+                      }
+                    }
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Size get preferredSize =>
       const Size.fromHeight(
           kToolbarHeight
       );
 }
+
