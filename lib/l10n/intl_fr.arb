@@ -1420,9 +1420,14 @@
   "languageFrench": "Français",
   "languagePortuguese": "Portugais",
   "languagePortugueseBrazil": "Portugais (Brésil)",
-  "help" : "aide",
-  "privacyPolicy" : "Politique de confidentialité",
+  "help": "aide",
+  "privacyPolicy": "Politique de confidentialité",
   "@privacyPolicy": {
     "description": "Lien vers la politique de confidentialité."
-  }
+  },
+  "newJournalMenuItem": "Nouveau Journal",
+  "editJournalNameTooltip": "Modifier le nom du journal",
+  "existingNotesTitle": "Notes existantes",
+  "sortByCreationDateTooltip": "Trier par date de création",
+  "sortByContentTooltip" : "Trier par contenu"
 }

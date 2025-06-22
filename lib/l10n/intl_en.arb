@@ -405,7 +405,6 @@
   "languageFrench": "French",
   "languagePortuguese": "Portuguese",
   "languagePortugueseBrazil": "Portuguese (Brazil)",
-
   "enterNumberValidator": "Enter a number.",
   "@enterNumberValidator": {
     "description": "Validation error message when a number input is expected but not provided correctly."
@@ -1418,9 +1417,14 @@
   "@cookieConsentSettings": {
     "description": "Button text to open cookie settings."
   },
-  "privacyPolicy" : "Privacy Policy",
+  "privacyPolicy": "Privacy Policy",
   "@privacyPolicy": {
     "description": "Privacy Policy Link"
-    }
+  },
+  "newJournalMenuItem": "New Journal",
+  "editJournalNameTooltip": "Edit journal name",
+  "existingNotesTitle": "Existing Notes",
+  "sortByCreationDateTooltip": "Sort by creation date",
+  "sortByContentTooltip" : "Sort by content"
 }
 
