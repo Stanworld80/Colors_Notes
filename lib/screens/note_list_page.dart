@@ -24,12 +24,12 @@ final _loggerPage = Logger(printer: PrettyPrinter(methodCount: 0, printTime: fal
 /// delete individual notes, or delete all notes in the journal.
 class NoteListPage extends StatefulWidget {
   /// The ID of the journal whose notes are to be displayed.
-  final String journalId;
+  final String? journalId;
 
   /// Creates an instance of [NoteListPage].
   ///
   /// [journalId] is required to fetch and display the relevant notes.
-  const NoteListPage({super.key, required this.journalId});
+  const NoteListPage({super.key, this.journalId});
 
   @override
   _NoteListPageState createState() => _NoteListPageState();
@@ -191,11 +191,22 @@ class _NoteListPageState extends State<NoteListPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final firestoreService = Provider.of<FirestoreService>(context, listen: false);
-    final activeJournalNotifier = Provider.of<ActiveJournalNotifier>(context);
-    final Journal? journalForPalette = activeJournalNotifier.activeJournalId == widget.journalId ? activeJournalNotifier.activeJournal : null;
+    final activeJournalNotifier = context.watch<ActiveJournalNotifier>();
     final authService = Provider.of<AuthService>(context, listen: false);
     final String? currentUserId = authService.currentUser?.uid;
 
+    final String? journalIdToUse = widget.journalId ?? activeJournalNotifier.activeJournalId;
+
+    if (journalIdToUse == null) {
+      return Scaffold(
+        body: Center(
+          child: Text(l10n.noJournalSelected),
+        ),
+      );
+    }
+    
+    final Journal? journalForPalette = activeJournalNotifier.activeJournalId == journalIdToUse ? activeJournalNotifier.activeJournal : null;
+    
     if (currentUserId == null) {
       return Center(child: Text(l10n.userNotConnectedError));
     }
@@ -211,7 +222,7 @@ class _NoteListPageState extends State<NoteListPage> {
               children: [
                 // "Delete All Notes" button, shown if user is logged in and notes exist.
                 StreamBuilder<List<Note>>(
-                  stream: firestoreService.getJournalNotesStream(widget.journalId, sortBy: 'eventTimestamp', descending: true),
+                  stream: firestoreService.getJournalNotesStream(journalIdToUse, sortBy: 'eventTimestamp', descending: true),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const SizedBox.shrink();
@@ -222,7 +233,7 @@ class _NoteListPageState extends State<NoteListPage> {
                         message: l10n.deleteAllNotesTooltip,
                         child: IconButton(
                           icon: Icon(Icons.delete_sweep_outlined, color: Theme.of(context).colorScheme.error),
-                          onPressed: _isDeletingAllNotes ? null : () => _confirmDeleteAllNotes(context, firestoreService, widget.journalId, currentUserId),
+                          onPressed: _isDeletingAllNotes ? null : () => _confirmDeleteAllNotes(context, firestoreService, journalIdToUse, currentUserId),
                         ),
                       );
                     }
@@ -262,7 +273,7 @@ class _NoteListPageState extends State<NoteListPage> {
           ),
           Expanded( // The actual notes display area using the new widget
             child: NotesDisplayWidget(
-              journalId: widget.journalId,
+              journalId: journalIdToUse,
               userId: currentUserId,
               journalForPalette: journalForPalette,
               showSortingControls: false, // NoteListPage handles sorting UI externally
@@ -274,7 +285,7 @@ class _NoteListPageState extends State<NoteListPage> {
               showDeleteButtons: true, // Enable delete buttons on notes
               onNoteTap: (note) {
                 // Navigate to EntryPage to edit the tapped note
-                Navigator.push(context, MaterialPageRoute(builder: (context) => EntryPage(journalId: widget.journalId, noteToEdit: note)));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => EntryPage(journalId: journalIdToUse, noteToEdit: note)));
               },
               onNoteDelete: (note) {
                 // Call the local delete confirmation function when delete button is pressed

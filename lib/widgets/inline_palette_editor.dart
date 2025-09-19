@@ -245,7 +245,7 @@ class _InlinePaletteEditorWidgetState extends State<InlinePaletteEditorWidget> {
                         pickerColor: pickerColor,
                         onColorChanged: (color) => pickerColor = color,
                         colorPickerWidth: 300.0,
-                        pickerAreaHeightPercent: 0.7,
+                        pickerAreaHeightPercent: 0.2,
                         enableAlpha: false,
                         displayThumbColor: true,
                         paletteType: PaletteType.hsvWithValue,

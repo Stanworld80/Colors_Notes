@@ -398,7 +398,6 @@
   "@emptyPaletteDialogTitle": {
     "description": "Título do diálogo de confirmação sobre se deve esvaziar uma nova paleta."
   },
-  "english": "Inglês",
   "enterNumberValidator": "Introduza um número.",
   "@enterNumberValidator": {
     "description": "Mensagem de erro de validação quando é esperado um input numérico mas não é fornecido corretamente."
@@ -618,7 +617,6 @@
   "@formValidationFailedLog": {
     "description": "Mensagem de log quando a validação do formulário para o nome da paleta falha durante uma tentativa de gravação automática."
   },
-  "french": "Francês",
   "generatedColorExistsError": "A cor gerada {hexCode} já existe.",
   "@generatedColorExistsError": {
     "description": "Mensagem de erro quando o código hexadecimal de uma cor de gradiente gerada já existe.",
@@ -650,6 +648,10 @@
       }
     }
   },
+  "homeButtonTooltip": "Início",
+  "@homeButtonTooltip": {
+    "description": "Dica de ferramenta para o botão de início na barra de aplicações."
+  },
   "incorrectConfirmationTextValidator": "Texto de confirmação incorreto.",
   "@incorrectConfirmationTextValidator": {
     "description": "Erro de validação quando o texto introduzido para confirmação de eliminação está incorreto."
@@ -662,7 +664,6 @@
   "@invalidInput": {
     "description": "Mensagem de erro genérica para entrada de utilizador inválida."
   },
-  "italian": "Italiano",
   "journalCreatedOnDateLabel": "Criado em: {date}",
   "@journalCreatedOnDateLabel": {
     "description": "Rótulo exibindo a data de criação de um jornal.",
@@ -759,6 +760,13 @@
     }
   },
   "language": "Idioma",
+  "languageEnglish": "Inglês",
+  "languageSpanish": "Espanhol",
+  "languageGerman": "Alemão",
+  "languageItalian": "Italiano",
+  "languageFrench": "Francês",
+  "languagePortuguese": "Português",
+  "languagePortugueseBrazil": "Português (Brasil)",
   "licenseLink": "Licença",
   "licensePageTitle": "Contrato de Licença",
   "@licensePageTitle": {
@@ -786,6 +794,7 @@
   },
   "logout": "Terminar Sessão",
   "manageJournals": "Gerir Jornais",
+  "manageNotes": "Gerir Notas",
   "manageJournalsAppBarTitle": "Gerir Jornais",
   "@manageJournalsAppBarTitle": {
     "description": "Título da AppBar para a página de gestão de jornais."
@@ -870,6 +879,10 @@
   "noActiveJournalTitle": "Nenhum jornal ativo.",
   "@noActiveJournalTitle": {
     "description": "Título exibido quando nenhum jornal está ativo."
+  },
+  "noJournalSelected": "Nenhum jornal selecionado.",
+  "@noJournalSelected": {
+    "description": "Mensagem exibida quando nenhum jornal é selecionado."
   },
   "noCancelButtonLabel": "NÃO, CANCELAR",
   "@noCancelButtonLabel": {
@@ -1051,12 +1064,15 @@
       }
     }
   },
-  "paletteModelInfo": "{colorCount,plural, =1{cor} other{cores}} {type}",
+  "paletteModelInfo": "{colorCount} cor {pluralS} {type}",
   "@paletteModelInfo": {
-    "description": "Informação sobre um modelo de paleta, mostrando a contagem de cores e o tipo (Predefinido/Pessoal).",
+    "description": "Informação sobre um modelo de paleta, mostrando a contagem de cores e o tipo (Predefinido/Pessoal). O marcador de posição {pluralS} deve ser substituído por 'es' ou uma cadeia vazia.",
     "placeholders": {
       "colorCount": {
         "type": "int"
+      },
+      "pluralS": {
+        "type": "String"
       },
       "type": {
         "type": "String"
@@ -1143,8 +1159,6 @@
   "@pleaseChooseModelValidator": {
     "description": "Erro de validação quando nenhum modelo de paleta é selecionado de um menu suspenso obrigatório."
   },
-  "portuguese": "Português",
-  "portugueseBrazilian": "Português (Brasil)",
   "predefinedModelsCannotBeDeletedSnackbar": "Os modelos predefinidos não podem ser eliminados.",
   "@predefinedModelsCannotBeDeletedSnackbar": {
     "description": "Mensagem Snackbar exibida ao tentar eliminar um modelo de paleta predefinido."
@@ -1391,11 +1405,33 @@
     "description": "Rótulo do botão que confirma a eliminação de todas as notas, tipicamente num diálogo de confirmação final."
   },
   "cookieConsentTitle": "Consentimento de Cookies",
+  "@cookieConsentTitle": {
+    "description": "Título para o banner de consentimento de cookies."
+  },
   "cookieConsentMessage": "Utilizamos cookies para melhorar a sua experiência. Os cookies essenciais são necessários para o funcionamento do site. Aceita cookies analíticos para nos ajudar a melhorar os nossos serviços?",
+  "@cookieConsentMessage": {
+    "description": "Mensagem principal para o banner de consentimento de cookies."
+  },
   "cookieConsentAcceptAll": "Aceitar Todos",
+  "@cookieConsentAcceptAll": {
+    "description": "Texto do botão para aceitar todos os cookies."
+  },
   "cookieConsentDecline": "Recusar Cookies de Análise",
+  "@cookieConsentDecline": {
+    "description": "Texto do botão para recusar cookies não essenciais."
+  },
   "cookieConsentSettings": "Configurações",
-  "help" : "Ajuda",
-  "privacyPolicy" : "Privacy Policy"
+  "@cookieConsentSettings": {
+    "description": "Texto do botão para abrir as configurações de cookies."
+  },
+  "help": "Ajuda",
+  "privacyPolicy": "Política de Privacidade",
+  "@privacyPolicy": {
+    "description": "Link para a Política de Privacidade."
+  },
+  "newJournalMenuItem": "Novo Jornal",
+  "editJournalNameTooltip": "Editar nome do jornal",
+  "existingNotesTitle": "Notas existentes",
+  "sortByCreationDateTooltip": "Ordenar por data de criação",
+  "sortByContentTooltip": "Ordenar por conteúdo"
 }
-

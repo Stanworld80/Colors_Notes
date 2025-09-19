@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ],
-      // Utilise un Consumer pour reconstruire MaterialApp si la langue change.
+      // Utilise un Consumer pour reconstruire MaterialApp si la langue change.ancestry.com
       child: Consumer<LanguageProvider>(
         builder: (context, languageProvider, _) {
           return MaterialApp(

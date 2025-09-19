@@ -1,5 +1,6 @@
 {
   "de": [
+    "homeButtonTooltip",
     "newJournalMenuItem",
     "editJournalNameTooltip",
     "existingNotesTitle",
@@ -8,6 +9,8 @@
   ],
 
   "es": [
+    "homeButtonTooltip",
+    "manageNotes",
     "cookieConsentTitle",
     "newJournalMenuItem",
     "editJournalNameTooltip",
@@ -16,7 +19,13 @@
     "sortByContentTooltip"
   ],
 
+  "fr": [
+    "homeButtonTooltip"
+  ],
+
   "it": [
+    "homeButtonTooltip",
+    "manageNotes",
     "newJournalMenuItem",
     "editJournalNameTooltip",
     "existingNotesTitle",
@@ -32,6 +41,8 @@
     "languageFrench",
     "languagePortuguese",
     "languagePortugueseBrazil",
+    "homeButtonTooltip",
+    "manageNotes",
     "newJournalMenuItem",
     "editJournalNameTooltip",
     "existingNotesTitle",
@@ -47,6 +58,8 @@
     "languageFrench",
     "languagePortuguese",
     "languagePortugueseBrazil",
+    "homeButtonTooltip",
+    "manageNotes",
     "newJournalMenuItem",
     "editJournalNameTooltip",
     "existingNotesTitle",

@@ -1,4 +1,5 @@
 // lib/widgets/dynamic_journal_app_bar.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
@@ -8,7 +9,6 @@ import '../screens/help_page.dart';
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
 import '../models/journal.dart';
-import '../screens/journal_management_page.dart';
 import '../screens/palette_model_management_page.dart';
 import '../screens/unified_palette_editor_page.dart';
 import '../screens/about_page.dart';
@@ -16,6 +16,8 @@ import '../screens/colors_notes_license_page.dart';
 import 'package:colors_notes/l10n/app_localizations.dart';
 import '../screens/privacy_policy_page.dart';
 import '../screens/create_journal_page.dart'; // Importez la page de création de journal
+import '../screens/main_screen.dart';
+import '../screens/auth_gate.dart';
 
 /// Logger instance for this AppBar widget.
 final _loggerAppBar = Logger(printer: PrettyPrinter(methodCount: 0));
@@ -46,6 +48,20 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
     }
 
     return AppBar(
+      leading: Tooltip(
+        message: l10n.homeButtonTooltip,
+        child: IconButton(
+          icon: const Icon(Icons.home_outlined),
+          onPressed: () {
+            // Navigate to the home page, which is LoggedHomepage
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const MainScreen()),
+              (Route<dynamic> route) => false, // This predicate removes all routes from the stack
+            );
+          },
+        ),
+      ),
       title:
       currentUserId == null
           ? Text(displayTitle)
@@ -167,12 +183,14 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
         if (currentUserId != null)
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert_outlined),
-            tooltip: l10n.optionsTooltip, // MODIFIÉ ICI pour utiliser la nouvelle clé
+            tooltip: l10n.optionsTooltip,
             onSelected: (value) {
               if (value == 'settings') {
                 Navigator.pushNamed(context, '/settings');
+              } else if (value == 'manage_notes') {
+                Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const MainScreen(initialIndex: 1)), (route) => false);
               } else if (value == 'manage_journals') {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const JournalManagementPage()));
+                Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const MainScreen(initialIndex: 2)), (route) => false);
               } else if (value == 'manage_palette_models') {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const PaletteModelManagementPage()));
               } else if (value == 'about') {
@@ -188,6 +206,10 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
                     .signOut()
                     .then((_) {
                   _loggerAppBar.i("Déconnexion demandée.");
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => const AuthGate()),
+                        (Route<dynamic> route) => false,
+                  );
                 })
                     .catchError((e) {
                   _loggerAppBar.e("Erreur déconnexion: $e");
@@ -197,6 +219,7 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
                     );
                   }
                 });
+
               }
             },
             itemBuilder:
@@ -204,6 +227,7 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
             <PopupMenuEntry<String>>[
               PopupMenuItem<String>(value: 'settings', child: ListTile(leading: const Icon(Icons.settings_outlined), title: Text(l10n.settings))),
               const PopupMenuDivider(),
+              PopupMenuItem<String>(value: 'manage_notes', child: ListTile(leading: const Icon(Icons.collections_bookmark_outlined), title: Text(l10n.manageNotes))),
               PopupMenuItem<String>(value: 'manage_journals', child: ListTile(leading: const Icon(Icons.collections_bookmark_outlined), title: Text(l10n.manageJournals))),
               PopupMenuItem<String>(value: 'manage_palette_models', child: ListTile(leading: const Icon(Icons.palette_outlined), title: Text(l10n.managePaletteModels))),
               const PopupMenuDivider(),
@@ -308,4 +332,3 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
           kToolbarHeight
       );
 }
-

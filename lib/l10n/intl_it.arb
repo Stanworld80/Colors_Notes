@@ -398,7 +398,6 @@
   "@emptyPaletteDialogTitle": {
     "description": "Titolo della finestra di dialogo che conferma se svuotare una nuova tavolozza."
   },
-  "english": "Inglese",
   "enterNumberValidator": "Inserisci un numero.",
   "@enterNumberValidator": {
     "description": "Messaggio di errore di convalida quando è previsto un input numerico ma non viene fornito correttamente."
@@ -618,7 +617,6 @@
   "@formValidationFailedLog": {
     "description": "Messaggio di log quando la convalida del modulo per il nome della tavolozza fallisce durante un tentativo di salvataggio automatico."
   },
-  "french": "Francese",
   "generatedColorExistsError": "Il colore generato {hexCode} esiste già.",
   "@generatedColorExistsError": {
     "description": "Messaggio di errore quando il codice esadecimale di un colore gradiente generato esiste già.",
@@ -650,6 +648,10 @@
       }
     }
   },
+  "homeButtonTooltip": "Home",
+  "@homeButtonTooltip": {
+    "description": "Suggerimento per il pulsante home sulla barra dell'app."
+  },
   "incorrectConfirmationTextValidator": "Testo di conferma errato.",
   "@incorrectConfirmationTextValidator": {
     "description": "Errore di convalida quando il testo inserito per la conferma dell'eliminazione non è corretto."
@@ -662,7 +664,6 @@
   "@invalidInput": {
     "description": "Messaggio di errore generico per input utente non valido."
   },
-  "italian": "Italiano",
   "journalCreatedOnDateLabel": "Creato il: {date}",
   "@journalCreatedOnDateLabel": {
     "description": "Etichetta che visualizza la data di creazione di un diario.",
@@ -759,6 +760,13 @@
     }
   },
   "language": "Lingua",
+  "languageEnglish": "Inglese",
+  "languageSpanish": "Spagnolo",
+  "languageGerman": "Tedesco",
+  "languageItalian": "Italiano",
+  "languageFrench": "Francese",
+  "languagePortuguese": "Portoghese",
+  "languagePortugueseBrazil": "Portoghese (Brasile)",
   "licenseLink": "Licenza",
   "licensePageTitle": "Contratto di Licenza",
   "@licensePageTitle": {
@@ -786,6 +794,7 @@
   },
   "logout": "Esci",
   "manageJournals": "Gestisci Diari",
+  "manageNotes": "Gestisci Note",
   "manageJournalsAppBarTitle": "Gestisci Diari",
   "@manageJournalsAppBarTitle": {
     "description": "Titolo dell'AppBar per la pagina di gestione dei diari."
@@ -870,6 +879,10 @@
   "noActiveJournalTitle": "Nessun diario attivo.",
   "@noActiveJournalTitle": {
     "description": "Titolo visualizzato quando nessun diario è attivo."
+  },
+  "noJournalSelected": "Nessun diario selezionato.",
+  "@noJournalSelected": {
+    "description": "Messaggio visualizzato quando nessun diario è selezionato."
   },
   "noCancelButtonLabel": "NO, ANNULLA",
   "@noCancelButtonLabel": {
@@ -1051,17 +1064,9 @@
       }
     }
   },
-  "paletteModelInfo": "{colorCount,plural, =1{colore} other{colori}} {type}",
+  "paletteModelInfo": "{colorCount} colore/i {type}",
   "@paletteModelInfo": {
-    "description": "Informazioni su un modello di tavolozza, che mostrano il numero di colori e il tipo (Predefinito/Personale).",
-    "placeholders": {
-      "colorCount": {
-        "type": "int"
-      },
-      "type": {
-        "type": "String"
-      }
-    }
+    "description": "Informazioni su un modello di tavolozza, che mostrano il numero di colori e il tipo (Predefinito/Personale)."
   },
   "paletteModelNameExistsError": "Un modello di tavolozza con questo nome esiste già.",
   "@paletteModelNameExistsError": {
@@ -1143,8 +1148,6 @@
   "@pleaseChooseModelValidator": {
     "description": "Errore di convalida quando nessun modello di tavolozza è selezionato da un menu a discesa obbligatorio."
   },
-  "portuguese": "Portoghese",
-  "portugueseBrazilian": "Portoghese (Brasile)",
   "predefinedModelsCannotBeDeletedSnackbar": "I modelli predefiniti non possono essere eliminati.",
   "@predefinedModelsCannotBeDeletedSnackbar": {
     "description": "Messaggio Snackbar mostrato quando si tenta di eliminare un modello di tavolozza predefinito."
@@ -1382,13 +1385,6 @@
       }
     }
   },
-  "languageEnglish" : "Inglese",
-  "languageSpanish" : "Spagnolo",
-  "languageGerman" : "Tedesco",
-  "languageItalian" : "Italiano",
-  "languageFrench" : "Francese",
-  "languagePortuguese" : "Portoghese",
-  "languagePortugueseBrazil" : "Portoghese (Brasile)",
   "yesDeleteAllButtonLabel": "SÌ, ELIMINA TUTTO",
   "@yesDeleteAllButtonLabel": {
     "description": "Etichetta del pulsante che conferma l'eliminazione di tutti gli elementi, tipicamente in una conferma ad alto rischio."
@@ -1398,28 +1394,33 @@
     "description": "Etichetta del pulsante che conferma l'eliminazione di tutte le note, tipicamente in una finestra di dialogo di conferma finale."
   },
   "help": "Aiuto",
-  "cookieConsentTitle": "Cookie Consent",
+  "cookieConsentTitle": "Consenso per i Cookie",
   "@cookieConsentTitle": {
-    "description": "Title for the cookie consent banner."
+    "description": "Titolo per il banner del consenso ai cookie."
   },
-  "cookieConsentMessage": "We use cookies to improve your experience. Essential cookies are necessary for site operation. Do you accept analytics cookies to help us improve our services?",
+  "cookieConsentMessage": "Utilizziamo i cookie per migliorare la tua esperienza. I cookie essenziali sono necessari per il funzionamento del sito. Accetti i cookie analitici per aiutarci a migliorare i nostri servizi?",
   "@cookieConsentMessage": {
-    "description": "Main message for the cookie consent banner."
+    "description": "Messaggio principale per il banner del consenso ai cookie."
   },
-  "cookieConsentAcceptAll": "Accept All",
+  "cookieConsentAcceptAll": "Accetta Tutti",
   "@cookieConsentAcceptAll": {
-    "description": "Button text to accept all cookies."
+    "description": "Testo del pulsante per accettare tutti i cookie."
   },
-  "cookieConsentDecline": "Decline Analytics",
+  "cookieConsentDecline": "Rifiuta i Cookie Analitici",
   "@cookieConsentDecline": {
-    "description": "Button text to decline non-essential cookies."
+    "description": "Testo del pulsante per rifiutare i cookie non essenziali."
   },
-  "cookieConsentSettings": "Settings",
+  "cookieConsentSettings": "Impostazioni",
   "@cookieConsentSettings": {
-    "description": "Button text to open cookie settings."
-  }, "privacyPolicy" : "Privacy Policy",
+    "description": "Testo del pulsante per aprire le impostazioni dei cookie."
+  },
+  "privacyPolicy": "Informativa sulla Privacy",
   "@privacyPolicy": {
-    "description": "Link to the privacy policy."
-  }
+    "description": "Link all'informativa sulla privacy."
+  },
+  "newJournalMenuItem": "Nuovo Diario",
+  "editJournalNameTooltip": "Modifica nome diario",
+  "existingNotesTitle": "Note esistenti",
+  "sortByCreationDateTooltip": "Ordina per data di creazione",
+  "sortByContentTooltip": "Ordina per contenuto"
 }
-

@@ -398,7 +398,6 @@
   "@emptyPaletteDialogTitle": {
     "description": "Title for the dialog confirming whether to empty a new palette."
   },
-  "english": "Englisch",
   "enterNumberValidator": "Geben Sie eine Nummer ein.",
   "@enterNumberValidator": {
     "description": "Validation error message when a number input is expected but not provided correctly."
@@ -506,7 +505,7 @@
       }
     }
   },
-  "errorLaunchingUrl" : "Ladefehler",
+  "errorLaunchingUrl": "Ladefehler",
   "errorLoadingInitialData": "Fehler beim Laden der Initialdaten: {errorDetails}",
   "@errorLoadingInitialData": {
     "description": "Error message displayed when initial data loading fails.",
@@ -618,7 +617,6 @@
   "@formValidationFailedLog": {
     "description": "Log message when form validation for palette name fails during an auto-save attempt."
   },
-  "french": "Französisch",
   "generatedColorExistsError": "Generierte Farbe {hexCode} existiert bereits.",
   "@generatedColorExistsError": {
     "description": "Error message when a generated gradient color's hex code already exists.",
@@ -650,6 +648,10 @@
       }
     }
   },
+  "homeButtonTooltip": "Startseite",
+  "@homeButtonTooltip": {
+    "description": "Tooltip for the home button on the app bar."
+  },
   "incorrectConfirmationTextValidator": "Falscher Bestätigungstext.",
   "@incorrectConfirmationTextValidator": {
     "description": "Validation error when the text entered for deletion confirmation is incorrect."
@@ -662,7 +664,6 @@
   "@invalidInput": {
     "description": "Generic error message for invalid user input."
   },
-  "italian": "Italienisch",
   "journalCreatedOnDateLabel": "Erstellt am: {date}",
   "@journalCreatedOnDateLabel": {
     "description": "Label displaying the creation date of a journal.",
@@ -759,6 +760,13 @@
     "description": "Snackbar message shown after a journal's palette has been successfully saved."
   },
   "language": "Sprache",
+  "languageEnglish": "Englisch",
+  "languageSpanish": "Spanisch",
+  "languageGerman": "Deutsch",
+  "languageItalian": "Italienisch",
+  "languageFrench": "Französisch",
+  "languagePortuguese": "Portugiesisch",
+  "languagePortugueseBrazil": "Portugiesisch (Brasilien)",
   "licenseLink": "Lizenz",
   "licensePageTitle": "Lizenzvereinbarung",
   "@licensePageTitle": {
@@ -786,6 +794,7 @@
   },
   "logout": "Abmelden",
   "manageJournals": "Journale verwalten",
+  "manageNotes": "Notizen verwalten",
   "manageJournalsAppBarTitle": "Journale verwalten",
   "@manageJournalsAppBarTitle": {
     "description": "App bar title for the journal management page."
@@ -870,6 +879,10 @@
   "noActiveJournalTitle": "Kein aktives Journal.",
   "@noActiveJournalTitle": {
     "description": "Title displayed when no journal is active."
+  },
+  "noJournalSelected": "Kein Journal ausgewählt.",
+  "@noJournalSelected": {
+    "description": "Message displayed when no journal is selected."
   },
   "noCancelButtonLabel": "NEIN, ABBRECHEN",
   "@noCancelButtonLabel": {
@@ -1053,7 +1066,7 @@
   },
   "paletteModelInfo": "{colorCount} Farbe{pluralS} {type}",
   "@paletteModelInfo": {
-    "description": "Information about a palette model, showing color count and type (Predefined/Personal). Placeholder {pluralS} should be replaced with 's' or empty string.",
+    "description": "Information about a palette model, showing color count and type (Predefined/Personal). Placeholder {pluralS} should be replaced with 'n' or empty string.",
     "placeholders": {
       "colorCount": {
         "type": "int"
@@ -1146,8 +1159,6 @@
   "@pleaseChooseModelValidator": {
     "description": "Validation error when no palette model is selected from a required dropdown."
   },
-  "portuguese": "Portugiesisch",
-  "portugueseBrazilian": "Portugiesisch (Brasilien)",
   "predefinedModelsCannotBeDeletedSnackbar": "Vordefinierte Modelle können nicht gelöscht werden.",
   "@predefinedModelsCannotBeDeletedSnackbar": {
     "description": "Snackbar message shown when attempting to delete a predefined palette model."
@@ -1197,7 +1208,7 @@
   "@savingInProgressSnackbar": {
     "description": "Snackbar message indicating that a save operation is currently in progress."
   },
-  "selectLanguage" : "Sprache auswählen",
+  "selectLanguage": "Sprache auswählen",
   "settings": "Einstellungen",
   "signInButton": "Anmelden",
   "signInEmailErrorLog": "E-Mail-Anmeldefehler: {errorDetails}",
@@ -1393,20 +1404,34 @@
   "@yesDeleteAllNotesButtonLabel": {
     "description": "Label for the button that confirms deleting all notes, typically in a final confirmation dialog."
   },
-  "help" : "Hilfe",
-
-  "languageEnglish" : "Englisch",
-  "languageSpanish" :  "Spanisch",
-  "languageGerman" :  "Deutsch",
-  "languageFrench" :  "Französisch",
-  "languageItalian" : "Italienisch",
-  "languagePortuguese" : "Portugiesisch",
-  "languagePortugueseBrazil" : "Portugiesisch (Brasilien)",
-
-  "cookieConsentTitle": "Cookie-Einstellungen",
+  "help": "Hilfe",
+  "cookieConsentTitle": "Cookie-Einwilligung",
+  "@cookieConsentTitle": {
+    "description": "Titel für das Cookie-Einwilligungsbanner."
+  },
   "cookieConsentMessage": "Wir verwenden Cookies, um Ihre Erfahrung zu verbessern. Essenzielle Cookies sind für den Betrieb der Website notwendig. Akzeptieren Sie Analyse-Cookies, um uns bei der Verbesserung unserer Dienste zu helfen?",
+  "@cookieConsentMessage": {
+    "description": "Hauptnachricht für das Cookie-Einwilligungsbanner."
+  },
   "cookieConsentAcceptAll": "Alle akzeptieren",
-  "cookieConsentDecline": "Abbrechen",
+  "@cookieConsentAcceptAll": {
+    "description": "Schaltflächentext, um alle Cookies zu akzeptieren."
+  },
+  "cookieConsentDecline": "Analyse-Cookies ablehnen",
+  "@cookieConsentDecline": {
+    "description": "Schaltflächentext, um nicht wesentliche Cookies abzulehnen."
+  },
   "cookieConsentSettings": "Einstellungen",
-  "privacyPolicy" : "Datenschutzerklärung"
+  "@cookieConsentSettings": {
+    "description": "Schaltflächentext, um die Cookie-Einstellungen zu öffnen."
+  },
+  "privacyPolicy": "Datenschutzerklärung",
+  "@privacyPolicy": {
+    "description": "Link zur Datenschutzerklärung"
+  },
+  "newJournalMenuItem": "Neues Journal",
+  "editJournalNameTooltip": "Journalname bearbeiten",
+  "existingNotesTitle": "Bestehende Notizen",
+  "sortByCreationDateTooltip": "Nach Erstellungsdatum sortieren",
+  "sortByContentTooltip": "Nach Inhalt sortieren"
 }

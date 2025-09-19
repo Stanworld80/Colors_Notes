@@ -2,53 +2,53 @@
   "@@locale": "es",
   "about": "Acerca de",
   "@about": {
-    "description": "Label for About sections or links."
+    "description": "Etiqueta para las secciones o enlaces 'Acerca de'."
   },
   "aboutColorsNotesTitle": "Acerca de Colors & Notes",
   "@aboutColorsNotesTitle": {
-    "description": "Title for the About Colors & Notes page."
+    "description": "Título de la página 'Acerca de Colors & Notes'."
   },
   "aboutLink": "Acerca de",
   "appDescription": "Esta aplicación te permite organizar tus notas y pensamientos diarios asociándolos con colores personalizados, agrupados en paletas únicas para cada diario.",
   "@appDescription": {
-    "description": "Detailed description of the application."
+    "description": "Descripción detallada de la aplicación."
   },
   "appName": "Colors & Notes",
   "appSlogan": "Colorea tu día.",
   "@appSlogan": {
-    "description": "Slogan for the application."
+    "description": "Eslogan de la aplicación."
   },
   "authorInfo": "Autor: Stanislas Mathieu Eric Selle",
   "@authorInfo": {
-    "description": "Information about the author of the application."
+    "description": "Información sobre el autor de la aplicación."
   },
   "add": "Añadir",
   "@add": {
-    "description": "Generic label for 'Add' action."
+    "description": "Etiqueta genérica para la acción 'Añadir'."
   },
   "addColorButtonLabel": "Añadir Color",
   "@addColorButtonLabel": {
-    "description": "Button label for adding a new color."
+    "description": "Etiqueta del botón para añadir un nuevo color."
   },
   "addColorGradientDialogTitle": "Añadir Color/Gradiente",
   "@addColorGradientDialogTitle": {
-    "description": "Title for the dialog to add a new color or gradient."
+    "description": "Título del diálogo para añadir un nuevo color o gradiente."
   },
   "addGradientButtonLabel": "Añadir Gradiente",
   "@addGradientButtonLabel": {
-    "description": "Button label for adding a gradient."
+    "description": "Etiqueta del botón para añadir un gradiente."
   },
   "addNewColorGradientListTile": "Añadir un nuevo color/gradiente",
   "@addNewColorGradientListTile": {
-    "description": "Label for the list tile option to add a new color or gradient."
+    "description": "Etiqueta de la opción de la lista para añadir un nuevo color o gradiente."
   },
   "allColorsDeletedFromEditorSnackbar": "Todos los colores han sido eliminados de la paleta de edición actual.",
   "@allColorsDeletedFromEditorSnackbar": {
-    "description": "Snackbar message shown when all colors are removed in the palette editor."
+    "description": "Mensaje de Snackbar mostrado cuando se eliminan todos los colores en el editor de paletas."
   },
   "allNotesDeletedBeforeEmptyingPaletteLog": "Todas las notas en el diario {journalId} fueron eliminadas antes de vaciar la paleta.",
   "@allNotesDeletedBeforeEmptyingPaletteLog": {
-    "description": "Log message indicating all notes in a journal were deleted before emptying its palette.",
+    "description": "Mensaje de registro que indica que todas las notas de un diario se eliminaron antes de vaciar su paleta.",
     "placeholders": {
       "journalId": {
         "type": "String"
@@ -57,11 +57,11 @@
   },
   "allNotesDeletedSnackbar": "Todas las notas han sido eliminadas.",
   "@allNotesDeletedSnackbar": {
-    "description": "Snackbar message shown after successfully deleting all notes."
+    "description": "Mensaje de Snackbar mostrado después de eliminar correctamente todas las notas."
   },
   "authErrorPrefix": "Error: {errorMessage}",
   "@authErrorPrefix": {
-    "description": "Prefix for authentication error messages.",
+    "description": "Prefijo para los mensajes de error de autenticación.",
     "placeholders": {
       "errorMessage": {
         "type": "String"
@@ -70,35 +70,35 @@
   },
   "baseNameCannotBeEmptyValidator": "El nombre base no puede estar vacío.",
   "@baseNameCannotBeEmptyValidator": {
-    "description": "Validation error message when the base name for a color/gradient is empty."
+    "description": "Mensaje de error de validación cuando el nombre base para un color/gradiente está vacío."
   },
   "baseNameForColorGradientLabel": "Nombre base para color/gradiente",
   "@baseNameForColorGradientLabel": {
-    "description": "Label for the input field for the base name of a color or gradient."
+    "description": "Etiqueta para el campo de entrada del nombre base de un color o gradiente."
   },
   "bottomNavHome": "Inicio",
   "@bottomNavHome": {
-    "description": "Label for the Home tab in the bottom navigation bar."
+    "description": "Etiqueta para la pestaña Inicio en la barra de navegación inferior."
   },
   "bottomNavJournals": "Diarios",
   "@bottomNavJournals": {
-    "description": "Label for the Journals tab in the bottom navigation bar."
+    "description": "Etiqueta para la pestaña Diarios en la barra de navegación inferior."
   },
   "bottomNavNotes": "Notas",
   "@bottomNavNotes": {
-    "description": "Label for the Notes tab in the bottom navigation bar."
+    "description": "Etiqueta para la pestaña Notas en la barra de navegación inferior."
   },
   "build": "Compilación",
   "@build": {
-    "description": "Label for build number, often used with version."
+    "description": "Etiqueta para el número de compilación, a menudo utilizado con la versión."
   },
   "cancelButtonLabel": "Cancelar",
   "@cancelButtonLabel": {
-    "description": "Generic label for a cancel button."
+    "description": "Etiqueta genérica para un botón de cancelar."
   },
   "cannotAddGradientMaxReachedError": "No se pueden añadir {gradientSteps} colores, se alcanzó el máximo de la paleta.",
   "@cannotAddGradientMaxReachedError": {
-    "description": "Error message when adding a gradient would exceed the maximum allowed colors in the palette.",
+    "description": "Mensaje de error cuando añadir un gradiente excedería el número máximo de colores permitidos en la paleta.",
     "placeholders": {
       "gradientSteps": {
         "type": "int"
@@ -107,31 +107,31 @@
   },
   "changeJournalTooltip": "Cambiar diario activo",
   "@changeJournalTooltip": {
-    "description": "Tooltip for the journal selection dropdown in the AppBar or similar controls."
+    "description": "Información sobre herramientas para el menú desplegable de selección de diario en la AppBar o controles similares."
   },
   "chooseJournalAppBarTitle": "Elegir Diario",
   "@chooseJournalAppBarTitle": {
-    "description": "App bar title when the user needs to choose a journal."
+    "description": "Título de la barra de aplicaciones cuando el usuario necesita elegir un diario."
   },
   "chooseJournalTitle": "Elige un diario",
   "@chooseJournalTitle": {
-    "description": "Title displayed in AppBar when no journal is active, prompting user to select one."
+    "description": "Título mostrado en la AppBar cuando no hay ningún diario activo, pidiendo al usuario que seleccione uno."
   },
   "chooseOrCreateJournalButton": "Elegir o crear un diario",
   "@chooseOrCreateJournalButton": {
-    "description": "Text for the button to choose an existing journal or create a new one."
+    "description": "Texto para el botón para elegir un diario existente o crear uno nuevo."
   },
   "choosePaletteModelDropdownLabel": "Elegir un modelo de paleta",
   "@choosePaletteModelDropdownLabel": {
-    "description": "Label for the dropdown to choose a palette model."
+    "description": "Etiqueta para el menú desplegable para elegir un modelo de paleta."
   },
   "colorHexExistsError": "Este color (hex) ya existe.",
   "@colorHexExistsError": {
-    "description": "Error message when trying to add a color whose hex code already exists in the palette."
+    "description": "Mensaje de error al intentar añadir un color cuyo código hexadecimal ya existe en la paleta."
   },
   "colorInUseDeleteError": "El color \"{colorTitle}\" está en uso y no se puede eliminar.",
   "@colorInUseDeleteError": {
-    "description": "Error message when trying to delete a color that is currently being used by notes.",
+    "description": "Mensaje de error al intentar eliminar un color que está siendo utilizado actualmente por las notas.",
     "placeholders": {
       "colorTitle": {
         "type": "String"
@@ -140,24 +140,19 @@
   },
   "colorTitleExistsError": "Este título de color ya existe.",
   "@colorTitleExistsError": {
-    "description": "Error message when trying to add a color whose title already exists in the palette."
+    "description": "Mensaje de error al intentar añadir un color cuyo título ya existe en la paleta."
   },
   "colorDeletedSnackbar": "\"{colorTitle}\" eliminado.",
   "@colorDeletedSnackbar": {
-    "description": "Snackbar message shown after a color has been successfully deleted.",
-    "placeholders": {
-      "colorTitle": {
-        "type": "String"
-      }
-    }
+    "description": "Mensaje de Snackbar mostrado después de que un color ha sido eliminado correctamente."
   },
   "colorsNotesAppName": "Colors & Notes",
   "@colorsNotesAppName": {
-    "description": "The name of the application, Colors & Notes."
+    "description": "El nombre de la aplicación, Colors & Notes."
   },
   "colorsSectionHeader": "Colores ({currentCount} / {maxCount}) :",
   "@colorsSectionHeader": {
-    "description": "Header for the colors section in the palette editor, showing current and max color counts.",
+    "description": "Encabezado de la sección de colores en el editor de paletas, mostrando el recuento actual y máximo de colores.",
     "placeholders": {
       "currentCount": {
         "type": "int"
@@ -169,11 +164,11 @@
   },
   "comingSoon": "Próximamente",
   "@comingSoon": {
-    "description": "Generic message for features that are not yet implemented."
+    "description": "Mensaje genérico para características que aún no están implementadas."
   },
   "confirmDeleteColorContent": "¿Realmente quieres eliminar el color \"{colorName}\"?",
   "@confirmDeleteColorContent": {
-    "description": "Confirmation message content when deleting a color.",
+    "description": "Contenido del mensaje de confirmación al eliminar un color.",
     "placeholders": {
       "colorName": {
         "type": "String"
@@ -182,71 +177,71 @@
   },
   "confirmDeleteColorTitle": "Confirmar Eliminación",
   "@confirmDeleteColorTitle": {
-    "description": "Title for the dialog confirming color deletion."
+    "description": "Título del diálogo que confirma la eliminación de un color."
   },
   "confirmDeleteDialogTitle": "Confirmar eliminación",
   "@confirmDeleteDialogTitle": {
-    "description": "Generic title for a confirmation dialog before deletion."
+    "description": "Título genérico para un diálogo de confirmación antes de la eliminación."
   },
   "confirmDeleteNoteDialogContent": "¿Realmente quieres eliminar esta nota?",
   "@confirmDeleteNoteDialogContent": {
-    "description": "Content of the dialog confirming note deletion."
+    "description": "Contenido del diálogo que confirma la eliminación de una nota."
   },
   "confirmDeletionButtonLabel": "CONFIRMAR ELIMINACIÓN",
   "@confirmDeletionButtonLabel": {
-    "description": "Label for the button that confirms a deletion action, typically after a final warning."
+    "description": "Etiqueta del botón que confirma una acción de eliminación, generalmente después de una advertencia final."
   },
   "confirmDeletionDialogContent": "¿Estás seguro? Esta acción es irreversible.",
   "@confirmDeletionDialogContent": {
-    "description": "Generic content for a confirmation dialog, warning about irreversibility."
+    "description": "Contenido genérico para un diálogo de confirmación, advirtiendo sobre la irreversibilidad."
   },
   "confirmDeletionDialogTitle": "¿Confirmar Eliminación?",
   "@confirmDeletionDialogTitle": {
-    "description": "Generic title for a dialog asking the user to confirm a deletion."
+    "description": "Título genérico para un diálogo que pide al usuario que confirme una eliminación."
   },
   "copyrightText": "Copyright © 2025",
   "@copyrightText": {
-    "description": "Copyright notice for the application."
+    "description": "Aviso de derechos de autor para la aplicación."
   },
   "copyPaletteFromJournalDropdownLabel": "Copiar paleta de un diario existente",
   "@copyPaletteFromJournalDropdownLabel": {
-    "description": "Label for the dropdown to select an existing journal to copy the palette from."
+    "description": "Etiqueta para el menú desplegable para seleccionar un diario existente del que copiar la paleta."
   },
   "createFirstModelMessage": "Crea tu primer modelo personal presionando el botón \"+\" de arriba.",
   "@createFirstModelMessage": {
-    "description": "Message displayed when no personal palette models exist, prompting user to create one."
+    "description": "Mensaje mostrado cuando no existen modelos de paleta personales, pidiendo al usuario que cree uno."
   },
   "createJournalButtonLabel": "Crear diario",
   "@createJournalButtonLabel": {
-    "description": "Label for the button to create a new journal."
+    "description": "Etiqueta del botón para crear un nuevo diario."
   },
   "createJournalPageTitle": "Crear un nuevo diario",
   "@createJournalPageTitle": {
-    "description": "Title for the page where users create a new journal."
+    "description": "Título de la página donde los usuarios crean un nuevo diario."
   },
   "createNewJournalButton": "Crear un nuevo diario",
   "@createNewJournalButton": {
-    "description": "Text for the button to create a new journal."
+    "description": "Texto para el botón para crear un nuevo diario."
   },
   "createNewJournalCardLabel": "Crear un nuevo diario",
   "@createNewJournalCardLabel": {
-    "description": "Label for the card or button that initiates creating a new journal."
+    "description": "Etiqueta de la tarjeta o botón que inicia la creación de un nuevo diario."
   },
   "createNewPersonalModelTooltip": "Crear un nuevo modelo personal",
   "@createNewPersonalModelTooltip": {
-    "description": "Tooltip for the button to create a new personal palette model."
+    "description": "Información sobre herramientas para el botón para crear un nuevo modelo de paleta personal."
   },
   "defaultAppBarTitle": "Colors & Notes",
   "@defaultAppBarTitle": {
-    "description": "Default title for the AppBar, usually the app name."
+    "description": "Título predeterminado de la AppBar, generalmente el nombre de la aplicación."
   },
   "defaultColorTitle": "Color",
   "@defaultColorTitle": {
-    "description": "Default title or label for a color when its specific name is not available or relevant."
+    "description": "Título o etiqueta predeterminada para un color cuando su nombre específico no está disponible o no es relevante."
   },
   "defaultPaletteNameForJournal": "Paleta de {journalName}",
   "@defaultPaletteNameForJournal": {
-    "description": "Default name format for a new palette associated with a journal.",
+    "description": "Formato de nombre predeterminado para una nueva paleta asociada a un diario.",
     "placeholders": {
       "journalName": {
         "type": "String"
@@ -255,19 +250,19 @@
   },
   "delete": "Eliminar",
   "@delete": {
-    "description": "Generic label for 'Delete' action."
+    "description": "Etiqueta genérica para la acción 'Eliminar'."
   },
   "deleteAllButtonLabel": "Eliminar Todo",
   "@deleteAllButtonLabel": {
-    "description": "Label for a button that deletes all items."
+    "description": "Etiqueta de un botón que elimina todos los elementos."
   },
   "deleteAllColorsDialogTitle": "¿Eliminar todos los colores?",
   "@deleteAllColorsDialogTitle": {
-    "description": "Title for the dialog confirming deletion of all colors from a palette or model."
+    "description": "Título del diálogo que confirma la eliminación de todos los colores de una paleta o modelo."
   },
   "deleteAllColorsJournalWarning": "Esto eliminará todos los colores de la paleta del diario \"{journalName}\". ADVERTENCIA: Todas las notas en este diario también serán eliminadas PERMANENTEMENTE.",
   "@deleteAllColorsJournalWarning": {
-    "description": "Warning message when attempting to delete all colors from a journal's palette.",
+    "description": "Mensaje de advertencia al intentar eliminar todos los colores de la paleta de un diario.",
     "placeholders": {
       "journalName": {
         "type": "String"
@@ -276,39 +271,39 @@
   },
   "deleteAllColorsModelWarning": "¿Realmente quieres eliminar todos los colores de este modelo de paleta?",
   "@deleteAllColorsModelWarning": {
-    "description": "Warning message when attempting to delete all colors from a palette model."
+    "description": "Mensaje de advertencia al intentar eliminar todos los colores de un modelo de paleta."
   },
   "deleteAllColorsTooltip": "Eliminar todos los colores",
   "@deleteAllColorsTooltip": {
-    "description": "Tooltip for the button that deletes all colors."
+    "description": "Información sobre herramientas para el botón que elimina todos los colores."
   },
   "deleteAllNotesDialogContent": "Esta acción eliminará PERMANENTEMENTE todas las notas de este diario. ¿Quieres continuar?",
   "@deleteAllNotesDialogContent": {
-    "description": "Content for the dialog confirming deletion of all notes in a journal."
+    "description": "Contenido del diálogo que confirma la eliminación de todas las notas de un diario."
   },
   "deleteAllNotesDialogTitle": "¿Eliminar todas las notas?",
   "@deleteAllNotesDialogTitle": {
-    "description": "Title for the dialog confirming deletion of all notes."
+    "description": "Título del diálogo que confirma la eliminación de todas las notas."
   },
   "deleteAllNotesTooltip": "Eliminar todas las notas de este diario",
   "@deleteAllNotesTooltip": {
-    "description": "Tooltip for the button to delete all notes in the current journal."
+    "description": "Información sobre herramientas para el botón para eliminar todas las notas del diario actual."
   },
   "deleteButtonLabel": "Eliminar",
   "@deleteButtonLabel": {
-    "description": "Label for a delete button."
+    "description": "Etiqueta de un botón de eliminar."
   },
   "deleteJournalButtonLabel": "Eliminar diario",
   "@deleteJournalButtonLabel": {
-    "description": "Label for the button to delete a journal."
+    "description": "Etiqueta del botón para eliminar un diario."
   },
   "deleteJournalDialogContent": "Todas las notas de este diario también serán eliminadas permanentemente. Esta acción es irreversible.",
   "@deleteJournalDialogContent": {
-    "description": "Content for the dialog confirming journal deletion, warning about note deletion."
+    "description": "Contenido del diálogo que confirma la eliminación de un diario, advirtiendo sobre la eliminación de notas."
   },
   "deleteJournalDialogTitle": "¿Eliminar diario \"{journalName}\"?",
   "@deleteJournalDialogTitle": {
-    "description": "Title for the dialog confirming journal deletion.",
+    "description": "Título del diálogo que confirma la eliminación de un diario.",
     "placeholders": {
       "journalName": {
         "type": "String"
@@ -317,7 +312,7 @@
   },
   "deleteModelDialogContent": "¿Realmente quieres eliminar el modelo de paleta \"{modelName}\"? Esta acción es irreversible.",
   "@deleteModelDialogContent": {
-    "description": "Content for the dialog confirming palette model deletion.",
+    "description": "Contenido del diálogo que confirma la eliminación de un modelo de paleta.",
     "placeholders": {
       "modelName": {
         "type": "String"
@@ -326,48 +321,48 @@
   },
   "deleteModelDialogTitle": "¿Eliminar Modelo?",
   "@deleteModelDialogTitle": {
-    "description": "Title for the dialog confirming palette model deletion."
+    "description": "Título del diálogo que confirma la eliminación de un modelo de paleta."
   },
   "deleteModelTooltip": "Eliminar modelo",
   "@deleteModelTooltip": {
-    "description": "Tooltip for the button to delete a palette model."
+    "description": "Información sobre herramientas para el botón para eliminar un modelo de paleta."
   },
   "deleteNoteTooltipGrid": "Eliminar nota",
   "@deleteNoteTooltipGrid": {
-    "description": "Tooltip for deleting a note, typically in a grid view."
+    "description": "Información sobre herramientas para eliminar una nota, típicamente en una vista de cuadrícula."
   },
   "deleteThisColorButtonLabel": "Eliminar este color",
   "@deleteThisColorButtonLabel": {
-    "description": "Label for the button to delete a specific color."
+    "description": "Etiqueta del botón para eliminar un color específico."
   },
   "deleteThisNoteTooltipList": "Eliminar esta nota",
   "@deleteThisNoteTooltipList": {
-    "description": "Tooltip for deleting a note, typically in a list item."
+    "description": "Información sobre herramientas para eliminar una nota, típicamente en un elemento de lista."
   },
   "developedWith": "Desarrollado con Flutter & Firebase.",
   "@developedWith": {
-    "description": "Information about the technologies used for development."
+    "description": "Información sobre las tecnologías utilizadas para el desarrollo."
   },
   "downloadForAndroidLink": "Descargar para Android",
   "edit": "Editar",
   "@edit": {
-    "description": "Generic label for 'Edit' action."
+    "description": "Etiqueta genérica para la acción 'Editar'."
   },
   "editColorDialogTitle": "Editar Color",
   "@editColorDialogTitle": {
-    "description": "Title for the dialog to edit an existing color."
+    "description": "Título del diálogo para editar un color existente."
   },
   "editModelTooltip": "Editar modelo",
   "@editModelTooltip": {
-    "description": "Tooltip for the button to edit a palette model."
+    "description": "Información sobre herramientas para el botón para editar un modelo de paleta."
   },
   "editNameOptionsTooltip": "Editar nombre / Opciones...",
   "@editNameOptionsTooltip": {
-    "description": "Tooltip for a button that allows editing a journal's name or accessing other options."
+    "description": "Información sobre herramientas para un botón que permite editar el nombre de un diario o acceder a otras opciones."
   },
   "editPaletteForJournalTooltip": "Editar paleta para {journalName}",
   "@editPaletteForJournalTooltip": {
-    "description": "Tooltip for the button to edit the palette of a specific journal.",
+    "description": "Información sobre herramientas para el botón para editar la paleta de un diario específico.",
     "placeholders": {
       "journalName": {
         "type": "String"
@@ -376,11 +371,11 @@
   },
   "editPaletteTooltip": "Editar paleta de '{journalName}'",
   "@editPaletteTooltip": {
-    "description": "Tooltip for the palette edit icon in the app bar, where {journalName} is the name of the active journal.",
+    "description": "Información sobre herramientas para el icono de edición de paleta en la barra de aplicaciones, donde {journalName} es el nombre del diario activo.",
     "placeholders": {
       "journalName": {
         "type": "String",
-        "example": "My Travel Diary"
+        "example": "Mi Diario de Viaje"
       }
     }
   },
@@ -388,20 +383,19 @@
   "emailValidationError": "Por favor, introduce una dirección de correo electrónico válida.",
   "emptyButtonLabel": "Vaciar",
   "@emptyButtonLabel": {
-    "description": "Label for a button that empties something, e.g., a palette."
+    "description": "Etiqueta de un botón que vacía algo, por ejemplo, una paleta."
   },
   "emptyPaletteDialogContent": "¿Realmente quieres eliminar todos los colores de esta nueva paleta?",
   "@emptyPaletteDialogContent": {
-    "description": "Content for the dialog confirming whether to empty a new palette."
+    "description": "Contenido del diálogo que confirma si se debe vaciar una nueva paleta."
   },
   "emptyPaletteDialogTitle": "¿Vaciar la paleta?",
   "@emptyPaletteDialogTitle": {
-    "description": "Title for the dialog confirming whether to empty a new palette."
+    "description": "Título del diálogo que confirma si se debe vaciar una nueva paleta."
   },
-  "english": "Inglés",
   "enterNumberValidator": "Introduce un número.",
   "@enterNumberValidator": {
-    "description": "Validation error message when a number input is expected but not provided correctly."
+    "description": "Mensaje de error de validación cuando se espera una entrada numérica pero no se proporciona correctamente."
   },
   "entryPageAssociatedColorLabel": "Color Asociado",
   "entryPageContentHint": "Describe tu pensamiento, evento o tarea...",
@@ -437,15 +431,15 @@
   "entryPageUserNotIdentifiedError": "Usuario no identificado.",
   "error": "Error",
   "@error": {
-    "description": "Generic label for 'Error'."
+    "description": "Etiqueta genérica para 'Error'."
   },
   "errorAppBarTitle": "Error",
   "@errorAppBarTitle": {
-    "description": "App bar title when an error has occurred."
+    "description": "Título de la barra de aplicaciones cuando ha ocurrido un error."
   },
   "errorCheckingColorUsageLog": "Error al comprobar el uso del color: {errorDetails}",
   "@errorCheckingColorUsageLog": {
-    "description": "Log message for an error that occurred while checking color usage.",
+    "description": "Mensaje de registro de un error que ocurrió al comprobar el uso del color.",
     "placeholders": {
       "errorDetails": {
         "type": "String"
@@ -454,7 +448,7 @@
   },
   "errorCheckingColorUsageSnackbar": "Error al comprobar el uso del color: {errorDetails}",
   "@errorCheckingColorUsageSnackbar": {
-    "description": "Snackbar message for an error that occurred while checking color usage.",
+    "description": "Mensaje de Snackbar de un error que ocurrió al comprobar el uso del color.",
     "placeholders": {
       "errorDetails": {
         "type": "String"
@@ -463,7 +457,7 @@
   },
   "errorDeletingAllColorsNotesLog": "Error al eliminar todos los colores/notas: {errorDetails}",
   "@errorDeletingAllColorsNotesLog": {
-    "description": "Log message for an error that occurred while deleting all colors or notes.",
+    "description": "Mensaje de registro de un error que ocurrió al eliminar todos los colores o notas.",
     "placeholders": {
       "errorDetails": {
         "type": "String"
@@ -472,7 +466,7 @@
   },
   "errorDeletingAllNotesSnackbar": "Error al eliminar todas las notas: {errorDetails}",
   "@errorDeletingAllNotesSnackbar": {
-    "description": "Snackbar message for an error that occurred while deleting all notes.",
+    "description": "Mensaje de Snackbar de un error que ocurrió al eliminar todas las notas.",
     "placeholders": {
       "errorDetails": {
         "type": "String"
@@ -481,7 +475,7 @@
   },
   "errorDeletingJournalSnackbar": "Error al eliminar: {errorDetails}",
   "@errorDeletingJournalSnackbar": {
-    "description": "Snackbar message for an error that occurred while deleting a journal.",
+    "description": "Mensaje de Snackbar de un error que ocurrió al eliminar un diario.",
     "placeholders": {
       "errorDetails": {
         "type": "String"
@@ -490,7 +484,7 @@
   },
   "errorDeletingModelSnackbar": "Error al eliminar: {errorDetails}",
   "@errorDeletingModelSnackbar": {
-    "description": "Snackbar message for an error that occurred while deleting a palette model.",
+    "description": "Mensaje de Snackbar de un error que ocurrió al eliminar un modelo de paleta.",
     "placeholders": {
       "errorDetails": {
         "type": "String"
@@ -499,17 +493,17 @@
   },
   "errorDeletingNoteSnackbar": "Error durante la eliminación: {errorDetails}",
   "@errorDeletingNoteSnackbar": {
-    "description": "Snackbar message for an error that occurred while deleting a note.",
+    "description": "Mensaje de Snackbar de un error que ocurrió al eliminar una nota.",
     "placeholders": {
       "errorDetails": {
         "type": "String"
       }
     }
   },
-  "errorLaunchingUrl" : "error de carga",
+  "errorLaunchingUrl": "error de carga",
   "errorLoadingInitialData": "Error al cargar los datos iniciales: {errorDetails}",
   "@errorLoadingInitialData": {
-    "description": "Error message displayed when initial data loading fails.",
+    "description": "Mensaje de error mostrado cuando falla la carga de datos iniciales.",
     "placeholders": {
       "errorDetails": {
         "type": "String"
@@ -518,11 +512,11 @@
   },
   "errorLoadingJournal": "Error al cargar el diario:",
   "@errorLoadingJournal": {
-    "description": "Prefix for the error message when loading a journal fails."
+    "description": "Prefijo del mensaje de error cuando falla la carga de un diario."
   },
   "errorLoadingJournals": "Error al cargar los diarios: {errorDetails}",
   "@errorLoadingJournals": {
-    "description": "Error message displayed when loading the list of journals fails.",
+    "description": "Mensaje de error mostrado cuando falla la carga de la lista de diarios.",
     "placeholders": {
       "errorDetails": {
         "type": "String"
@@ -531,7 +525,7 @@
   },
   "errorLoadingLicense": "Error al cargar la licencia.\n\nVerifica que el archivo LICENSE exista en la raíz del proyecto y esté declarado en los activos de pubspec.yaml si es necesario.\n\nError: {errorDetails}",
   "@errorLoadingLicense": {
-    "description": "Error message displayed when the license file cannot be loaded.",
+    "description": "Mensaje de error mostrado cuando no se puede cargar el archivo de licencia.",
     "placeholders": {
       "errorDetails": {
         "type": "String"
@@ -540,7 +534,7 @@
   },
   "errorLoadingNotes": "Error al cargar las notas. {errorDetails}",
   "@errorLoadingNotes": {
-    "description": "Error message displayed when loading notes fails.",
+    "description": "Mensaje de error mostrado cuando falla la carga de notas.",
     "placeholders": {
       "errorDetails": {
         "type": "String"
@@ -549,7 +543,7 @@
   },
   "errorLoadingOptions": "Error al cargar las opciones: {errorDetails}",
   "@errorLoadingOptions": {
-    "description": "Error message displayed when loading options (e.g., palette models, existing journals) fails.",
+    "description": "Mensaje de error mostrado cuando falla la carga de opciones (por ejemplo, modelos de paleta, diarios existentes).",
     "placeholders": {
       "errorDetails": {
         "type": "String"
@@ -558,11 +552,11 @@
   },
   "errorLoadingPersonalModels": "Error al cargar los modelos personales.",
   "@errorLoadingPersonalModels": {
-    "description": "Error message displayed when loading personal palette models fails."
+    "description": "Mensaje de error mostrado cuando falla la carga de modelos de paleta personales."
   },
   "errorSavingPaletteSnackbar": "Error al guardar: {errorDetails}",
   "@errorSavingPaletteSnackbar": {
-    "description": "Snackbar message for an error that occurred while saving a palette or model.",
+    "description": "Mensaje de Snackbar de un error que ocurrió al guardar una paleta o modelo.",
     "placeholders": {
       "errorDetails": {
         "type": "String"
@@ -571,27 +565,27 @@
   },
   "errorTitle": "Error",
   "@errorTitle": {
-    "description": "Title displayed in AppBar when an error occurs."
+    "description": "Título mostrado en la AppBar cuando ocurre un error."
   },
   "errorUserNotIdentified": "Error: Usuario no identificado.",
   "@errorUserNotIdentified": {
-    "description": "Error message when the current user cannot be identified."
+    "description": "Mensaje de error cuando no se puede identificar al usuario actual."
   },
   "existingJournalsSectionTitle": "Diarios Existentes:",
   "@existingJournalsSectionTitle": {
-    "description": "Title for the section listing existing journals."
+    "description": "Título de la sección que lista los diarios existentes."
   },
   "fieldCannotBeEmpty": "El campo no puede estar vacío.",
   "@fieldCannotBeEmpty": {
-    "description": "Generic validation error for a required field that is empty."
+    "description": "Error de validación genérico para un campo obligatorio que está vacío."
   },
   "finalConfirmationDialogContent": "Para confirmar la eliminación, escribe 'DELETE' en el campo de abajo.",
   "@finalConfirmationDialogContent": {
-    "description": "Content for a final confirmation dialog requiring user to type 'DELETE'."
+    "description": "Contenido de un diálogo de confirmación final que requiere que el usuario escriba 'DELETE'."
   },
   "finalConfirmationDialogTitle": "CONFIRMACIÓN FINAL para \"{journalName}\"",
   "@finalConfirmationDialogTitle": {
-    "description": "Title for a final confirmation dialog before deleting a journal.",
+    "description": "Título de un diálogo de confirmación final antes de eliminar un diario.",
     "placeholders": {
       "journalName": {
         "type": "String"
@@ -600,28 +594,27 @@
   },
   "finalDeleteAllConfirmationDialogContent": "¿Estás absolutamente seguro? Esta acción es IRREVERSIBLE.",
   "@finalDeleteAllConfirmationDialogContent": {
-    "description": "Content for the final confirmation dialog before deleting all notes, emphasizing irreversibility."
+    "description": "Contenido del diálogo de confirmación final antes de eliminar todas las notas, enfatizando la irreversibilidad."
   },
   "finalDeleteAllConfirmationDialogTitle": "CONFIRMACIÓN FINAL",
   "@finalDeleteAllConfirmationDialogTitle": {
-    "description": "Title for the final confirmation dialog before deleting all notes."
+    "description": "Título del diálogo de confirmación final antes de eliminar todas las notas."
   },
   "finalDeleteAllConfirmationJournalWarning": "¿Estás absolutamente seguro? Eliminar colores de esta paleta eliminará IRREVERSIBLEMENTE TODAS las notas de este diario.",
   "@finalDeleteAllConfirmationJournalWarning": {
-    "description": "Final warning when deleting all colors from a journal palette, emphasizing note deletion."
+    "description": "Advertencia final al eliminar todos los colores de la paleta de un diario, enfatizando la eliminación de notas."
   },
   "finalDeleteAllConfirmationModelWarning": "¿Confirmas la eliminación de todos los colores de este modelo?",
   "@finalDeleteAllConfirmationModelWarning": {
-    "description": "Final confirmation when deleting all colors from a model palette."
+    "description": "Confirmación final al eliminar todos los colores de un modelo de paleta."
   },
   "formValidationFailedLog": "La validación del formulario (nombre de la paleta) falló durante el guardado automático.",
   "@formValidationFailedLog": {
-    "description": "Log message when form validation for palette name fails during an auto-save attempt."
+    "description": "Mensaje de registro cuando la validación del formulario para el nombre de la paleta falla durante un intento de guardado automático."
   },
-  "french": "Francés",
   "generatedColorExistsError": "El color generado {hexCode} ya existe.",
   "@generatedColorExistsError": {
-    "description": "Error message when a generated gradient color's hex code already exists.",
+    "description": "Mensaje de error cuando el código hexadecimal de un color de gradiente generado ya existe.",
     "placeholders": {
       "hexCode": {
         "type": "String"
@@ -630,7 +623,7 @@
   },
   "generatedTitleExistsError": "El título generado \"{title}\" ya existe.",
   "@generatedTitleExistsError": {
-    "description": "Error message when a generated gradient color's title already exists.",
+    "description": "Mensaje de error cuando el título de un color de gradiente generado ya existe.",
     "placeholders": {
       "title": {
         "type": "String"
@@ -639,33 +632,36 @@
   },
   "genericAuthErrorSnackbar": "Error de autenticación: Por favor, inténtalo de nuevo.",
   "@genericAuthErrorSnackbar": {
-    "description": "Generic snackbar message for authentication errors."
+    "description": "Mensaje de Snackbar genérico para errores de autenticación."
   },
   "genericErrorSnackbar": "Error: {errorDetails}",
   "@genericErrorSnackbar": {
-    "description": "Generic snackbar message for displaying an error.",
+    "description": "Mensaje de Snackbar genérico para mostrar un error.",
     "placeholders": {
       "errorDetails": {
         "type": "String"
       }
     }
   },
+  "homeButtonTooltip": "Inicio",
+  "@homeButtonTooltip": {
+    "description": "Información sobre herramientas para el botón de inicio en la barra de aplicaciones."
+  },
   "incorrectConfirmationTextValidator": "Texto de confirmación incorrecto.",
   "@incorrectConfirmationTextValidator": {
-    "description": "Validation error when the text entered for deletion confirmation is incorrect."
+    "description": "Error de validación cuando el texto introducido para la confirmación de eliminación es incorrecto."
   },
   "invalidEmail": "Correo electrónico no válido.",
   "@invalidEmail": {
-    "description": "Validation error for an invalid email format."
+    "description": "Error de validación para un formato de correo electrónico no válido."
   },
   "invalidInput": "Entrada no válida",
   "@invalidInput": {
-    "description": "Generic error message for invalid user input."
+    "description": "Mensaje de error genérico para una entrada de usuario no válida."
   },
-  "italian": "Italiano",
   "journalCreatedOnDateLabel": "Creado el: {date}",
   "@journalCreatedOnDateLabel": {
-    "description": "Label displaying the creation date of a journal.",
+    "description": "Etiqueta que muestra la fecha de creación de un diario.",
     "placeholders": {
       "date": {
         "type": "String"
@@ -674,7 +670,7 @@
   },
   "journalCreatedSuccess": "¡Diario \"{journalName}\" creado con éxito!",
   "@journalCreatedSuccess": {
-    "description": "Success message displayed after a new journal is created.",
+    "description": "Mensaje de éxito mostrado después de crear un nuevo diario.",
     "placeholders": {
       "journalName": {
         "type": "String"
@@ -683,16 +679,11 @@
   },
   "journalDeletedSnackbar": "Diario \"{journalName}\" eliminado.",
   "@journalDeletedSnackbar": {
-    "description": "Snackbar message shown after a journal has been successfully deleted.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
+    "description": "Mensaje de Snackbar mostrado después de que un diario ha sido eliminado correctamente."
   },
   "journalDetailsUnavailableWarning": "Detalles del diario (para la paleta) no disponibles para {journalId}. La ordenación por color puede no funcionar correctamente.",
   "@journalDetailsUnavailableWarning": {
-    "description": "Warning log when journal details for palette are unavailable for sorting notes by color.",
+    "description": "Advertencia de registro cuando los detalles del diario para la paleta no están disponibles para ordenar las notas por color.",
     "placeholders": {
       "journalId": {
         "type": "String"
@@ -701,7 +692,7 @@
   },
   "journalNameExistsError": "Un diario llamado \"{journalName}\" ya existe.",
   "@journalNameExistsError": {
-    "description": "Error message displayed when trying to create a journal with a name that already exists.",
+    "description": "Mensaje de error mostrado al intentar crear un diario con un nombre que ya existe.",
     "placeholders": {
       "journalName": {
         "type": "String"
@@ -710,44 +701,39 @@
   },
   "journalNameExistsSnackbar": "Un diario llamado \"{journalName}\" ya existe.",
   "@journalNameExistsSnackbar": {
-    "description": "Snackbar message indicating a journal with the given name already exists.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
+    "description": "Mensaje de Snackbar que indica que ya existe un diario con el nombre dado."
   },
   "journalNameTextFieldHint": "Ej: Diario de Gratitud, Proyectos 2025...",
   "@journalNameTextFieldHint": {
-    "description": "Hint text for the journal name input field."
+    "description": "Texto de sugerencia para el campo de entrada del nombre del diario."
   },
   "journalNameTextFieldLabel": "Elige un nombre para tu diario...",
   "@journalNameTextFieldLabel": {
-    "description": "Label for the journal name input field."
+    "description": "Etiqueta para el campo de entrada del nombre del diario."
   },
   "journalNameTooLongValidator": "El nombre del diario es demasiado largo (máx. 70).",
   "@journalNameTooLongValidator": {
-    "description": "Validation error when the journal name exceeds the maximum length."
+    "description": "Error de validación cuando el nombre del diario excede la longitud máxima."
   },
   "journalNameUpdatedSnackbar": "Nombre del diario actualizado.",
   "@journalNameUpdatedSnackbar": {
-    "description": "Snackbar message shown after a journal's name has been successfully updated."
+    "description": "Mensaje de Snackbar mostrado después de que el nombre de un diario ha sido actualizado correctamente."
   },
   "journalNameValidatorEmpty": "Por favor, introduce un nombre para el diario.",
   "@journalNameValidatorEmpty": {
-    "description": "Validation error when the journal name is empty."
+    "description": "Error de validación cuando el nombre del diario está vacío."
   },
   "journalNameValidatorTooLong": "El nombre del diario es demasiado largo (máx. 70).",
   "@journalNameValidatorTooLong": {
-    "description": "Validation error when the journal name is too long."
+    "description": "Error de validación cuando el nombre del diario es demasiado largo."
   },
   "journalOptionsDialogTitle": "Opciones del diario",
   "@journalOptionsDialogTitle": {
-    "description": "Title for the dialog displaying options for a journal."
+    "description": "Título del diálogo que muestra las opciones para un diario."
   },
   "journalPaletteUpdatedLog": "Paleta para el diario {journalName} actualizada.",
   "@journalPaletteUpdatedLog": {
-    "description": "Log message indicating the palette for a specific journal has been updated.",
+    "description": "Mensaje de registro que indica que la paleta de un diario específico ha sido actualizada.",
     "placeholders": {
       "journalName": {
         "type": "String"
@@ -756,57 +742,60 @@
   },
   "journalPaletteSavedSnackbar": "Paleta del diario guardada.",
   "@journalPaletteSavedSnackbar": {
-    "description": "Snackbar message shown after a journal's palette has been successfully saved."
+    "description": "Mensaje de Snackbar mostrado después de que la paleta de un diario ha sido guardada correctamente."
   },
   "language": "Idioma",
+  "languageEnglish": "Inglés",
+  "languageSpanish": "Español",
+  "languageGerman": "Alemán",
+  "languageItalian": "Italiano",
+  "languageFrench": "Francés",
+  "languagePortuguese": "Portugués",
+  "languagePortugueseBrazil": "Portugués (Brasil)",
   "licenseLink": "Licencia",
   "licensePageTitle": "Acuerdo de Licencia",
   "@licensePageTitle": {
-    "description": "Title for the License Agreement page."
+    "description": "Título de la página del Acuerdo de Licencia."
   },
   "loading": "Cargando...",
   "@loading": {
-    "description": "Generic text for loading state."
+    "description": "Texto genérico para el estado de carga."
   },
   "loadingAppBarTitle": "Cargando...",
   "@loadingAppBarTitle": {
-    "description": "App bar title when content is loading."
+    "description": "Título de la barra de aplicaciones cuando el contenido se está cargando."
   },
   "loadingLicense": "Cargando licencia...",
   "@loadingLicense": {
-    "description": "Message displayed while the license text is being loaded."
+    "description": "Mensaje mostrado mientras se carga el texto de la licencia."
   },
   "loadingText": "Cargando...",
   "@loadingText": {
-    "description": "Text displayed when content is loading."
+    "description": "Texto mostrado cuando el contenido se está cargando."
   },
   "loadingTitle": "Cargando...",
   "@loadingTitle": {
-    "description": "Title displayed in AppBar when content is loading."
+    "description": "Título mostrado en la AppBar cuando el contenido se está cargando."
   },
   "logout": "Cerrar sesión",
   "manageJournals": "Gestionar Diarios",
+  "manageNotes": "Gestionar Notas",
   "manageJournalsAppBarTitle": "Gestionar Diarios",
   "@manageJournalsAppBarTitle": {
-    "description": "App bar title for the journal management page."
+    "description": "Título de la barra de aplicaciones para la página de gestión de diarios."
   },
   "managePaletteModels": "Gestionar Modelos de Paleta",
   "managePaletteModelsAppBarTitle": "Gestionar Modelos de Paleta",
   "@managePaletteModelsAppBarTitle": {
-    "description": "App bar title for the palette model management page."
+    "description": "Título de la barra de aplicaciones para la página de gestión de modelos de paleta."
   },
   "modelDeletedSnackbar": "Modelo \"{modelName}\" eliminado.",
   "@modelDeletedSnackbar": {
-    "description": "Snackbar message shown after a palette model has been successfully deleted.",
-    "placeholders": {
-      "modelName": {
-        "type": "String"
-      }
-    }
+    "description": "Mensaje de Snackbar mostrado después de que un modelo de paleta ha sido eliminado correctamente."
   },
   "modelMinColorsDeleteError": "Un modelo de paleta debe contener al menos {minColors} color(es). No se puede eliminar \"{colorTitle}\".",
   "@modelMinColorsDeleteError": {
-    "description": "Error message when attempting to delete a color from a model would result in fewer than the minimum required colors.",
+    "description": "Mensaje de error al intentar eliminar un color de un modelo que resultaría en menos de los colores mínimos requeridos.",
     "placeholders": {
       "minColors": {
         "type": "int"
@@ -818,7 +807,7 @@
   },
   "modelMinColorsErrorSnackbar": "Un modelo debe tener al menos {minColors} colores.",
   "@modelMinColorsErrorSnackbar": {
-    "description": "Snackbar error message when a palette model has fewer than the minimum required colors.",
+    "description": "Mensaje de error de Snackbar cuando un modelo de paleta tiene menos de los colores mínimos requeridos.",
     "placeholders": {
       "minColors": {
         "type": "int"
@@ -827,35 +816,35 @@
   },
   "moreInfoText": "Para más información, consulta el repositorio de GitHub o la página de licencia.",
   "@moreInfoText": {
-    "description": "Text encouraging users to find more information on GitHub or the license page."
+    "description": "Texto que anima a los usuarios a encontrar más información en GitHub o en la página de licencia."
   },
   "nameCannotBeEmptyValidator": "El nombre no puede estar vacío.",
   "@nameCannotBeEmptyValidator": {
-    "description": "Validation error when a name field is empty."
+    "description": "Error de validación cuando un campo de nombre está vacío."
   },
   "nameTooLong": "Nombre demasiado largo.",
   "@nameTooLong": {
-    "description": "Generic validation error for a name that is too long."
+    "description": "Error de validación genérico para un nombre que es demasiado largo."
   },
   "newJournalNameHint": "Introduce el nuevo nombre aquí",
   "@newJournalNameHint": {
-    "description": "Hint text for the input field where a new journal name is entered."
+    "description": "Texto de sugerencia para el campo de entrada donde se introduce un nuevo nombre de diario."
   },
   "newJournalNameLabel": "Nuevo nombre del diario",
   "@newJournalNameLabel": {
-    "description": "Label for the input field where a new journal name is entered."
+    "description": "Etiqueta para el campo de entrada donde se introduce un nuevo nombre de diario."
   },
   "newNameSameAsOldValidator": "El nuevo nombre es idéntico al anterior.",
   "@newNameSameAsOldValidator": {
-    "description": "Validation error when the new name entered is the same as the current name."
+    "description": "Error de validación cuando el nuevo nombre introducido es el mismo que el nombre actual."
   },
   "newPaletteDefaultName": "Nueva Paleta",
   "@newPaletteDefaultName": {
-    "description": "Default name for a newly created palette."
+    "description": "Nombre predeterminado para una paleta recién creada."
   },
   "newPaletteModelCreatedLog": "Nuevo modelo de paleta creado: {modelName}",
   "@newPaletteModelCreatedLog": {
-    "description": "Log message indicating a new palette model has been created.",
+    "description": "Mensaje de registro que indica que se ha creado un nuevo modelo de paleta.",
     "placeholders": {
       "modelName": {
         "type": "String"
@@ -865,43 +854,47 @@
   "noAccountYetSignUp": "¿Aún no tienes cuenta? Regístrate",
   "noActiveJournalMessage": "Selecciona un diario existente o crea uno nuevo para empezar.",
   "@noActiveJournalMessage": {
-    "description": "Message displayed when no journal is active, prompting user action."
+    "description": "Mensaje mostrado cuando no hay ningún diario activo, pidiendo una acción del usuario."
   },
   "noActiveJournalTitle": "No hay diario activo.",
   "@noActiveJournalTitle": {
-    "description": "Title displayed when no journal is active."
+    "description": "Título mostrado cuando no hay ningún diario activo."
+  },
+  "noJournalSelected": "No se ha seleccionado ningún diario.",
+  "@noJournalSelected": {
+    "description": "Mensaje mostrado cuando no se ha seleccionado ningún diario."
   },
   "noCancelButtonLabel": "NO, CANCELAR",
   "@noCancelButtonLabel": {
-    "description": "Label for a button that cancels an action, typically in a high-stakes confirmation."
+    "description": "Etiqueta de un botón que cancela una acción, típicamente en una confirmación de alto riesgo."
   },
   "noExistingJournalsMessage": "No hay diarios existentes.",
   "@noExistingJournalsMessage": {
-    "description": "Message displayed when there are no journals created yet."
+    "description": "Mensaje mostrado cuando aún no se han creado diarios."
   },
   "noExistingJournalsToCopy": "No hay diarios existentes para copiar.",
   "@noExistingJournalsToCopy": {
-    "description": "Message displayed in the palette source selection when no other journals exist to copy a palette from."
+    "description": "Mensaje mostrado en la selección de fuente de paleta cuando no existen otros diarios de los que copiar una paleta."
   },
   "noNotesInJournalMessage": "No hay notas en este diario.",
   "@noNotesInJournalMessage": {
-    "description": "Message displayed when a journal contains no notes."
+    "description": "Mensaje mostrado cuando un diario no contiene notas."
   },
   "noPaletteModelsAvailable": "No hay modelos de paleta disponibles.",
   "@noPaletteModelsAvailable": {
-    "description": "Message displayed when no palette models (predefined or personal) are available."
+    "description": "Mensaje mostrado cuando no hay modelos de paleta (predefinidos o personales) disponibles."
   },
   "noPaletteModelsAvailableMessage": "No hay modelos de paleta disponibles.",
   "@noPaletteModelsAvailableMessage": {
-    "description": "Message displayed when no palette models are available to choose from."
+    "description": "Mensaje mostrado cuando no hay modelos de paleta disponibles para elegir."
   },
   "noRealChangesDetectedLog": "No se detectaron cambios reales, guardado automático cancelado.",
   "@noRealChangesDetectedLog": {
-    "description": "Log message when an auto-save is cancelled because no changes were detected."
+    "description": "Mensaje de registro cuando se cancela un guardado automático porque no se detectaron cambios."
   },
   "noteCreatedOnLabel": "Creado el: {date}",
   "@noteCreatedOnLabel": {
-    "description": "Label displaying the creation date of a note.",
+    "description": "Etiqueta que muestra la fecha de creación de una nota.",
     "placeholders": {
       "date": {
         "type": "String"
@@ -910,7 +903,7 @@
   },
   "noteDateLabel": "Fecha: {date}",
   "@noteDateLabel": {
-    "description": "Label displaying the event date of a note.",
+    "description": "Etiqueta que muestra la fecha del evento de una nota.",
     "placeholders": {
       "date": {
         "type": "String"
@@ -919,13 +912,13 @@
   },
   "noteDeletedSuccessSnackbar": "Nota eliminada con éxito.",
   "@noteDeletedSuccessSnackbar": {
-    "description": "Snackbar message shown after a note has been successfully deleted."
+    "description": "Mensaje de Snackbar mostrado después de que una nota ha sido eliminada correctamente."
   },
   "notifications": "Notificaciones",
   "notificationSettingsComingSoon": "¡La configuración de notificaciones llegará pronto!",
   "numberBetweenValidator": "Entre 1 y {maxGradientSteps}.",
   "@numberBetweenValidator": {
-    "description": "Validation error message for a number input that must be within a specific range for gradient steps.",
+    "description": "Mensaje de error de validación para una entrada numérica que debe estar dentro de un rango específico para los pasos de gradiente.",
     "placeholders": {
       "maxGradientSteps": {
         "type": "int"
@@ -934,11 +927,11 @@
   },
   "numberOfColorsHint": "1",
   "@numberOfColorsHint": {
-    "description": "Hint text for the number of colors input field (for single color or gradient)."
+    "description": "Texto de sugerencia para el campo de entrada del número de colores (para un solo color o gradiente)."
   },
   "numberOfColorsLabel": "Número de colores (1 para individual, 2-{maxGradientSteps} para gradiente)",
   "@numberOfColorsLabel": {
-    "description": "Label for the input field specifying the number of colors for a single color or a gradient.",
+    "description": "Etiqueta para el campo de entrada que especifica el número de colores para un solo color o un gradiente.",
     "placeholders": {
       "maxGradientSteps": {
         "type": "int"
@@ -947,32 +940,32 @@
   },
   "ok": "OK",
   "@ok": {
-    "description": "Generic label for an OK button."
+    "description": "Etiqueta genérica para un botón de OK."
   },
   "optionsAppBarTooltip": "Opciones",
   "@optionsAppBarTooltip": {
-    "description": "Tooltip for the options menu button in the AppBar."
+    "description": "Información sobre herramientas para el botón del menú de opciones en la AppBar."
   },
   "optionsTooltip": "Opciones",
   "@optionsTooltip": {
-    "description": "Tooltip for the 'more options' menu button in the AppBar."
+    "description": "Información sobre herramientas para el botón del menú 'más opciones' en la AppBar."
   },
   "orSeparator": "o",
   "pageTitleModelPrefix": "Modelo: ",
   "@pageTitleModelPrefix": {
-    "description": "Prefix for the page title when editing a palette model."
+    "description": "Prefijo del título de la página al editar un modelo de paleta."
   },
   "pageTitleNewPaletteModel": "Nuevo Modelo de Paleta",
   "@pageTitleNewPaletteModel": {
-    "description": "Page title when creating a new palette model."
+    "description": "Título de la página al crear un nuevo modelo de paleta."
   },
   "pageTitlePalettePrefix": "Paleta: ",
   "@pageTitlePalettePrefix": {
-    "description": "Prefix for the page title when editing a journal palette."
+    "description": "Prefijo del título de la página al editar la paleta de un diario."
   },
   "paletteCopiedFromName": "Paleta de '{journalName}' (Copiada de {sourceJournalName})",
   "@paletteCopiedFromName": {
-    "description": "Name format for a palette copied from another journal, associated with a new journal.",
+    "description": "Formato de nombre para una paleta copiada de otro diario, asociada a un nuevo diario.",
     "placeholders": {
       "journalName": {
         "type": "String"
@@ -984,20 +977,15 @@
   },
   "paletteCopiedFromNameNoJournal": "Paleta (Copiada de {sourceJournalName})",
   "@paletteCopiedFromNameNoJournal": {
-    "description": "Name format for a palette copied from another journal, not yet associated with a new journal (e.g. during model creation).",
-    "placeholders": {
-      "sourceJournalName": {
-        "type": "String"
-      }
-    }
+    "description": "Formato de nombre para una paleta copiada de otro diario, aún no asociada a un nuevo diario (por ejemplo, durante la creación de un modelo)."
   },
   "paletteEmptyMaxReachedMessage": "La paleta está vacía y ha alcanzado el número máximo de colores.",
   "@paletteEmptyMaxReachedMessage": {
-    "description": "Message shown when the palette is empty but cannot add more colors due to reaching a maximum limit (edge case)."
+    "description": "Mensaje mostrado cuando la paleta está vacía pero no se pueden añadir más colores debido a que se ha alcanzado un límite máximo (caso excepcional)."
   },
   "paletteFromModelName": "Paleta de '{journalName}' (Modelo: {modelName})",
   "@paletteFromModelName": {
-    "description": "Name format for a palette created from a model, associated with a new journal.",
+    "description": "Formato de nombre para una paleta creada a partir de un modelo, asociada a un nuevo diario.",
     "placeholders": {
       "journalName": {
         "type": "String"
@@ -1009,20 +997,15 @@
   },
   "paletteFromModelNameNoJournal": "Paleta (Modelo: {modelName})",
   "@paletteFromModelNameNoJournal": {
-    "description": "Name format for a palette created from a model, not yet associated with a new journal (e.g. during model creation).",
-    "placeholders": {
-      "modelName": {
-        "type": "String"
-      }
-    }
+    "description": "Formato de nombre para una paleta creada a partir de un modelo, aún no asociada a un nuevo diario (por ejemplo, durante la creación de un modelo)."
   },
   "paletteIsEmptyMessage": "La paleta de este diario está vacía.\nEdita el diario para añadir colores o elige otro diario.",
   "@paletteIsEmptyMessage": {
-    "description": "Message displayed when the active journal's palette is empty."
+    "description": "Mensaje mostrado cuando la paleta del diario activo está vacía."
   },
   "paletteMaxColorsError": "La paleta no puede tener más de {maxColors} colores.",
   "@paletteMaxColorsError": {
-    "description": "Error message displayed when trying to add more colors than the maximum allowed.",
+    "description": "Mensaje de error mostrado al intentar añadir más colores de los máximos permitidos.",
     "placeholders": {
       "maxColors": {
         "type": "int"
@@ -1031,7 +1014,7 @@
   },
   "paletteMaxColorsErrorSnackbar": "Una paleta no puede tener más de {maxColors} colores.",
   "@paletteMaxColorsErrorSnackbar": {
-    "description": "Snackbar error message when a palette has more than the maximum allowed colors.",
+    "description": "Mensaje de error de Snackbar cuando una paleta tiene más de los colores máximos permitidos.",
     "placeholders": {
       "maxColors": {
         "type": "int"
@@ -1040,11 +1023,11 @@
   },
   "paletteMinColorError": "La paleta debe contener al menos 1 color.",
   "@paletteMinColorError": {
-    "description": "Error message displayed when a palette has less than 1 color."
+    "description": "Mensaje de error mostrado cuando una paleta tiene menos de 1 color."
   },
   "paletteMinColorsError": "La paleta debe contener al menos {minColors} color(es).",
   "@paletteMinColorsError": {
-    "description": "Error message displayed when a palette has fewer than the minimum required colors.",
+    "description": "Mensaje de error mostrado cuando una paleta tiene menos de los colores mínimos requeridos.",
     "placeholders": {
       "minColors": {
         "type": "int"
@@ -1053,38 +1036,27 @@
   },
   "paletteModelInfo": "{colorCount} color{pluralS} {type}",
   "@paletteModelInfo": {
-    "description": "Information about a palette model, showing color count and type (Predefined/Personal). Placeholder {pluralS} should be replaced with 's' or empty string.",
-    "placeholders": {
-      "colorCount": {
-        "type": "int"
-      },
-      "pluralS": {
-        "type": "String"
-      },
-      "type": {
-        "type": "String"
-      }
-    }
+    "description": "Información sobre un modelo de paleta, mostrando el recuento de colores y el tipo (Predefinido/Personal). El marcador de posición {pluralS} debe reemplazarse con 's' o una cadena vacía."
   },
   "paletteModelNameExistsError": "Un modelo de paleta con este nombre ya existe.",
   "@paletteModelNameExistsError": {
-    "description": "Error message when trying to save a palette model with a name that already exists."
+    "description": "Mensaje de error al intentar guardar un modelo de paleta con un nombre que ya existe."
   },
   "paletteModelSavedSnackbar": "Modelo de paleta guardado.",
   "@paletteModelSavedSnackbar": {
-    "description": "Snackbar message shown after a palette model has been successfully saved."
+    "description": "Mensaje de Snackbar mostrado después de que un modelo de paleta ha sido guardado correctamente."
   },
   "paletteModelSuffixPersonal": " (Personal)",
   "@paletteModelSuffixPersonal": {
-    "description": "Suffix added to palette model names to indicate they are personal models."
+    "description": "Sufijo añadido a los nombres de los modelos de paleta para indicar que son modelos personales."
   },
   "paletteModelSuffixPredefined": " (Predefinido)",
   "@paletteModelSuffixPredefined": {
-    "description": "Suffix added to palette model names to indicate they are predefined models."
+    "description": "Sufijo añadido a los nombres de los modelos de paleta para indicar que son modelos predefinidos."
   },
   "paletteModelUpdatedLog": "Modelo de paleta actualizado: {modelName}",
   "@paletteModelUpdatedLog": {
-    "description": "Log message indicating a palette model has been updated.",
+    "description": "Mensaje de registro que indica que un modelo de paleta ha sido actualizado.",
     "placeholders": {
       "modelName": {
         "type": "String"
@@ -1093,27 +1065,27 @@
   },
   "paletteModelsAppBarTitle": "Modelos de Paleta",
   "@paletteModelsAppBarTitle": {
-    "description": "App bar title for the palette models display/selection screen."
+    "description": "Título de la barra de aplicaciones para la pantalla de visualización/selección de modelos de paleta."
   },
   "paletteNameEmptyValidator": "El nombre de la paleta no puede estar vacío.",
   "@paletteNameEmptyValidator": {
-    "description": "Validation error when the palette name is empty."
+    "description": "Error de validación cuando el nombre de la paleta está vacío."
   },
   "paletteNameHint": "Ej: Mi paleta de trabajo",
   "@paletteNameHint": {
-    "description": "Hint text for the palette name input field."
+    "description": "Texto de sugerencia para el campo de entrada del nombre de la paleta."
   },
   "paletteNameLabel": "Nombre de la Paleta",
   "@paletteNameLabel": {
-    "description": "Label for the palette name input field."
+    "description": "Etiqueta para el campo de entrada del nombre de la paleta."
   },
   "paletteNameTooLongValidator": "El nombre no debe exceder los 50 caracteres.",
   "@paletteNameTooLongValidator": {
-    "description": "Validation error when the palette name is too long."
+    "description": "Error de validación cuando el nombre de la paleta es demasiado largo."
   },
   "paletteOfJournalName": "Paleta de '{journalName}'",
   "@paletteOfJournalName": {
-    "description": "Default name for a new palette based on a journal's name.",
+    "description": "Nombre predeterminado para una nueva paleta basado en el nombre de un diario.",
     "placeholders": {
       "journalName": {
         "type": "String"
@@ -1122,35 +1094,33 @@
   },
   "paletteSourceDropdownLabel": "Elegir origen de la paleta",
   "@paletteSourceDropdownLabel": {
-    "description": "Label for the dropdown to choose the source for creating a new palette."
+    "description": "Etiqueta para el menú desplegable para elegir la fuente para crear una nueva paleta."
   },
   "paletteSourceEmptyOption": "Paleta en Blanco (para componer)",
   "@paletteSourceEmptyOption": {
-    "description": "Option in palette source selection for creating a new blank palette."
+    "description": "Opción en la selección de fuente de paleta para crear una nueva paleta en blanco."
   },
   "paletteSourceExistingJournalOption": "Copiando paleta de un diario existente",
   "@paletteSourceExistingJournalOption": {
-    "description": "Option in palette source selection for copying a palette from an existing journal."
+    "description": "Opción en la selección de fuente de paleta para copiar una paleta de un diario existente."
   },
   "paletteSourceModelOption": "Desde un modelo de paleta",
   "@paletteSourceModelOption": {
-    "description": "Option in palette source selection for using a palette model."
+    "description": "Opción en la selección de fuente de paleta para usar un modelo de paleta."
   },
   "passwordLabel": "Contraseña",
   "passwordValidationError": "Por favor, introduce tu contraseña.",
   "pleaseChooseJournalValidator": "Por favor, elige un diario",
   "@pleaseChooseJournalValidator": {
-    "description": "Validation error when no journal is selected from a required dropdown."
+    "description": "Error de validación cuando no se selecciona ningún diario de un menú desplegable obligatorio."
   },
   "pleaseChooseModelValidator": "Por favor, elige un modelo",
   "@pleaseChooseModelValidator": {
-    "description": "Validation error when no palette model is selected from a required dropdown."
+    "description": "Error de validación cuando no se selecciona ningún modelo de paleta de un menú desplegable obligatorio."
   },
-  "portuguese": "Portugués",
-  "portugueseBrazilian": "Portugués (Brasil)",
   "predefinedModelsCannotBeDeletedSnackbar": "Los modelos predefinidos no se pueden eliminar.",
   "@predefinedModelsCannotBeDeletedSnackbar": {
-    "description": "Snackbar message shown when attempting to delete a predefined palette model."
+    "description": "Mensaje de Snackbar mostrado al intentar eliminar un modelo de paleta predefinido."
   },
   "registerPageAlreadyHaveAccountLink": "¿Ya tienes una cuenta? Inicia Sesión",
   "registerPageConfirmPasswordLabel": "Confirmar Contraseña",
@@ -1170,15 +1140,15 @@
   "registerPageTitle": "Crear Cuenta",
   "reloadingInitialJournalMessage": "Recargando diario inicial después de eliminar el diario activo.",
   "@reloadingInitialJournalMessage": {
-    "description": "Log message indicating that the application is reloading the initial/default journal after the active one was deleted."
+    "description": "Mensaje de registro que indica que la aplicación está recargando el diario inicial/predeterminado después de que se eliminó el activo."
   },
   "save": "Guardar",
   "@save": {
-    "description": "Generic label for 'Save' action."
+    "description": "Etiqueta genérica para la acción 'Guardar'."
   },
   "saveBlockedColorInUseError": "Guardado bloqueado: El/los color(es) '{colorTitles}' está/n en uso y no se puede/n eliminar.",
   "@saveBlockedColorInUseError": {
-    "description": "Error message when saving a palette is blocked because one or more colors marked for deletion are in use.",
+    "description": "Mensaje de error cuando se bloquea el guardado de una paleta porque uno o más colores marcados para eliminación están en uso.",
     "placeholders": {
       "colorTitles": {
         "type": "String"
@@ -1187,22 +1157,22 @@
   },
   "saveButtonLabel": "Guardar",
   "@saveButtonLabel": {
-    "description": "Label for a save button."
+    "description": "Etiqueta de un botón de guardar."
   },
   "saveNameButtonLabel": "Guardar nombre",
   "@saveNameButtonLabel": {
-    "description": "Label for the button to save a new name (e.g., for a journal)."
+    "description": "Etiqueta del botón para guardar un nuevo nombre (por ejemplo, para un diario)."
   },
   "savingInProgressSnackbar": "Guardando en progreso, por favor espera...",
   "@savingInProgressSnackbar": {
-    "description": "Snackbar message indicating that a save operation is currently in progress."
+    "description": "Mensaje de Snackbar que indica que una operación de guardado está actualmente en progreso."
   },
-  "selectLanguage" : "Seleccionar Idioma",
+  "selectLanguage": "Seleccionar Idioma",
   "settings": "Configuración",
   "signInButton": "Iniciar Sesión",
   "signInEmailErrorLog": "Error de inicio de sesión con correo electrónico: {errorDetails}",
   "@signInEmailErrorLog": {
-    "description": "Log message for an error during email sign-in.",
+    "description": "Mensaje de registro de un error durante el inicio de sesión con correo electrónico.",
     "placeholders": {
       "errorDetails": {
         "type": "String"
@@ -1211,7 +1181,7 @@
   },
   "signInGoogleErrorLog": "Error de inicio de sesión con Google: {errorDetails}",
   "@signInGoogleErrorLog": {
-    "description": "Log message for an error during Google sign-in.",
+    "description": "Mensaje de registro de un error durante el inicio de sesión con Google.",
     "placeholders": {
       "errorDetails": {
         "type": "String"
@@ -1220,12 +1190,12 @@
   },
   "signInGoogleSuccessLog": "Intento de inicio de sesión con Google exitoso.",
   "@signInGoogleSuccessLog": {
-    "description": "Log message for a successful Google sign-in attempt."
+    "description": "Mensaje de registro de un intento de inicio de sesión con Google exitoso."
   },
   "signInPageTitle": "Iniciar Sesión",
   "signInSuccessLog": "Intento de inicio de sesión exitoso para {email}",
   "@signInSuccessLog": {
-    "description": "Log message for a successful email sign-in attempt.",
+    "description": "Mensaje de registro de un intento de inicio de sesión con correo electrónico exitoso.",
     "placeholders": {
       "email": {
         "type": "String"
@@ -1235,11 +1205,11 @@
   "signInWithGoogleButton": "Iniciar Sesión con Google",
   "signOutErrorPrefix": "Error al cerrar sesión: ",
   "@signOutErrorPrefix": {
-    "description": "Prefix for the error message displayed in a SnackBar when sign-out fails."
+    "description": "Prefijo del mensaje de error mostrado en un SnackBar cuando falla el cierre de sesión."
   },
   "signOutErrorSnackbar": "Error al cerrar sesión: {errorDetails}",
   "@signOutErrorSnackbar": {
-    "description": "Snackbar message for an error that occurred during sign-out.",
+    "description": "Mensaje de Snackbar de un error que ocurrió durante el cierre de sesión.",
     "placeholders": {
       "errorDetails": {
         "type": "String"
@@ -1248,7 +1218,7 @@
   },
   "signUpErrorLog": "Error durante el registro en RegisterPage: {errorDetails}",
   "@signUpErrorLog": {
-    "description": "Log message for an error during user registration.",
+    "description": "Mensaje de registro de un error durante el registro de usuario.",
     "placeholders": {
       "errorDetails": {
         "type": "String"
@@ -1257,7 +1227,7 @@
   },
   "signUpSuccessLog": "Registro exitoso para {email}",
   "@signUpSuccessLog": {
-    "description": "Log message for a successful user registration.",
+    "description": "Mensaje de registro de un registro de usuario exitoso.",
     "placeholders": {
       "email": {
         "type": "String"
@@ -1266,41 +1236,41 @@
   },
   "sortByEventDateTooltip": "Ordenar por fecha de evento",
   "@sortByEventDateTooltip": {
-    "description": "Tooltip for the button to sort notes by their event date."
+    "description": "Información sobre herramientas para el botón para ordenar las notas por su fecha de evento."
   },
   "sortByPaletteColorTooltip": "Ordenar por color de paleta",
   "@sortByPaletteColorTooltip": {
-    "description": "Tooltip for the button to sort notes by their associated palette color."
+    "description": "Información sobre herramientas para el botón para ordenar las notas por su color de paleta asociado."
   },
   "sortDirectionAscending": " (Ascendente)",
   "@sortDirectionAscending": {
-    "description": "Suffix indicating ascending sort order."
+    "description": "Sufijo que indica un orden de clasificación ascendente."
   },
   "sortDirectionDescending": " (Descendente)",
   "@sortDirectionDescending": {
-    "description": "Suffix indicating descending sort order."
+    "description": "Sufijo que indica un orden de clasificación descendente."
   },
   "startByCreatingOneMessage": "Comienza creando uno arriba.",
   "@startByCreatingOneMessage": {
-    "description": "Follow-up message when no journals exist, suggesting to create one."
+    "description": "Mensaje de seguimiento cuando no existen diarios, sugiriendo crear uno."
   },
   "step1JournalName": "Nombre del Diario",
   "@step1JournalName": {
-    "description": "Title for the first step in creating a journal (setting its name)."
+    "description": "Título del primer paso para crear un diario (establecer su nombre)."
   },
   "step2PaletteConfiguration": "Configuración de la Paleta",
   "@step2PaletteConfiguration": {
-    "description": "Title for the second step in creating a journal (configuring its palette)."
+    "description": "Título del segundo paso para crear un diario (configurar su paleta)."
   },
   "success": "Éxito",
   "@success": {
-    "description": "Generic label for 'Success'."
+    "description": "Etiqueta genérica para 'Éxito'."
   },
   "theme": "Tema",
   "themeSettingsComingSoon": "¡La configuración del tema llegará pronto!",
   "tooManyColorsValidator": "Demasiados colores (máx. {maxAllowed} permitidos).",
   "@tooManyColorsValidator": {
-    "description": "Validation error message when the number of colors exceeds the maximum allowed for the palette.",
+    "description": "Mensaje de error de validación cuando el número de colores excede el máximo permitido para la paleta.",
     "placeholders": {
       "maxAllowed": {
         "type": "int"
@@ -1309,39 +1279,31 @@
   },
   "typeDeleteHereLabel": "Escribe DELETE aquí",
   "@typeDeleteHereLabel": {
-    "description": "Label for the input field where user must type 'DELETE' to confirm deletion."
+    "description": "Etiqueta para el campo de entrada donde el usuario debe escribir 'DELETE' para confirmar la eliminación."
   },
   "userNotConnectedError": "Usuario no conectado.",
   "@userNotConnectedError": {
-    "description": "Error message when an action requires an authenticated user but none is found."
+    "description": "Mensaje de error cuando una acción requiere un usuario autenticado pero no se encuentra ninguno."
   },
   "userNotIdentified": "Usuario no identificado",
   "@userNotIdentified": {
-    "description": "Generic error message when the user's identity cannot be confirmed."
+    "description": "Mensaje de error genérico cuando no se puede confirmar la identidad del usuario."
   },
   "userNotIdentifiedSnackbar": "Usuario no identificado.",
   "@userNotIdentifiedSnackbar": {
-    "description": "Snackbar message indicating the user is not identified."
+    "description": "Mensaje de Snackbar que indica que el usuario no está identificado."
   },
   "version": "Versión",
   "@version": {
-    "description": "Label for application version."
+    "description": "Etiqueta de la versión de la aplicación."
   },
   "versionBuildFormat": "v{version} (Compilación {buildNumber})",
   "@versionBuildFormat": {
-    "description": "Format for displaying application version and build number. Example: v1.0.0 (Build 1)",
-    "placeholders": {
-      "version": {
-        "type": "String"
-      },
-      "buildNumber": {
-        "type": "String"
-      }
-    }
+    "description": "Formato para mostrar la versión de la aplicación y el número de compilación. Ejemplo: v1.0.0 (Compilación 1)"
   },
   "versionDynamicText": "Versión {version} (Compilación {buildNumber})",
   "@versionDynamicText": {
-    "description": "Text displaying the application version and build number.",
+    "description": "Texto que muestra la versión de la aplicación y el número de compilación.",
     "placeholders": {
       "version": {
         "type": "String"
@@ -1353,31 +1315,31 @@
   },
   "versionLoading": "Cargando...",
   "@versionLoading": {
-    "description": "Text displayed while the version information is loading."
+    "description": "Texto mostrado mientras se carga la información de la versión."
   },
   "versionPrefix": "versión : ",
   "@versionPrefix": {
-    "description": "Prefix for displaying the version number, e.g., 'version : 1.0'."
+    "description": "Prefijo para mostrar el número de versión, por ejemplo, 'versión : 1.0'."
   },
   "versionUnavailable": "Versión no disponible",
   "@versionUnavailable": {
-    "description": "Text displayed when the version information cannot be retrieved."
+    "description": "Texto mostrado cuando no se puede recuperar la información de la versión."
   },
   "viewAsGridTooltip": "Ver como cuadrícula",
   "@viewAsGridTooltip": {
-    "description": "Tooltip for the button to switch to grid view."
+    "description": "Información sobre herramientas para el botón para cambiar a la vista de cuadrícula."
   },
   "viewAsListTooltip": "Ver como lista",
   "@viewAsListTooltip": {
-    "description": "Tooltip for the button to switch to list view."
+    "description": "Información sobre herramientas para el botón para cambiar a la vista de lista."
   },
   "welcomeGuest": "¡Bienvenido!",
   "@welcomeGuest": {
-    "description": "Generic welcome message when user's display name is not available."
+    "description": "Mensaje de bienvenida genérico cuando el nombre para mostrar del usuario no está disponible."
   },
   "welcomeUser": "¡Bienvenido, {userName}!",
   "@welcomeUser": {
-    "description": "Welcome message with user's display name.",
+    "description": "Mensaje de bienvenida con el nombre para mostrar del usuario.",
     "placeholders": {
       "userName": {
         "type": "String",
@@ -1387,25 +1349,40 @@
   },
   "yesDeleteAllButtonLabel": "SÍ, ELIMINAR TODO",
   "@yesDeleteAllButtonLabel": {
-    "description": "Label for the button that confirms deleting all items, typically in a high-stakes confirmation."
+    "description": "Etiqueta del botón que confirma la eliminación de todos los elementos, típicamente en una confirmación de alto riesgo."
   },
   "yesDeleteAllNotesButtonLabel": "SÍ, ELIMINAR TODAS LAS NOTAS",
   "@yesDeleteAllNotesButtonLabel": {
-    "description": "Label for the button that confirms deleting all notes, typically in a final confirmation dialog."
+    "description": "Etiqueta del botón que confirma la eliminación de todas las notas, típicamente en un diálogo de confirmación final."
   },
-  "help" : "Ayuda",
-  "languageEnglish" :  "Inglés",
-  "languageSpanish" :  "Español",
-  "languageGerman" :  "Alemán",
-  "languageItalian" :  "Italiano",
-  "languageFrench" : "Francés",
-  "languagePortuguese" : "Portugués",
-  "languagePortugueseBrazil" : "Portugués (Brasil)",
-
+  "help": "Ayuda",
+  "cookieConsentTitle": "Consentimiento de Cookies",
+  "@cookieConsentTitle": {
+    "description": "Título para el banner de consentimiento de cookies."
+  },
   "cookieConsentMessage": "Utilizamos cookies para mejorar su experiencia. Las cookies esenciales son necesarias para el funcionamiento del sitio. ¿Acepta las cookies analíticas para ayudarnos a mejorar nuestros servicios?",
+  "@cookieConsentMessage": {
+    "description": "Mensaje principal para el banner de consentimiento de cookies."
+  },
   "cookieConsentAcceptAll": "Aceptar Todo",
+  "@cookieConsentAcceptAll": {
+    "description": "Texto del botón para aceptar todas las cookies."
+  },
   "cookieConsentDecline": "Rechazar Cookies de Análisis",
+  "@cookieConsentDecline": {
+    "description": "Texto del botón para rechazar las cookies no esenciales."
+  },
   "cookieConsentSettings": "Configuración",
-
-  "privacyPolicy" : "Privacy Policy"
+  "@cookieConsentSettings": {
+    "description": "Texto del botón para abrir la configuración de cookies."
+  },
+  "privacyPolicy": "Política de Privacidad",
+  "@privacyPolicy": {
+    "description": "Enlace a la Política de Privacidad"
+  },
+  "newJournalMenuItem": "Nuevo Diario",
+  "editJournalNameTooltip": "Editar nombre del diario",
+  "existingNotesTitle": "Notas existentes",
+  "sortByCreationDateTooltip": "Ordenar por fecha de creación",
+  "sortByContentTooltip": "Ordenar por contenido"
 }

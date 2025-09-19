@@ -655,6 +655,10 @@
       }
     }
   },
+  "homeButtonTooltip": "Home",
+  "@homeButtonTooltip": {
+    "description": "Tooltip for the home button on the app bar."
+  },
   "incorrectConfirmationTextValidator": "Incorrect confirmation text.",
   "@incorrectConfirmationTextValidator": {
     "description": "Validation error when the text entered for deletion confirmation is incorrect."
@@ -791,6 +795,7 @@
   },
   "logout": "Logout",
   "manageJournals": "Manage Journals",
+  "manageNotes": "Manage Notes",
   "manageJournalsAppBarTitle": "Manage Journals",
   "@manageJournalsAppBarTitle": {
     "description": "App bar title for the journal management page."
@@ -875,6 +880,10 @@
   "noActiveJournalTitle": "No active journal.",
   "@noActiveJournalTitle": {
     "description": "Title displayed when no journal is active."
+  },
+  "noJournalSelected": "No journal selected.",
+  "@noJournalSelected": {
+    "description": "Message displayed when no journal is selected."
   },
   "noCancelButtonLabel": "NO, CANCEL",
   "@noCancelButtonLabel": {
@@ -1427,4 +1436,3 @@
   "sortByCreationDateTooltip": "Sort by creation date",
   "sortByContentTooltip" : "Sort by content"
 }
-

@@ -50,7 +50,7 @@ android {
     defaultConfig {
         applicationId = "org.stanworld.colorsnotes"
         minSdk = 23
-        targetSdk = 34
+        targetSdk = 35
         versionCode = flutter.versionCode // Géré par Flutter via pubspec.yaml
         versionName = flutter.versionName // Géré par Flutter via pubspec.yaml
         multiDexEnabled = true

@@ -11,7 +11,8 @@ import '../providers/active_journal_provider.dart';
 import '../widgets/dynamic_journal_app_bar.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final int? initialIndex;
+  const MainScreen({super.key, this.initialIndex});
 
   @override
   _MainScreenState createState() => _MainScreenState();
@@ -19,6 +20,13 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex ?? 0;
+  }
+
 
   List<Widget> _buildWidgetOptions(String? activeJournalId) {
     final options = <Widget>[const LoggedHomepage()];
@@ -45,22 +53,6 @@ class _MainScreenState extends State<MainScreen> {
 
     final List<Widget> currentWidgetOptions = _buildWidgetOptions(journalId);
 
-    List<BottomNavigationBarItem> navBarItems = [
-      BottomNavigationBarItem(icon: const Icon(Icons.home_outlined), activeIcon: const Icon(Icons.home), label: l10n.bottomNavHome), // MODIFIÉ
-    ];
-
-    if (journalId != null) {
-      navBarItems.insert(1, BottomNavigationBarItem(icon: const Icon(Icons.list_alt_outlined), activeIcon: const Icon(Icons.list_alt), label: l10n.bottomNavNotes)); // MODIFIÉ
-    }
-    navBarItems.add(BottomNavigationBarItem(icon: const Icon(Icons.book_outlined), activeIcon: const Icon(Icons.book), label: l10n.bottomNavJournals)); // MODIFIÉ
-
-    int clampedSelectedIndexForNavBar = _selectedIndex;
-    if (clampedSelectedIndexForNavBar >= navBarItems.length) {
-      clampedSelectedIndexForNavBar = navBarItems.length - 1;
-      if (clampedSelectedIndexForNavBar < 0) {
-        clampedSelectedIndexForNavBar = 0;
-      }
-    }
 
     int bodyWidgetIndex;
     if (journalId == null) {
@@ -81,12 +73,7 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       appBar: const DynamicJournalAppBar(),
       body: Center(child: currentWidgetOptions[bodyWidgetIndex]),
-      bottomNavigationBar: BottomNavigationBar(
-        items: navBarItems,
-        currentIndex: clampedSelectedIndexForNavBar,
-        type: BottomNavigationBarType.fixed,
-        onTap: _onItemTapped,
-      ),
+
     );
   }
 }

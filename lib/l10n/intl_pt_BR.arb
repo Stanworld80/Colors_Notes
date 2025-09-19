@@ -242,7 +242,7 @@
   },
   "defaultColorTitle": "Cor",
   "@defaultColorTitle": {
-    "description": "Título ou rótulo padrão для uma cor quando seu nome específico não está disponível ou não é relevante."
+    "description": "Título ou rótulo padrão para uma cor quando seu nome específico não está disponível ou não é relevante."
   },
   "defaultPaletteNameForJournal": "Paleta de {journalName}",
   "@defaultPaletteNameForJournal": {
@@ -367,7 +367,7 @@
   },
   "editPaletteForJournalTooltip": "Editar paleta para {journalName}",
   "@editPaletteForJournalTooltip": {
-    "description": "Dica de ferramenta para o botão para editar la paleta de um diário específico.",
+    "description": "Dica de ferramenta para o botão para editar a paleta de um diário específico.",
     "placeholders": {
       "journalName": {
         "type": "String"
@@ -398,7 +398,6 @@
   "@emptyPaletteDialogTitle": {
     "description": "Título da caixa de diálogo que confirma se deve esvaziar uma nova paleta."
   },
-  "english": "Inglês",
   "enterNumberValidator": "Insira um número.",
   "@enterNumberValidator": {
     "description": "Mensagem de erro de validação quando é esperado um input numérico mas não é fornecido corretamente."
@@ -618,7 +617,6 @@
   "@formValidationFailedLog": {
     "description": "Mensagem de log quando a validação do formulário para o nome da paleta falha durante uma tentativa de salvamento automático."
   },
-  "french": "Francês",
   "generatedColorExistsError": "A cor gerada {hexCode} já existe.",
   "@generatedColorExistsError": {
     "description": "Mensagem de erro quando o código hexadecimal de uma cor de gradiente gerada já existe.",
@@ -650,6 +648,10 @@
       }
     }
   },
+  "homeButtonTooltip": "Início",
+  "@homeButtonTooltip": {
+    "description": "Dica de ferramenta para o botão de início na barra de aplicativos."
+  },
   "incorrectConfirmationTextValidator": "Texto de confirmação incorreto.",
   "@incorrectConfirmationTextValidator": {
     "description": "Erro de validação quando o texto inserido para confirmação de exclusão está incorreto."
@@ -662,7 +664,6 @@
   "@invalidInput": {
     "description": "Mensagem de erro genérica para entrada de usuário inválida."
   },
-  "italian": "Italiano",
   "journalCreatedOnDateLabel": "Criado em: {date}",
   "@journalCreatedOnDateLabel": {
     "description": "Rótulo exibindo a data de criação de um diário.",
@@ -759,6 +760,13 @@
     }
   },
   "language": "Idioma",
+  "languageEnglish": "Inglês",
+  "languageSpanish": "Espanhol",
+  "languageGerman": "Alemão",
+  "languageItalian": "Italiano",
+  "languageFrench": "Francês",
+  "languagePortuguese": "Português",
+  "languagePortugueseBrazil": "Português (Brasil)",
   "licenseLink": "Licença",
   "licensePageTitle": "Contrato de Licença",
   "@licensePageTitle": {
@@ -786,6 +794,7 @@
   },
   "logout": "Sair",
   "manageJournals": "Gerenciar Diários",
+  "manageNotes": "Gerenciar Notas",
   "manageJournalsAppBarTitle": "Gerenciar Diários",
   "@manageJournalsAppBarTitle": {
     "description": "Título da AppBar para a página de gerenciamento de diários."
@@ -870,6 +879,10 @@
   "noActiveJournalTitle": "Nenhum diário ativo.",
   "@noActiveJournalTitle": {
     "description": "Título exibido quando nenhum diário está ativo."
+  },
+  "noJournalSelected": "Nenhum diário selecionado.",
+  "@noJournalSelected": {
+    "description": "Mensagem exibida quando nenhum diário é selecionado."
   },
   "noCancelButtonLabel": "NÃO, CANCELAR",
   "@noCancelButtonLabel": {
@@ -1051,17 +1064,9 @@
       }
     }
   },
-  "paletteModelInfo": "{colorCount,plural, =1{cor} other{cores}} {type}",
+  "paletteModelInfo": "{colorCount} cor(es) {type}",
   "@paletteModelInfo": {
-    "description": "Informação sobre um modelo de paleta, mostrando a contagem de cores e o tipo (Predefinido/Pessoal).",
-    "placeholders": {
-      "colorCount": {
-        "type": "int"
-      },
-      "type": {
-        "type": "String"
-      }
-    }
+    "description": "Informação sobre um modelo de paleta, mostrando a contagem de cores e o tipo (Predefinido/Pessoal)."
   },
   "paletteModelNameExistsError": "Já existe um modelo de paleta com este nome.",
   "@paletteModelNameExistsError": {
@@ -1143,8 +1148,6 @@
   "@pleaseChooseModelValidator": {
     "description": "Erro de validação quando nenhum modelo de paleta é selecionado de um menu suspenso obrigatório."
   },
-  "portuguese": "Português",
-  "portugueseBrazilian": "Português (Brasil)",
   "predefinedModelsCannotBeDeletedSnackbar": "Os modelos predefinidos não podem ser excluídos.",
   "@predefinedModelsCannotBeDeletedSnackbar": {
     "description": "Mensagem Snackbar exibida ao tentar excluir um modelo de paleta predefinido."
@@ -1390,11 +1393,34 @@
   "@yesDeleteAllNotesButtonLabel": {
     "description": "Rótulo do botão que confirma a exclusão de todas as notas, tipicamente em uma caixa de diálogo de confirmação final."
   },
+  "help": "Ajuda",
   "cookieConsentTitle": "Consentimento de Cookies",
+  "@cookieConsentTitle": {
+    "description": "Título para o banner de consentimento de cookies."
+  },
   "cookieConsentMessage": "Utilizamos cookies para melhorar a sua experiência. Os cookies essenciais são necessários para o funcionamento do site. Aceita cookies analíticos para nos ajudar a melhorar os nossos serviços?",
+  "@cookieConsentMessage": {
+    "description": "Mensagem principal para o banner de consentimento de cookies."
+  },
   "cookieConsentAcceptAll": "Aceitar Todos",
+  "@cookieConsentAcceptAll": {
+    "description": "Texto do botão para aceitar todos os cookies."
+  },
   "cookieConsentDecline": "Recusar Cookies de Análise",
+  "@cookieConsentDecline": {
+    "description": "Texto do botão para recusar cookies não essenciais."
+  },
   "cookieConsentSettings": "Configurações",
-  "help" : "Ajuda",
-  "privacyPolicy" : "Privacy Policy"
+  "@cookieConsentSettings": {
+    "description": "Texto do botão para abrir as configurações de cookies."
+  },
+  "privacyPolicy": "Política de Privacidade",
+  "@privacyPolicy": {
+    "description": "Link para a Política de Privacidade."
+  },
+  "newJournalMenuItem": "Novo Diário",
+  "editJournalNameTooltip": "Editar nome do diário",
+  "existingNotesTitle": "Notas existentes",
+  "sortByCreationDateTooltip": "Ordenar por data de criação",
+  "sortByContentTooltip": "Ordenar por conteúdo"
 }
