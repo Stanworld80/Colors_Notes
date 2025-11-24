@@ -1,765 +1,91 @@
 {
   "@@locale": "pt_BR",
   "about": "Sobre",
-  "@about": {
-    "description": "Rótulo para seções ou links 'Sobre'."
-  },
   "aboutColorsNotesTitle": "Sobre Colors & Notes",
-  "@aboutColorsNotesTitle": {
-    "description": "Título da página 'Sobre Colors & Notes'."
-  },
   "aboutLink": "Sobre",
-  "add": "Adicionar",
-  "@add": {
-    "description": "Rótulo genérico para a ação 'Adicionar'."
-  },
-  "addColorButtonLabel": "Adicionar Cor",
-  "@addColorButtonLabel": {
-    "description": "Rótulo do botão para adicionar uma nova cor."
-  },
-  "addColorGradientDialogTitle": "Adicionar Cor/Gradiente",
-  "@addColorGradientDialogTitle": {
-    "description": "Título da caixa de diálogo para adicionar uma nova cor ou gradiente."
-  },
-  "addGradientButtonLabel": "Adicionar Gradiente",
-  "@addGradientButtonLabel": {
-    "description": "Rótulo do botão para adicionar um gradiente."
-  },
-  "addNewColorGradientListTile": "Adicionar nova cor/gradiente",
-  "@addNewColorGradientListTile": {
-    "description": "Rótulo da opção da lista para adicionar uma nova cor ou gradiente."
-  },
-  "allColorsDeletedFromEditorSnackbar": "Todas as cores foram removidas da paleta de edição atual.",
-  "@allColorsDeletedFromEditorSnackbar": {
-    "description": "Mensagem Snackbar exibida quando todas as cores são removidas no editor de paletas."
-  },
-  "allNotesDeletedBeforeEmptyingPaletteLog": "Todas as notas no diário {journalId} foram excluídas antes de esvaziar a paleta.",
-  "@allNotesDeletedBeforeEmptyingPaletteLog": {
-    "description": "Mensagem de log indicando que todas as notas em um diário foram excluídas antes de esvaziar sua paleta.",
-    "placeholders": {
-      "journalId": {
-        "type": "String"
-      }
-    }
-  },
-  "allNotesDeletedSnackbar": "Todas as notas foram excluídas.",
-  "@allNotesDeletedSnackbar": {
-    "description": "Mensagem Snackbar exibida após a exclusão bem-sucedida de todas as notas."
-  },
-  "appDescription": "Este aplicativo permite que você organize suas notas e pensamentos diários associando-os a cores personalizadas, agrupadas em paletas únicas para cada diário.",
-  "@appDescription": {
-    "description": "Descrição detalhada do aplicativo."
-  },
+  "appDescription": "Este aplicativo permite que você organize suas notas e pensamentos diários, associando-os a cores personalizadas, agrupadas em paletas únicas para cada diário.",
   "appName": "Colors & Notes",
   "appSlogan": "Dê cor ao seu dia.",
-  "@appSlogan": {
-    "description": "Slogan do aplicativo."
-  },
-  "authErrorPrefix": "Erro: {errorMessage}",
-  "@authErrorPrefix": {
-    "description": "Prefixo para mensagens de erro de autenticação.",
-    "placeholders": {
-      "errorMessage": {
-        "type": "String"
-      }
-    }
-  },
   "authorInfo": "Autor: Stanislas Mathieu Eric Selle",
-  "@authorInfo": {
-    "description": "Informações sobre o autor do aplicativo."
-  },
+  "add": "Adicionar",
+  "addColorButtonLabel": "Adicionar cor",
+  "addColorGradientDialogTitle": "Adicionar Cor/Gradiente",
+  "addGradientButtonLabel": "Adicionar gradiente",
+  "addNewColorGradientListTile": "Adicionar uma nova cor/gradiente",
+  "allColorsDeletedFromEditorSnackbar": "Todas as cores foram removidas da paleta de edição atual.",
+  "allNotesDeletedBeforeEmptyingPaletteLog": "Todas as notas no diário {journalId} foram excluídas antes de esvaziar a paleta.",
+  "allNotesDeletedSnackbar": "Todas as notas foram excluídas.",
+  "authErrorPrefix": "Erro: {errorMessage}",
   "baseNameCannotBeEmptyValidator": "O nome base não pode estar vazio.",
-  "@baseNameCannotBeEmptyValidator": {
-    "description": "Mensagem de erro de validação quando o nome base para uma cor/gradiente está vazio."
-  },
   "baseNameForColorGradientLabel": "Nome base para cor/gradiente",
-  "@baseNameForColorGradientLabel": {
-    "description": "Rótulo para o campo de entrada do nome base de uma cor ou gradiente."
-  },
   "bottomNavHome": "Início",
-  "@bottomNavHome": {
-    "description": "Rótulo para a aba Início na barra de navegação inferior."
-  },
   "bottomNavJournals": "Diários",
-  "@bottomNavJournals": {
-    "description": "Rótulo para a aba Diários na barra de navegação inferior."
-  },
   "bottomNavNotes": "Notas",
-  "@bottomNavNotes": {
-    "description": "Rótulo para a aba Notas na barra de navegação inferior."
-  },
   "build": "Build",
-  "@build": {
-    "description": "Rótulo para o número da compilação, frequentemente usado com a versão."
-  },
   "cancelButtonLabel": "Cancelar",
-  "@cancelButtonLabel": {
-    "description": "Rótulo genérico para um botão de cancelar."
-  },
   "cannotAddGradientMaxReachedError": "Não é possível adicionar {gradientSteps} cores, máximo da paleta atingido.",
-  "@cannotAddGradientMaxReachedError": {
-    "description": "Mensagem de erro quando a adição de um gradiente excederia o número máximo de cores permitido na paleta.",
-    "placeholders": {
-      "gradientSteps": {
-        "type": "int"
-      }
-    }
-  },
   "changeJournalTooltip": "Mudar diário ativo",
-  "@changeJournalTooltip": {
-    "description": "Dica de ferramenta para o menu suspenso de seleção de diário na AppBar ou controles semelhantes."
-  },
   "chooseJournalAppBarTitle": "Escolher Diário",
-  "@chooseJournalAppBarTitle": {
-    "description": "Título da AppBar quando o usuário precisa escolher um diário."
-  },
   "chooseJournalTitle": "Escolha um diário",
-  "@chooseJournalTitle": {
-    "description": "Título exibido na AppBar quando nenhum diário está ativo, solicitando ao usuário que selecione um."
-  },
   "chooseOrCreateJournalButton": "Escolher ou criar um diário",
-  "@chooseOrCreateJournalButton": {
-    "description": "Texto para o botão para escolher um diário existente ou criar um novo."
-  },
   "choosePaletteModelDropdownLabel": "Escolher um modelo de paleta",
-  "@choosePaletteModelDropdownLabel": {
-    "description": "Rótulo para o menu suspenso para escolher um modelo de paleta."
-  },
-  "colorDeletedSnackbar": "\"{colorTitle}\" excluída.",
-  "@colorDeletedSnackbar": {
-    "description": "Mensagem Snackbar exibida após uma cor ter sido excluída com sucesso.",
-    "placeholders": {
-      "colorTitle": {
-        "type": "String"
-      }
-    }
-  },
   "colorHexExistsError": "Esta cor (hex) já existe.",
-  "@colorHexExistsError": {
-    "description": "Mensagem de erro ao tentar adicionar uma cor cujo código hexadecimal já existe na paleta."
-  },
   "colorInUseDeleteError": "A cor \"{colorTitle}\" está em uso e não pode ser excluída.",
-  "@colorInUseDeleteError": {
-    "description": "Mensagem de erro ao tentar excluir uma cor que está atualmente sendo usada por notas.",
-    "placeholders": {
-      "colorTitle": {
-        "type": "String"
-      }
-    }
-  },
   "colorTitleExistsError": "Este título de cor já existe.",
-  "@colorTitleExistsError": {
-    "description": "Mensagem de erro ao tentar adicionar uma cor cujo título já existe na paleta."
-  },
+  "colorDeletedSnackbar": "\"{colorTitle}\" excluído.",
   "colorsNotesAppName": "Colors & Notes",
-  "@colorsNotesAppName": {
-    "description": "O nome do aplicativo, Colors & Notes."
-  },
   "colorsSectionHeader": "Cores ({currentCount} / {maxCount}) :",
-  "@colorsSectionHeader": {
-    "description": "Cabeçalho da seção de cores no editor de paletas, mostrando a contagem atual e máxima de cores.",
-    "placeholders": {
-      "currentCount": {
-        "type": "int"
-      },
-      "maxCount": {
-        "type": "int"
-      }
-    }
-  },
   "comingSoon": "Em breve",
-  "@comingSoon": {
-    "description": "Mensagem genérica para funcionalidades ainda não implementadas."
-  },
   "confirmDeleteColorContent": "Você realmente quer excluir a cor \"{colorName}\"?",
-  "@confirmDeleteColorContent": {
-    "description": "Conteúdo da mensagem de confirmação ao excluir uma cor.",
-    "placeholders": {
-      "colorName": {
-        "type": "String"
-      }
-    }
-  },
-  "confirmDeleteColorTitle": "Confirmar Exclusão",
-  "@confirmDeleteColorTitle": {
-    "description": "Título da caixa de diálogo que confirma a exclusão da cor."
-  },
+  "confirmDeleteColorTitle": "Confirmar exclusão",
   "confirmDeleteDialogTitle": "Confirmar exclusão",
-  "@confirmDeleteDialogTitle": {
-    "description": "Título genérico para uma caixa de diálogo de confirmação antes da exclusão."
-  },
   "confirmDeleteNoteDialogContent": "Você realmente quer excluir esta nota?",
-  "@confirmDeleteNoteDialogContent": {
-    "description": "Conteúdo da caixa de diálogo que confirma a exclusão da nota."
-  },
   "confirmDeletionButtonLabel": "CONFIRMAR EXCLUSÃO",
-  "@confirmDeletionButtonLabel": {
-    "description": "Rótulo do botão que confirma uma ação de exclusão, normalmente após um aviso final."
-  },
   "confirmDeletionDialogContent": "Você tem certeza? Esta ação é irreversível.",
-  "@confirmDeletionDialogContent": {
-    "description": "Conteúdo genérico para uma caixa de diálogo de confirmação, avisando sobre a irreversibilidade."
-  },
-  "confirmDeletionDialogTitle": "Confirmar Exclusão?",
-  "@confirmDeletionDialogTitle": {
-    "description": "Título genérico para uma caixa de diálogo pedindo ao usuário para confirmar uma exclusão."
-  },
-  "copyPaletteFromJournalDropdownLabel": "Copiar paleta de um diário existente",
-  "@copyPaletteFromJournalDropdownLabel": {
-    "description": "Rótulo para o menu suspenso para selecionar um diário existente do qual copiar a paleta."
-  },
+  "confirmDeletionDialogTitle": "Confirmar exclusão?",
   "copyrightText": "Copyright © 2025",
-  "@copyrightText": {
-    "description": "Aviso de direitos autorais para o aplicativo."
-  },
+  "copyPaletteFromJournalDropdownLabel": "Copiar paleta de um diário existente",
   "createFirstModelMessage": "Crie seu primeiro modelo pessoal pressionando o botão \"+\" acima.",
-  "@createFirstModelMessage": {
-    "description": "Mensagem exibida quando não existem modelos de paleta pessoais, solicitando ao usuário que crie um."
-  },
   "createJournalButtonLabel": "Criar diário",
-  "@createJournalButtonLabel": {
-    "description": "Rótulo do botão para criar um novo diário."
-  },
   "createJournalPageTitle": "Criar um novo diário",
-  "@createJournalPageTitle": {
-    "description": "Título da página onde os usuários criam um novo diário."
-  },
   "createNewJournalButton": "Criar um novo diário",
-  "@createNewJournalButton": {
-    "description": "Texto para o botão para criar um novo diário."
-  },
   "createNewJournalCardLabel": "Criar um novo diário",
-  "@createNewJournalCardLabel": {
-    "description": "Rótulo para o cartão ou botão que inicia a criação de um novo diário."
-  },
-  "createNewPersonalModelTooltip": "Criar novo modelo pessoal",
-  "@createNewPersonalModelTooltip": {
-    "description": "Dica de ferramenta para o botão para criar um novo modelo de paleta pessoal."
-  },
+  "createNewPersonalModelTooltip": "Criar um novo modelo pessoal",
   "defaultAppBarTitle": "Colors & Notes",
-  "@defaultAppBarTitle": {
-    "description": "Título padrão para a AppBar, geralmente o nome do aplicativo."
-  },
   "defaultColorTitle": "Cor",
-  "@defaultColorTitle": {
-    "description": "Título ou rótulo padrão para uma cor quando seu nome específico não está disponível ou não é relevante."
-  },
   "defaultPaletteNameForJournal": "Paleta de {journalName}",
-  "@defaultPaletteNameForJournal": {
-    "description": "Formato de nome padrão para uma nova paleta associada a um diário.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
-  },
   "delete": "Excluir",
-  "@delete": {
-    "description": "Rótulo genérico para a ação 'Excluir'."
-  },
-  "deleteAllButtonLabel": "Excluir Tudo",
-  "@deleteAllButtonLabel": {
-    "description": "Rótulo para um botão que exclui todos os itens."
-  },
+  "deleteAllButtonLabel": "Excluir tudo",
   "deleteAllColorsDialogTitle": "Excluir todas as cores?",
-  "@deleteAllColorsDialogTitle": {
-    "description": "Título da caixa de diálogo que confirma a exclusão de todas as cores de uma paleta ou modelo."
-  },
-  "deleteAllColorsJournalWarning": "Isso excluirá todas as cores da paleta do diário \"{journalName}\". ATENÇÃO: Todas as notas neste diário também serão PERMANENTEMENTE excluídas.",
-  "@deleteAllColorsJournalWarning": {
-    "description": "Mensagem de aviso ao tentar excluir todas as cores da paleta de um diário.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
-  },
+  "deleteAllColorsJournalWarning": "Isso excluirá todas as cores da paleta do diário \"{journalName}\". AVISO: Todas as notas neste diário também serão excluídas PERMANENTEMENTE.",
   "deleteAllColorsModelWarning": "Você realmente quer excluir todas as cores deste modelo de paleta?",
-  "@deleteAllColorsModelWarning": {
-    "description": "Mensagem de aviso ao tentar excluir todas as cores de um modelo de paleta."
-  },
   "deleteAllColorsTooltip": "Excluir todas as cores",
-  "@deleteAllColorsTooltip": {
-    "description": "Dica de ferramenta para o botão que exclui todas as cores."
-  },
-  "deleteAllNotesDialogContent": "Esta ação excluirá PERMANENTEMENTE todas as notas deste diário. Deseja continuar?",
-  "@deleteAllNotesDialogContent": {
-    "description": "Conteúdo da caixa de diálogo que confirma a exclusão de todas as notas em um diário."
-  },
+  "deleteAllNotesDialogContent": "Esta ação excluirá PERMANENTEMENTE todas as notas neste diário. Você deseja continuar?",
   "deleteAllNotesDialogTitle": "Excluir todas as notas?",
-  "@deleteAllNotesDialogTitle": {
-    "description": "Título da caixa de diálogo que confirma a exclusão de todas as notas."
-  },
   "deleteAllNotesTooltip": "Excluir todas as notas neste diário",
-  "@deleteAllNotesTooltip": {
-    "description": "Dica de ferramenta para o botão para excluir todas as notas no diário atual."
-  },
   "deleteButtonLabel": "Excluir",
-  "@deleteButtonLabel": {
-    "description": "Rótulo para um botão de excluir."
-  },
   "deleteJournalButtonLabel": "Excluir diário",
-  "@deleteJournalButtonLabel": {
-    "description": "Rótulo do botão para excluir um diário."
-  },
   "deleteJournalDialogContent": "Todas as notas neste diário também serão excluídas permanentemente. Esta ação é irreversível.",
-  "@deleteJournalDialogContent": {
-    "description": "Conteúdo da caixa de diálogo que confirma a exclusão do diário, avisando sobre a exclusão das notas."
-  },
   "deleteJournalDialogTitle": "Excluir o diário \"{journalName}\"?",
-  "@deleteJournalDialogTitle": {
-    "description": "Título da caixa de diálogo que confirma a exclusão do diário.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
-  },
   "deleteModelDialogContent": "Você realmente quer excluir o modelo de paleta \"{modelName}\"? Esta ação é irreversível.",
-  "@deleteModelDialogContent": {
-    "description": "Conteúdo da caixa de diálogo que confirma a exclusão do modelo de paleta.",
-    "placeholders": {
-      "modelName": {
-        "type": "String"
-      }
-    }
-  },
-  "deleteModelDialogTitle": "Excluir Modelo?",
-  "@deleteModelDialogTitle": {
-    "description": "Título da caixa de diálogo que confirma a exclusão do modelo de paleta."
-  },
+  "deleteModelDialogTitle": "Excluir modelo?",
   "deleteModelTooltip": "Excluir modelo",
-  "@deleteModelTooltip": {
-    "description": "Dica de ferramenta para o botão para excluir um modelo de paleta."
-  },
   "deleteNoteTooltipGrid": "Excluir nota",
-  "@deleteNoteTooltipGrid": {
-    "description": "Dica de ferramenta para excluir uma nota, tipicamente em uma visualização em grade."
-  },
   "deleteThisColorButtonLabel": "Excluir esta cor",
-  "@deleteThisColorButtonLabel": {
-    "description": "Rótulo do botão para excluir uma cor específica."
-  },
   "deleteThisNoteTooltipList": "Excluir esta nota",
-  "@deleteThisNoteTooltipList": {
-    "description": "Dica de ferramenta para excluir uma nota, tipicamente em um item de lista."
-  },
   "developedWith": "Desenvolvido com Flutter & Firebase.",
-  "@developedWith": {
-    "description": "Informações sobre as tecnologias usadas para o desenvolvimento."
-  },
   "downloadForAndroidLink": "Baixar para Android",
   "edit": "Editar",
-  "@edit": {
-    "description": "Rótulo genérico para a ação 'Editar'."
-  },
-  "editColorDialogTitle": "Editar Cor",
-  "@editColorDialogTitle": {
-    "description": "Título da caixa de diálogo para editar uma cor existente."
-  },
+  "editColorDialogTitle": "Editar cor",
   "editModelTooltip": "Editar modelo",
-  "@editModelTooltip": {
-    "description": "Dica de ferramenta para o botão para editar um modelo de paleta."
-  },
   "editNameOptionsTooltip": "Editar nome / Opções...",
-  "@editNameOptionsTooltip": {
-    "description": "Dica de ferramenta para um botão que permite editar o nome de um diário ou acessar outras opções."
-  },
   "editPaletteForJournalTooltip": "Editar paleta para {journalName}",
-  "@editPaletteForJournalTooltip": {
-    "description": "Dica de ferramenta para o botão para editar a paleta de um diário específico.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
-  },
   "editPaletteTooltip": "Editar paleta de '{journalName}'",
-  "@editPaletteTooltip": {
-    "description": "Dica de ferramenta para o ícone de edição de paleta na barra de aplicativos, onde {journalName} é o nome do diário ativo.",
-    "placeholders": {
-      "journalName": {
-        "type": "String",
-        "example": "Meu Diário de Viagem"
-      }
-    }
-  },
-  "emailLabel": "E-mail",
-  "emailValidationError": "Por favor, insira um endereço de e-mail válido.",
+  "emailLabel": "Email",
+  "emailValidationError": "Por favor, insira um endereço de email válido.",
   "emptyButtonLabel": "Esvaziar",
-  "@emptyButtonLabel": {
-    "description": "Rótulo para um botão que esvazia algo, ex: uma paleta."
-  },
   "emptyPaletteDialogContent": "Você realmente quer remover todas as cores desta nova paleta?",
-  "@emptyPaletteDialogContent": {
-    "description": "Conteúdo da caixa de diálogo que confirma se deve esvaziar uma nova paleta."
-  },
   "emptyPaletteDialogTitle": "Esvaziar a paleta?",
-  "@emptyPaletteDialogTitle": {
-    "description": "Título da caixa de diálogo que confirma se deve esvaziar uma nova paleta."
-  },
-  "enterNumberValidator": "Insira um número.",
-  "@enterNumberValidator": {
-    "description": "Mensagem de erro de validação quando é esperado um input numérico mas não é fornecido corretamente."
-  },
-  "entryPageAssociatedColorLabel": "Cor Associada",
-  "entryPageContentHint": "Descreva seu pensamento, evento ou tarefa...",
-  "entryPageContentLabel": "Conteúdo da nota...",
-  "entryPageContentValidatorEmpty": "Por favor, insira o conteúdo da nota.",
-  "entryPageContentValidatorTooLong": "O conteúdo é muito longo (máx. 1024 caracteres).",
-  "entryPageDateTimeSetToNowSnackbar": "Data e hora definidas para agora.",
-  "entryPageEditTitle": "Editar Nota",
-  "entryPageGenericSaveError": "Erro: {errorMessage}",
-  "@entryPageGenericSaveError": {
-    "placeholders": {
-      "errorMessage": {
-        "type": "String"
-      }
-    }
-  },
-  "entryPageJournalDetailsLoadError": "Não foi possível carregar os detalhes do diário.",
-  "entryPageJournalDetailsRetryButton": "Tentar Novamente",
-  "entryPageNewTitle": "Nova Nota",
-  "entryPageNoColorSelectedError": "Por favor, selecione uma cor para a nota.",
-  "entryPageNoteSavedAsNewSuccess": "Nota salva como nova.",
-  "entryPageNoteSavedSuccess": "Nota salva.",
-  "entryPageNoteUpdatedSuccess": "Nota atualizada.",
-  "entryPageOriginalColorMissingSnackbar": "A cor original desta nota não existe mais na paleta. Uma cor padrão foi selecionada.",
-  "entryPagePaletteEmptySnackbar": "A paleta deste diário está vazia. Adicione cores à paleta para associar esta nota.",
-  "entryPageSaveAsNewButton": "Salvar como nova nota",
-  "entryPageSaveButtonCreate": "Salvar Nota",
-  "entryPageSaveButtonUpdate": "Atualizar Nota",
-  "entryPageSaveTooltip": "Salvar nota",
-  "entryPageSavingButton": "Salvando...",
-  "entryPageSelectColorValidator": "Por favor, selecione uma cor.",
-  "entryPageUpdateTooltip": "Atualizar nota",
-  "entryPageUserNotIdentifiedError": "Usuário não identificado.",
-  "error": "Erro",
-  "@error": {
-    "description": "Rótulo genérico para 'Erro'."
-  },
-  "errorAppBarTitle": "Erro",
-  "@errorAppBarTitle": {
-    "description": "Título da AppBar quando ocorre um erro."
-  },
-  "errorCheckingColorUsageLog": "Erro ao verificar o uso da cor: {errorDetails}",
-  "@errorCheckingColorUsageLog": {
-    "description": "Mensagem de log para um erro ocorrido ao verificar o uso da cor.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
-  "errorCheckingColorUsageSnackbar": "Erro ao verificar uso da cor: {errorDetails}",
-  "@errorCheckingColorUsageSnackbar": {
-    "description": "Mensagem Snackbar para um erro ocorrido ao verificar o uso da cor.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
-  "errorDeletingAllColorsNotesLog": "Erro ao excluir todas as cores/notas: {errorDetails}",
-  "@errorDeletingAllColorsNotesLog": {
-    "description": "Mensagem de log para um erro ocorrido ao excluir todas as cores ou notas.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
-  "errorDeletingAllNotesSnackbar": "Erro ao excluir todas as notas: {errorDetails}",
-  "@errorDeletingAllNotesSnackbar": {
-    "description": "Mensagem Snackbar para um erro ocorrido ao excluir todas as notas.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
-  "errorDeletingJournalSnackbar": "Erro ao excluir: {errorDetails}",
-  "@errorDeletingJournalSnackbar": {
-    "description": "Mensagem Snackbar para um erro ocorrido ao excluir um diário.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
-  "errorDeletingModelSnackbar": "Erro ao excluir: {errorDetails}",
-  "@errorDeletingModelSnackbar": {
-    "description": "Mensagem Snackbar para um erro ocorrido ao excluir um modelo de paleta.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
-  "errorDeletingNoteSnackbar": "Erro durante a exclusão: {errorDetails}",
-  "@errorDeletingNoteSnackbar": {
-    "description": "Mensagem Snackbar para um erro ocorrido ao excluir uma nota.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
-  "errorLaunchingUrl": "Erro ao carregar URL",
-  "errorLoadingInitialData": "Erro ao carregar dados iniciais: {errorDetails}",
-  "@errorLoadingInitialData": {
-    "description": "Mensagem de erro exibida quando o carregamento dos dados iniciais falha.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
-  "errorLoadingJournal": "Erro ao carregar diário:",
-  "@errorLoadingJournal": {
-    "description": "Prefixo para a mensagem de erro quando o carregamento de um diário falha."
-  },
-  "errorLoadingJournals": "Erro ao carregar diários: {errorDetails}",
-  "@errorLoadingJournals": {
-    "description": "Mensagem de erro exibida quando o carregamento da lista de diários falha.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
-  "errorLoadingLicense": "Erro ao carregar a licença.\n\nVerifique se o arquivo LICENSE existe na raiz do projeto e está declarado nos assets do pubspec.yaml, se necessário.\n\nErro: {errorDetails}",
-  "@errorLoadingLicense": {
-    "description": "Mensagem de erro exibida quando o arquivo de licença não pode ser carregado.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
-  "errorLoadingNotes": "Erro ao carregar notas. {errorDetails}",
-  "@errorLoadingNotes": {
-    "description": "Mensagem de erro exibida quando o carregamento de notas falha.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
-  "errorLoadingOptions": "Erro ao carregar opções: {errorDetails}",
-  "@errorLoadingOptions": {
-    "description": "Mensagem de erro exibida quando o carregamento de opções (ex: modelos de paleta, diários existentes) falha.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
-  "errorLoadingPersonalModels": "Erro ao carregar modelos pessoais.",
-  "@errorLoadingPersonalModels": {
-    "description": "Mensagem de erro exibida quando o carregamento de modelos de paleta pessoais falha."
-  },
-  "errorSavingPaletteSnackbar": "Erro ao salvar: {errorDetails}",
-  "@errorSavingPaletteSnackbar": {
-    "description": "Mensagem Snackbar para um erro ocorrido ao salvar uma paleta ou modelo.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
-  "errorTitle": "Erro",
-  "@errorTitle": {
-    "description": "Título exibido na AppBar quando ocorre um erro."
-  },
-  "errorUserNotIdentified": "Erro: Usuário não identificado.",
-  "@errorUserNotIdentified": {
-    "description": "Mensagem de erro quando o usuário atual não pode ser identificado."
-  },
-  "existingJournalsSectionTitle": "Diários Existentes:",
-  "@existingJournalsSectionTitle": {
-    "description": "Título da seção que lista os diários existentes."
-  },
-  "fieldCannotBeEmpty": "O campo não pode estar vazio.",
-  "@fieldCannotBeEmpty": {
-    "description": "Erro de validação genérico para um campo obrigatório que está vazio."
-  },
-  "finalConfirmationDialogContent": "Para confirmar a exclusão, por favor digite 'DELETE' no campo abaixo.",
-  "@finalConfirmationDialogContent": {
-    "description": "Conteúdo de uma caixa de diálogo de confirmação final que requer que o usuário digite 'DELETE'."
-  },
-  "finalConfirmationDialogTitle": "CONFIRMAÇÃO FINAL para \"{journalName}\"",
-  "@finalConfirmationDialogTitle": {
-    "description": "Título de uma caixa de diálogo de confirmação final antes de excluir um diário.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
-  },
-  "finalDeleteAllConfirmationDialogContent": "Você tem certeza absoluta? Esta ação é IRREVERSÍVEL.",
-  "@finalDeleteAllConfirmationDialogContent": {
-    "description": "Conteúdo da caixa de diálogo de confirmação final antes de excluir todas as notas, enfatizando a irreversibilidade."
-  },
-  "finalDeleteAllConfirmationDialogTitle": "CONFIRMAÇÃO FINAL",
-  "@finalDeleteAllConfirmationDialogTitle": {
-    "description": "Título da caixa de diálogo de confirmação final antes de excluir todas as notas."
-  },
-  "finalDeleteAllConfirmationJournalWarning": "Você tem certeza absoluta? Excluir as cores desta paleta excluirá IRREVERSIVELMENTE TODAS as notas deste diário.",
-  "@finalDeleteAllConfirmationJournalWarning": {
-    "description": "Aviso final ao excluir todas as cores da paleta de um diário, enfatizando a exclusão de notas."
-  },
-  "finalDeleteAllConfirmationModelWarning": "Você confirma a exclusão de todas as cores deste modelo?",
-  "@finalDeleteAllConfirmationModelWarning": {
-    "description": "Confirmação final ao excluir todas as cores de um modelo de paleta."
-  },
-  "formValidationFailedLog": "A validação do formulário (nome da paleta) falhou durante o salvamento automático.",
-  "@formValidationFailedLog": {
-    "description": "Mensagem de log quando a validação do formulário para o nome da paleta falha durante uma tentativa de salvamento automático."
-  },
-  "generatedColorExistsError": "A cor gerada {hexCode} já existe.",
-  "@generatedColorExistsError": {
-    "description": "Mensagem de erro quando o código hexadecimal de uma cor de gradiente gerada já existe.",
-    "placeholders": {
-      "hexCode": {
-        "type": "String"
-      }
-    }
-  },
-  "generatedTitleExistsError": "O título gerado \"{title}\" já existe.",
-  "@generatedTitleExistsError": {
-    "description": "Mensagem de erro quando o título de uma cor de gradiente gerada já existe.",
-    "placeholders": {
-      "title": {
-        "type": "String"
-      }
-    }
-  },
-  "genericAuthErrorSnackbar": "Erro de autenticação: Por favor, tente novamente.",
-  "@genericAuthErrorSnackbar": {
-    "description": "Mensagem Snackbar genérica para erros de autenticação."
-  },
-  "genericErrorSnackbar": "Erro: {errorDetails}",
-  "@genericErrorSnackbar": {
-    "description": "Mensagem Snackbar genérica para exibir um erro.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
-  "homeButtonTooltip": "Início",
-  "@homeButtonTooltip": {
-    "description": "Dica de ferramenta para o botão de início na barra de aplicativos."
-  },
-  "incorrectConfirmationTextValidator": "Texto de confirmação incorreto.",
-  "@incorrectConfirmationTextValidator": {
-    "description": "Erro de validação quando o texto inserido para confirmação de exclusão está incorreto."
-  },
-  "invalidEmail": "E-mail inválido.",
-  "@invalidEmail": {
-    "description": "Erro de validação para um formato de e-mail inválido."
-  },
-  "invalidInput": "Entrada inválida",
-  "@invalidInput": {
-    "description": "Mensagem de erro genérica para entrada de usuário inválida."
-  },
-  "journalCreatedOnDateLabel": "Criado em: {date}",
-  "@journalCreatedOnDateLabel": {
-    "description": "Rótulo exibindo a data de criação de um diário.",
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
-  "journalCreatedSuccess": "Diário \"{journalName}\" criado com sucesso!",
-  "@journalCreatedSuccess": {
-    "description": "Mensagem de sucesso exibida após a criação de um novo diário.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
-  },
-  "journalDeletedSnackbar": "Diário \"{journalName}\" excluído.",
-  "@journalDeletedSnackbar": {
-    "description": "Mensagem Snackbar exibida após um diário ter sido excluído com sucesso.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
-  },
-  "journalDetailsUnavailableWarning": "Detalhes do diário (para paleta) não disponíveis para {journalId}. A ordenação por cores pode não funcionar corretamente.",
-  "@journalDetailsUnavailableWarning": {
-    "description": "Aviso de log quando os detalhes do diário para paleta não estão disponíveis para ordenar notas por cor.",
-    "placeholders": {
-      "journalId": {
-        "type": "String"
-      }
-    }
-  },
-  "journalNameExistsError": "Já existe um diário com o nome \"{journalName}\".",
-  "@journalNameExistsError": {
-    "description": "Mensagem de erro exibida ao tentar criar um diário com um nome que já existe.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
-  },
-  "journalNameExistsSnackbar": "Já existe um diário com o nome \"{journalName}\".",
-  "@journalNameExistsSnackbar": {
-    "description": "Mensagem Snackbar indicando que já existe um diário com o nome fornecido.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
-  },
-  "journalNameTextFieldHint": "Ex: Diário de Gratidão, Projetos 2025...",
-  "@journalNameTextFieldHint": {
-    "description": "Texto de sugestão para o campo de entrada do nome do diário."
-  },
-  "journalNameTextFieldLabel": "Escolha um nome para o seu diário...",
-  "@journalNameTextFieldLabel": {
-    "description": "Rótulo para o campo de entrada do nome do diário."
-  },
-  "journalNameTooLongValidator": "O nome do diário é muito longo (máx. 70).",
-  "@journalNameTooLongValidator": {
-    "description": "Erro de validação quando o nome do diário excede o comprimento máximo."
-  },
-  "journalNameUpdatedSnackbar": "Nome do diário atualizado.",
-  "@journalNameUpdatedSnackbar": {
-    "description": "Mensagem Snackbar exibida após o nome de um diário ter sido atualizado com sucesso."
-  },
-  "journalNameValidatorEmpty": "Por favor, insira um nome para o diário.",
-  "@journalNameValidatorEmpty": {
-    "description": "Erro de validação quando o nome do diário está vazio."
-  },
-  "journalNameValidatorTooLong": "O nome do diário é muito longo (máx. 70).",
-  "@journalNameValidatorTooLong": {
-    "description": "Erro de validação quando o nome do diário é muito longo."
-  },
-  "journalOptionsDialogTitle": "Opções do diário",
-  "@journalOptionsDialogTitle": {
-    "description": "Título da caixa de diálogo que exibe as opções para um diário."
-  },
-  "journalPaletteSavedSnackbar": "Paleta do diário salva.",
-  "@journalPaletteSavedSnackbar": {
-    "description": "Mensagem Snackbar exibida após a paleta de um diário ter sido salva com sucesso."
-  },
-  "journalPaletteUpdatedLog": "Paleta para o diário {journalName} atualizada.",
-  "@journalPaletteUpdatedLog": {
-    "description": "Mensagem de log indicando que a paleta para um diário específico foi atualizada.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
-  },
-  "language": "Idioma",
   "languageEnglish": "Inglês",
   "languageSpanish": "Espanhol",
   "languageGerman": "Alemão",
@@ -767,674 +93,251 @@
   "languageFrench": "Francês",
   "languagePortuguese": "Português",
   "languagePortugueseBrazil": "Português (Brasil)",
+  "enterNumberValidator": "Insira um número.",
+  "entryPageAssociatedColorLabel": "Cor associada",
+  "entryPageContentHint": "Descreva seu pensamento, evento ou tarefa...",
+  "entryPageContentLabel": "Conteúdo da nota...",
+  "entryPageContentValidatorEmpty": "Por favor, insira o conteúdo da nota.",
+  "entryPageContentValidatorTooLong": "O conteúdo é muito longo (máx. 1024 caracteres).",
+  "entryPageDateTimeSetToNowSnackbar": "Data e hora definidas para agora.",
+  "entryPageEditTitle": "Editar nota",
+  "entryPageGenericSaveError": "Erro: {errorMessage}",
+  "entryPageJournalDetailsLoadError": "Não foi possível carregar os detalhes do diário.",
+  "entryPageJournalDetailsRetryButton": "Tentar novamente",
+  "entryPageNewTitle": "Nova nota",
+  "entryPageNoColorSelectedError": "Por favor, selecione uma cor para a nota.",
+  "entryPageNoteSavedAsNewSuccess": "Nota salva como nova.",
+  "entryPageNoteSavedSuccess": "Nota salva.",
+  "entryPageNoteUpdatedSuccess": "Nota atualizada.",
+  "entryPageOriginalColorMissingSnackbar": "A cor original desta nota não existe mais na paleta. Uma cor padrão foi selecionada.",
+  "entryPagePaletteEmptySnackbar": "A paleta deste diário está vazia. Por favor, adicione cores à paleta para associar esta nota.",
+  "entryPageSaveAsNewButton": "Salvar como nova nota",
+  "entryPageSaveButtonCreate": "Salvar nota",
+  "entryPageSaveButtonUpdate": "Atualizar nota",
+  "entryPageSaveTooltip": "Salvar nota",
+  "entryPageSavingButton": "Salvando...",
+  "entryPageSelectColorValidator": "Por favor, selecione uma cor.",
+  "entryPageUpdateTooltip": "Atualizar nota",
+  "entryPageUserNotIdentifiedError": "Usuário não identificado.",
+  "error": "Erro",
+  "errorAppBarTitle": "Erro",
+  "errorCheckingColorUsageLog": "Erro ao verificar o uso da cor: {errorDetails}",
+  "errorCheckingColorUsageSnackbar": "Erro ao verificar o uso da cor: {errorDetails}",
+  "errorDeletingAllColorsNotesLog": "Erro ao excluir todas as cores/notas: {errorDetails}",
+  "errorDeletingAllNotesSnackbar": "Erro ao excluir todas as notas: {errorDetails}",
+  "errorDeletingJournalSnackbar": "Erro ao excluir: {errorDetails}",
+  "errorDeletingModelSnackbar": "Erro ao excluir: {errorDetails}",
+  "errorDeletingNoteSnackbar": "Erro durante a exclusão: {errorDetails}",
+  "errorLaunchingUrl": "erro ao carregar",
+  "errorLoadingInitialData": "Erro ao carregar os dados iniciais: {errorDetails}",
+  "errorLoadingJournal": "Erro ao carregar o diário:",
+  "errorLoadingJournals": "Erro ao carregar os diários: {errorDetails}",
+  "errorLoadingLicense": "Erro ao carregar a licença.\n\nVerifique se o arquivo LICENSE existe na raiz do projeto e está declarado nos ativos do pubspec.yaml, se necessário.\n\nErro: {errorDetails}",
+  "errorLoadingNotes": "Erro ao carregar as notas. {errorDetails}",
+  "errorLoadingOptions": "Erro ao carregar as opções: {errorDetails}",
+  "errorLoadingPersonalModels": "Erro ao carregar os modelos pessoais.",
+  "errorSavingPaletteSnackbar": "Erro ao salvar: {errorDetails}",
+  "errorTitle": "Erro",
+  "errorUserNotIdentified": "Erro: Usuário não identificado.",
+  "existingJournalsSectionTitle": "Diários existentes:",
+  "fieldCannotBeEmpty": "O campo não pode estar vazio.",
+  "finalConfirmationDialogContent": "Para confirmar a exclusão, digite 'DELETE' no campo abaixo.",
+  "finalConfirmationDialogTitle": "CONFIRMAÇÃO FINAL para \"{journalName}\"",
+  "finalDeleteAllConfirmationDialogContent": "Você tem certeza absoluta? Esta ação é IRREVERSÍVEL.",
+  "finalDeleteAllConfirmationDialogTitle": "CONFIRMAÇÃO FINAL",
+  "finalDeleteAllConfirmationJournalWarning": "Você tem certeza absoluta? Excluir as cores desta paleta excluirá IRREVERSIVELMENTE TODAS as notas neste diário.",
+  "finalDeleteAllConfirmationModelWarning": "Você confirma a exclusão de todas as cores deste modelo?",
+  "formValidationFailedLog": "A validação do formulário (nome da paleta) falhou durante o salvamento automático.",
+  "generatedColorExistsError": "A cor gerada {hexCode} já existe.",
+  "generatedTitleExistsError": "O título gerado \"{title}\" já existe.",
+  "genericAuthErrorSnackbar": "Erro de autenticação: Por favor, tente novamente.",
+  "genericErrorSnackbar": "Erro: {errorDetails}",
+  "homeButtonTooltip": "Início",
+  "incorrectConfirmationTextValidator": "Texto de confirmação incorreto.",
+  "invalidEmail": "Email inválido.",
+  "invalidInput": "Entrada inválida",
+  "italian": "Italiano",
+  "journalCreatedOnDateLabel": "Criado em: {date}",
+  "journalCreatedSuccess": "Diário \"{journalName}\" criado com sucesso!",
+  "journalDeletedSnackbar": "Diário \"{journalName}\" excluído.",
+  "journalDetailsUnavailableWarning": "Detalhes do diário (para a paleta) não disponíveis para {journalId}. A ordenação por cor pode não funcionar corretamente.",
+  "journalNameExistsError": "Já existe um diário com o nome \"{journalName}\".",
+  "journalNameExistsSnackbar": "Já existe um diário com o nome \"{journalName}\".",
+  "journalNameTextFieldHint": "Ex: Diário de gratidão, Projetos 2025...",
+  "journalNameTextFieldLabel": "Escolha um nome para o seu diário...",
+  "journalNameTooLongValidator": "O nome do diário é muito longo (máx. 70).",
+  "journalNameUpdatedSnackbar": "Nome do diário atualizado.",
+  "journalNameValidatorEmpty": "Por favor, insira um nome para o diário.",
+  "journalNameValidatorTooLong": "O nome do diário é muito longo (máx. 70).",
+  "journalOptionsDialogTitle": "Opções do diário",
+  "journalPaletteUpdatedLog": "Paleta do diário {journalName} atualizada.",
+  "journalPaletteSavedSnackbar": "Paleta do diário salva.",
+  "language": "Idioma",
   "licenseLink": "Licença",
-  "licensePageTitle": "Contrato de Licença",
-  "@licensePageTitle": {
-    "description": "Título da página do Contrato de Licença."
-  },
+  "licensePageTitle": "Contrato de licença",
   "loading": "Carregando...",
-  "@loading": {
-    "description": "Texto genérico para o estado de carregamento."
-  },
   "loadingAppBarTitle": "Carregando...",
-  "@loadingAppBarTitle": {
-    "description": "Título da AppBar quando o conteúdo está carregando."
-  },
   "loadingLicense": "Carregando licença...",
-  "@loadingLicense": {
-    "description": "Mensagem exibida enquanto o texto da licença está sendo carregado."
-  },
   "loadingText": "Carregando...",
-  "@loadingText": {
-    "description": "Texto exibido quando o conteúdo está carregando."
-  },
   "loadingTitle": "Carregando...",
-  "@loadingTitle": {
-    "description": "Título exibido na AppBar quando o conteúdo está carregando."
-  },
   "logout": "Sair",
-  "manageJournals": "Gerenciar Diários",
-  "manageNotes": "Gerenciar Notas",
-  "manageJournalsAppBarTitle": "Gerenciar Diários",
-  "@manageJournalsAppBarTitle": {
-    "description": "Título da AppBar para a página de gerenciamento de diários."
-  },
-  "managePaletteModels": "Gerenciar Modelos de Paleta",
-  "managePaletteModelsAppBarTitle": "Gerenciar Modelos de Paleta",
-  "@managePaletteModelsAppBarTitle": {
-    "description": "Título da AppBar para a página de gerenciamento de modelos de paleta."
-  },
+  "manageJournals": "Gerenciar diários",
+  "manageNotes": "Gerenciar notas",
+  "manageJournalsAppBarTitle": "Gerenciar diários",
+  "managePaletteModels": "Gerenciar modelos de paletas",
+  "managePaletteModelsAppBarTitle": "Gerenciar modelos de paletas",
   "modelDeletedSnackbar": "Modelo \"{modelName}\" excluído.",
-  "@modelDeletedSnackbar": {
-    "description": "Mensagem Snackbar exibida após um modelo de paleta ter sido excluído com sucesso.",
-    "placeholders": {
-      "modelName": {
-        "type": "String"
-      }
-    }
-  },
   "modelMinColorsDeleteError": "Um modelo de paleta deve conter pelo menos {minColors} cor(es). Não é possível excluir \"{colorTitle}\".",
-  "@modelMinColorsDeleteError": {
-    "description": "Mensagem de erro ao tentar excluir uma cor de um modelo que resultaria em menos do que o número mínimo de cores exigido.",
-    "placeholders": {
-      "minColors": {
-        "type": "int"
-      },
-      "colorTitle": {
-        "type": "String"
-      }
-    }
-  },
   "modelMinColorsErrorSnackbar": "Um modelo deve ter pelo menos {minColors} cores.",
-  "@modelMinColorsErrorSnackbar": {
-    "description": "Mensagem de erro Snackbar quando um modelo de paleta tem menos do que o número mínimo de cores exigido.",
-    "placeholders": {
-      "minColors": {
-        "type": "int"
-      }
-    }
-  },
-  "moreInfoText": "Para mais informações, consulte o repositório GitHub ou a página da licença.",
-  "@moreInfoText": {
-    "description": "Texto incentivando os usuários a encontrar mais informações no GitHub ou na página da licença."
-  },
+  "moreInfoText": "Para mais informações, consulte o repositório GitHub ou a página de licença.",
   "nameCannotBeEmptyValidator": "O nome não pode estar vazio.",
-  "@nameCannotBeEmptyValidator": {
-    "description": "Erro de validação quando um campo de nome está vazio."
-  },
   "nameTooLong": "Nome muito longo.",
-  "@nameTooLong": {
-    "description": "Erro de validação genérico para um nome muito longo."
-  },
-  "newJournalNameHint": "Insira o novo nome aqui",
-  "@newJournalNameHint": {
-    "description": "Texto de sugestão para o campo de entrada onde um novo nome de diário é inserido."
-  },
+  "newJournalNameHint": "Digite o novo nome aqui",
   "newJournalNameLabel": "Novo nome do diário",
-  "@newJournalNameLabel": {
-    "description": "Rótulo para o campo de entrada onde um novo nome de diário é inserido."
-  },
   "newNameSameAsOldValidator": "O novo nome é idêntico ao antigo.",
-  "@newNameSameAsOldValidator": {
-    "description": "Erro de validação quando o novo nome inserido é igual ao nome atual."
-  },
-  "newPaletteDefaultName": "Nova Paleta",
-  "@newPaletteDefaultName": {
-    "description": "Nome padrão para uma paleta recém-criada."
-  },
+  "newPaletteDefaultName": "Nova paleta",
   "newPaletteModelCreatedLog": "Novo modelo de paleta criado: {modelName}",
-  "@newPaletteModelCreatedLog": {
-    "description": "Mensagem de log indicando que um novo modelo de paleta foi criado.",
-    "placeholders": {
-      "modelName": {
-        "type": "String"
-      }
-    }
-  },
-  "noAccountYetSignUp": "Ainda não tem conta? Cadastre-se",
+  "noAccountYetSignUp": "Ainda não tem conta? Inscreva-se",
   "noActiveJournalMessage": "Selecione um diário existente ou crie um novo para começar.",
-  "@noActiveJournalMessage": {
-    "description": "Mensagem exibida quando nenhum diário está ativo, solicitando uma ação do usuário."
-  },
   "noActiveJournalTitle": "Nenhum diário ativo.",
-  "@noActiveJournalTitle": {
-    "description": "Título exibido quando nenhum diário está ativo."
-  },
   "noJournalSelected": "Nenhum diário selecionado.",
-  "@noJournalSelected": {
-    "description": "Mensagem exibida quando nenhum diário é selecionado."
-  },
   "noCancelButtonLabel": "NÃO, CANCELAR",
-  "@noCancelButtonLabel": {
-    "description": "Rótulo para um botão que cancela uma ação, tipicamente em uma confirmação de alto risco."
-  },
   "noExistingJournalsMessage": "Nenhum diário existente.",
-  "@noExistingJournalsMessage": {
-    "description": "Mensagem exibida quando ainda não existem diários criados."
-  },
   "noExistingJournalsToCopy": "Nenhum diário existente para copiar.",
-  "@noExistingJournalsToCopy": {
-    "description": "Mensagem exibida na seleção de origem da paleta quando não existem outros diários para copiar uma paleta."
-  },
   "noNotesInJournalMessage": "Nenhuma nota neste diário.",
-  "@noNotesInJournalMessage": {
-    "description": "Mensagem exibida quando um diário não contém notas."
-  },
   "noPaletteModelsAvailable": "Nenhum modelo de paleta disponível.",
-  "@noPaletteModelsAvailable": {
-    "description": "Mensagem exibida quando não estão disponíveis modelos de paleta (predefinidos ou pessoais)."
-  },
   "noPaletteModelsAvailableMessage": "Nenhum modelo de paleta disponível.",
-  "@noPaletteModelsAvailableMessage": {
-    "description": "Mensagem exibida quando não há modelos de paleta para escolher."
-  },
   "noRealChangesDetectedLog": "Nenhuma alteração real detectada, salvamento automático cancelado.",
-  "@noRealChangesDetectedLog": {
-    "description": "Mensagem de log quando um salvamento automático é cancelado porque nenhuma alteração foi detectada."
-  },
-  "noteCreatedOnLabel": "Criada em: {date}",
-  "@noteCreatedOnLabel": {
-    "description": "Rótulo exibindo a data de criação de uma nota.",
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
+  "noteCreatedOnLabel": "Criado em: {date}",
   "noteDateLabel": "Data: {date}",
-  "@noteDateLabel": {
-    "description": "Rótulo exibindo a data do evento de uma nota.",
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
   "noteDeletedSuccessSnackbar": "Nota excluída com sucesso.",
-  "@noteDeletedSuccessSnackbar": {
-    "description": "Mensagem Snackbar exibida após uma nota ter sido excluída com sucesso."
-  },
-  "notificationSettingsComingSoon": "Configurações de notificação em breve!",
   "notifications": "Notificações",
+  "notificationSettingsComingSoon": "As configurações de notificação estarão disponíveis em breve!",
   "numberBetweenValidator": "Entre 1 e {maxGradientSteps}.",
-  "@numberBetweenValidator": {
-    "description": "Mensagem de erro de validação para um input numérico que deve estar dentro de um intervalo específico para os passos do gradiente.",
-    "placeholders": {
-      "maxGradientSteps": {
-        "type": "int"
-      }
-    }
-  },
   "numberOfColorsHint": "1",
-  "@numberOfColorsHint": {
-    "description": "Texto de sugestão para o campo de entrada do número de cores (para cor única ou gradiente)."
-  },
   "numberOfColorsLabel": "Número de cores (1 para única, 2-{maxGradientSteps} para gradiente)",
-  "@numberOfColorsLabel": {
-    "description": "Rótulo para o campo de entrada que especifica o número de cores para uma cor única ou um gradiente.",
-    "placeholders": {
-      "maxGradientSteps": {
-        "type": "int"
-      }
-    }
-  },
   "ok": "OK",
-  "@ok": {
-    "description": "Rótulo genérico para um botão OK."
-  },
   "optionsAppBarTooltip": "Opções",
-  "@optionsAppBarTooltip": {
-    "description": "Dica de ferramenta para o botão do menu de opções na AppBar."
-  },
   "optionsTooltip": "Opções",
-  "@optionsTooltip": {
-    "description": "Dica de ferramenta para o botão do menu 'mais opções' na AppBar."
-  },
   "orSeparator": "ou",
   "pageTitleModelPrefix": "Modelo: ",
-  "@pageTitleModelPrefix": {
-    "description": "Prefixo para o título da página ao editar um modelo de paleta."
-  },
-  "pageTitleNewPaletteModel": "Novo Modelo de Paleta",
-  "@pageTitleNewPaletteModel": {
-    "description": "Título da página ao criar um novo modelo de paleta."
-  },
+  "pageTitleNewPaletteModel": "Novo modelo de paleta",
   "pageTitlePalettePrefix": "Paleta: ",
-  "@pageTitlePalettePrefix": {
-    "description": "Prefixo para o título da página ao editar a paleta de um diário."
-  },
   "paletteCopiedFromName": "Paleta de '{journalName}' (Copiada de {sourceJournalName})",
-  "@paletteCopiedFromName": {
-    "description": "Formato do nome para uma paleta copiada de outro diário, associada a um novo diário.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      },
-      "sourceJournalName": {
-        "type": "String"
-      }
-    }
-  },
   "paletteCopiedFromNameNoJournal": "Paleta (Copiada de {sourceJournalName})",
-  "@paletteCopiedFromNameNoJournal": {
-    "description": "Formato do nome para uma paleta copiada de outro diário, ainda não associada a um novo diário (ex: durante a criação do modelo).",
-    "placeholders": {
-      "sourceJournalName": {
-        "type": "String"
-      }
-    }
-  },
   "paletteEmptyMaxReachedMessage": "A paleta está vazia e atingiu o número máximo de cores.",
-  "@paletteEmptyMaxReachedMessage": {
-    "description": "Mensagem exibida quando a paleta está vazia mas não pode adicionar mais cores devido a ter atingido um limite máximo (caso extremo)."
-  },
   "paletteFromModelName": "Paleta de '{journalName}' (Modelo: {modelName})",
-  "@paletteFromModelName": {
-    "description": "Formato do nome para uma paleta criada a partir de um modelo, associada a um novo diário.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      },
-      "modelName": {
-        "type": "String"
-      }
-    }
-  },
   "paletteFromModelNameNoJournal": "Paleta (Modelo: {modelName})",
-  "@paletteFromModelNameNoJournal": {
-    "description": "Formato do nome para uma paleta criada a partir de um modelo, ainda não associada a um novo diário (ex: durante a criação do modelo).",
-    "placeholders": {
-      "modelName": {
-        "type": "String"
-      }
-    }
-  },
   "paletteIsEmptyMessage": "A paleta deste diário está vazia.\nEdite o diário para adicionar cores ou escolha outro diário.",
-  "@paletteIsEmptyMessage": {
-    "description": "Mensagem exibida quando a paleta do diário ativo está vazia."
-  },
   "paletteMaxColorsError": "A paleta não pode ter mais de {maxColors} cores.",
-  "@paletteMaxColorsError": {
-    "description": "Mensagem de erro exibida ao tentar adicionar mais cores do que o máximo permitido.",
-    "placeholders": {
-      "maxColors": {
-        "type": "int"
-      }
-    }
-  },
   "paletteMaxColorsErrorSnackbar": "Uma paleta não pode ter mais de {maxColors} cores.",
-  "@paletteMaxColorsErrorSnackbar": {
-    "description": "Mensagem de erro Snackbar quando uma paleta tem mais do que o máximo de cores permitido.",
-    "placeholders": {
-      "maxColors": {
-        "type": "int"
-      }
-    }
-  },
   "paletteMinColorError": "A paleta deve conter pelo menos 1 cor.",
-  "@paletteMinColorError": {
-    "description": "Mensagem de erro exibida quando uma paleta tem menos de 1 cor."
-  },
   "paletteMinColorsError": "A paleta deve conter pelo menos {minColors} cor(es).",
-  "@paletteMinColorsError": {
-    "description": "Mensagem de erro exibida quando uma paleta tem menos do que o mínimo de cores exigido.",
-    "placeholders": {
-      "minColors": {
-        "type": "int"
-      }
-    }
-  },
   "paletteModelInfo": "{colorCount} cor(es) {type}",
-  "@paletteModelInfo": {
-    "description": "Informação sobre um modelo de paleta, mostrando a contagem de cores e o tipo (Predefinido/Pessoal)."
-  },
   "paletteModelNameExistsError": "Já existe um modelo de paleta com este nome.",
-  "@paletteModelNameExistsError": {
-    "description": "Mensagem de erro ao tentar salvar um modelo de paleta com um nome que já existe."
-  },
   "paletteModelSavedSnackbar": "Modelo de paleta salvo.",
-  "@paletteModelSavedSnackbar": {
-    "description": "Mensagem Snackbar exibida após um modelo de paleta ter sido salvo com sucesso."
-  },
   "paletteModelSuffixPersonal": " (Pessoal)",
-  "@paletteModelSuffixPersonal": {
-    "description": "Sufixo adicionado aos nomes dos modelos de paleta para indicar que são modelos pessoais."
-  },
   "paletteModelSuffixPredefined": " (Predefinido)",
-  "@paletteModelSuffixPredefined": {
-    "description": "Sufixo adicionado aos nomes dos modelos de paleta para indicar que são modelos predefinidos."
-  },
   "paletteModelUpdatedLog": "Modelo de paleta atualizado: {modelName}",
-  "@paletteModelUpdatedLog": {
-    "description": "Mensagem de log indicando que um modelo de paleta foi atualizado.",
-    "placeholders": {
-      "modelName": {
-        "type": "String"
-      }
-    }
-  },
-  "paletteModelsAppBarTitle": "Modelos de Paleta",
-  "@paletteModelsAppBarTitle": {
-    "description": "Título da AppBar para a tela de visualização/seleção de modelos de paleta."
-  },
+  "paletteModelsAppBarTitle": "Modelos de paletas",
   "paletteNameEmptyValidator": "O nome da paleta não pode estar vazio.",
-  "@paletteNameEmptyValidator": {
-    "description": "Erro de validação quando o nome da paleta está vazio."
-  },
   "paletteNameHint": "Ex: Minha paleta de trabalho",
-  "@paletteNameHint": {
-    "description": "Texto de sugestão para o campo de entrada do nome da paleta."
-  },
-  "paletteNameLabel": "Nome da Paleta",
-  "@paletteNameLabel": {
-    "description": "Rótulo para o campo de entrada do nome da paleta."
-  },
+  "paletteNameLabel": "Nome da paleta",
   "paletteNameTooLongValidator": "O nome não deve exceder 50 caracteres.",
-  "@paletteNameTooLongValidator": {
-    "description": "Erro de validação quando o nome da paleta é muito longo."
-  },
   "paletteOfJournalName": "Paleta de '{journalName}'",
-  "@paletteOfJournalName": {
-    "description": "Nome padrão para uma nova paleta com base no nome de um diário.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
-  },
   "paletteSourceDropdownLabel": "Escolher origem da paleta",
-  "@paletteSourceDropdownLabel": {
-    "description": "Rótulo para o menu suspenso para escolher a origem para criar uma nova paleta."
-  },
-  "paletteSourceEmptyOption": "Paleta Vazia (para compor)",
-  "@paletteSourceEmptyOption": {
-    "description": "Opção na seleção de origem da paleta para criar uma nova paleta vazia."
-  },
-  "paletteSourceExistingJournalOption": "Copiando paleta de um diário existente",
-  "@paletteSourceExistingJournalOption": {
-    "description": "Opção na seleção de origem da paleta para copiar uma paleta de um diário existente."
-  },
-  "paletteSourceModelOption": "De um modelo de paleta",
-  "@paletteSourceModelOption": {
-    "description": "Opção na seleção de origem da paleta para usar um modelo de paleta."
-  },
+  "paletteSourceEmptyOption": "Paleta em branco (para compor)",
+  "paletteSourceExistingJournalOption": "Copiando a paleta de um diário existente",
+  "paletteSourceModelOption": "A partir de um modelo de paleta",
   "passwordLabel": "Senha",
   "passwordValidationError": "Por favor, insira sua senha.",
   "pleaseChooseJournalValidator": "Por favor, escolha um diário",
-  "@pleaseChooseJournalValidator": {
-    "description": "Erro de validação quando nenhum diário é selecionado de um menu suspenso obrigatório."
-  },
   "pleaseChooseModelValidator": "Por favor, escolha um modelo",
-  "@pleaseChooseModelValidator": {
-    "description": "Erro de validação quando nenhum modelo de paleta é selecionado de um menu suspenso obrigatório."
-  },
   "predefinedModelsCannotBeDeletedSnackbar": "Os modelos predefinidos não podem ser excluídos.",
-  "@predefinedModelsCannotBeDeletedSnackbar": {
-    "description": "Mensagem Snackbar exibida ao tentar excluir um modelo de paleta predefinido."
-  },
   "registerPageAlreadyHaveAccountLink": "Já tem uma conta? Entrar",
-  "registerPageConfirmPasswordLabel": "Confirmar Senha",
+  "registerPageConfirmPasswordLabel": "Confirmar senha",
   "registerPageConfirmPasswordValidatorEmpty": "Por favor, confirme sua senha.",
   "registerPageConfirmPasswordValidatorMismatch": "As senhas não coincidem.",
-  "registerPageDisplayNameLabel": "Nome de Exibição",
+  "registerPageDisplayNameLabel": "Nome de exibição",
   "registerPageDisplayNameValidatorEmpty": "Por favor, insira seu nome de exibição.",
   "registerPageDisplayNameValidatorTooShort": "O nome de exibição deve ter pelo menos 3 caracteres.",
-  "registerPageHeading": "Junte-se ao Colors & Notes",
+  "registerPageHeading": "Junte-se a Colors & Notes",
   "registerPagePasswordValidatorDigit": "A senha deve conter pelo menos um dígito.",
   "registerPagePasswordValidatorEmpty": "Por favor, insira uma senha.",
   "registerPagePasswordValidatorLength": "A senha deve ter pelo menos 8 caracteres.",
   "registerPagePasswordValidatorLowercase": "A senha deve conter pelo menos uma letra minúscula.",
   "registerPagePasswordValidatorSpecialChar": "A senha deve conter pelo menos um caractere especial (+-*_#=@%:$).",
   "registerPagePasswordValidatorUppercase": "A senha deve conter pelo menos uma letra maiúscula.",
-  "registerPageSignUpButton": "Cadastrar e Entrar",
-  "registerPageTitle": "Criar Conta",
+  "registerPageSignUpButton": "Inscrever-se e entrar",
+  "registerPageTitle": "Criar conta",
   "reloadingInitialJournalMessage": "Recarregando o diário inicial após excluir o diário ativo.",
-  "@reloadingInitialJournalMessage": {
-    "description": "Mensagem de log indicando que o aplicativo está recarregando o diário inicial/padrão após o ativo ter sido excluído."
-  },
   "save": "Salvar",
-  "@save": {
-    "description": "Rótulo genérico para a ação 'Salvar'."
-  },
-  "saveBlockedColorInUseError": "Salvamento bloqueado: A(s) cor(es) '{colorTitles}' está/estão em uso e não pode(m) ser excluída(s).",
-  "@saveBlockedColorInUseError": {
-    "description": "Mensagem de erro quando o salvamento de uma paleta é bloqueado porque uma ou mais cores marcadas para exclusão estão em uso.",
-    "placeholders": {
-      "colorTitles": {
-        "type": "String"
-      }
-    }
-  },
+  "saveBlockedColorInUseError": "Salvamento bloqueado: A(s) cor(es) '{colorTitles}' está(ão) em uso e não pode(m) ser excluída(s).",
   "saveButtonLabel": "Salvar",
-  "@saveButtonLabel": {
-    "description": "Rótulo para um botão de salvar."
-  },
   "saveNameButtonLabel": "Salvar nome",
-  "@saveNameButtonLabel": {
-    "description": "Rótulo do botão para salvar um novo nome (ex: para um diário)."
-  },
   "savingInProgressSnackbar": "Salvando, por favor aguarde...",
-  "@savingInProgressSnackbar": {
-    "description": "Mensagem Snackbar indicando que uma operação de salvamento está atualmente em curso."
-  },
-  "selectLanguage": "Selecionar Idioma",
+  "selectLanguage": "Selecionar idioma",
   "settings": "Configurações",
   "signInButton": "Entrar",
-  "signInEmailErrorLog": "Erro de login com e-mail: {errorDetails}",
-  "@signInEmailErrorLog": {
-    "description": "Mensagem de log para um erro durante o login com e-mail.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
+  "signInEmailErrorLog": "Erro de login com email: {errorDetails}",
   "signInGoogleErrorLog": "Erro de login com Google: {errorDetails}",
-  "@signInGoogleErrorLog": {
-    "description": "Mensagem de log para um erro durante o login com Google.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
   "signInGoogleSuccessLog": "Tentativa de login com Google bem-sucedida.",
-  "@signInGoogleSuccessLog": {
-    "description": "Mensagem de log para uma tentativa de login com Google bem-sucedida."
-  },
   "signInPageTitle": "Entrar",
   "signInSuccessLog": "Tentativa de login bem-sucedida para {email}",
-  "@signInSuccessLog": {
-    "description": "Mensagem de log para uma tentativa de login com e-mail bem-sucedida.",
-    "placeholders": {
-      "email": {
-        "type": "String"
-      }
-    }
-  },
   "signInWithGoogleButton": "Entrar com o Google",
   "signOutErrorPrefix": "Erro ao sair: ",
-  "@signOutErrorPrefix": {
-    "description": "Prefixo da mensagem de erro exibida em um SnackBar quando o logout falha."
-  },
   "signOutErrorSnackbar": "Erro ao sair: {errorDetails}",
-  "@signOutErrorSnackbar": {
-    "description": "Mensagem Snackbar para um erro ocorrido ao sair.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
-  "signUpErrorLog": "Erro durante o cadastro em RegisterPage: {errorDetails}",
-  "@signUpErrorLog": {
-    "description": "Mensagem de log para um erro durante o cadastro do usuário.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
-  "signUpSuccessLog": "Cadastro bem-sucedido para {email}",
-  "@signUpSuccessLog": {
-    "description": "Mensagem de log para um cadastro de usuário bem-sucedido.",
-    "placeholders": {
-      "email": {
-        "type": "String"
-      }
-    }
-  },
+  "signUpErrorLog": "Erro durante o registro em RegisterPage: {errorDetails}",
+  "signUpSuccessLog": "Registro bem-sucedido para {email}",
   "sortByEventDateTooltip": "Ordenar por data do evento",
-  "@sortByEventDateTooltip": {
-    "description": "Dica de ferramenta para o botão para ordenar notas pela data do evento."
-  },
   "sortByPaletteColorTooltip": "Ordenar por cor da paleta",
-  "@sortByPaletteColorTooltip": {
-    "description": "Dica de ferramenta para o botão para ordenar notas pela cor da paleta associada."
-  },
-  "sortDirectionAscending": " (Ascendente)",
-  "@sortDirectionAscending": {
-    "description": "Sufixo indicando ordem de ordenação ascendente."
-  },
-  "sortDirectionDescending": " (Descendente)",
-  "@sortDirectionDescending": {
-    "description": "Sufixo indicando ordem de ordenação descendente."
-  },
+  "sortDirectionAscending": " (Crescente)",
+  "sortDirectionDescending": " (Decrescente)",
   "startByCreatingOneMessage": "Comece criando um acima.",
-  "@startByCreatingOneMessage": {
-    "description": "Mensagem de seguimento quando não existem diários, sugerindo criar um."
-  },
-  "step1JournalName": "Nome do Diário",
-  "@step1JournalName": {
-    "description": "Título para o primeiro passo na criação de um diário (definir o nome)."
-  },
-  "step2PaletteConfiguration": "Configuração da Paleta",
-  "@step2PaletteConfiguration": {
-    "description": "Título para o segundo passo na criação de um diário (configurar a paleta)."
-  },
+  "step1JournalName": "Nome do diário",
+  "step2PaletteConfiguration": "Configuração da paleta",
   "success": "Sucesso",
-  "@success": {
-    "description": "Rótulo genérico para 'Sucesso'."
-  },
   "theme": "Tema",
-  "themeSettingsComingSoon": "Configurações de tema em breve!",
+  "themeSettingsComingSoon": "As configurações de tema estarão disponíveis em breve!",
   "tooManyColorsValidator": "Muitas cores (máx. {maxAllowed} permitidas).",
-  "@tooManyColorsValidator": {
-    "description": "Mensagem de erro de validação quando o número de cores excede o máximo permitido para a paleta.",
-    "placeholders": {
-      "maxAllowed": {
-        "type": "int"
-      }
-    }
-  },
   "typeDeleteHereLabel": "Digite DELETE aqui",
-  "@typeDeleteHereLabel": {
-    "description": "Rótulo para o campo de entrada onde o usuário deve digitar 'DELETE' para confirmar a exclusão."
-  },
   "userNotConnectedError": "Usuário não conectado.",
-  "@userNotConnectedError": {
-    "description": "Mensagem de erro quando uma ação requer um usuário autenticado mas nenhum é encontrado."
-  },
   "userNotIdentified": "Usuário não identificado",
-  "@userNotIdentified": {
-    "description": "Mensagem de erro genérica quando a identidade do usuário não pode ser confirmada."
-  },
   "userNotIdentifiedSnackbar": "Usuário não identificado.",
-  "@userNotIdentifiedSnackbar": {
-    "description": "Mensagem Snackbar indicando que o usuário não está identificado."
-  },
   "version": "Versão",
-  "@version": {
-    "description": "Rótulo para a versão do aplicativo."
-  },
   "versionBuildFormat": "v{version} (Build {buildNumber})",
-  "@versionBuildFormat": {
-    "description": "Formato para exibir a versão do aplicativo e o número da compilação. Exemplo: v1.0.0 (Build 1)",
-    "placeholders": {
-      "version": {
-        "type": "String"
-      },
-      "buildNumber": {
-        "type": "String"
-      }
-    }
-  },
   "versionDynamicText": "Versão {version} (Build {buildNumber})",
-  "@versionDynamicText": {
-    "description": "Texto exibindo a versão do aplicativo e o número da compilação.",
-    "placeholders": {
-      "version": {
-        "type": "String"
-      },
-      "buildNumber": {
-        "type": "String"
-      }
-    }
-  },
   "versionLoading": "Carregando...",
-  "@versionLoading": {
-    "description": "Texto exibido enquanto as informações da versão estão carregando."
-  },
-  "versionPrefix": "versão : ",
-  "@versionPrefix": {
-    "description": "Prefixo para exibir o número da versão, ex: 'versão : 1.0'."
-  },
-  "versionUnavailable": "Versão indisponível",
-  "@versionUnavailable": {
-    "description": "Texto exibido quando as informações da versão não podem ser recuperadas."
-  },
-  "viewAsGridTooltip": "Visualizar como grade",
-  "@viewAsGridTooltip": {
-    "description": "Dica de ferramenta para o botão para mudar para visualização em grade."
-  },
-  "viewAsListTooltip": "Visualizar como lista",
-  "@viewAsListTooltip": {
-    "description": "Dica de ferramenta para o botão para mudar para visualização em lista."
-  },
-  "welcomeGuest": "Bem-vindo(a)!",
-  "@welcomeGuest": {
-    "description": "Mensagem de boas-vindas genérica quando o nome de exibição do usuário não está disponível."
-  },
-  "welcomeUser": "Bem-vindo(a), {userName}!",
-  "@welcomeUser": {
-    "description": "Mensagem de boas-vindas com o nome de exibição do usuário.",
-    "placeholders": {
-      "userName": {
-        "type": "String",
-        "example": "Maria Silva"
-      }
-    }
-  },
+  "versionPrefix": "versão: ",
+  "versionUnavailable": "Versão não disponível",
+  "viewAsGridTooltip": "Ver como grade",
+  "viewAsListTooltip": "Ver como lista",
+  "welcomeGuest": "Bem-vindo!",
+  "welcomeUser": "Bem-vindo, {userName}!",
   "yesDeleteAllButtonLabel": "SIM, EXCLUIR TUDO",
-  "@yesDeleteAllButtonLabel": {
-    "description": "Rótulo do botão que confirma a exclusão de todos os itens, tipicamente em uma confirmação de alto risco."
-  },
   "yesDeleteAllNotesButtonLabel": "SIM, EXCLUIR TODAS AS NOTAS",
-  "@yesDeleteAllNotesButtonLabel": {
-    "description": "Rótulo do botão que confirma a exclusão de todas as notas, tipicamente em uma caixa de diálogo de confirmação final."
-  },
-  "help": "Ajuda",
-  "cookieConsentTitle": "Consentimento de Cookies",
-  "@cookieConsentTitle": {
-    "description": "Título para o banner de consentimento de cookies."
-  },
-  "cookieConsentMessage": "Utilizamos cookies para melhorar a sua experiência. Os cookies essenciais são necessários para o funcionamento do site. Aceita cookies analíticos para nos ajudar a melhorar os nossos serviços?",
-  "@cookieConsentMessage": {
-    "description": "Mensagem principal para o banner de consentimento de cookies."
-  },
-  "cookieConsentAcceptAll": "Aceitar Todos",
-  "@cookieConsentAcceptAll": {
-    "description": "Texto do botão para aceitar todos os cookies."
-  },
-  "cookieConsentDecline": "Recusar Cookies de Análise",
-  "@cookieConsentDecline": {
-    "description": "Texto do botão para recusar cookies não essenciais."
-  },
+  "help": "ajuda",
+  "cookieConsentTitle": "Consentimento de cookies",
+  "cookieConsentMessage": "Usamos cookies para melhorar sua experiência. Os cookies essenciais são necessários para o funcionamento do site. Você aceita cookies de análise para nos ajudar a melhorar nossos serviços?",
+  "cookieConsentAcceptAll": "Aceitar tudo",
+  "cookieConsentDecline": "Recusar análises",
   "cookieConsentSettings": "Configurações",
-  "@cookieConsentSettings": {
-    "description": "Texto do botão para abrir as configurações de cookies."
-  },
-  "privacyPolicy": "Política de Privacidade",
-  "@privacyPolicy": {
-    "description": "Link para a Política de Privacidade."
-  },
-  "newJournalMenuItem": "Novo Diário",
+  "privacyPolicy": "Política de privacidade",
+  "newJournalMenuItem": "Novo diário",
   "editJournalNameTooltip": "Editar nome do diário",
   "existingNotesTitle": "Notas existentes",
   "sortByCreationDateTooltip": "Ordenar por data de criação",
   "sortByContentTooltip": "Ordenar por conteúdo",
 
-  "editJournalTitle": "Editar Diário",
-  "notificationsTitle": "Notificações",
-  "enableNotificationsLabel": "Ativar Notificações",
-  "notificationPhraseLabel": "Frase de Notificação",
-  "phraseCannotBeEmptyValidator": "A frase não pode estar vazia.",
-  "notificationDaysLabel": "Dias de Notificação",
-  "allDaysButtonLabel": "Todos",
-  "notificationTimesLabel": "Horas de Notificação",
+  "editJournalTitle": "Editar diário",
   "journalNameLabel": "Nome do diário",
   "journalNameValidator": "Por favor, insira um nome para o diário.",
-  "notificationPhraseValidator": "A frase de notificação não pode estar vazia.",
-  "selectAllButton": "Selecionar todos",
-  "daysOfWeek": "Seg,Ter,Qua,Qui,Sex,Sáb,Dom"
+  "notificationsTitle": "Notificações",
+  "enableNotificationsLabel": "Ativar notificações",
+  "notificationPhraseLabel": "Frase de notificação",
+  "notificationPhraseValidator": "Por favor, insira uma frase de notificação.",
+  "notificationDaysLabel": "Dias de notificação",
+  "selectAllButton": "Selecionar tudo",
+  "daysOfWeek": "Seg,Ter,Qua,Qui,Sex,Sáb,Dom",
+  "notificationTimesLabel": "Horas de notificação"
 }

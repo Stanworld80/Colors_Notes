@@ -1440,6 +1440,14 @@
   "@editJournalTitle": {
     "description": "Title for the page where users edit an existing journal."
   },
+  "journalNameLabel": "Journal Name",
+  "@journalNameLabel": {
+    "description": "Label for the journal name text field."
+  },
+  "journalNameValidator": "Please enter a journal name.",
+  "@journalNameValidator": {
+    "description": "Validation error for the journal name text field."
+  },
   "notificationsTitle": "Notifications",
   "@notificationsTitle": {
     "description": "Section title for notification settings."
@@ -1452,17 +1460,21 @@
   "@notificationPhraseLabel": {
     "description": "Label for the text field where the user enters the notification message."
   },
-  "phraseCannotBeEmptyValidator": "Phrase cannot be empty.",
-  "@phraseCannotBeEmptyValidator": {
+  "notificationPhraseValidator": "Please enter a notification phrase.",
+  "@notificationPhraseValidator": {
     "description": "Validation error when the notification phrase is empty but notifications are enabled."
   },
   "notificationDaysLabel": "Notification Days",
   "@notificationDaysLabel": {
     "description": "Label for the section to select the days of the week for notifications."
   },
-  "allDaysButtonLabel": "All",
-  "@allDaysButtonLabel": {
-    "description": "Button label to select all days of the week."
+  "selectAllButton": "Select All",
+  "@selectAllButton": {
+    "description": "Button to select all days of the week."
+  },
+  "daysOfWeek": "Mon,Tue,Wed,Thu,Fri,Sat,Sun",
+  "@daysOfWeek": {
+    "description": "Comma-separated list of the days of the week."
   },
   "notificationTimesLabel": "Notification Times",
   "@notificationTimesLabel": {
