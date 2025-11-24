@@ -1422,5 +1422,19 @@
   "editJournalNameTooltip": "Editar nome do diário",
   "existingNotesTitle": "Notas existentes",
   "sortByCreationDateTooltip": "Ordenar por data de criação",
-  "sortByContentTooltip": "Ordenar por conteúdo"
+  "sortByContentTooltip": "Ordenar por conteúdo",
+
+  "editJournalTitle": "Editar Diário",
+  "notificationsTitle": "Notificações",
+  "enableNotificationsLabel": "Ativar Notificações",
+  "notificationPhraseLabel": "Frase de Notificação",
+  "phraseCannotBeEmptyValidator": "A frase não pode estar vazia.",
+  "notificationDaysLabel": "Dias de Notificação",
+  "allDaysButtonLabel": "Todos",
+  "notificationTimesLabel": "Horas de Notificação",
+  "journalNameLabel": "Nome do diário",
+  "journalNameValidator": "Por favor, insira um nome para o diário.",
+  "notificationPhraseValidator": "A frase de notificação não pode estar vazia.",
+  "selectAllButton": "Selecionar todos",
+  "daysOfWeek": "Seg,Ter,Qua,Qui,Sex,Sáb,Dom"
 }

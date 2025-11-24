@@ -1433,5 +1433,19 @@
   "editJournalNameTooltip": "Modifier le nom du journal",
   "existingNotesTitle": "Notes existantes",
   "sortByCreationDateTooltip": "Trier par date de création",
-  "sortByContentTooltip": "Trier par contenu"
+  "sortByContentTooltip": "Trier par contenu",
+
+  "editJournalTitle": "Modifier le Journal",
+  "notificationsTitle": "Notifications",
+  "enableNotificationsLabel": "Activer les Notifications",
+  "notificationPhraseLabel": "Phrase de Notification",
+  "phraseCannotBeEmptyValidator": "La phrase ne peut pas être vide.",
+  "notificationDaysLabel": "Jours de Notification",
+  "allDaysButtonLabel": "Tous",
+  "notificationTimesLabel": "Heures de Notification",
+  "journalNameLabel": "Nom du journal",
+  "journalNameValidator": "Veuillez entrer un nom pour le journal.",
+  "notificationPhraseValidator": "La phrase de notification ne peut pas être vide.",
+  "selectAllButton": "Tout sélectionner",
+  "daysOfWeek": "Lun,Mar,Mer,Jeu,Ven,Sam,Dim"
 }

@@ -1434,5 +1434,38 @@
   "editJournalNameTooltip": "Edit journal name",
   "existingNotesTitle": "Existing Notes",
   "sortByCreationDateTooltip": "Sort by creation date",
-  "sortByContentTooltip" : "Sort by content"
+  "sortByContentTooltip" : "Sort by content",
+
+  "editJournalTitle": "Edit Journal",
+  "@editJournalTitle": {
+    "description": "Title for the page where users edit an existing journal."
+  },
+  "notificationsTitle": "Notifications",
+  "@notificationsTitle": {
+    "description": "Section title for notification settings."
+  },
+  "enableNotificationsLabel": "Enable Notifications",
+  "@enableNotificationsLabel": {
+    "description": "Label for the switch to turn on/off notifications for a journal."
+  },
+  "notificationPhraseLabel": "Notification Phrase",
+  "@notificationPhraseLabel": {
+    "description": "Label for the text field where the user enters the notification message."
+  },
+  "phraseCannotBeEmptyValidator": "Phrase cannot be empty.",
+  "@phraseCannotBeEmptyValidator": {
+    "description": "Validation error when the notification phrase is empty but notifications are enabled."
+  },
+  "notificationDaysLabel": "Notification Days",
+  "@notificationDaysLabel": {
+    "description": "Label for the section to select the days of the week for notifications."
+  },
+  "allDaysButtonLabel": "All",
+  "@allDaysButtonLabel": {
+    "description": "Button label to select all days of the week."
+  },
+  "notificationTimesLabel": "Notification Times",
+  "@notificationTimesLabel": {
+    "description": "Label for the section to manage notification times."
+  }
 }

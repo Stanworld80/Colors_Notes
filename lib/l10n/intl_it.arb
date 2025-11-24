@@ -1,407 +1,92 @@
 {
   "@@locale": "it",
   "about": "Informazioni",
-  "@about": {
-    "description": "Etichetta per sezioni o link 'Informazioni'."
-  },
   "aboutColorsNotesTitle": "Informazioni su Colors & Notes",
-  "@aboutColorsNotesTitle": {
-    "description": "Titolo della pagina 'Informazioni su Colors & Notes'."
-  },
   "aboutLink": "Informazioni",
   "add": "Aggiungi",
-  "@add": {
-    "description": "Etichetta generica per l'azione 'Aggiungi'."
-  },
   "addColorButtonLabel": "Aggiungi Colore",
-  "@addColorButtonLabel": {
-    "description": "Etichetta del pulsante per aggiungere un nuovo colore."
-  },
   "addColorGradientDialogTitle": "Aggiungi Colore/Gradiente",
-  "@addColorGradientDialogTitle": {
-    "description": "Titolo della finestra di dialogo per aggiungere un nuovo colore o gradiente."
-  },
   "addGradientButtonLabel": "Aggiungi Gradiente",
-  "@addGradientButtonLabel": {
-    "description": "Etichetta del pulsante per aggiungere un gradiente."
-  },
   "addNewColorGradientListTile": "Aggiungi un nuovo colore/gradiente",
-  "@addNewColorGradientListTile": {
-    "description": "Etichetta dell'opzione dell'elenco per aggiungere un nuovo colore o gradiente."
-  },
-  "allColorsDeletedFromEditorSnackbar": "Tutti i colori sono stati rimossi dalla tavolozza corrente.",
-  "@allColorsDeletedFromEditorSnackbar": {
-    "description": "Messaggio Snackbar mostrato quando tutti i colori vengono rimossi nell'editor della tavolozza."
-  },
+  "allColorsDeletedFromEditorSnackbar": "Tutti i colori sono stati rimossi dalla tavolozozza corrente.",
   "allNotesDeletedBeforeEmptyingPaletteLog": "Tutte le note nel diario {journalId} sono state eliminate prima di svuotare la tavolozza.",
-  "@allNotesDeletedBeforeEmptyingPaletteLog": {
-    "description": "Messaggio di log che indica che tutte le note in un diario sono state eliminate prima di svuotare la sua tavolozza.",
-    "placeholders": {
-      "journalId": {
-        "type": "String"
-      }
-    }
-  },
   "allNotesDeletedSnackbar": "Tutte le note sono state eliminate.",
-  "@allNotesDeletedSnackbar": {
-    "description": "Messaggio Snackbar mostrato dopo aver eliminato con successo tutte le note."
-  },
   "appDescription": "Questa applicazione ti permette di organizzare le tue note e pensieri quotidiani associandoli a colori personalizzati, raggruppati in tavolozze uniche per ogni diario.",
-  "@appDescription": {
-    "description": "Descrizione dettagliata dell'applicazione."
-  },
   "appName": "Colors & Notes",
   "appSlogan": "Colora la tua giornata.",
-  "@appSlogan": {
-    "description": "Slogan dell'applicazione."
-  },
   "authErrorPrefix": "Errore: {errorMessage}",
-  "@authErrorPrefix": {
-    "description": "Prefisso per i messaggi di errore di autenticazione.",
-    "placeholders": {
-      "errorMessage": {
-        "type": "String"
-      }
-    }
-  },
   "authorInfo": "Autore: Stanislas Mathieu Eric Selle",
-  "@authorInfo": {
-    "description": "Informazioni sull'autore dell'applicazione."
-  },
   "baseNameCannotBeEmptyValidator": "Il nome di base non può essere vuoto.",
-  "@baseNameCannotBeEmptyValidator": {
-    "description": "Messaggio di errore di convalida quando il nome di base per un colore/gradiente è vuoto."
-  },
   "baseNameForColorGradientLabel": "Nome di base per colore/gradiente",
-  "@baseNameForColorGradientLabel": {
-    "description": "Etichetta per il campo di input per il nome di base di un colore o gradiente."
-  },
   "bottomNavHome": "Home",
-  "@bottomNavHome": {
-    "description": "Etichetta per la scheda Home nella barra di navigazione inferiore."
-  },
   "bottomNavJournals": "Diari",
-  "@bottomNavJournals": {
-    "description": "Etichetta per la scheda Diari nella barra di navigazione inferiore."
-  },
   "bottomNavNotes": "Note",
-  "@bottomNavNotes": {
-    "description": "Etichetta per la scheda Note nella barra di navigazione inferiore."
-  },
   "build": "Build",
-  "@build": {
-    "description": "Etichetta per il numero di build, spesso usato con la versione."
-  },
   "cancelButtonLabel": "Annulla",
-  "@cancelButtonLabel": {
-    "description": "Etichetta generica per un pulsante di annullamento."
-  },
   "cannotAddGradientMaxReachedError": "Impossibile aggiungere {gradientSteps} colori, massimo della tavolozza raggiunto.",
-  "@cannotAddGradientMaxReachedError": {
-    "description": "Messaggio di errore quando l'aggiunta di un gradiente supererebbe il numero massimo di colori consentiti nella tavolozza.",
-    "placeholders": {
-      "gradientSteps": {
-        "type": "int"
-      }
-    }
-  },
   "changeJournalTooltip": "Cambia diario attivo",
-  "@changeJournalTooltip": {
-    "description": "Suggerimento per il menu a discesa di selezione del diario nell'AppBar o controlli simili."
-  },
   "chooseJournalAppBarTitle": "Scegli Diario",
-  "@chooseJournalAppBarTitle": {
-    "description": "Titolo dell'AppBar quando l'utente deve scegliere un diario."
-  },
   "chooseJournalTitle": "Scegli un diario",
-  "@chooseJournalTitle": {
-    "description": "Titolo visualizzato nell'AppBar quando nessun diario è attivo, che chiede all'utente di selezionarne uno."
-  },
   "chooseOrCreateJournalButton": "Scegli o crea un diario",
-  "@chooseOrCreateJournalButton": {
-    "description": "Testo per il pulsante per scegliere un diario esistente o crearne uno nuovo."
-  },
   "choosePaletteModelDropdownLabel": "Scegli un modello di tavolozza",
-  "@choosePaletteModelDropdownLabel": {
-    "description": "Etichetta per il menu a discesa per scegliere un modello di tavolozza."
-  },
   "colorDeletedSnackbar": "\"{colorTitle}\" eliminato.",
-  "@colorDeletedSnackbar": {
-    "description": "Messaggio Snackbar mostrato dopo che un colore è stato eliminato con successo.",
-    "placeholders": {
-      "colorTitle": {
-        "type": "String"
-      }
-    }
-  },
   "colorHexExistsError": "Questo colore (esadecimale) esiste già.",
-  "@colorHexExistsError": {
-    "description": "Messaggio di errore quando si tenta di aggiungere un colore il cui codice esadecimale esiste già nella tavolozza."
-  },
   "colorInUseDeleteError": "Il colore \"{colorTitle}\" è in uso e non può essere eliminato.",
-  "@colorInUseDeleteError": {
-    "description": "Messaggio di errore quando si tenta di eliminare un colore attualmente utilizzato dalle note.",
-    "placeholders": {
-      "colorTitle": {
-        "type": "String"
-      }
-    }
-  },
   "colorTitleExistsError": "Questo titolo di colore esiste già.",
-  "@colorTitleExistsError": {
-    "description": "Messaggio di errore quando si tenta di aggiungere un colore il cui titolo esiste già nella tavolozza."
-  },
   "colorsNotesAppName": "Colors & Notes",
-  "@colorsNotesAppName": {
-    "description": "Il nome dell'applicazione, Colors & Notes."
-  },
   "colorsSectionHeader": "Colori ({currentCount} / {maxCount}) :",
-  "@colorsSectionHeader": {
-    "description": "Intestazione della sezione colori nell'editor della tavolozza, che mostra il conteggio corrente e massimo dei colori.",
-    "placeholders": {
-      "currentCount": {
-        "type": "int"
-      },
-      "maxCount": {
-        "type": "int"
-      }
-    }
-  },
   "comingSoon": "Prossimamente",
-  "@comingSoon": {
-    "description": "Messaggio generico per funzionalità non ancora implementate."
-  },
   "confirmDeleteColorContent": "Vuoi davvero eliminare il colore \"{colorName}\"?",
-  "@confirmDeleteColorContent": {
-    "description": "Contenuto del messaggio di conferma durante l'eliminazione di un colore.",
-    "placeholders": {
-      "colorName": {
-        "type": "String"
-      }
-    }
-  },
   "confirmDeleteColorTitle": "Conferma Eliminazione",
-  "@confirmDeleteColorTitle": {
-    "description": "Titolo della finestra di dialogo che conferma l'eliminazione del colore."
-  },
   "confirmDeleteDialogTitle": "Conferma eliminazione",
-  "@confirmDeleteDialogTitle": {
-    "description": "Titolo generico per una finestra di dialogo di conferma prima dell'eliminazione."
-  },
   "confirmDeleteNoteDialogContent": "Vuoi davvero eliminare questa nota?",
-  "@confirmDeleteNoteDialogContent": {
-    "description": "Contenuto della finestra di dialogo che conferma l'eliminazione della nota."
-  },
   "confirmDeletionButtonLabel": "CONFERMA ELIMINAZIONE",
-  "@confirmDeletionButtonLabel": {
-    "description": "Etichetta del pulsante che conferma un'azione di eliminazione, tipicamente dopo un avviso finale."
-  },
   "confirmDeletionDialogContent": "Sei sicuro? Questa azione è irreversibile.",
-  "@confirmDeletionDialogContent": {
-    "description": "Contenuto generico per una finestra di dialogo di conferma, che avverte dell'irreversibilità."
-  },
   "confirmDeletionDialogTitle": "Confermare l'eliminazione?",
-  "@confirmDeletionDialogTitle": {
-    "description": "Titolo generico per una finestra di dialogo che chiede all'utente di confermare un'eliminazione."
-  },
   "copyPaletteFromJournalDropdownLabel": "Copia tavolozza da un diario esistente",
-  "@copyPaletteFromJournalDropdownLabel": {
-    "description": "Etichetta per il menu a discesa per selezionare un diario esistente da cui copiare la tavolozza."
-  },
   "copyrightText": "Copyright © 2025",
-  "@copyrightText": {
-    "description": "Avviso di copyright per l'applicazione."
-  },
   "createFirstModelMessage": "Crea il tuo primo modello personale premendo il pulsante \"+\" in alto.",
-  "@createFirstModelMessage": {
-    "description": "Messaggio visualizzato quando non esistono modelli di tavolozza personali, che chiede all'utente di crearne uno."
-  },
   "createJournalButtonLabel": "Crea diario",
-  "@createJournalButtonLabel": {
-    "description": "Etichetta del pulsante per creare un nuovo diario."
-  },
   "createJournalPageTitle": "Crea un nuovo diario",
-  "@createJournalPageTitle": {
-    "description": "Titolo della pagina in cui gli utenti creano un nuovo diario."
-  },
   "createNewJournalButton": "Crea un nuovo diario",
-  "@createNewJournalButton": {
-    "description": "Testo per il pulsante per creare un nuovo diario."
-  },
   "createNewJournalCardLabel": "Crea un nuovo diario",
-  "@createNewJournalCardLabel": {
-    "description": "Etichetta per la scheda o il pulsante che avvia la creazione di un nuovo diario."
-  },
   "createNewPersonalModelTooltip": "Crea un nuovo modello personale",
-  "@createNewPersonalModelTooltip": {
-    "description": "Suggerimento per il pulsante per creare un nuovo modello di tavolozza personale."
-  },
   "defaultAppBarTitle": "Colors & Notes",
-  "@defaultAppBarTitle": {
-    "description": "Titolo predefinito per l'AppBar, solitamente il nome dell'app."
-  },
   "defaultColorTitle": "Colore",
-  "@defaultColorTitle": {
-    "description": "Titolo o etichetta predefiniti per un colore quando il suo nome specifico non è disponibile o pertinente."
-  },
   "defaultPaletteNameForJournal": "Tavolozza di {journalName}",
-  "@defaultPaletteNameForJournal": {
-    "description": "Formato del nome predefinito per una nuova tavolozza associata a un diario.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
-  },
   "delete": "Elimina",
-  "@delete": {
-    "description": "Etichetta generica per l'azione 'Elimina'."
-  },
   "deleteAllButtonLabel": "Elimina Tutto",
-  "@deleteAllButtonLabel": {
-    "description": "Etichetta per un pulsante che elimina tutti gli elementi."
-  },
   "deleteAllColorsDialogTitle": "Eliminare tutti i colori?",
-  "@deleteAllColorsDialogTitle": {
-    "description": "Titolo della finestra di dialogo che conferma l'eliminazione di tutti i colori da una tavolozza o modello."
-  },
   "deleteAllColorsJournalWarning": "Questo eliminerà tutti i colori dalla tavolozza del diario \"{journalName}\". ATTENZIONE: Anche tutte le note in questo diario saranno PERMANENTEMENTE eliminate.",
-  "@deleteAllColorsJournalWarning": {
-    "description": "Messaggio di avviso quando si tenta di eliminare tutti i colori dalla tavolozza di un diario.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
-  },
   "deleteAllColorsModelWarning": "Vuoi davvero eliminare tutti i colori da questo modello di tavolozza?",
-  "@deleteAllColorsModelWarning": {
-    "description": "Messaggio di avviso quando si tenta di eliminare tutti i colori da un modello di tavolozza."
-  },
   "deleteAllColorsTooltip": "Elimina tutti i colori",
-  "@deleteAllColorsTooltip": {
-    "description": "Suggerimento per il pulsante che elimina tutti i colori."
-  },
   "deleteAllNotesDialogContent": "Questa azione eliminerà PERMANENTEMENTE tutte le note in questo diario. Vuoi continuare?",
-  "@deleteAllNotesDialogContent": {
-    "description": "Contenuto della finestra di dialogo che conferma l'eliminazione di tutte le note in un diario."
-  },
   "deleteAllNotesDialogTitle": "Eliminare tutte le note?",
-  "@deleteAllNotesDialogTitle": {
-    "description": "Titolo della finestra di dialogo che conferma l'eliminazione di tutte le note."
-  },
   "deleteAllNotesTooltip": "Elimina tutte le note in questo diario",
-  "@deleteAllNotesTooltip": {
-    "description": "Suggerimento per il pulsante per eliminare tutte le note nel diario corrente."
-  },
   "deleteButtonLabel": "Elimina",
-  "@deleteButtonLabel": {
-    "description": "Etichetta per un pulsante di eliminazione."
-  },
   "deleteJournalButtonLabel": "Elimina diario",
-  "@deleteJournalButtonLabel": {
-    "description": "Etichetta del pulsante per eliminare un diario."
-  },
   "deleteJournalDialogContent": "Anche tutte le note in questo diario saranno eliminate definitivamente. Questa azione è irreversibile.",
-  "@deleteJournalDialogContent": {
-    "description": "Contenuto della finestra di dialogo che conferma l'eliminazione del diario, avvertendo dell'eliminazione delle note."
-  },
   "deleteJournalDialogTitle": "Eliminare il diario \"{journalName}\"?",
-  "@deleteJournalDialogTitle": {
-    "description": "Titolo della finestra di dialogo che conferma l'eliminazione del diario.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
-  },
   "deleteModelDialogContent": "Vuoi davvero eliminare il modello di tavolozza \"{modelName}\"? Questa azione è irreversibile.",
-  "@deleteModelDialogContent": {
-    "description": "Contenuto della finestra di dialogo che conferma l'eliminazione del modello di tavolozza.",
-    "placeholders": {
-      "modelName": {
-        "type": "String"
-      }
-    }
-  },
   "deleteModelDialogTitle": "Eliminare Modello?",
-  "@deleteModelDialogTitle": {
-    "description": "Titolo della finestra di dialogo che conferma l'eliminazione del modello di tavolozza."
-  },
   "deleteModelTooltip": "Elimina modello",
-  "@deleteModelTooltip": {
-    "description": "Suggerimento per il pulsante per eliminare un modello di tavolozza."
-  },
   "deleteNoteTooltipGrid": "Elimina nota",
-  "@deleteNoteTooltipGrid": {
-    "description": "Suggerimento per eliminare una nota, tipicamente in una visualizzazione a griglia."
-  },
   "deleteThisColorButtonLabel": "Elimina questo colore",
-  "@deleteThisColorButtonLabel": {
-    "description": "Etichetta del pulsante per eliminare un colore specifico."
-  },
   "deleteThisNoteTooltipList": "Elimina questa nota",
-  "@deleteThisNoteTooltipList": {
-    "description": "Suggerimento per eliminare una nota, tipicamente in un elemento di elenco."
-  },
   "developedWith": "Sviluppato con Flutter & Firebase.",
-  "@developedWith": {
-    "description": "Informazioni sulle tecnologie utilizzate per lo sviluppo."
-  },
   "downloadForAndroidLink": "Scarica per Android",
   "edit": "Modifica",
-  "@edit": {
-    "description": "Etichetta generica per l'azione 'Modifica'."
-  },
   "editColorDialogTitle": "Modifica Colore",
-  "@editColorDialogTitle": {
-    "description": "Titolo della finestra di dialogo per modificare un colore esistente."
-  },
   "editModelTooltip": "Modifica modello",
-  "@editModelTooltip": {
-    "description": "Suggerimento per il pulsante per modificare un modello di tavolozza."
-  },
   "editNameOptionsTooltip": "Modifica nome / Opzioni...",
-  "@editNameOptionsTooltip": {
-    "description": "Suggerimento per un pulsante che consente di modificare il nome di un diario o accedere ad altre opzioni."
-  },
   "editPaletteForJournalTooltip": "Modifica tavolozza per {journalName}",
-  "@editPaletteForJournalTooltip": {
-    "description": "Suggerimento per il pulsante per modificare la tavolozza di un diario specifico.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
-  },
   "editPaletteTooltip": "Modifica tavolozza di '{journalName}'",
-  "@editPaletteTooltip": {
-    "description": "Suggerimento per l'icona di modifica della tavolozza nella barra dell'app, dove {journalName} è il nome del diario attivo.",
-    "placeholders": {
-      "journalName": {
-        "type": "String",
-        "example": "Il Mio Diario di Viaggio"
-      }
-    }
-  },
   "emailLabel": "Email",
   "emailValidationError": "Inserisci un indirizzo email valido.",
   "emptyButtonLabel": "Svuota",
-  "@emptyButtonLabel": {
-    "description": "Etichetta per un pulsante che svuota qualcosa, ad es. una tavolozza."
-  },
   "emptyPaletteDialogContent": "Vuoi davvero rimuovere tutti i colori da questa nuova tavolozza?",
-  "@emptyPaletteDialogContent": {
-    "description": "Contenuto della finestra di dialogo che conferma se svuotare una nuova tavolozza."
-  },
   "emptyPaletteDialogTitle": "Svuotare la tavolozza?",
-  "@emptyPaletteDialogTitle": {
-    "description": "Titolo della finestra di dialogo che conferma se svuotare una nuova tavolozza."
-  },
   "enterNumberValidator": "Inserisci un numero.",
-  "@enterNumberValidator": {
-    "description": "Messaggio di errore di convalida quando è previsto un input numerico ma non viene fornito correttamente."
-  },
   "entryPageAssociatedColorLabel": "Colore Associato",
   "entryPageContentHint": "Descrivi il tuo pensiero, evento o compito...",
   "entryPageContentLabel": "Contenuto della nota...",
@@ -410,13 +95,6 @@
   "entryPageDateTimeSetToNowSnackbar": "Data e ora impostate su adesso.",
   "entryPageEditTitle": "Modifica Nota",
   "entryPageGenericSaveError": "Errore: {errorMessage}",
-  "@entryPageGenericSaveError": {
-    "placeholders": {
-      "errorMessage": {
-        "type": "String"
-      }
-    }
-  },
   "entryPageJournalDetailsLoadError": "Impossibile caricare i dettagli del diario.",
   "entryPageJournalDetailsRetryButton": "Riprova",
   "entryPageNewTitle": "Nuova Nota",
@@ -435,330 +113,57 @@
   "entryPageUpdateTooltip": "Aggiorna nota",
   "entryPageUserNotIdentifiedError": "Utente non identificato.",
   "error": "Errore",
-  "@error": {
-    "description": "Etichetta generica per 'Errore'."
-  },
   "errorAppBarTitle": "Errore",
-  "@errorAppBarTitle": {
-    "description": "Titolo dell'AppBar quando si verifica un errore."
-  },
   "errorCheckingColorUsageLog": "Errore durante la verifica dell'utilizzo del colore: {errorDetails}",
-  "@errorCheckingColorUsageLog": {
-    "description": "Messaggio di log per un errore verificatosi durante la verifica dell'utilizzo del colore.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
   "errorCheckingColorUsageSnackbar": "Errore verifica utilizzo colore: {errorDetails}",
-  "@errorCheckingColorUsageSnackbar": {
-    "description": "Messaggio Snackbar per un errore verificatosi durante la verifica dell'utilizzo del colore.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
   "errorDeletingAllColorsNotesLog": "Errore durante l'eliminazione di tutti i colori/note: {errorDetails}",
-  "@errorDeletingAllColorsNotesLog": {
-    "description": "Messaggio di log per un errore verificatosi durante l'eliminazione di tutti i colori o note.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
   "errorDeletingAllNotesSnackbar": "Errore durante l'eliminazione di tutte le note: {errorDetails}",
-  "@errorDeletingAllNotesSnackbar": {
-    "description": "Messaggio Snackbar per un errore verificatosi durante l'eliminazione di tutte le note.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
   "errorDeletingJournalSnackbar": "Errore durante l'eliminazione: {errorDetails}",
-  "@errorDeletingJournalSnackbar": {
-    "description": "Messaggio Snackbar per un errore verificatosi durante l'eliminazione di un diario.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
   "errorDeletingModelSnackbar": "Errore durante l'eliminazione: {errorDetails}",
-  "@errorDeletingModelSnackbar": {
-    "description": "Messaggio Snackbar per un errore verificatosi durante l'eliminazione di un modello di tavolozza.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
   "errorDeletingNoteSnackbar": "Errore durante l'eliminazione: {errorDetails}",
-  "@errorDeletingNoteSnackbar": {
-    "description": "Messaggio Snackbar per un errore verificatosi durante l'eliminazione di una nota.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
   "errorLaunchingUrl": "Errore durante l'apertura dell'URL",
   "errorLoadingInitialData": "Errore durante il caricamento dei dati iniziali: {errorDetails}",
-  "@errorLoadingInitialData": {
-    "description": "Messaggio di errore visualizzato quando il caricamento dei dati iniziali fallisce.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
   "errorLoadingJournal": "Errore durante il caricamento del diario:",
-  "@errorLoadingJournal": {
-    "description": "Prefisso per il messaggio di errore quando il caricamento di un diario fallisce."
-  },
-  "errorLoadingJournals": "Errore durante il caricamento dei diari: {errorDetails}",
-  "@errorLoadingJournals": {
-    "description": "Messaggio di errore visualizzato quando il caricamento dell'elenco dei diari fallisce.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
+  "errorLoadingJournals": "Errore during il caricamento dei diari: {errorDetails}",
   "errorLoadingLicense": "Errore durante il caricamento della licenza.\n\nVerifica che il file LICENSE esista nella root del progetto e sia dichiarato negli assets di pubspec.yaml se necessario.\n\nErrore: {errorDetails}",
-  "@errorLoadingLicense": {
-    "description": "Messaggio di errore visualizzato quando il file di licenza non può essere caricato.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
   "errorLoadingNotes": "Errore durante il caricamento delle note. {errorDetails}",
-  "@errorLoadingNotes": {
-    "description": "Messaggio di errore visualizzato quando il caricamento delle note fallisce.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
   "errorLoadingOptions": "Errore durante il caricamento delle opzioni: {errorDetails}",
-  "@errorLoadingOptions": {
-    "description": "Messaggio di errore visualizzato quando il caricamento delle opzioni (ad es. modelli di tavolozza, diari esistenti) fallisce.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
   "errorLoadingPersonalModels": "Errore durante il caricamento dei modelli personali.",
-  "@errorLoadingPersonalModels": {
-    "description": "Messaggio di errore visualizzato quando il caricamento dei modelli di tavolozza personali fallisce."
-  },
   "errorSavingPaletteSnackbar": "Errore durante il salvataggio: {errorDetails}",
-  "@errorSavingPaletteSnackbar": {
-    "description": "Messaggio Snackbar per un errore verificatosi durante il salvataggio di una tavolozza o di un modello.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
   "errorTitle": "Errore",
-  "@errorTitle": {
-    "description": "Titolo visualizzato nell'AppBar quando si verifica un errore."
-  },
   "errorUserNotIdentified": "Errore: Utente non identificato.",
-  "@errorUserNotIdentified": {
-    "description": "Messaggio di errore quando l'utente corrente non può essere identificato."
-  },
   "existingJournalsSectionTitle": "Diari Esistenti:",
-  "@existingJournalsSectionTitle": {
-    "description": "Titolo della sezione che elenca i diari esistenti."
-  },
   "fieldCannotBeEmpty": "Il campo non può essere vuoto.",
-  "@fieldCannotBeEmpty": {
-    "description": "Errore di convalida generico per un campo obbligatorio vuoto."
-  },
   "finalConfirmationDialogContent": "Per confermare l'eliminazione, digita 'DELETE' nel campo sottostante.",
-  "@finalConfirmationDialogContent": {
-    "description": "Contenuto di una finestra di dialogo di conferma finale che richiede all'utente di digitare 'DELETE'."
-  },
   "finalConfirmationDialogTitle": "CONFERMA FINALE per \"{journalName}\"",
-  "@finalConfirmationDialogTitle": {
-    "description": "Titolo di una finestra di dialogo di conferma finale prima di eliminare un diario.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
-  },
   "finalDeleteAllConfirmationDialogContent": "Sei assolutamente sicuro? Questa azione è IRREVERSIBILE.",
-  "@finalDeleteAllConfirmationDialogContent": {
-    "description": "Contenuto della finestra di dialogo di conferma finale prima di eliminare tutte le note, sottolineando l'irreversibilità."
-  },
   "finalDeleteAllConfirmationDialogTitle": "CONFERMA FINALE",
-  "@finalDeleteAllConfirmationDialogTitle": {
-    "description": "Titolo della finestra di dialogo di conferma finale prima di eliminare tutte le note."
-  },
   "finalDeleteAllConfirmationJournalWarning": "Sei assolutamente sicuro? L'eliminazione dei colori da questa tavolozza eliminerà IRREVERSIBILMENTE TUTTE le note in questo diario.",
-  "@finalDeleteAllConfirmationJournalWarning": {
-    "description": "Avviso finale durante l'eliminazione di tutti i colori dalla tavolozza di un diario, sottolineando l'eliminazione delle note."
-  },
   "finalDeleteAllConfirmationModelWarning": "Confermi l'eliminazione di tutti i colori da questo modello?",
-  "@finalDeleteAllConfirmationModelWarning": {
-    "description": "Conferma finale durante l'eliminazione di tutti i colori da un modello di tavolozza."
-  },
-  "formValidationFailedLog": "La convalida del modulo (nome tavolozza) è fallita durante il salvataggio automatico.",
-  "@formValidationFailedLog": {
-    "description": "Messaggio di log quando la convalida del modulo per il nome della tavolozza fallisce durante un tentativo di salvataggio automatico."
-  },
+  "formValidationFailedLog": "La convalida del modulo (nome tavolozza) è fallita during il salvataggio automatico.",
   "generatedColorExistsError": "Il colore generato {hexCode} esiste già.",
-  "@generatedColorExistsError": {
-    "description": "Messaggio di errore quando il codice esadecimale di un colore gradiente generato esiste già.",
-    "placeholders": {
-      "hexCode": {
-        "type": "String"
-      }
-    }
-  },
   "generatedTitleExistsError": "Il titolo generato \"{title}\" esiste già.",
-  "@generatedTitleExistsError": {
-    "description": "Messaggio di errore quando il titolo di un colore gradiente generato esiste già.",
-    "placeholders": {
-      "title": {
-        "type": "String"
-      }
-    }
-  },
   "genericAuthErrorSnackbar": "Errore di autenticazione: Riprova.",
-  "@genericAuthErrorSnackbar": {
-    "description": "Messaggio Snackbar generico per errori di autenticazione."
-  },
   "genericErrorSnackbar": "Errore: {errorDetails}",
-  "@genericErrorSnackbar": {
-    "description": "Messaggio Snackbar generico per visualizzare un errore.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
   "homeButtonTooltip": "Home",
-  "@homeButtonTooltip": {
-    "description": "Suggerimento per il pulsante home sulla barra dell'app."
-  },
   "incorrectConfirmationTextValidator": "Testo di conferma errato.",
-  "@incorrectConfirmationTextValidator": {
-    "description": "Errore di convalida quando il testo inserito per la conferma dell'eliminazione non è corretto."
-  },
   "invalidEmail": "Email non valida.",
-  "@invalidEmail": {
-    "description": "Errore di convalida per un formato email non valido."
-  },
   "invalidInput": "Input non valido",
-  "@invalidInput": {
-    "description": "Messaggio di errore generico per input utente non valido."
-  },
   "journalCreatedOnDateLabel": "Creato il: {date}",
-  "@journalCreatedOnDateLabel": {
-    "description": "Etichetta che visualizza la data di creazione di un diario.",
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
   "journalCreatedSuccess": "Diario \"{journalName}\" creato con successo!",
-  "@journalCreatedSuccess": {
-    "description": "Messaggio di successo visualizzato dopo la creazione di un nuovo diario.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
-  },
   "journalDeletedSnackbar": "Diario \"{journalName}\" eliminato.",
-  "@journalDeletedSnackbar": {
-    "description": "Messaggio Snackbar mostrato dopo che un diario è stato eliminato con successo.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
-  },
   "journalDetailsUnavailableWarning": "I dettagli del diario (per la tavolozza) non sono disponibili per {journalId}. L'ordinamento per colore potrebbe non funzionare correttamente.",
-  "@journalDetailsUnavailableWarning": {
-    "description": "Avviso di log quando i dettagli del diario per la tavolozza non sono disponibili per l'ordinamento delle note per colore.",
-    "placeholders": {
-      "journalId": {
-        "type": "String"
-      }
-    }
-  },
   "journalNameExistsError": "Un diario chiamato \"{journalName}\" esiste già.",
-  "@journalNameExistsError": {
-    "description": "Messaggio di errore visualizzato quando si tenta di creare un diario con un nome che esiste già.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
-  },
   "journalNameExistsSnackbar": "Un diario chiamato \"{journalName}\" esiste già.",
-  "@journalNameExistsSnackbar": {
-    "description": "Messaggio Snackbar che indica che un diario con il nome specificato esiste già.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
-  },
   "journalNameTextFieldHint": "Es: Diario della gratitudine, Progetti 2025...",
-  "@journalNameTextFieldHint": {
-    "description": "Testo di suggerimento per il campo di input del nome del diario."
-  },
   "journalNameTextFieldLabel": "Scegli un nome per il tuo diario...",
-  "@journalNameTextFieldLabel": {
-    "description": "Etichetta per il campo di input del nome del diario."
-  },
   "journalNameTooLongValidator": "Il nome del diario è troppo lungo (max 70).",
-  "@journalNameTooLongValidator": {
-    "description": "Errore di convalida quando il nome del diario supera la lunghezza massima."
-  },
   "journalNameUpdatedSnackbar": "Nome del diario aggiornato.",
-  "@journalNameUpdatedSnackbar": {
-    "description": "Messaggio Snackbar mostrato dopo che il nome di un diario è stato aggiornato con successo."
-  },
   "journalNameValidatorEmpty": "Inserisci un nome per il diario.",
-  "@journalNameValidatorEmpty": {
-    "description": "Errore di convalida quando il nome del diario è vuoto."
-  },
   "journalNameValidatorTooLong": "Il nome del diario è troppo lungo (max 70).",
-  "@journalNameValidatorTooLong": {
-    "description": "Errore di convalida quando il nome del diario è troppo lungo."
-  },
   "journalOptionsDialogTitle": "Opzioni diario",
-  "@journalOptionsDialogTitle": {
-    "description": "Titolo della finestra di dialogo che visualizza le opzioni per un diario."
-  },
   "journalPaletteSavedSnackbar": "Tavolozza del diario salvata.",
-  "@journalPaletteSavedSnackbar": {
-    "description": "Messaggio Snackbar mostrato dopo che la tavolozza di un diario è stata salvata con successo."
-  },
   "journalPaletteUpdatedLog": "Tavolozza per il diario {journalName} aggiornata.",
-  "@journalPaletteUpdatedLog": {
-    "description": "Messaggio di log che indica che la tavolozza per un diario specifico è stata aggiornata.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
-  },
   "language": "Lingua",
   "languageEnglish": "Inglese",
   "languageSpanish": "Spagnolo",
@@ -769,389 +174,85 @@
   "languagePortugueseBrazil": "Portoghese (Brasile)",
   "licenseLink": "Licenza",
   "licensePageTitle": "Contratto di Licenza",
-  "@licensePageTitle": {
-    "description": "Titolo della pagina del Contratto di Licenza."
-  },
   "loading": "Caricamento...",
-  "@loading": {
-    "description": "Testo generico per lo stato di caricamento."
-  },
   "loadingAppBarTitle": "Caricamento...",
-  "@loadingAppBarTitle": {
-    "description": "Titolo dell'AppBar quando il contenuto è in caricamento."
-  },
   "loadingLicense": "Caricamento licenza...",
-  "@loadingLicense": {
-    "description": "Messaggio visualizzato durante il caricamento del testo della licenza."
-  },
   "loadingText": "Caricamento...",
-  "@loadingText": {
-    "description": "Testo visualizzato quando il contenuto è in caricamento."
-  },
   "loadingTitle": "Caricamento...",
-  "@loadingTitle": {
-    "description": "Titolo visualizzato nell'AppBar quando il contenuto è in caricamento."
-  },
   "logout": "Esci",
   "manageJournals": "Gestisci Diari",
   "manageNotes": "Gestisci Note",
   "manageJournalsAppBarTitle": "Gestisci Diari",
-  "@manageJournalsAppBarTitle": {
-    "description": "Titolo dell'AppBar per la pagina di gestione dei diari."
-  },
   "managePaletteModels": "Gestisci Modelli di Tavolozze",
   "managePaletteModelsAppBarTitle": "Gestisci Modelli di Tavolozze",
-  "@managePaletteModelsAppBarTitle": {
-    "description": "Titolo dell'AppBar per la pagina di gestione dei modelli di tavolozza."
-  },
   "modelDeletedSnackbar": "Modello \"{modelName}\" eliminato.",
-  "@modelDeletedSnackbar": {
-    "description": "Messaggio Snackbar mostrato dopo che un modello di tavolozza è stato eliminato con successo.",
-    "placeholders": {
-      "modelName": {
-        "type": "String"
-      }
-    }
-  },
   "modelMinColorsDeleteError": "Un modello di tavolozza deve contenere almeno {minColors} colore/i. Impossibile eliminare \"{colorTitle}\".",
-  "@modelMinColorsDeleteError": {
-    "description": "Messaggio di errore quando si tenta di eliminare un colore da un modello che comporterebbe un numero di colori inferiore al minimo richiesto.",
-    "placeholders": {
-      "minColors": {
-        "type": "int"
-      },
-      "colorTitle": {
-        "type": "String"
-      }
-    }
-  },
   "modelMinColorsErrorSnackbar": "Un modello deve avere almeno {minColors} colori.",
-  "@modelMinColorsErrorSnackbar": {
-    "description": "Messaggio di errore Snackbar quando un modello di tavolozza ha meno del numero minimo di colori richiesto.",
-    "placeholders": {
-      "minColors": {
-        "type": "int"
-      }
-    }
-  },
   "moreInfoText": "Per maggiori informazioni, consulta il repository GitHub o la pagina della licenza.",
-  "@moreInfoText": {
-    "description": "Testo che incoraggia gli utenti a trovare maggiori informazioni su GitHub o sulla pagina della licenza."
-  },
   "nameCannotBeEmptyValidator": "Il nome non può essere vuoto.",
-  "@nameCannotBeEmptyValidator": {
-    "description": "Errore di convalida quando un campo nome è vuoto."
-  },
   "nameTooLong": "Nome troppo lungo.",
-  "@nameTooLong": {
-    "description": "Errore di convalida generico per un nome troppo lungo."
-  },
   "newJournalNameHint": "Inserisci qui il nuovo nome",
-  "@newJournalNameHint": {
-    "description": "Testo di suggerimento per il campo di input in cui viene inserito un nuovo nome di diario."
-  },
   "newJournalNameLabel": "Nuovo nome del diario",
-  "@newJournalNameLabel": {
-    "description": "Etichetta per il campo di input in cui viene inserito un nuovo nome di diario."
-  },
   "newNameSameAsOldValidator": "Il nuovo nome è identico a quello vecchio.",
-  "@newNameSameAsOldValidator": {
-    "description": "Errore di convalida quando il nuovo nome inserito è uguale al nome corrente."
-  },
   "newPaletteDefaultName": "Nuova Tavolozza",
-  "@newPaletteDefaultName": {
-    "description": "Nome predefinito per una tavolozza appena creata."
-  },
   "newPaletteModelCreatedLog": "Nuovo modello di tavolozza creato: {modelName}",
-  "@newPaletteModelCreatedLog": {
-    "description": "Messaggio di log che indica che è stato creato un nuovo modello di tavolozza.",
-    "placeholders": {
-      "modelName": {
-        "type": "String"
-      }
-    }
-  },
   "noAccountYetSignUp": "Non hai ancora un account? Registrati",
   "noActiveJournalMessage": "Seleziona un diario esistente o creane uno nuovo per iniziare.",
-  "@noActiveJournalMessage": {
-    "description": "Messaggio visualizzato quando nessun diario è attivo, che richiede un'azione da parte dell'utente."
-  },
   "noActiveJournalTitle": "Nessun diario attivo.",
-  "@noActiveJournalTitle": {
-    "description": "Titolo visualizzato quando nessun diario è attivo."
-  },
   "noJournalSelected": "Nessun diario selezionato.",
-  "@noJournalSelected": {
-    "description": "Messaggio visualizzato quando nessun diario è selezionato."
-  },
   "noCancelButtonLabel": "NO, ANNULLA",
-  "@noCancelButtonLabel": {
-    "description": "Etichetta per un pulsante che annulla un'azione, tipicamente in una conferma ad alto rischio."
-  },
   "noExistingJournalsMessage": "Nessun diario esistente.",
-  "@noExistingJournalsMessage": {
-    "description": "Messaggio visualizzato quando non ci sono ancora diari creati."
-  },
   "noExistingJournalsToCopy": "Nessun diario esistente da cui copiare.",
-  "@noExistingJournalsToCopy": {
-    "description": "Messaggio visualizzato nella selezione della fonte della tavolozza quando non esistono altri diari da cui copiare una tavolozza."
-  },
   "noNotesInJournalMessage": "Nessuna nota in questo diario.",
-  "@noNotesInJournalMessage": {
-    "description": "Messaggio visualizzato quando un diario non contiene note."
-  },
   "noPaletteModelsAvailable": "Nessun modello di tavolozza disponibile.",
-  "@noPaletteModelsAvailable": {
-    "description": "Messaggio visualizzato quando non sono disponibili modelli di tavolozza (predefiniti o personali)."
-  },
   "noPaletteModelsAvailableMessage": "Nessun modello di tavolozza disponibile.",
-  "@noPaletteModelsAvailableMessage": {
-    "description": "Messaggio visualizzato quando non ci sono modelli di tavolozza tra cui scegliere."
-  },
   "noRealChangesDetectedLog": "Nessuna modifica reale rilevata, salvataggio automatico annullato.",
-  "@noRealChangesDetectedLog": {
-    "description": "Messaggio di log quando un salvataggio automatico viene annullato perché non sono state rilevate modifiche."
-  },
   "noteCreatedOnLabel": "Creata il: {date}",
-  "@noteCreatedOnLabel": {
-    "description": "Etichetta che visualizza la data di creazione di una nota.",
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
   "noteDateLabel": "Data: {date}",
-  "@noteDateLabel": {
-    "description": "Etichetta che visualizza la data dell'evento di una nota.",
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
   "noteDeletedSuccessSnackbar": "Nota eliminata con successo.",
-  "@noteDeletedSuccessSnackbar": {
-    "description": "Messaggio Snackbar mostrato dopo che una nota è stata eliminata con successo."
-  },
   "notificationSettingsComingSoon": "Impostazioni notifiche prossimamente!",
   "notifications": "Notifiche",
   "numberBetweenValidator": "Tra 1 e {maxGradientSteps}.",
-  "@numberBetweenValidator": {
-    "description": "Messaggio di errore di convalida per un input numerico che deve essere compreso in un intervallo specifico per i passaggi del gradiente.",
-    "placeholders": {
-      "maxGradientSteps": {
-        "type": "int"
-      }
-    }
-  },
   "numberOfColorsHint": "1",
-  "@numberOfColorsHint": {
-    "description": "Testo di suggerimento per il campo di input del numero di colori (per colore singolo o gradiente)."
-  },
   "numberOfColorsLabel": "Numero di colori (1 per singolo, 2-{maxGradientSteps} per gradiente)",
-  "@numberOfColorsLabel": {
-    "description": "Etichetta per il campo di input che specifica il numero di colori per un singolo colore o un gradiente.",
-    "placeholders": {
-      "maxGradientSteps": {
-        "type": "int"
-      }
-    }
-  },
   "ok": "OK",
-  "@ok": {
-    "description": "Etichetta generica per un pulsante OK."
-  },
   "optionsAppBarTooltip": "Opzioni",
-  "@optionsAppBarTooltip": {
-    "description": "Suggerimento per il pulsante del menu opzioni nell'AppBar."
-  },
   "optionsTooltip": "Opzioni",
-  "@optionsTooltip": {
-    "description": "Suggerimento per il pulsante del menu 'più opzioni' nell'AppBar."
-  },
   "orSeparator": "o",
   "pageTitleModelPrefix": "Modello: ",
-  "@pageTitleModelPrefix": {
-    "description": "Prefisso per il titolo della pagina durante la modifica di un modello di tavolozza."
-  },
   "pageTitleNewPaletteModel": "Nuovo Modello di Tavolozza",
-  "@pageTitleNewPaletteModel": {
-    "description": "Titolo della pagina durante la creazione di un nuovo modello di tavolozza."
-  },
   "pageTitlePalettePrefix": "Tavolozza: ",
-  "@pageTitlePalettePrefix": {
-    "description": "Prefisso per il titolo della pagina durante la modifica della tavolozza di un diario."
-  },
   "paletteCopiedFromName": "Tavolozza di '{journalName}' (Copiata da {sourceJournalName})",
-  "@paletteCopiedFromName": {
-    "description": "Formato del nome per una tavolozza copiata da un altro diario, associata a un nuovo diario.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      },
-      "sourceJournalName": {
-        "type": "String"
-      }
-    }
-  },
   "paletteCopiedFromNameNoJournal": "Tavolozza (Copiata da {sourceJournalName})",
-  "@paletteCopiedFromNameNoJournal": {
-    "description": "Formato del nome per una tavolozza copiata da un altro diario, non ancora associata a un nuovo diario (ad es. durante la creazione di un modello).",
-    "placeholders": {
-      "sourceJournalName": {
-        "type": "String"
-      }
-    }
-  },
   "paletteEmptyMaxReachedMessage": "La tavolozza è vuota e ha raggiunto il numero massimo di colori.",
-  "@paletteEmptyMaxReachedMessage": {
-    "description": "Messaggio mostrato quando la tavolozza è vuota ma non è possibile aggiungere altri colori a causa del raggiungimento di un limite massimo (caso limite)."
-  },
   "paletteFromModelName": "Tavolozza di '{journalName}' (Modello: {modelName})",
-  "@paletteFromModelName": {
-    "description": "Formato del nome per una tavolozza creata da un modello, associata a un nuovo diario.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      },
-      "modelName": {
-        "type": "String"
-      }
-    }
-  },
   "paletteFromModelNameNoJournal": "Tavolozza (Modello: {modelName})",
-  "@paletteFromModelNameNoJournal": {
-    "description": "Formato del nome per una tavolozza creata da un modello, non ancora associata a un nuovo diario (ad es. durante la creazione di un modello).",
-    "placeholders": {
-      "modelName": {
-        "type": "String"
-      }
-    }
-  },
   "paletteIsEmptyMessage": "La tavolozza di questo diario è vuota.\nModifica il diario per aggiungere colori o scegline un altro.",
-  "@paletteIsEmptyMessage": {
-    "description": "Messaggio visualizzato quando la tavolozza del diario attivo è vuota."
-  },
   "paletteMaxColorsError": "La tavolozza non può avere più di {maxColors} colori.",
-  "@paletteMaxColorsError": {
-    "description": "Messaggio di errore visualizzato quando si tenta di aggiungere più colori del massimo consentito.",
-    "placeholders": {
-      "maxColors": {
-        "type": "int"
-      }
-    }
-  },
   "paletteMaxColorsErrorSnackbar": "Una tavolozza non può avere più di {maxColors} colori.",
-  "@paletteMaxColorsErrorSnackbar": {
-    "description": "Messaggio di errore Snackbar quando una tavolozza supera il numero massimo di colori consentiti.",
-    "placeholders": {
-      "maxColors": {
-        "type": "int"
-      }
-    }
-  },
   "paletteMinColorError": "La tavolozza deve contenere almeno 1 colore.",
-  "@paletteMinColorError": {
-    "description": "Messaggio di errore visualizzato quando una tavolozza ha meno di 1 colore."
-  },
   "paletteMinColorsError": "La tavolozza deve contenere almeno {minColors} colore/i.",
-  "@paletteMinColorsError": {
-    "description": "Messaggio di errore visualizzato quando una tavolozza ha meno del numero minimo di colori richiesto.",
-    "placeholders": {
-      "minColors": {
-        "type": "int"
-      }
-    }
-  },
   "paletteModelInfo": "{colorCount} colore/i {type}",
-  "@paletteModelInfo": {
-    "description": "Informazioni su un modello di tavolozza, che mostrano il numero di colori e il tipo (Predefinito/Personale)."
-  },
   "paletteModelNameExistsError": "Un modello di tavolozza con questo nome esiste già.",
-  "@paletteModelNameExistsError": {
-    "description": "Messaggio di errore quando si tenta di salvare un modello di tavolozza con un nome che esiste già."
-  },
   "paletteModelSavedSnackbar": "Modello di tavolozza salvato.",
-  "@paletteModelSavedSnackbar": {
-    "description": "Messaggio Snackbar mostrato dopo che un modello di tavolozza è stato salvato con successo."
-  },
   "paletteModelSuffixPersonal": " (Personale)",
-  "@paletteModelSuffixPersonal": {
-    "description": "Suffisso aggiunto ai nomi dei modelli di tavolozza per indicare che sono modelli personali."
-  },
   "paletteModelSuffixPredefined": " (Predefinito)",
-  "@paletteModelSuffixPredefined": {
-    "description": "Suffisso aggiunto ai nomi dei modelli di tavolozza per indicare che sono modelli predefiniti."
-  },
   "paletteModelUpdatedLog": "Modello di tavolozza aggiornato: {modelName}",
-  "@paletteModelUpdatedLog": {
-    "description": "Messaggio di log che indica che un modello di tavolozza è stato aggiornato.",
-    "placeholders": {
-      "modelName": {
-        "type": "String"
-      }
-    }
-  },
   "paletteModelsAppBarTitle": "Modelli di Tavolozze",
-  "@paletteModelsAppBarTitle": {
-    "description": "Titolo dell'AppBar per la schermata di visualizzazione/selezione dei modelli di tavolozza."
-  },
   "paletteNameEmptyValidator": "Il nome della tavolozza non può essere vuoto.",
-  "@paletteNameEmptyValidator": {
-    "description": "Errore di convalida quando il nome della tavolozza è vuoto."
-  },
   "paletteNameHint": "Es: La mia tavolozza di lavoro",
-  "@paletteNameHint": {
-    "description": "Testo di suggerimento per il campo di input del nome della tavolozza."
-  },
   "paletteNameLabel": "Nome Tavolozza",
-  "@paletteNameLabel": {
-    "description": "Etichetta per il campo di input del nome della tavolozza."
-  },
   "paletteNameTooLongValidator": "Il nome non deve superare i 50 caratteri.",
-  "@paletteNameTooLongValidator": {
-    "description": "Errore di convalida quando il nome della tavolozza è troppo lungo."
-  },
   "paletteOfJournalName": "Tavolozza di '{journalName}'",
-  "@paletteOfJournalName": {
-    "description": "Nome predefinito per una nuova tavolozza basato sul nome di un diario.",
-    "placeholders": {
-      "journalName": {
-        "type": "String"
-      }
-    }
-  },
   "paletteSourceDropdownLabel": "Scegli origine tavolozza",
-  "@paletteSourceDropdownLabel": {
-    "description": "Etichetta per il menu a discesa per scegliere l'origine per la creazione di una nuova tavolozza."
-  },
   "paletteSourceEmptyOption": "Tavolozza Vuota (da comporre)",
-  "@paletteSourceEmptyOption": {
-    "description": "Opzione nella selezione dell'origine della tavolozza per creare una nuova tavolozza vuota."
-  },
   "paletteSourceExistingJournalOption": "Copiando la tavolozza da un diario esistente",
-  "@paletteSourceExistingJournalOption": {
-    "description": "Opzione nella selezione dell'origine della tavolozza per copiare una tavolozza da un diario esistente."
-  },
   "paletteSourceModelOption": "Da un modello di tavolozza",
-  "@paletteSourceModelOption": {
-    "description": "Opzione nella selezione dell'origine della tavolozza per utilizzare un modello di tavolozza."
-  },
   "passwordLabel": "Password",
   "passwordValidationError": "Inserisci la tua password.",
   "pleaseChooseJournalValidator": "Scegli un diario",
-  "@pleaseChooseJournalValidator": {
-    "description": "Errore di convalida quando nessun diario è selezionato da un menu a discesa obbligatorio."
-  },
   "pleaseChooseModelValidator": "Scegli un modello",
-  "@pleaseChooseModelValidator": {
-    "description": "Errore di convalida quando nessun modello di tavolozza è selezionato da un menu a discesa obbligatorio."
-  },
   "predefinedModelsCannotBeDeletedSnackbar": "I modelli predefiniti non possono essere eliminati.",
-  "@predefinedModelsCannotBeDeletedSnackbar": {
-    "description": "Messaggio Snackbar mostrato quando si tenta di eliminare un modello di tavolozza predefinito."
-  },
   "registerPageAlreadyHaveAccountLink": "Hai già un account? Accedi",
   "registerPageConfirmPasswordLabel": "Conferma Password",
   "registerPageConfirmPasswordValidatorEmpty": "Conferma la tua password.",
@@ -1169,258 +270,74 @@
   "registerPageSignUpButton": "Registrati e Accedi",
   "registerPageTitle": "Crea Account",
   "reloadingInitialJournalMessage": "Ricaricamento del diario iniziale dopo l'eliminazione del diario attivo.",
-  "@reloadingInitialJournalMessage": {
-    "description": "Messaggio di log che indica che l'applicazione sta ricaricando il diario iniziale/predefinito dopo che quello attivo è stato eliminato."
-  },
   "save": "Salva",
-  "@save": {
-    "description": "Etichetta generica per l'azione 'Salva'."
-  },
   "saveBlockedColorInUseError": "Salvataggio bloccato: Il/I colore/i '{colorTitles}' è/sono in uso e non possono essere eliminati.",
-  "@saveBlockedColorInUseError": {
-    "description": "Messaggio di errore quando il salvataggio di una tavolozza è bloccato perché uno o più colori contrassegnati per l'eliminazione sono in uso.",
-    "placeholders": {
-      "colorTitles": {
-        "type": "String"
-      }
-    }
-  },
   "saveButtonLabel": "Salva",
-  "@saveButtonLabel": {
-    "description": "Etichetta per un pulsante di salvataggio."
-  },
   "saveNameButtonLabel": "Salva nome",
-  "@saveNameButtonLabel": {
-    "description": "Etichetta del pulsante per salvare un nuovo nome (ad es. per un diario)."
-  },
   "savingInProgressSnackbar": "Salvataggio in corso, attendere...",
-  "@savingInProgressSnackbar": {
-    "description": "Messaggio Snackbar che indica che un'operazione di salvataggio è attualmente in corso."
-  },
   "selectLanguage": "Seleziona Lingua",
   "settings": "Impostazioni",
   "signInButton": "Accedi",
   "signInEmailErrorLog": "Errore di accesso con email: {errorDetails}",
-  "@signInEmailErrorLog": {
-    "description": "Messaggio di log per un errore durante l'accesso con email.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
   "signInGoogleErrorLog": "Errore di accesso con Google: {errorDetails}",
-  "@signInGoogleErrorLog": {
-    "description": "Messaggio di log per un errore durante l'accesso con Google.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
   "signInGoogleSuccessLog": "Tentativo di accesso con Google riuscito.",
-  "@signInGoogleSuccessLog": {
-    "description": "Messaggio di log per un tentativo di accesso con Google riuscito."
-  },
   "signInPageTitle": "Accedi",
   "signInSuccessLog": "Tentativo di accesso riuscito per {email}",
-  "@signInSuccessLog": {
-    "description": "Messaggio di log per un tentativo di accesso con email riuscito.",
-    "placeholders": {
-      "email": {
-        "type": "String"
-      }
-    }
-  },
   "signInWithGoogleButton": "Accedi con Google",
   "signOutErrorPrefix": "Errore durante la disconnessione: ",
-  "@signOutErrorPrefix": {
-    "description": "Prefisso per il messaggio di errore visualizzato in uno SnackBar quando la disconnessione fallisce."
-  },
   "signOutErrorSnackbar": "Errore di disconnessione: {errorDetails}",
-  "@signOutErrorSnackbar": {
-    "description": "Messaggio Snackbar per un errore verificatosi durante la disconnessione.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
-  "signUpErrorLog": "Errore durante la registrazione su RegisterPage: {errorDetails}",
-  "@signUpErrorLog": {
-    "description": "Messaggio di log per un errore durante la registrazione dell'utente.",
-    "placeholders": {
-      "errorDetails": {
-        "type": "String"
-      }
-    }
-  },
+  "signUpErrorLog": "Errore during la registrazione su RegisterPage: {errorDetails}",
   "signUpSuccessLog": "Registrazione riuscita per {email}",
-  "@signUpSuccessLog": {
-    "description": "Messaggio di log per una registrazione utente riuscita.",
-    "placeholders": {
-      "email": {
-        "type": "String"
-      }
-    }
-  },
   "sortByEventDateTooltip": "Ordina per data evento",
-  "@sortByEventDateTooltip": {
-    "description": "Suggerimento per il pulsante per ordinare le note per data dell'evento."
-  },
   "sortByPaletteColorTooltip": "Ordina per colore tavolozza",
-  "@sortByPaletteColorTooltip": {
-    "description": "Suggerimento per il pulsante per ordinare le note per il colore della tavolozza associato."
-  },
   "sortDirectionAscending": " (Ascendente)",
-  "@sortDirectionAscending": {
-    "description": "Suffisso che indica un ordine di ordinamento ascendente."
-  },
   "sortDirectionDescending": " (Discendente)",
-  "@sortDirectionDescending": {
-    "description": "Suffisso che indica un ordine di ordinamento discendente."
-  },
   "startByCreatingOneMessage": "Inizia creandone uno qui sopra.",
-  "@startByCreatingOneMessage": {
-    "description": "Messaggio di follow-up quando non esistono diari, che suggerisce di crearne uno."
-  },
   "step1JournalName": "Nome del Diario",
-  "@step1JournalName": {
-    "description": "Titolo per il primo passo nella creazione di un diario (impostazione del nome)."
-  },
   "step2PaletteConfiguration": "Configurazione Tavolozza",
-  "@step2PaletteConfiguration": {
-    "description": "Titolo per il secondo passo nella creazione di un diario (configurazione della tavolozza)."
-  },
   "success": "Successo",
-  "@success": {
-    "description": "Etichetta generica per 'Successo'."
-  },
   "theme": "Tema",
   "themeSettingsComingSoon": "Impostazioni tema prossimamente!",
   "tooManyColorsValidator": "Troppi colori (max {maxAllowed} consentiti).",
-  "@tooManyColorsValidator": {
-    "description": "Messaggio di errore di convalida quando il numero di colori supera il massimo consentito per la tavolozza.",
-    "placeholders": {
-      "maxAllowed": {
-        "type": "int"
-      }
-    }
-  },
   "typeDeleteHereLabel": "Digita DELETE qui",
-  "@typeDeleteHereLabel": {
-    "description": "Etichetta per il campo di input in cui l'utente deve digitare 'DELETE' per confermare l'eliminazione."
-  },
   "userNotConnectedError": "Utente non connesso.",
-  "@userNotConnectedError": {
-    "description": "Messaggio di errore quando un'azione richiede un utente autenticato ma non ne viene trovato nessuno."
-  },
   "userNotIdentified": "Utente non identificato",
-  "@userNotIdentified": {
-    "description": "Messaggio di errore generico quando l'identità dell'utente non può essere confermata."
-  },
   "userNotIdentifiedSnackbar": "Utente non identificato.",
-  "@userNotIdentifiedSnackbar": {
-    "description": "Messaggio Snackbar che indica che l'utente non è identificato."
-  },
   "version": "Versione",
-  "@version": {
-    "description": "Etichetta per la versione dell'applicazione."
-  },
   "versionBuildFormat": "v{version} (Build {buildNumber})",
-  "@versionBuildFormat": {
-    "description": "Formato per visualizzare la versione dell'applicazione e il numero di build. Esempio: v1.0.0 (Build 1)",
-    "placeholders": {
-      "version": {
-        "type": "String"
-      },
-      "buildNumber": {
-        "type": "String"
-      }
-    }
-  },
   "versionDynamicText": "Versione {version} (Build {buildNumber})",
-  "@versionDynamicText": {
-    "description": "Testo che visualizza la versione dell'applicazione e il numero di build.",
-    "placeholders": {
-      "version": {
-        "type": "String"
-      },
-      "buildNumber": {
-        "type": "String"
-      }
-    }
-  },
   "versionLoading": "Caricamento...",
-  "@versionLoading": {
-    "description": "Testo visualizzato durante il caricamento delle informazioni sulla versione."
-  },
   "versionPrefix": "versione : ",
-  "@versionPrefix": {
-    "description": "Prefisso per visualizzare il numero di versione, ad es. 'versione : 1.0'."
-  },
   "versionUnavailable": "Versione non disponibile",
-  "@versionUnavailable": {
-    "description": "Testo visualizzato quando le informazioni sulla versione non possono essere recuperate."
-  },
   "viewAsGridTooltip": "Visualizza come griglia",
-  "@viewAsGridTooltip": {
-    "description": "Suggerimento per il pulsante per passare alla visualizzazione a griglia."
-  },
   "viewAsListTooltip": "Visualizza come elenco",
-  "@viewAsListTooltip": {
-    "description": "Suggerimento per il pulsante per passare alla visualizzazione a elenco."
-  },
   "welcomeGuest": "Benvenuto/a!",
-  "@welcomeGuest": {
-    "description": "Messaggio di benvenuto generico quando il nome visualizzato dell'utente non è disponibile."
-  },
   "welcomeUser": "Benvenuto/a, {userName}!",
-  "@welcomeUser": {
-    "description": "Messaggio di benvenuto con il nome visualizzato dell'utente.",
-    "placeholders": {
-      "userName": {
-        "type": "String",
-        "example": "Mario Rossi"
-      }
-    }
-  },
   "yesDeleteAllButtonLabel": "SÌ, ELIMINA TUTTO",
-  "@yesDeleteAllButtonLabel": {
-    "description": "Etichetta del pulsante che conferma l'eliminazione di tutti gli elementi, tipicamente in una conferma ad alto rischio."
-  },
   "yesDeleteAllNotesButtonLabel": "SÌ, ELIMINA TUTTE LE NOTE",
-  "@yesDeleteAllNotesButtonLabel": {
-    "description": "Etichetta del pulsante che conferma l'eliminazione di tutte le note, tipicamente in una finestra di dialogo di conferma finale."
-  },
   "help": "Aiuto",
   "cookieConsentTitle": "Consenso per i Cookie",
-  "@cookieConsentTitle": {
-    "description": "Titolo per il banner del consenso ai cookie."
-  },
   "cookieConsentMessage": "Utilizziamo i cookie per migliorare la tua esperienza. I cookie essenziali sono necessari per il funzionamento del sito. Accetti i cookie analitici per aiutarci a migliorare i nostri servizi?",
-  "@cookieConsentMessage": {
-    "description": "Messaggio principale per il banner del consenso ai cookie."
-  },
   "cookieConsentAcceptAll": "Accetta Tutti",
-  "@cookieConsentAcceptAll": {
-    "description": "Testo del pulsante per accettare tutti i cookie."
-  },
   "cookieConsentDecline": "Rifiuta i Cookie Analitici",
-  "@cookieConsentDecline": {
-    "description": "Testo del pulsante per rifiutare i cookie non essenziali."
-  },
   "cookieConsentSettings": "Impostazioni",
-  "@cookieConsentSettings": {
-    "description": "Testo del pulsante per aprire le impostazioni dei cookie."
-  },
   "privacyPolicy": "Informativa sulla Privacy",
-  "@privacyPolicy": {
-    "description": "Link all'informativa sulla privacy."
-  },
   "newJournalMenuItem": "Nuovo Diario",
   "editJournalNameTooltip": "Modifica nome diario",
   "existingNotesTitle": "Note esistenti",
   "sortByCreationDateTooltip": "Ordina per data di creazione",
-  "sortByContentTooltip": "Ordina per contenuto"
+  "sortByContentTooltip": "Ordina per contenuto",
+  "editJournalTitle": "Modifica Diario",
+  "notificationsTitle": "Notifiche",
+  "enableNotificationsLabel": "Abilita Notifiche",
+  "notificationPhraseLabel": "Frase di Notifica",
+  "phraseCannotBeEmptyValidator": "La frase non può essere vuota.",
+  "notificationDaysLabel": "Giorni di Notifica",
+  "allDaysButtonLabel": "Tutti",
+  "notificationTimesLabel": "Orari di Notifica",
+  "journalNameLabel": "Nome del diario",
+  "journalNameValidator": "Inserisci un nome per il diario.",
+  "notificationPhraseValidator": "La frase di notifica non può essere vuota.",
+  "selectAllButton": "Seleziona tutto",
+  "daysOfWeek": "Lun,Mar,Mer,Gio,Ven,Sab,Dom"
 }
