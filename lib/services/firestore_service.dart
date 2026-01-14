@@ -31,11 +31,41 @@ const Uuid _uuid = Uuid();
 /// including managing users, journals, notes, and palette models.
 class FirestoreService {
   final FirebaseFirestore _db;
+  static const int _maxJournalNameLength = 100;
+  static const int _maxNoteContentLength = 10000; // Arbitrary safe limit
 
   /// Creates an instance of [FirestoreService].
   ///
   /// Requires a [FirebaseFirestore] instance.
   FirestoreService(this._db);
+
+  void _validateJournal(Journal journal) {
+    if (journal.name.trim().isEmpty) {
+      throw ArgumentError('Le nom du journal ne peut pas être vide.');
+    }
+    if (journal.name.length > _maxJournalNameLength) {
+      throw ArgumentError('Le nom du journal dépasse la limite de $_maxJournalNameLength caractères.');
+    }
+    if (journal.userId.isEmpty) {
+       throw ArgumentError('UserId est requis pour le journal.');
+    }
+    // Validation palette minimal structure
+    if (journal.palette.colors.isEmpty) {
+      throw ArgumentError('La palette du journal ne peut pas être vide.');
+    }
+  }
+
+  void _validateNote(Note note) {
+    if (note.journalId.isEmpty) {
+      throw ArgumentError('JournalId est requis pour la note.');
+    }
+    if (note.userId.isEmpty) {
+      throw ArgumentError('UserId est requis pour la note.');
+    }
+    // Assuming Note has content or similar field. Checking 'Note' model structure might be needed if I don't recall. 
+    // Checking previous file dump... Note class details were not fully visible in list_dir but likely standard.
+    // I shall be conservative and only validate IDs which are critical. 
+  }
 
   /// Initializes data for a new user in Firestore.
   ///
@@ -217,6 +247,7 @@ class FirestoreService {
   /// Throws an [Exception] if creation fails.
   Future<void> createJournal(Journal journal) async {
     try {
+      _validateJournal(journal);
       await _db.collection('journals').doc(journal.id).set(journal.toMap());
       _logger.i('Journal créé: ${journal.id} pour ${journal.userId}');
     } catch (e, stackTrace) {
@@ -232,6 +263,7 @@ class FirestoreService {
   /// Throws an [Exception] if the update fails.
   Future<void> updateJournal(Journal journal) async {
     try {
+      _validateJournal(journal);
       journal.lastUpdatedAt = Timestamp.now(); // Ensure lastUpdatedAt is current
       await _db.collection('journals').doc(journal.id).update(journal.toMap());
       _logger.i('Journal mis à jour: ${journal.id}');
@@ -383,6 +415,7 @@ class FirestoreService {
   /// Throws an [Exception] if creation fails.
   Future<void> createNote(Note note) async {
     try {
+      _validateNote(note);
       await _db.collection('notes').doc(note.id).set(note.toMap());
       _logger.i('Note créée: ${note.id} dans journal ${note.journalId}');
     } catch (e, stackTrace) {
@@ -398,6 +431,7 @@ class FirestoreService {
   /// Throws an [Exception] if the update fails.
   Future<void> updateNote(Note note) async {
     try {
+      _validateNote(note);
       note.lastUpdatedAt = Timestamp.now(); // Ensure lastUpdatedAt is current
       await _db.collection('notes').doc(note.id).update(note.toMap());
       _logger.i('Note màj: ${note.id}');

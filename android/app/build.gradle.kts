@@ -31,12 +31,13 @@ val localProps = localProperties()
 
 android {
     namespace = "org.stanworld.colorsnotes"
-    compileSdk = 35 // Ou flutter.compileSdkVersion si défini par le plugin Flutter
-    ndkVersion = "27.0.12077973"
+    compileSdk = 36 // Ou flutter.compileSdkVersion si défini par le plugin Flutter
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -49,8 +50,8 @@ android {
 
     defaultConfig {
         applicationId = "org.stanworld.colorsnotes"
-        minSdk = 23
-        targetSdk = 35
+        minSdk = flutter.minSdkVersion
+        targetSdk = 36
         versionCode = flutter.versionCode // Géré par Flutter via pubspec.yaml
         versionName = flutter.versionName // Géré par Flutter via pubspec.yaml
         multiDexEnabled = true
@@ -92,14 +93,15 @@ android {
 }
 
 dependencies {
-    implementation(platform("com.google.firebase:firebase-bom:33.13.0"))
-    implementation("com.google.firebase:firebase-analytics-ktx")
-    implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("com.google.firebase:firebase-firestore-ktx")
+    // Use explicit versions instead of BOM for better compatibility
+    implementation("com.google.firebase:firebase-analytics:22.1.2")
+    implementation("com.google.firebase:firebase-auth:23.1.0")
+    implementation("com.google.firebase:firebase-firestore:25.1.1")
     // implementation("com.google.firebase:firebase-appcheck-playintegrity")
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.0") // Assurez-vous que cette version ou une version compatible est utilisée
     implementation("androidx.multidex:multidex:2.0.1")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
 
 flutter {

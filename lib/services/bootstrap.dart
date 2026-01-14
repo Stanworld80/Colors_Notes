@@ -49,7 +49,7 @@ class AppBootstrap {
 
     // 5. Instancier les services de bas niveau
     final firestoreService = FirestoreService(FirebaseFirestore.instance);
-    final authService = AuthService(FirebaseAuth.instance, GoogleSignIn(), firestoreService);
+    final authService = AuthService(FirebaseAuth.instance, GoogleSignIn(scopes: []), firestoreService);
 
     // 6. Instancier et charger les providers qui nécessitent une initialisation asynchrone
     final languageProvider = LanguageProvider();
