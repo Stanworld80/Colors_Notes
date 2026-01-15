@@ -23,3 +23,20 @@ This triplet structure applies to both:
 - **MVVM Pattern**: transition towards MVVM (e.g., `CreateJournalViewModel`) to separate UI from business logic.
 - **Service Layer**: Centralized services (`FirestoreService`, `AuthService`) for external interactions.
 - **Validation**: "Trust but verify" - Client-side validation complements server-side security rules.
+
+## Deployment & DevOps
+- **Scripted Deployment**: `build_deploy.sh` handles building (Web/Android APK/AAB) and deploying to Firebase Hosting and App Distribution.
+    - Usage: `./build_deploy.sh -e [dev|staging|prod] -p [web|android]`
+- **Data Sync**: `sync_firestore_env.sh` facilitates syncing Firestore data and Auth users between environments (e.g., Prod -> Staging).
+- **Versioning**: Semantic versioning managed in `pubspec.yaml` (automatically incremented by build script).
+
+## Testing Strategy
+- **Unit Tests**: Focus on ViewModels (`create_journal_view_model_test.dart`) and Services (`firestore_service_test.dart`) using `mockito` for dependencies.
+- **Widget Tests**: Smoke tests for UI components.
+- **Integration Tests**: (Planned) End-to-end flows.
+
+## Codebase Organization
+- **`lib/viewmodels/`**: State management and business logic (Provider/ChangeNotifier).
+- **`lib/services/`**: Data access and external APIs (Firestore, Auth).
+- **`lib/models/`**: Data classes with JSON serialization.
+- **`lib/screens/`**: UI implementations (StatelessWidgets observing ViewModels).
