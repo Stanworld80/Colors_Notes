@@ -2,7 +2,7 @@ name: colors_notes
 description: "Color your days"
 publish_to: 'none'
 
-version: 1.6.7+97
+version: 1.6.8+99
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
