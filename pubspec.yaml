@@ -2,7 +2,7 @@ name: colors_notes
 description: "Color your days"
 publish_to: 'none'
 
-version: 1.6.8+118
+version: 1.6.8+120
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
@@ -40,6 +40,7 @@ dependencies:
   flutter_local_notifications: ^19.0.0
   timezone: ^0.10.1
   flutter_timezone: ^3.0.0
+  permission_handler: ^11.3.0
 
 
 dev_dependencies:
