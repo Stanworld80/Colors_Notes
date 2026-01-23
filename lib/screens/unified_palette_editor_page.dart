@@ -362,10 +362,11 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
 
     if (secondConfirm != true) return false;
 
-    if (mounted)
+    if (mounted) {
       setState(() {
         _isLoading = true;
       });
+    }
     try {
       if (!_isEditingModel && widget.journalToUpdatePaletteFor != null) {
         final firestoreService = Provider.of<FirestoreService>(context, listen: false);
@@ -378,10 +379,11 @@ class _UnifiedPaletteEditorPageState extends State<UnifiedPaletteEditorPage> {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.genericErrorSnackbar(e.toString())), backgroundColor: Colors.red));
       return false;
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _isLoading = false;
         });
+      }
     }
   }
   /// Handles the `onWillPop` event to prevent navigation while saving.

@@ -28,6 +28,7 @@ class MyApp extends StatelessWidget {
       providers: [
         Provider.value(value: bootstrap.authService),
         Provider.value(value: bootstrap.firestoreService),
+        Provider.value(value: bootstrap.notificationService),
         ChangeNotifierProvider.value(value: bootstrap.languageProvider),
         ChangeNotifierProvider(
           create: (_) => ActiveJournalNotifier(

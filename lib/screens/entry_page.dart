@@ -346,7 +346,7 @@ class _EntryPageState extends State<EntryPage> {
                   children: <Widget>[
                     if (_currentJournalDetails!.palette.colors.isNotEmpty)
                       DropdownButtonFormField<String>(
-                        value: _selectedPaletteElementId,
+                        initialValue: _selectedPaletteElementId,
                         decoration: InputDecoration(labelText: l10n.entryPageAssociatedColorLabel, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
                         items: _currentJournalDetails!.palette.colors.map((ColorData colorData) {
                           return DropdownMenuItem<String>(

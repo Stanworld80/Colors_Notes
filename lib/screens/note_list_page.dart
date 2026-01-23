@@ -1,14 +1,13 @@
 // lib/screens/note_list_page.dart
 import 'package:colors_notes/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // For date formatting.
+// For date formatting.
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
 import '../services/firestore_service.dart';
 import '../models/note.dart';
 import '../models/journal.dart';
-import '../models/color_data.dart';
 import '../providers/active_journal_provider.dart';
 import 'entry_page.dart'; // Pour la navigation vers la page d'édition
 import '../services/auth_service.dart'; // Used to get currentUserId for deleting all notes.
@@ -228,7 +227,7 @@ class _NoteListPageState extends State<NoteListPage> {
                       return const SizedBox.shrink();
                     }
                     final notes = snapshot.data ?? [];
-                    if (currentUserId != null && notes.isNotEmpty) {
+                    if (notes.isNotEmpty) {
                       return Tooltip(
                         message: l10n.deleteAllNotesTooltip,
                         child: IconButton(

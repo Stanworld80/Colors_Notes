@@ -164,7 +164,7 @@ class DynamicJournalAppBar extends StatelessWidget implements PreferredSizeWidge
               icon: const Icon(Icons.edit_outlined),
               onPressed: () {
                 // Appel de la fonction de dialogue pour éditer le nom du journal
-                if (currentUserId != null && activeJournal != null) {
+                if (currentUserId != null) {
                   _showEditActiveJournalNameDialog(context, activeJournal, currentUserId, firestoreService, l10n);
                 }
               },

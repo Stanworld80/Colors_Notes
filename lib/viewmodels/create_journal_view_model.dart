@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 
 import '../services/firestore_service.dart';
-import '../services/auth_service.dart';
 import '../models/journal.dart';
 import '../models/palette.dart';
 import '../models/palette_model.dart';

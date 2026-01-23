@@ -1,11 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:colors_notes/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
 
-import '../core/app_constants.dart';
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
 import '../models/journal.dart';
@@ -197,7 +193,7 @@ class __CreateJournalContentState extends State<_CreateJournalContent> {
                       _buildStepIndicator(context, "2", l10n.step2PaletteConfiguration),
                       const SizedBox(height: 16),
                       DropdownButtonFormField<PaletteSourceType>(
-                        value: viewModel.selectedSourceType,
+                        initialValue: viewModel.selectedSourceType,
                         decoration: InputDecoration(
                             labelText: l10n.paletteSourceDropdownLabel,
                             border: const OutlineInputBorder()
@@ -221,7 +217,7 @@ class __CreateJournalContentState extends State<_CreateJournalContent> {
                               child: Text(l10n.noPaletteModelsAvailableMessage, style: TextStyle(color: Colors.orange.shade700))
                            )
                          : DropdownButtonFormField<PaletteModel>(
-                              value: viewModel.selectedPaletteModel,
+                              initialValue: viewModel.selectedPaletteModel,
                               items: viewModel.availablePaletteModels.map((PaletteModel model) {
                                 return DropdownMenuItem<PaletteModel>(
                                   value: model,
@@ -242,7 +238,7 @@ class __CreateJournalContentState extends State<_CreateJournalContent> {
                               child: Text(l10n.noExistingJournalsToCopy, style: TextStyle(color: Colors.orange.shade700))
                           )
                         : DropdownButtonFormField<Journal>(
-                              value: viewModel.selectedExistingJournal,
+                              initialValue: viewModel.selectedExistingJournal,
                               items: viewModel.availableUserJournals.map((Journal journal) {
                                 return DropdownMenuItem<Journal>(
                                   value: journal,

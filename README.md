@@ -22,6 +22,10 @@ Sous les conditions suivantes :
 * **Partage dans les Mêmes Conditions (SA)** — Dans le cas où vous effectuez un remix, que vous transformez, ou créez à partir du matériel composant l'Oeuvre originale, vous devez diffuser l'Oeuvre modifiée dans les même conditions, c'est-à-dire avec la même licence avec laquelle l'Oeuvre originale a été diffusée.
 
 Voir le fichier [LICENSE](LICENSE) pour le texte légal complet.
+Voir aussi :
+- [Guide Git](doc/GITGUIDE.md)
+- [Spécifications](doc/SPECS.md)
+- [Guide Testeur](doc/TESTER_GUIDE.md)
 
 [CC BY-NC-SA](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode) 
 
@@ -96,7 +100,28 @@ https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.txt
 * **Pour Android (avec un émulateur ou appareil connecté) :**
     ```bash
     flutter run
+    flutter run
     ```
+
+## 🧪 Tests et Qualité
+
+Le projet inclut une suite de tests d'intégration automatisés pour valider les fonctionnalités clés sur de vrais appareils Android via **Firebase Test Lab**.
+
+### Exécuter les tests sur Firebase Test Lab
+
+Pour exécuter tous les tests d'intégration (création de compte, journaux, notes, notifications) :
+
+```powershell
+./tools/run_firebase_test_lab.ps1
+```
+
+Pour exécuter spécifiquement le test des notifications (plus rapide) :
+
+```powershell
+./tools/run_firebase_notification_test.ps1
+```
+
+Ces scripts construisent automatiquement l'APK de test et l'envoient à Firebase Test Lab. Les résultats sont consultables dans la console Firebase.
 
 ## 📂 Structure du Projet (Simplifiée)
 * lib/

@@ -6,8 +6,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:colors_notes/models/journal.dart';
 import 'package:colors_notes/models/palette.dart';
 import 'package:colors_notes/providers/active_journal_provider.dart';
-import 'package:colors_notes/services/auth_service.dart';
-import 'package:colors_notes/services/firestore_service.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' show User;
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';

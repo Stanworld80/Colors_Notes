@@ -1,0 +1,5 @@
+-keep class com.dexterous.flutterlocalnotifications.** { *; }
+-keep class com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver
+-keep class com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver
+-keep class com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver
+-dontwarn com.dexterous.flutterlocalnotifications.**
