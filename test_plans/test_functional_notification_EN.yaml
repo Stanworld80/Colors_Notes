@@ -30,9 +30,10 @@
     
     - goal: Edit notification time
       hint: >-
-        1. Click on the default time (e.g. 08:00).
-        2. In the time picker, select current time + 2 minutes.
-        3. Confirm/Validate.
+        1. Click on the time (e.g., 08:00).
+        2. IMPORTANT: Click the small keyboard icon in the bottom left to switch to text input mode.
+        3. Enter the time (Current Time + 2 minutes) in the text fields.
+        4. Confirm with "OK".
     
     - goal: Save changes
       hint: "Tap the 'Save' button (floppy disk icon) at the top right."

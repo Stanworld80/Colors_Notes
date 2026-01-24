@@ -30,9 +30,10 @@
     
     - goal: modifier l'heure de notification
       hint: >-
-        1. Cliquer sur l'heure par défaut (ex: 08:00).
-        2. Dans le sélecteur d'heure, choisir l'heure actuelle + 2 minutes.
-        3. Valider.
+        1. Cliquer sur l'heure (ex: 08:00).
+        2. IMPORTANT : Cliquer sur l'icône de petit clavier en bas à gauche pour passer en mode saisie de texte.
+        3. Saisir l'heure actuelle + 2 minutes dans les champs de texte.
+        4. Valider avec "OK".
     
     - goal: sauvegarder les modifications
       hint: "Appuyer sur le bouton 'Enregistrer' (icône disquette) en haut à droite."
