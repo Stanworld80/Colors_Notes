@@ -1,0 +1,45 @@
+- displayName: notification 2 minutes after current time
+  id: notification-2-minutes-en
+  steps:
+    - goal: Simple Login
+      hint: |-
+        Use account: "CompteTechnique-Testeur@stanworld.org"
+        Password: "Tester=2025"
+      successCriteria: "Arrive at Journals screen (or last active journal)"
+    
+    - goal: Go to Journal Management
+      hint: |-
+        1. Open burger menu (or top dropdown).
+        2. Click "Manage Journals" (or "New Journal" if list is empty).
+        3. Ensure you have an active journal (create "My New Journal" if needed).
+        4. From the list or home page, click the edit icon (pencil) for "My New Journal".
+      successCriteria: "Arrive at 'Edit Journal' page"
+    
+    - goal: Enable Notifications
+      hint: "Toggle the 'Enable notifications' switch."
+    
+    - goal: 'Add notification phrase: "2min notification test"'
+      hint: "Fill the 'Notification Phrase' field."
+    
+    - goal: Select Days
+      hint: "Click the 'Select All' button."
+    
+    - goal: Add a notification time
+      hint: "Click the (+) icon to add a time slot if none exists."
+      successCriteria: "A time slot appears (e.g. 08:00)."
+    
+    - goal: Edit notification time
+      hint: >-
+        1. Click on the default time (e.g. 08:00).
+        2. In the time picker, select current time + 2 minutes.
+        3. Confirm/Validate.
+    
+    - goal: Save changes
+      hint: "Tap the 'Save' button (floppy disk icon) at the top right."
+      successCriteria: "Return to journal with 'Journal updated' message (or similar)."
+    
+    - goal: 'Wait for notification in 2 minutes'
+      hint: |-
+        Do not close the application (backgrounding is okay).
+        Wait for 2 minutes.
+      successCriteria: "A system notification appears with the journal title and the text '2min notification test'."
