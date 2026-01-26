@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
@@ -83,11 +82,11 @@ void main() {
             Palette(id: 'p1', name: 'Default', colors: [], userId: 'user1'),
       );
 
-      when(mockPlugin.cancel(any)).thenAnswer((_) async => null);
+      when(mockPlugin.cancel(any)).thenAnswer((_) async {});
       when(mockPlugin.zonedSchedule(any, any, any, any, any,
               androidScheduleMode: anyNamed('androidScheduleMode'),
               matchDateTimeComponents: anyNamed('matchDateTimeComponents')))
-          .thenAnswer((_) async => null);
+          .thenAnswer((_) async {});
 
       // Act
       await service.scheduleJournalNotifications(journal);
@@ -122,7 +121,7 @@ void main() {
             Palette(id: 'p1', name: 'Default', colors: [], userId: 'user1'),
       );
 
-      when(mockPlugin.cancel(any)).thenAnswer((_) async => null);
+      when(mockPlugin.cancel(any)).thenAnswer((_) async {});
 
       // Act
       await service.scheduleJournalNotifications(journal);

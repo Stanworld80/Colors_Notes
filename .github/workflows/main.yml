@@ -1,0 +1,140 @@
+name: Colors & Notes CI/CD
+
+on:
+  push:
+    branches: [ "main", "dev", "refactor/*" ]
+  pull_request:
+    branches: [ "main", "dev" ]
+  workflow_dispatch:
+
+jobs:
+  # 1. Quality Assurance (Linting & Unit Tests)
+  quality_check:
+    name: 🛡️ Quality Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Get Dependencies
+        run: flutter pub get
+
+      - name: 🧹 Linting
+        run: flutter analyze
+
+      - name: 🧪 Unit Tests
+        run: flutter test test/unit
+
+      - name: 🧩 Widget Tests
+        run: flutter test test/widget
+
+  # 2. Build & Deploy (Only on main/dev push)
+  build_and_deploy:
+    name: 🚀 Build & Deploy
+    needs: quality_check
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Get Dependencies
+        run: flutter pub get
+
+      # Setup KeyStore
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
+          
+      - name: Create key.properties
+        run: |
+          echo "storePassword=${{ secrets.ANDROID_STORE_PASSWORD }}" > android/key.properties
+          echo "keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> android/key.properties
+          echo "storeFile=upload-keystore.jks" >> android/key.properties
+
+      # Setup Firebase
+      - name: Create google-services.json
+        run: |
+          echo "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > android/app/google-services.json
+
+      # Build APK
+      - name: 🏗️ Build APK
+        run: flutter build apk --release
+
+      # Distribute to Firebase App Distribution
+      - name: 📤 Upload to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID_ANDROID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_CREDENTIAL_FILE_CONTENT }}
+          groups: uat-testers
+          file: build/app/outputs/flutter-apk/app-release.apk
+          releaseNotes: "Automated Release from CI/CD - ${{ github.sha }}"
+
+  # 3. Integration Tests (Firebase Test Lab) - Optional / Scheduled
+  # Running this on every push might be expensive/slow, so maybe on dispatch or nightly
+  integration_tests:
+    name: 🤖 Integration Tests (Firebase)
+    needs: build_and_deploy
+    # Only run on main or manual trigger to save credits/time
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          service_account_key: ${{ secrets.GCLOUD_SERVICE_ACCOUNT_KEY }}
+          project_id: ${{ secrets.FIREBASE_PROJECT_ID }}
+
+      - name: Build Android Test APK
+        working-directory: android
+        run: ./gradlew app:assembleAndroidTest
+
+      - name: Build App APK (Debug preferred for testing usually, or profile)
+        run: flutter build apk --debug --target=integration_test/notification_flow_test.dart
+
+      - name: 🧪 Run Notification Flow Test
+        run: |
+          gcloud firebase test android run \
+            --type instrumentation \
+            --app build/app/outputs/flutter-apk/app-debug.apk \
+            --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
+            --device model=redfin,version=30,locale=en,orientation=portrait \
+            --timeout 10m
