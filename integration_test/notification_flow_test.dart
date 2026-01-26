@@ -13,36 +13,58 @@ void main() {
       await tester.pumpAndSettle();
 
       // 1. Check if we are already logged in (Home Screen check)
-      if (find.byType(AppBar).evaluate().isNotEmpty) {
+      // Wait for either Home Screen or Auth Screen
+      bool onHome = false;
+      bool onAuth = false;
+      for (int i = 0; i < 20; i++) {
+        if (find.byType(AppBar).evaluate().isNotEmpty) {
+          // Verify if it's Home (AppBar usually has title "Journaux" or similar)
+          // Simple check: If AppBar exists, we are likely inside.
+          onHome = true;
+          break;
+        }
+        if (find
+                .widgetWithText(ElevatedButton, "Se connecter")
+                .evaluate()
+                .isNotEmpty ||
+            find.text("Déjà un compte ? Se connecter").evaluate().isNotEmpty) {
+          onAuth = true;
+          break;
+        }
+        await tester.pump(const Duration(milliseconds: 500));
+      }
+
+      if (onHome) {
         print("Already logged in, skipping authentication.");
       } else {
-        // We are likely on Login Page or Register Page.
-        // If we see "Déjà un compte ? Se connecter", we are on Register page -> Go to Login.
+        // Go to Login if needed
         final goToLoginLink = find.text("Déjà un compte ? Se connecter");
         if (goToLoginLink.evaluate().isNotEmpty) {
           await tester.tap(goToLoginLink);
           await tester.pumpAndSettle();
         }
 
-        // Now we should be on Login Page.
-        // Fields: Email, Password.
-        const email = 'CompteTechnique-Testeur@stanworld.org';
-        const password = 'Tester=2025';
-
-        // Fill Email
-        // Try finding by Icon first, fallback to Label/Hint
-        final emailField = find.ancestor(
+        // Wait for Email Field
+        final emailFieldFinder = find.ancestor(
             of: find.byIcon(Icons.email_outlined),
             matching: find.byType(TextFormField));
 
-        if (emailField.evaluate().isNotEmpty) {
-          await tester.enterText(emailField, email);
-        } else {
-          await tester.enterText(find.byType(TextFormField).at(0), email);
+        // Wait loop for fields
+        for (int i = 0; i < 10; i++) {
+          if (emailFieldFinder.evaluate().isNotEmpty) break;
+          await tester.pump(const Duration(milliseconds: 500));
         }
 
-        // Fill Password
-        // Try finding by Lock Icon or Label "Mot de passe"
+        const email = 'CompteTechnique-Testeur@stanworld.org';
+        const password = 'Tester=2025';
+
+        if (emailFieldFinder.evaluate().isNotEmpty) {
+          await tester.enterText(emailFieldFinder, email);
+        } else {
+          // Last ditch fallback if finder failed but fields exist
+          await tester.enterText(find.byType(TextFormField).first, email);
+        }
+
         final passwordField = find.ancestor(
             of: find.byIcon(Icons.lock_outline),
             matching: find.byType(TextFormField));
@@ -50,26 +72,14 @@ void main() {
         if (passwordField.evaluate().isNotEmpty) {
           await tester.enterText(passwordField, password);
         } else {
-          // Fallback: Use Label "Mot de passe" or just 2nd field
-          final passwordLabelFinder = find.ancestor(
-              of: find.text('Mot de passe'),
-              matching: find.byType(TextFormField));
-
-          if (passwordLabelFinder.evaluate().isNotEmpty) {
-            await tester.enterText(passwordLabelFinder, password);
-          } else {
-            await tester.enterText(find.byType(TextFormField).at(1), password);
-          }
+          await tester.enterText(find.byType(TextFormField).at(1), password);
         }
 
         // Submit Button "Se connecter"
         final loginButton = find.widgetWithText(ElevatedButton, "Se connecter");
-        if (loginButton.evaluate().isNotEmpty) {
-          await tester.tap(loginButton);
-        } else {
-          // Fallback
-          await tester.tap(find.byType(ElevatedButton).last);
-        }
+        await tester.tap(loginButton.evaluate().isNotEmpty
+            ? loginButton
+            : find.byType(ElevatedButton).last);
 
         await tester.pumpAndSettle(const Duration(seconds: 8)); // Wait for Auth
       }

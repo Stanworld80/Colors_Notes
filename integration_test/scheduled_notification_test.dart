@@ -12,41 +12,68 @@ void main() {
       await tester.pumpAndSettle();
 
       // --- Authentication (Reuse from notification_flow_test) ---
-      if (find.byType(AppBar).evaluate().isEmpty) {
+      // Wait for either Home Screen or Auth Screen
+      bool onHome = false;
+      bool onAuth = false;
+      for (int i = 0; i < 20; i++) {
+        if (find.byType(AppBar).evaluate().isNotEmpty) {
+          onHome = true;
+          break;
+        }
+        if (find
+                .widgetWithText(ElevatedButton, "Se connecter")
+                .evaluate()
+                .isNotEmpty ||
+            find.text("Déjà un compte ? Se connecter").evaluate().isNotEmpty) {
+          onAuth = true;
+          break;
+        }
+        await tester.pump(const Duration(milliseconds: 500));
+      }
+
+      if (onHome) {
+        // Logged in
+      } else {
         final goToLoginLink = find.text("Déjà un compte ? Se connecter");
         if (goToLoginLink.evaluate().isNotEmpty) {
           await tester.tap(goToLoginLink);
           await tester.pumpAndSettle();
         }
 
+        // Wait for Email Field
+        final emailFieldFinder = find.ancestor(
+            of: find.byIcon(Icons.email_outlined),
+            matching: find.byType(TextFormField));
+
+        for (int i = 0; i < 10; i++) {
+          if (emailFieldFinder.evaluate().isNotEmpty) break;
+          await tester.pump(const Duration(milliseconds: 500));
+        }
+
         const email = 'CompteTechnique-Testeur@stanworld.org';
         const password = 'Tester=2025';
 
-        final emailField = find.ancestor(
-            of: find.byIcon(Icons.email_outlined),
-            matching: find.byType(TextFormField));
-        if (emailField.evaluate().isNotEmpty) {
-          await tester.enterText(emailField, email);
+        if (emailFieldFinder.evaluate().isNotEmpty) {
+          await tester.enterText(emailFieldFinder, email);
         } else {
-          await tester.enterText(find.byType(TextFormField).at(0), email);
+          await tester.enterText(find.byType(TextFormField).first, email);
         }
 
         final passwordField = find.ancestor(
             of: find.byIcon(Icons.lock_outline),
             matching: find.byType(TextFormField));
+
         if (passwordField.evaluate().isNotEmpty) {
           await tester.enterText(passwordField, password);
         } else {
-          // Fallback to 2nd field
           await tester.enterText(find.byType(TextFormField).at(1), password);
         }
 
         final loginButton = find.widgetWithText(ElevatedButton, "Se connecter");
-        if (loginButton.evaluate().isNotEmpty) {
-          await tester.tap(loginButton);
-        } else {
-          await tester.tap(find.byType(ElevatedButton).last);
-        }
+        await tester.tap(loginButton.evaluate().isNotEmpty
+            ? loginButton
+            : find.byType(ElevatedButton).last);
+
         await tester.pumpAndSettle(const Duration(seconds: 8));
       }
 

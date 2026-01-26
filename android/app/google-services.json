@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "344541548510",
+    "project_id": "colors-notes-staging",
+    "storage_bucket": "colors-notes-staging.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:344541548510:android:631fa078fb9926677d174f",
+        "android_client_info": {
+          "package_name": "org.stanworld.colorsnotes"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCM4qYI0VtSAHTeorJzNMEwFHXAjEAMKbA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
