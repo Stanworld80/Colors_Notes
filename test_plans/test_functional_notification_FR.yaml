@@ -24,16 +24,16 @@
     - goal: Sélectionner les jours
       hint: "Cliquer sur le bouton 'Tout sélectionner' (SELECT ALL)."
     
-    - goal: ajouter une heure de notification
-      hint: "Cliquer sur l'icône (+) pour ajouter un créneau si aucun n'existe."
-      successCriteria: "Un créneau apparaît (ex: 08:00)."
+    - goal: Ajouter une heure de notification
+      hint: "Cliquer sur l'icône (+) pour ajouter un créneau. Le sélecteur d'heure s'ouvre automatiquement."
+      successCriteria: "La pop-up de sélection d'heure s'affiche immédiatement avec l'heure actuelle pré-sélectionnée."
     
-    - goal: modifier l'heure de notification
-      hint: >-
-        1. Cliquer sur l'heure (ex: 08:00).
-        2. IMPORTANT : Cliquer sur l'icône de petit clavier en bas à gauche pour passer en mode saisie de texte.
-        3. Saisir l'heure actuelle + 2 minutes dans les champs de texte.
-        4. Valider avec "OK".
+    - goal: Passer en mode saisie texte (Clavier)
+      hint: "Cliquer sur l'icône de petit clavier située tout en bas à gauche de la fenêtre contextuelle (dialogue). C'est crucial pour la stabilité du test."
+      successCriteria: "Les champs de saisie de texte (chiffres) remplacent l'horloge."
+
+    - goal: Saisir l'heure (+2 minutes)
+      hint: "Saisir l'heure actuelle + 2 minutes dans les champs, puis valider avec OK."
     
     - goal: sauvegarder les modifications
       hint: "Appuyer sur le bouton 'Enregistrer' (icône disquette) en haut à droite."

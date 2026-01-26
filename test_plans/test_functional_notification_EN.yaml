@@ -25,15 +25,15 @@
       hint: "Click the 'Select All' button."
     
     - goal: Add a notification time
-      hint: "Click the (+) icon to add a time slot if none exists."
-      successCriteria: "A time slot appears (e.g. 08:00)."
+      hint: "Click the (+) icon to add a time slot. The time picker opens automatically."
+      successCriteria: "The time picker dialog appears immediately with current time selected."
     
-    - goal: Edit notification time
-      hint: >-
-        1. Click on the time (e.g., 08:00).
-        2. IMPORTANT: Click the small keyboard icon in the bottom left to switch to text input mode.
-        3. Enter the time (Current Time + 2 minutes) in the text fields.
-        4. Confirm with "OK".
+    - goal: Switch to text input mode (Keyboard)
+      hint: "Click the small keyboard icon at the very bottom left of the dialog. This is crucial for test stability."
+      successCriteria: "Text input fields (numbers) replace the clock face."
+
+    - goal: Enter time (+2 minutes)
+      hint: "Enter current time + 2 minutes in the fields, then confirm with OK."
     
     - goal: Save changes
       hint: "Tap the 'Save' button (floppy disk icon) at the top right."

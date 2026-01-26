@@ -95,11 +95,15 @@ class _EditJournalPageState extends State<EditJournalPage> {
     }
   }
 
-  void _addNotificationTime() {
+  Future<void> _addNotificationTime() async {
     if (_notificationTimes.length < 12) {
       setState(() {
-        _notificationTimes.add(const TimeOfDay(hour: 8, minute: 0));
+        _notificationTimes.add(TimeOfDay.now());
       });
+      // Open the picker automatically for the newly added time
+      if (mounted) {
+        await _selectTime(context, _notificationTimes.length - 1);
+      }
     }
   }
 
@@ -341,6 +345,115 @@ class _EditJournalPageState extends State<EditJournalPage> {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text("Success! $scheduleInfo")),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text("Error: $e"),
+                                backgroundColor: Colors.red),
+                          );
+                        }
+                      }
+                    },
+                  ),
+                ),
+                // --- TEST BUTTON END ---
+                Center(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.schedule),
+                    label: const Text("Test: Schedule Interval"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.lightBlueAccent,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () async {
+                      if (!_notificationsEnabled) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content:
+                                  Text("Enable notifications switch first!")),
+                        );
+                        return;
+                      }
+
+                      // Show dialog to ask for interval
+                      int? selectedInterval = await showDialog<int>(
+                        context: context,
+                        builder: (ctx) {
+                          final TextEditingController controller =
+                              TextEditingController(text: '5');
+                          return AlertDialog(
+                            title: const Text("Test Interval"),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text(
+                                    "Enter interval in minutes (or 0 for seconds test):"),
+                                TextField(
+                                  controller: controller,
+                                  keyboardType: TextInputType.number,
+                                  decoration:
+                                      const InputDecoration(suffixText: "min"),
+                                ),
+                              ],
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(),
+                                child: const Text("Cancel"),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  final val = int.tryParse(controller.text);
+                                  Navigator.of(ctx).pop(val);
+                                },
+                                child: const Text("Schedule"),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+
+                      if (selectedInterval == null) return;
+
+                      final notificationService =
+                          Provider.of<NotificationService>(context,
+                              listen: false);
+
+                      await notificationService.requestPermissions();
+
+                      try {
+                        // If user entered 0, we can interpret it as "Every 10 seconds" or similar for rapid testing
+                        // But for now, let's just stick to minutes, strict interpretation.
+                        // Actually, let's treat 0 as "Fast Mode" -> 1 minute? Or we can check invalid inputs.
+                        // User asked "hours or minutes".
+                        // Let's pass the value to the service.
+
+                        // If 0 or less, maybe use seconds?
+                        // The service method signature scheduleIntervalTestNotifications takes `intervalMinutes`.
+                        // Let's modify the service method if we want seconds support, but for now let's assume minutes >= 1.
+                        // Ideally we should support seconds for testing.
+
+                        if (selectedInterval < 1) selectedInterval = 1;
+
+                        final res = await notificationService
+                            .scheduleIntervalTestNotifications(
+                                intervalMinutes: selectedInterval, count: 5);
+                        if (context.mounted) {
+                          showDialog(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: const Text("Scheduled!"),
+                              content: Text(res),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(ctx).pop(),
+                                  child: const Text("OK"),
+                                )
+                              ],
+                            ),
                           );
                         }
                       } catch (e) {

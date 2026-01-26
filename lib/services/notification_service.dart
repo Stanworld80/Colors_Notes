@@ -278,6 +278,46 @@ class NotificationService {
     }
   }
 
+  Future<String> scheduleIntervalTestNotifications(
+      {int intervalMinutes = 5, int count = 5}) async {
+    try {
+      const AndroidNotificationDetails androidPlatformChannelSpecifics =
+          AndroidNotificationDetails(
+        _channelId,
+        _channelName,
+        channelDescription: _channelDesc,
+        importance: Importance.max,
+        priority: Priority.high,
+        showWhen: true,
+      );
+      const NotificationDetails platformChannelSpecifics =
+          NotificationDetails(android: androidPlatformChannelSpecifics);
+
+      final now = tz.TZDateTime.now(tz.local);
+      final sb = StringBuffer();
+
+      for (int i = 1; i <= count; i++) {
+        final scheduledDate = now.add(Duration(minutes: intervalMinutes * i));
+        final id = 900 + i; // IDs 901, 902, ...
+
+        await flutterLocalNotificationsPlugin.zonedSchedule(
+          id,
+          'Test Interval #$i',
+          'Notification $i of $count (every $intervalMinutes min).',
+          scheduledDate,
+          platformChannelSpecifics,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        );
+        sb.writeln("Tip #$i: ${scheduledDate.hour}:${scheduledDate.minute}");
+      }
+
+      return "Scheduled $count notifications:\n${sb.toString()}";
+    } catch (e) {
+      debugPrint("Error scheduling interval notifications: $e");
+      rethrow;
+    }
+  }
+
   Future<void> cancelJournalNotifications(String journalId) async {
     int journalHash = journalId.hashCode;
 
@@ -289,5 +329,9 @@ class NotificationService {
             .cancel(journalHash + (day * 100) + time);
       }
     }
+  }
+
+  Future<List<PendingNotificationRequest>> getPendingNotifications() async {
+    return await flutterLocalNotificationsPlugin.pendingNotificationRequests();
   }
 }
