@@ -49,8 +49,13 @@ jobs:
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/develop')
     runs-on: ubuntu-latest
     env:
-      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-      FIREBASE_CREDENTIAL_FILE_CONTENT: ${{ secrets.FIREBASE_CREDENTIAL_FILE_CONTENT }}
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+      ANDROID_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      FIREBASE_CREDENTIAL_FILE_CONTENT: ${{ github.ref == 'refs/heads/main' && secrets.FIREBASE_SERVICE_ACCOUNT_PROD || secrets.FIREBASE_SERVICE_ACCOUNT_DEV }}
+      FIREBASE_APP_ID_ANDROID: ${{ github.ref == 'refs/heads/main' && secrets.FIREBASE_ANDROID_APP_ID_STAGING || secrets.FIREBASE_ANDROID_APP_ID_DEV }}
+      FIREBASE_PROJECT_ID: ${{ github.ref == 'refs/heads/main' && 'colors-notes-prod' || 'colors-notes-staging' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -73,14 +78,14 @@ jobs:
       - name: Decode Keystore
         if: env.ANDROID_KEYSTORE_BASE64 != ''
         run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
+          echo "${{ env.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
           
       - name: Create key.properties
         if: env.ANDROID_KEYSTORE_BASE64 != ''
         run: |
-          echo "storePassword=${{ secrets.ANDROID_STORE_PASSWORD }}" > android/key.properties
-          echo "keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> android/key.properties
-          echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> android/key.properties
+          echo "storePassword=${{ env.ANDROID_STORE_PASSWORD }}" > android/key.properties
+          echo "keyPassword=${{ env.ANDROID_KEY_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ env.ANDROID_KEY_ALIAS }}" >> android/key.properties
           echo "storeFile=upload-keystore.jks" >> android/key.properties
 
       # Setup Firebase
@@ -101,8 +106,8 @@ jobs:
         if: env.FIREBASE_CREDENTIAL_FILE_CONTENT != ''
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
-          appId: ${{ secrets.FIREBASE_APP_ID_ANDROID }}
-          serviceCredentialsFileContent: ${{ secrets.FIREBASE_CREDENTIAL_FILE_CONTENT }}
+          appId: ${{ env.FIREBASE_APP_ID_ANDROID }}
+          serviceCredentialsFileContent: ${{ env.FIREBASE_CREDENTIAL_FILE_CONTENT }}
           groups: uat-testers
           file: build/app/outputs/flutter-apk/app-release.apk
           releaseNotes: "Automated Release from CI/CD - ${{ github.sha }}"
@@ -134,11 +139,11 @@ jobs:
           fi
           
           # Create credentials file
-          echo "${{ secrets.FIREBASE_CREDENTIAL_FILE_CONTENT }}" > gcp-key.json
+          echo "${{ env.FIREBASE_CREDENTIAL_FILE_CONTENT }}" > gcp-key.json
           export GOOGLE_APPLICATION_CREDENTIALS=gcp-key.json
           
           # Deploy Firestore & Hosting
-          npx firebase-tools deploy --only firestore,hosting --project "${{ secrets.FIREBASE_PROJECT_ID }}"
+          npx firebase-tools deploy --only firestore,hosting --project "${{ env.FIREBASE_PROJECT_ID }}"
           
           # Clean up
           rm gcp-key.json
@@ -153,7 +158,8 @@ jobs:
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     env:
-      GCLOUD_SERVICE_ACCOUNT_KEY: ${{ secrets.GCLOUD_SERVICE_ACCOUNT_KEY }}
+      GCLOUD_SERVICE_ACCOUNT_KEY: ${{ github.ref == 'refs/heads/main' && secrets.FIREBASE_SERVICE_ACCOUNT_PROD || secrets.FIREBASE_SERVICE_ACCOUNT_DEV }}
+      FIREBASE_PROJECT_ID: ${{ github.ref == 'refs/heads/main' && 'colors-notes-prod' || 'colors-notes-staging' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -173,8 +179,8 @@ jobs:
         if: env.GCLOUD_SERVICE_ACCOUNT_KEY != ''
         uses: google-github-actions/setup-gcloud@v2
         with:
-          service_account_key: ${{ secrets.GCLOUD_SERVICE_ACCOUNT_KEY }}
-          project_id: ${{ secrets.FIREBASE_PROJECT_ID }}
+          service_account_key: ${{ env.GCLOUD_SERVICE_ACCOUNT_KEY }}
+          project_id: ${{ env.FIREBASE_PROJECT_ID }}
 
       # Setup Firebase Configuration
       - name: Setup google-services.json
