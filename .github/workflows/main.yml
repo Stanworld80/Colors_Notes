@@ -81,7 +81,11 @@ jobs:
       # Setup Firebase
       - name: Create google-services.json
         run: |
-          echo "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > android/app/google-services.json
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            cp android/app/google-services.prod.json android/app/google-services.json
+          else
+            cp android/app/google-services.staging.json android/app/google-services.json
+          fi
 
       # Build APK
       - name: 🏗️ Build APK
@@ -162,6 +166,15 @@ jobs:
           service_account_key: ${{ secrets.GCLOUD_SERVICE_ACCOUNT_KEY }}
           project_id: ${{ secrets.FIREBASE_PROJECT_ID }}
 
+      # Setup Firebase Configuration
+      - name: Setup google-services.json
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            cp android/app/google-services.prod.json android/app/google-services.json
+          else
+            cp android/app/google-services.staging.json android/app/google-services.json
+          fi
+
       - name: Build Android Test APK
         working-directory: android
         run: ./gradlew app:assembleAndroidTest
@@ -176,4 +189,6 @@ jobs:
             --app build/app/outputs/flutter-apk/app-debug.apk \
             --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
             --device model=redfin,version=30,locale=en,orientation=portrait \
+            --device model=panther,version=33,locale=en,orientation=portrait \
+            --device model=shiba,version=35,locale=en,orientation=portrait \
             --timeout 10m
