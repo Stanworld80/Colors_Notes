@@ -2,9 +2,9 @@ name: Colors & Notes CI/CD
 
 on:
   push:
-    branches: [ "main", "dev", "refactor/*" ]
+    branches: [ "main", "dev", "develop", "refactor/*" ]
   pull_request:
-    branches: [ "main", "dev" ]
+    branches: [ "main", "dev", "develop" ]
   workflow_dispatch:
 
 jobs:
@@ -43,7 +43,7 @@ jobs:
   build_and_deploy:
     name: 🚀 Build & Deploy
     needs: quality_check
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/develop')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -93,6 +93,42 @@ jobs:
           groups: uat-testers
           file: build/app/outputs/flutter-apk/app-release.apk
           releaseNotes: "Automated Release from CI/CD - ${{ github.sha }}"
+
+      # Setup Node.js (needed for npm & firebase-tools)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Build Web
+      - name: 🌐 Build Web
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            ENV="prod"
+          else
+            ENV="staging"
+          fi
+          flutter build web --release --dart-define=APP_ENV=$ENV
+
+      # Deploy Web & Firestore Rules/Indexes
+      - name: 🚀 Deploy Web & Firestore to Firebase
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            cp firebase.prod.json firebase.json
+          else
+            cp firebase.staging.json firebase.json
+          fi
+          
+          # Create credentials file
+          echo "${{ secrets.FIREBASE_CREDENTIAL_FILE_CONTENT }}" > gcp-key.json
+          export GOOGLE_APPLICATION_CREDENTIALS=gcp-key.json
+          
+          # Deploy Firestore & Hosting
+          npx firebase-tools deploy --only firestore,hosting --project "${{ secrets.FIREBASE_PROJECT_ID }}"
+          
+          # Clean up
+          rm gcp-key.json
+          rm firebase.json
 
   # 3. Integration Tests (Firebase Test Lab) - Optional / Scheduled
   # Running this on every push might be expensive/slow, so maybe on dispatch or nightly

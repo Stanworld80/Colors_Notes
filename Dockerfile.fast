@@ -1,0 +1,11 @@
+# Dockerfile.fast - Ultra-lightweight local deployment for Colors & Notes
+# Assumes build/web is already compiled on the host machine to maximize performance.
+FROM nginx:alpine
+
+# Copy the pre-built web folder from host to Nginx html directory
+COPY build/web /usr/share/nginx/html
+
+# Expose HTTP port
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

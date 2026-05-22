@@ -307,6 +307,15 @@ echo "   pubspec.yaml poussé et tag '$TAG_NAME' créé avec succès."
 
 # 3. Logique de déploiement
 echo "-> Étape 3/3 : Déploiement..."
+
+echo "   - Déploiement des Règles et Index Firestore (Projet: $CURRENT_FIREBASE_PROJECT_ID)..."
+execute_verbose "Déploiement Firestore" firebase deploy --only firestore -P "$CURRENT_FIREBASE_PROJECT_ID"
+if [ $? -ne 0 ]; then
+    echo "ERREUR : Le déploiement Firestore a échoué."
+else
+    echo "   Déploiement Firestore réussi."
+fi
+
 if [[ " ${PLATFORMS[*]} " =~ " web " ]]; then
     echo "   - Déploiement Web vers Firebase Hosting (Projet: $CURRENT_FIREBASE_PROJECT_ID)..."
     execute_verbose "Déploiement Firebase Web" firebase deploy --only hosting -P "$CURRENT_FIREBASE_PROJECT_ID"

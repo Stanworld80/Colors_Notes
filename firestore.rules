@@ -1,0 +1,34 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Rules for journals
+    match /journals/{journalId} {
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if isOwner(resource.data.userId);
+    }
+    
+    // Rules for notes
+    match /notes/{noteId} {
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if isOwner(resource.data.userId);
+    }
+    
+    // Rules for paletteModels
+    match /paletteModels/{modelId} {
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isOwner(resource.data.userId);
+      // Predefined palettes can be read by anyone; user-defined palettes only by their owner
+      allow read: if resource.data.isPredefined == true || isOwner(resource.data.userId);
+    }
+  }
+}

@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  # ⚡ FAST LOCAL DEPLOYMENT (Recommended for old/slow computers)
+  # Assumes you run "flutter build web --release --web-renderer html --dart-define=APP_ENV=staging" first
+  web-fast:
+    build:
+      context: .
+      dockerfile: Dockerfile.fast
+    container_name: colors_notes_web_fast
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+  # 🐳 FULL CONTAINER BUILD (Self-contained, includes compilation & automated tests)
+  web-full:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: colors_notes_web_full
+    ports:
+      - "8081:80"
+    restart: unless-stopped
+
+  # 🧪 RUN TEST SUITE ONLY
+  tests:
+    image: ghcr.io/subosito/flutter:3.22.0
+    container_name: colors_notes_tests
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: bash -c "flutter pub get && flutter analyze && flutter test test/unit && flutter test test/widget"
