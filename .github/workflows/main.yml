@@ -56,7 +56,6 @@ jobs:
       FIREBASE_CREDENTIAL_FILE_CONTENT: ${{ github.ref == 'refs/heads/main' && secrets.FIREBASE_SERVICE_ACCOUNT_PROD || secrets.FIREBASE_SERVICE_ACCOUNT_STG }}
       FIREBASE_APP_ID_ANDROID: ${{ github.ref == 'refs/heads/main' && secrets.FIREBASE_ANDROID_APP_ID_PROD || secrets.FIREBASE_ANDROID_APP_ID_STG }}
       FIREBASE_PROJECT_ID: ${{ github.ref == 'refs/heads/main' && 'colors-notes-prod' || 'colors-notes-staging' }}
-      FIREBASE_TESTER_GROUPS: ${{ github.ref == 'refs/heads/main' && '' || 'uat-testers' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -103,13 +102,22 @@ jobs:
         run: flutter build apk --release
 
       # Distribute to Firebase App Distribution
-      - name: 📤 Upload to Firebase App Distribution
-        if: env.FIREBASE_CREDENTIAL_FILE_CONTENT != ''
+      - name: 📤 Upload to Firebase App Distribution (Staging)
+        if: env.FIREBASE_CREDENTIAL_FILE_CONTENT != '' && github.ref != 'refs/heads/main'
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: ${{ env.FIREBASE_APP_ID_ANDROID }}
           serviceCredentialsFileContent: ${{ env.FIREBASE_CREDENTIAL_FILE_CONTENT }}
-          groups: ${{ env.FIREBASE_TESTER_GROUPS }}
+          groups: uat-testers
+          file: build/app/outputs/flutter-apk/app-release.apk
+          releaseNotes: "Automated Release from CI/CD - ${{ github.sha }}"
+
+      - name: 📤 Upload to Firebase App Distribution (Production)
+        if: env.FIREBASE_CREDENTIAL_FILE_CONTENT != '' && github.ref == 'refs/heads/main'
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ env.FIREBASE_APP_ID_ANDROID }}
+          serviceCredentialsFileContent: ${{ env.FIREBASE_CREDENTIAL_FILE_CONTENT }}
           file: build/app/outputs/flutter-apk/app-release.apk
           releaseNotes: "Automated Release from CI/CD - ${{ github.sha }}"
 
@@ -132,6 +140,8 @@ jobs:
       # Deploy Web & Firestore Rules/Indexes
       - name: 🚀 Deploy Web & Firestore to Firebase
         if: env.FIREBASE_CREDENTIAL_FILE_CONTENT != ''
+        env:
+          FIREBASE_KEY: ${{ env.FIREBASE_CREDENTIAL_FILE_CONTENT }}
         run: |
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
             cp firebase.prod.json firebase.json
@@ -139,8 +149,8 @@ jobs:
             cp firebase.staging.json firebase.json
           fi
           
-          # Create credentials file
-          echo "${{ env.FIREBASE_CREDENTIAL_FILE_CONTENT }}" > gcp-key.json
+          # Create credentials file cleanly
+          echo "$FIREBASE_KEY" > gcp-key.json
           export GOOGLE_APPLICATION_CREDENTIALS=gcp-key.json
           
           # Deploy Firestore & Hosting
