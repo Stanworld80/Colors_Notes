@@ -56,7 +56,7 @@ jobs:
       FIREBASE_CREDENTIAL_FILE_CONTENT: ${{ github.ref == 'refs/heads/main' && secrets.FIREBASE_SERVICE_ACCOUNT_PROD || secrets.FIREBASE_SERVICE_ACCOUNT_STG }}
       FIREBASE_APP_ID_ANDROID: ${{ github.ref == 'refs/heads/main' && secrets.FIREBASE_ANDROID_APP_ID_PROD || secrets.FIREBASE_ANDROID_APP_ID_STG }}
       FIREBASE_PROJECT_ID: ${{ github.ref == 'refs/heads/main' && 'colors-notes-prod' || 'colors-notes-staging' }}
-      FIREBASE_TESTER_GROUPS: ${{ github.ref == 'refs/heads/main' && 'prod-final-checkers' || 'uat-testers' }}
+      FIREBASE_TESTER_GROUPS: ${{ github.ref == 'refs/heads/main' && '' || 'uat-testers' }}
     steps:
       - uses: actions/checkout@v4
 
