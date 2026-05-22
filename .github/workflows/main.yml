@@ -42,11 +42,11 @@ jobs:
       - name: 🧩 Widget Tests
         run: flutter test test/widget
 
-  # 2. Build & Deploy (Only on main/dev push)
+  # 2. Build & Deploy (On push and manual triggers)
   build_and_deploy:
     name: 🚀 Build & Deploy
     needs: quality_check
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/develop')
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/develop')
     runs-on: ubuntu-latest
     env:
       ANDROID_KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
