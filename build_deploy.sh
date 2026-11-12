@@ -190,7 +190,7 @@ fi
 
 # 2. Mise à jour de la version
 echo "-> Étape 2/6 : Mise à jour de la version..."
-VERSION_LINE=$(grep 'version:' pubspec.yaml)
+VERSION_LINE=$(grep 'version:' pubspec.yaml | tr -d '\r')
 VERSION_NUMBER=$(echo "$VERSION_LINE" | cut -d' ' -f2)
 VERSION_NAME=$(echo "$VERSION_NUMBER" | cut -d'+' -f1)
 BUILD_NUMBER=$(echo "$VERSION_NUMBER" | cut -d'+' -f2)

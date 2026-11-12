@@ -186,11 +186,16 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Authenticate to Google Cloud
+        if: env.GCLOUD_SERVICE_ACCOUNT_KEY != ''
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ env.GCLOUD_SERVICE_ACCOUNT_KEY }}
+
       - name: Setup Google Cloud SDK
         if: env.GCLOUD_SERVICE_ACCOUNT_KEY != ''
         uses: google-github-actions/setup-gcloud@v2
         with:
-          service_account_key: ${{ env.GCLOUD_SERVICE_ACCOUNT_KEY }}
           project_id: ${{ env.FIREBASE_PROJECT_ID }}
 
       # Setup Firebase Configuration
@@ -206,7 +211,9 @@ jobs:
       - name: Build Android Test APK
         if: env.GCLOUD_SERVICE_ACCOUNT_KEY != ''
         working-directory: android
-        run: ./gradlew app:assembleAndroidTest
+        run: |
+          chmod +x ./gradlew
+          ./gradlew app:assembleAndroidTest
 
       - name: Build App APK (Debug preferred for testing usually, or profile)
         if: env.GCLOUD_SERVICE_ACCOUNT_KEY != ''
