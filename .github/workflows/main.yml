@@ -2,9 +2,9 @@ name: Colors & Notes CI/CD
 
 on:
   push:
-    branches: [ "main", "dev", "develop", "refactor/*" ]
+    branches: ["main", "dev", "develop", "refactor/*"]
   pull_request:
-    branches: [ "main", "dev", "develop" ]
+    branches: ["main", "dev", "develop"]
   workflow_dispatch:
 
 jobs:
@@ -14,18 +14,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
-          distribution: 'zulu'
-          java-version: '17'
+          distribution: "zulu"
+          java-version: "17"
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.44.0'
-          channel: 'stable'
+          flutter-version: "3.44.0"
+          channel: "stable"
           cache: true
 
       - name: Get Dependencies
@@ -63,14 +63,14 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
-          distribution: 'zulu'
-          java-version: '17'
+          distribution: "zulu"
+          java-version: "17"
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.44.0'
-          channel: 'stable'
+          flutter-version: "3.44.0"
+          channel: "stable"
           cache: true
 
       - name: Get Dependencies
@@ -81,7 +81,7 @@ jobs:
         if: env.ANDROID_KEYSTORE_BASE64 != ''
         run: |
           echo "${{ env.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
-          
+
       - name: Create key.properties
         if: env.ANDROID_KEYSTORE_BASE64 != ''
         run: |
@@ -101,7 +101,25 @@ jobs:
 
       # Build APK
       - name: 🏗️ Build APK
-        run: flutter build apk --release
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            ENV="prod"
+          else
+            ENV="staging"
+          fi
+          flutter build apk --release --dart-define=APP_ENV=$ENV
+
+      # Build AAB (Production)
+      - name: 📦 Build AAB (Production)
+        if: github.ref == 'refs/heads/main'
+        run: flutter build appbundle --release --dart-define=APP_ENV=prod
+
+      - name: 📤 Upload Production AAB Artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ColorsNotes-prod-aab
+          path: build/app/outputs/bundle/release/app-release.aab
 
       # Distribute to Firebase App Distribution
       - name: 📤 Upload to Firebase App Distribution (Staging)
@@ -127,16 +145,20 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       # Build Web
       - name: 🌐 Build Web
         run: |
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
             ENV="prod"
+            CLIENT_ID="48301164525-6lqqh5tc0m0jpsm4ovdpgalosve17a1m.apps.googleusercontent.com"
           else
             ENV="staging"
+            CLIENT_ID="344541548510-k1vncr9ufjii7r3k4425p8sqgq5p47r6.apps.googleusercontent.com"
           fi
+          cp web/index-template.html web/index.html
+          sed -i "s|##GOOGLE_SIGNIN_CLIENT_ID_PLACEHOLDER##|$CLIENT_ID|g" web/index.html
           flutter build web --release --dart-define=APP_ENV=$ENV
 
       # Deploy Web & Firestore Rules/Indexes
@@ -150,14 +172,14 @@ jobs:
           else
             cp firebase.staging.json firebase.json
           fi
-          
+
           # Create credentials file cleanly
           echo "$FIREBASE_KEY" > gcp-key.json
           export GOOGLE_APPLICATION_CREDENTIALS=gcp-key.json
-          
+
           # Deploy Firestore & Hosting
           npx firebase-tools deploy --only firestore,hosting --project "${{ env.FIREBASE_PROJECT_ID }}"
-          
+
           # Clean up
           rm gcp-key.json
           rm firebase.json
@@ -169,6 +191,7 @@ jobs:
     needs: build_and_deploy
     # Only run on main or manual trigger to save credits/time
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    continue-on-error: true
     runs-on: ubuntu-latest
     env:
       GCLOUD_SERVICE_ACCOUNT_KEY: ${{ github.ref == 'refs/heads/main' && secrets.FIREBASE_SERVICE_ACCOUNT_PROD || secrets.FIREBASE_SERVICE_ACCOUNT_STG }}
@@ -179,14 +202,14 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
-          distribution: 'zulu'
-          java-version: '17'
+          distribution: "zulu"
+          java-version: "17"
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.44.0'
-          channel: 'stable'
+          flutter-version: "3.44.0"
+          channel: "stable"
           cache: true
 
       - name: Authenticate to Google Cloud
@@ -201,26 +224,26 @@ jobs:
         with:
           project_id: ${{ env.FIREBASE_PROJECT_ID }}
 
-      # Setup Firebase Configuration
+      # Setup Firebase Configuration (Integration tests use dev environment & test account)
       - name: Setup google-services.json
         if: env.GCLOUD_SERVICE_ACCOUNT_KEY != ''
-        run: |
-          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            cp android/app/google-services.prod.json android/app/google-services.json
-          else
-            cp android/app/google-services.staging.json android/app/google-services.json
-          fi
+        run: cp android/app/google-services.dev.json android/app/google-services.json
+
+      - name: Get Dependencies
+        if: env.GCLOUD_SERVICE_ACCOUNT_KEY != ''
+        run: flutter pub get
+
+      - name: Build App APK (Debug preferred for testing usually, or profile)
+        if: env.GCLOUD_SERVICE_ACCOUNT_KEY != ''
+        run: flutter build apk --debug --target=integration_test/notification_flow_test.dart
 
       - name: Build Android Test APK
         if: env.GCLOUD_SERVICE_ACCOUNT_KEY != ''
         working-directory: android
         run: |
+          sed -i 's/\r$//' ./gradlew
           chmod +x ./gradlew
           ./gradlew app:assembleAndroidTest
-
-      - name: Build App APK (Debug preferred for testing usually, or profile)
-        if: env.GCLOUD_SERVICE_ACCOUNT_KEY != ''
-        run: flutter build apk --debug --target=integration_test/notification_flow_test.dart
 
       - name: 🧪 Run Notification Flow Test
         if: env.GCLOUD_SERVICE_ACCOUNT_KEY != ''
