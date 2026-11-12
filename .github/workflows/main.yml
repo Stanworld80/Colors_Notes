@@ -121,6 +121,24 @@ jobs:
           name: ColorsNotes-prod-aab
           path: build/app/outputs/bundle/release/app-release.aab
 
+      - name: 📤 Upload Production APK Artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ColorsNotes-prod-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: 🏪 Publish to Google Play Console (Internal Testing)
+        if: env.FIREBASE_CREDENTIAL_FILE_CONTENT != '' && github.ref == 'refs/heads/main'
+        continue-on-error: true
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ env.FIREBASE_CREDENTIAL_FILE_CONTENT }}
+          packageName: org.stanworld.colorsnotes
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          track: internal
+          status: draft
+
       # Distribute to Firebase App Distribution
       - name: 📤 Upload to Firebase App Distribution (Staging)
         if: env.FIREBASE_CREDENTIAL_FILE_CONTENT != '' && github.ref != 'refs/heads/main'
